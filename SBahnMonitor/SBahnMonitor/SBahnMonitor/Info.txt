@@ -1,0 +1,9 @@
+﻿Mögliche Tabellen-Elements:
+
+<td class="departure nowrap">
+ab 10:03
+<span class="delayOnTime">10:03</span>
+</td>
+
+Halt entfällt ("Halt entf&#228;llt")
+zusätzlicher Halt ("(zus&#228;tzlicher Halt)"")
