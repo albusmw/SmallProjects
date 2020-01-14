@@ -33,7 +33,7 @@ Public Class MainForm
 
         Dim LinkCount As Integer = 0
         Dim NewTrainLinks As Integer = 0
-        AddLog(wbMain.Document.Links.Count.ToString.Trim & " links")
+        AddLog(wbMain.Document.Links.Count.ValRegIndep & " links")
         For Each Element As HtmlElement In wbMain.Document.Links
             'Get link and filter
             Dim TrainInfoLink As String = Element.GetAttribute("href")
@@ -61,8 +61,8 @@ Public Class MainForm
                 End If
             End If
         Next Element
-        AddLog("  > " & LinkCount.ToString.Trim & " trains found")
-        AddLog("  > " & NewTrainLinks.ToString.Trim & " new trains found")
+        AddLog("  > " & LinkCount.ValRegIndep & " trains found")
+        AddLog("  > " & NewTrainLinks.ValRegIndep & " new trains found")
 
         'Get all trains present
         CheckAllTrains(AllTrains)
@@ -85,7 +85,7 @@ Public Class MainForm
                 Dim InnerLink As String = Element.GetAttribute("href")
                 If InnerLink.StartsWith("https://reiseauskunft.bahn.de/bin/bhftafel.exe") Then
                     Dim BahnhofName As String = Element.InnerText.Trim              'Text as displayed
-                    Dim EvaID As String = InnerLink.PartFrom("input=")
+                    Dim EvaID As String = InnerLink.PartAfter("input=")
                     EvaID = EvaID.Substring(EvaID.IndexOf("%") + 3)
                     EvaID = EvaID.Substring(0, EvaID.IndexOf("&"))
                     If EvaIDs.ContainsKey(EvaID) = False Then
@@ -119,10 +119,10 @@ Public Class MainForm
 
             If TrainDepDelayed + TrainDepDelayedOnTime > 0 Then
                 AddLog("  > " & Train)
-                AddLog("  > " & TotalDeps.ToString.Trim & " departures, " & TrainDepDelayedOnTime.ToString.Trim & " delayed on time, " & TrainDepDelayed.ToString.Trim & " delayed")
+                AddLog("  > " & TotalDeps.ValRegIndep & " departures, " & TrainDepDelayedOnTime.ValRegIndep & " delayed on time, " & TrainDepDelayed.ValRegIndep & " delayed")
             End If
         Next Train
-        If NewEVAIDCount > 0 Then AddLog("  > " & NewEVAIDCount.ToString.Trim & " new EVA ID's found")
+        If NewEVAIDCount > 0 Then AddLog("  > " & NewEVAIDCount.ValRegIndep & " new EVA ID's found")
     End Sub
 
     Private Sub Navigate(ByVal URL As String)
@@ -154,6 +154,14 @@ Public Class MainForm
 
     Private Sub CheckAllTrainsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CheckAllTrainsToolStripMenuItem.Click
         CheckAllTrains(AllTrains)
+    End Sub
+
+    Private Sub tsbBack_Click(sender As Object, e As EventArgs) Handles tsbBack.Click
+        wbMain.GoBack()
+    End Sub
+
+    Private Sub tsbForward_Click(sender As Object, e As EventArgs) Handles tsbForward.Click
+        wbMain.GoForward()
     End Sub
 
 End Class

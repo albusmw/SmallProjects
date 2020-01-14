@@ -22,20 +22,25 @@ Partial Class MainForm
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.wbMain = New System.Windows.Forms.WebBrowser()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StartToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.scMain = New System.Windows.Forms.SplitContainer()
-        Me.tbLog = New System.Windows.Forms.TextBox()
+        Me.CheckAllTrainsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DebugToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreAllEVAIDsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.CheckAllTrainsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.scMain = New System.Windows.Forms.SplitContainer()
+        Me.tbLog = New System.Windows.Forms.TextBox()
+        Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
+        Me.tsbBack = New System.Windows.Forms.ToolStripButton()
+        Me.tsbForward = New System.Windows.Forms.ToolStripButton()
         Me.MenuStrip1.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
         Me.scMain.SuspendLayout()
+        Me.ToolStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'wbMain
@@ -70,8 +75,27 @@ Partial Class MainForm
         'StartToolStripMenuItem
         '
         Me.StartToolStripMenuItem.Name = "StartToolStripMenuItem"
-        Me.StartToolStripMenuItem.Size = New System.Drawing.Size(270, 34)
+        Me.StartToolStripMenuItem.Size = New System.Drawing.Size(231, 34)
         Me.StartToolStripMenuItem.Text = "Start"
+        '
+        'CheckAllTrainsToolStripMenuItem
+        '
+        Me.CheckAllTrainsToolStripMenuItem.Name = "CheckAllTrainsToolStripMenuItem"
+        Me.CheckAllTrainsToolStripMenuItem.Size = New System.Drawing.Size(231, 34)
+        Me.CheckAllTrainsToolStripMenuItem.Text = "Check all trains"
+        '
+        'DebugToolStripMenuItem
+        '
+        Me.DebugToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StoreAllEVAIDsToolStripMenuItem})
+        Me.DebugToolStripMenuItem.Name = "DebugToolStripMenuItem"
+        Me.DebugToolStripMenuItem.Size = New System.Drawing.Size(82, 29)
+        Me.DebugToolStripMenuItem.Text = "Debug"
+        '
+        'StoreAllEVAIDsToolStripMenuItem
+        '
+        Me.StoreAllEVAIDsToolStripMenuItem.Name = "StoreAllEVAIDsToolStripMenuItem"
+        Me.StoreAllEVAIDsToolStripMenuItem.Size = New System.Drawing.Size(248, 34)
+        Me.StoreAllEVAIDsToolStripMenuItem.Text = "Store all EVA ID's"
         '
         'scMain
         '
@@ -81,6 +105,7 @@ Partial Class MainForm
         '
         'scMain.Panel1
         '
+        Me.scMain.Panel1.Controls.Add(Me.ToolStrip1)
         Me.scMain.Panel1.Controls.Add(Me.wbMain)
         '
         'scMain.Panel2
@@ -101,24 +126,33 @@ Partial Class MainForm
         Me.tbLog.Size = New System.Drawing.Size(718, 1181)
         Me.tbLog.TabIndex = 0
         '
-        'DebugToolStripMenuItem
+        'ToolStrip1
         '
-        Me.DebugToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StoreAllEVAIDsToolStripMenuItem})
-        Me.DebugToolStripMenuItem.Name = "DebugToolStripMenuItem"
-        Me.DebugToolStripMenuItem.Size = New System.Drawing.Size(82, 29)
-        Me.DebugToolStripMenuItem.Text = "Debug"
+        Me.ToolStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbBack, Me.tsbForward})
+        Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
+        Me.ToolStrip1.Name = "ToolStrip1"
+        Me.ToolStrip1.Size = New System.Drawing.Size(728, 34)
+        Me.ToolStrip1.TabIndex = 1
+        Me.ToolStrip1.Text = "ToolStrip1"
         '
-        'StoreAllEVAIDsToolStripMenuItem
+        'tsbBack
         '
-        Me.StoreAllEVAIDsToolStripMenuItem.Name = "StoreAllEVAIDsToolStripMenuItem"
-        Me.StoreAllEVAIDsToolStripMenuItem.Size = New System.Drawing.Size(270, 34)
-        Me.StoreAllEVAIDsToolStripMenuItem.Text = "Store all EVA ID's"
+        Me.tsbBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.tsbBack.Image = CType(resources.GetObject("tsbBack.Image"), System.Drawing.Image)
+        Me.tsbBack.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsbBack.Name = "tsbBack"
+        Me.tsbBack.Size = New System.Drawing.Size(52, 29)
+        Me.tsbBack.Text = "<<<"
         '
-        'CheckAllTrainsToolStripMenuItem
+        'tsbForward
         '
-        Me.CheckAllTrainsToolStripMenuItem.Name = "CheckAllTrainsToolStripMenuItem"
-        Me.CheckAllTrainsToolStripMenuItem.Size = New System.Drawing.Size(270, 34)
-        Me.CheckAllTrainsToolStripMenuItem.Text = "Check all trains"
+        Me.tsbForward.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.tsbForward.Image = CType(resources.GetObject("tsbForward.Image"), System.Drawing.Image)
+        Me.tsbForward.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsbForward.Name = "tsbForward"
+        Me.tsbForward.Size = New System.Drawing.Size(52, 29)
+        Me.tsbForward.Text = ">>>"
         '
         'MainForm
         '
@@ -133,10 +167,13 @@ Partial Class MainForm
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
         Me.scMain.Panel1.ResumeLayout(False)
+        Me.scMain.Panel1.PerformLayout()
         Me.scMain.Panel2.ResumeLayout(False)
         Me.scMain.Panel2.PerformLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
+        Me.ToolStrip1.ResumeLayout(False)
+        Me.ToolStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -151,4 +188,7 @@ Partial Class MainForm
     Friend WithEvents CheckAllTrainsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents DebugToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents StoreAllEVAIDsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStrip1 As ToolStrip
+    Friend WithEvents tsbBack As ToolStripButton
+    Friend WithEvents tsbForward As ToolStripButton
 End Class
