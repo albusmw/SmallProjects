@@ -95,11 +95,23 @@
     <Compile Include="..\..\src\atomics\cFITSWriter.vb">
       <Link>cFITSWriter.vb</Link>
     </Compile>
+    <Compile Include="..\..\src\atomics\cIntelIPP.vb">
+      <Link>cIntelIPP.vb</Link>
+    </Compile>
     <Compile Include="..\..\src\atomics\cLockBitmap.vb">
       <Link>cLockBitmap.vb</Link>
     </Compile>
+    <Compile Include="..\..\src\atomics\cSingleValueStatistics.vb">
+      <Link>cSingleValueStatistics.vb</Link>
+    </Compile>
     <Compile Include="..\..\src\atomics\cStatistics.vb">
       <Link>cStatistics.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cStatMultiThread.vb">
+      <Link>cStatMultiThread.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\Extensions.vb">
+      <Link>Extensions.vb</Link>
     </Compile>
     <Compile Include="..\..\src\atomics\Generics.vb">
       <Link>Generics.vb</Link>
