@@ -4,36 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B31A292C-FA0A-4AD6-AB61-B51E84D2CDF6}</ProjectGuid>
+    <ProjectGuid>{2DBA8AE1-894F-4CAD-8DE5-723666124649}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>MassDownloader.My.MyApplication</StartupObject>
-    <RootNamespace>MassDownloader</RootNamespace>
-    <AssemblyName>MassDownloader</AssemblyName>
+    <StartupObject>AstroFocus.My.MyApplication</StartupObject>
+    <RootNamespace>AstroFocus</RootNamespace>
+    <AssemblyName>AstroFocus</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>MassDownloader.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <DefineDebug>false</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>MassDownloader.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -47,7 +26,35 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ASCOM.Astrometry, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\assembly\GAC_MSIL\ASCOM.Astrometry\6.0.0.0__565de7938946fba7\ASCOM.Astrometry.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Controls, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\assembly\GAC_MSIL\ASCOM.Controls\6.0.0.0__565de7938946fba7\ASCOM.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.DeviceInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\assembly\GAC_MSIL\ASCOM.DeviceInterfaces\6.0.0.0__565de7938946fba7\ASCOM.DeviceInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.DriverAccess, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\assembly\GAC_MSIL\ASCOM.DriverAccess\6.0.0.0__565de7938946fba7\ASCOM.DriverAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Utilities, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Windows\assembly\GAC_MSIL\ASCOM.Utilities\6.0.0.0__565de7938946fba7\ASCOM.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -73,12 +80,34 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\src\atomics\cDownloader.vb">
-      <Link>cDownloader.vb</Link>
+    <Compile Include="..\..\src\atomics\AstroStatistics.vb">
+      <Link>AstroStatistics.vb</Link>
     </Compile>
-    <Compile Include="..\..\..\src\atomics\Extensions.vb">
-      <Link>Extensions.vb</Link>
+    <Compile Include="..\..\src\atomics\BayerFunctions.vb">
+      <Link>BayerFunctions.vb</Link>
     </Compile>
+    <Compile Include="..\..\src\atomics\cColorMaps.vb">
+      <Link>cColorMaps.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cFITSHeaderKeywords.vb">
+      <Link>cFITSHeaderKeywords.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cFITSWriter.vb">
+      <Link>cFITSWriter.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cLockBitmap.vb">
+      <Link>cLockBitmap.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cStatistics.vb">
+      <Link>cStatistics.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\Generics.vb">
+      <Link>Generics.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\cImageDisplay.vb">
+      <Link>cImageDisplay.vb</Link>
+    </Compile>
+    <Compile Include="DB.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -124,6 +153,16 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\src\bin\ASI_ZWO\ASICamera2.dll">
+      <Link>ASICamera2.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\src\bin\ASI_ZWO\ASICamera2_x64.dll">
+      <Link>ASICamera2_x64.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

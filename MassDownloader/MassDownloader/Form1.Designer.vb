@@ -27,6 +27,10 @@ Partial Class MainForm
         Me.btnLinks = New System.Windows.Forms.Button()
         Me.tbLinks = New System.Windows.Forms.TextBox()
         Me.tbProgress = New System.Windows.Forms.TextBox()
+        Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.SpecialToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.StrassennamenÜberVIVOToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'wbMain
@@ -34,16 +38,16 @@ Partial Class MainForm
         Me.wbMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.wbMain.Location = New System.Drawing.Point(12, 12)
+        Me.wbMain.Location = New System.Drawing.Point(12, 44)
         Me.wbMain.MinimumSize = New System.Drawing.Size(20, 20)
         Me.wbMain.Name = "wbMain"
-        Me.wbMain.Size = New System.Drawing.Size(652, 678)
+        Me.wbMain.Size = New System.Drawing.Size(652, 646)
         Me.wbMain.TabIndex = 0
         '
         'tbAdr
         '
         Me.tbAdr.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbAdr.Location = New System.Drawing.Point(670, 12)
+        Me.tbAdr.Location = New System.Drawing.Point(670, 44)
         Me.tbAdr.Name = "tbAdr"
         Me.tbAdr.Size = New System.Drawing.Size(520, 26)
         Me.tbAdr.TabIndex = 1
@@ -52,7 +56,7 @@ Partial Class MainForm
         'btnLinks
         '
         Me.btnLinks.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnLinks.Location = New System.Drawing.Point(670, 44)
+        Me.btnLinks.Location = New System.Drawing.Point(670, 108)
         Me.btnLinks.Name = "btnLinks"
         Me.btnLinks.Size = New System.Drawing.Size(520, 46)
         Me.btnLinks.TabIndex = 2
@@ -64,22 +68,46 @@ Partial Class MainForm
         Me.tbLinks.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.tbLinks.Font = New System.Drawing.Font("Courier New", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.tbLinks.Location = New System.Drawing.Point(670, 132)
+        Me.tbLinks.Location = New System.Drawing.Point(670, 192)
         Me.tbLinks.Multiline = True
         Me.tbLinks.Name = "tbLinks"
         Me.tbLinks.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLinks.Size = New System.Drawing.Size(520, 558)
+        Me.tbLinks.Size = New System.Drawing.Size(520, 498)
         Me.tbLinks.TabIndex = 3
         Me.tbLinks.WordWrap = False
         '
         'tbProgress
         '
         Me.tbProgress.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbProgress.Location = New System.Drawing.Point(670, 96)
+        Me.tbProgress.Location = New System.Drawing.Point(670, 160)
         Me.tbProgress.Name = "tbProgress"
         Me.tbProgress.ReadOnly = True
         Me.tbProgress.Size = New System.Drawing.Size(520, 26)
         Me.tbProgress.TabIndex = 4
+        '
+        'MenuStrip1
+        '
+        Me.MenuStrip1.GripMargin = New System.Windows.Forms.Padding(2, 2, 0, 2)
+        Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SpecialToolStripMenuItem})
+        Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
+        Me.MenuStrip1.Name = "MenuStrip1"
+        Me.MenuStrip1.Size = New System.Drawing.Size(1202, 33)
+        Me.MenuStrip1.TabIndex = 5
+        Me.MenuStrip1.Text = "MenuStrip1"
+        '
+        'SpecialToolStripMenuItem
+        '
+        Me.SpecialToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StrassennamenÜberVIVOToolStripMenuItem})
+        Me.SpecialToolStripMenuItem.Name = "SpecialToolStripMenuItem"
+        Me.SpecialToolStripMenuItem.Size = New System.Drawing.Size(83, 29)
+        Me.SpecialToolStripMenuItem.Text = "Special"
+        '
+        'StrassennamenÜberVIVOToolStripMenuItem
+        '
+        Me.StrassennamenÜberVIVOToolStripMenuItem.Name = "StrassennamenÜberVIVOToolStripMenuItem"
+        Me.StrassennamenÜberVIVOToolStripMenuItem.Size = New System.Drawing.Size(320, 34)
+        Me.StrassennamenÜberVIVOToolStripMenuItem.Text = "Strassennamen über VIVO"
         '
         'MainForm
         '
@@ -91,8 +119,12 @@ Partial Class MainForm
         Me.Controls.Add(Me.btnLinks)
         Me.Controls.Add(Me.tbAdr)
         Me.Controls.Add(Me.wbMain)
+        Me.Controls.Add(Me.MenuStrip1)
+        Me.MainMenuStrip = Me.MenuStrip1
         Me.Name = "MainForm"
         Me.Text = "Mass downloader"
+        Me.MenuStrip1.ResumeLayout(False)
+        Me.MenuStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -103,4 +135,7 @@ Partial Class MainForm
     Friend WithEvents btnLinks As Button
     Friend WithEvents tbLinks As TextBox
     Friend WithEvents tbProgress As TextBox
+    Friend WithEvents MenuStrip1 As MenuStrip
+    Friend WithEvents SpecialToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents StrassennamenÜberVIVOToolStripMenuItem As ToolStripMenuItem
 End Class

@@ -41,4 +41,12 @@ Public Class MainForm
         Next Element
     End Sub
 
+    Private Sub StrassennamenÜberVIVOToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StrassennamenÜberVIVOToolStripMenuItem.Click
+        Dim Names As New List(Of String)
+        For Each Entry As String In System.IO.File.ReadAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamen.txt")
+            Names.Add(Entry.PartAfter(">").PartBefore("<"))
+        Next
+        System.IO.File.WriteAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamenxx.txt", Names.ToArray)
+    End Sub
+
 End Class
