@@ -1,0 +1,8 @@
+﻿- Solver ein- und ausschaltbar machen
+- Start-RA und DEC für den Fall daß das File keine Angaben enthält
+- Histogram über einen (XY)-Punkt über viele Files
+- Einen Bereich LängexBreite um einen (XY)-Punkt über alle Files als Mosaik anzeigen
+- Nochmal Performance beim Einlesen von FITS untersuchen
+- -32 und -64 für BITPIX untersuchen
+- Mit-Verarbeitung von BZERO und BSCALE einbauen (Modi: Aus, nur BZERO wenn BSCALE 1 ist - SharpCap-Mode ..., alle verarbeiten)
+- Suchen wo die Mosaik-Funktion für Andreas Bringman ist ("Ecken eierförmig?")
