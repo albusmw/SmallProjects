@@ -4,14 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9EEC741B-1138-4AC8-B85D-4FFF064D7802}</ProjectGuid>
+    <ProjectGuid>{94F2193C-8E66-4359-B790-250F3B1F21EA}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>SBahnMonitor.My.MyApplication</StartupObject>
-    <RootNamespace>SBahnMonitor</RootNamespace>
-    <AssemblyName>SBahnMonitor</AssemblyName>
+    <StartupObject>AstroImageStatistics.My.MyApplication</StartupObject>
+    <RootNamespace>AstroImageStatistics</RootNamespace>
+    <AssemblyName>AstroImageStatistics</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -22,7 +22,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>SBahnMonitor.xml</DocumentationFile>
+    <DocumentationFile>AstroImageStatistics.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,7 +32,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>SBahnMonitor.xml</DocumentationFile>
+    <DocumentationFile>AstroImageStatistics.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -47,6 +47,14 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -58,6 +66,9 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="ZedGraph">
+      <HintPath>..\..\..\src\bin\ZedGraph.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -73,20 +84,50 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\src\atomics\cDownloader.vb">
-      <Link>cDownloader.vb</Link>
+    <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
+      <Link>AstroStatistics.vb</Link>
     </Compile>
-    <Compile Include="..\..\..\..\src\atomics\Extensions.vb">
+    <Compile Include="..\..\..\src\atomics\cFITSHeaderChanger.vb">
+      <Link>cFITSHeaderChanger.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSHeaderParser.vb">
+      <Link>cFITSHeaderParser.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSReader.vb">
+      <Link>cFITSReader.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSWriter.vb">
+      <Link>cFITSWriter.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cIntelIPP.vb">
+      <Link>cIntelIPP.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cStatMultiThread.vb">
+      <Link>cStatMultiThread.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cStopper.vb">
+      <Link>cStopper.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\Extensions.vb">
       <Link>Extensions.vb</Link>
     </Compile>
-    <Compile Include="..\..\..\..\src\atomics\Utils.vb">
-      <Link>Utils.vb</Link>
+    <Compile Include="..\..\..\src\atomics\Generics.vb">
+      <Link>Generics.vb</Link>
     </Compile>
-    <Compile Include="MainForm.vb">
+    <Compile Include="..\..\..\src\atomics\ZEDGraphForm.vb">
+      <Link>ZEDGraphForm.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
+      <Link>ZedGraphService.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\ZEDGraphUtil.vb">
+      <Link>ZEDGraphUtil.vb</Link>
+    </Compile>
+    <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.vb">
-      <DependentUpon>MainForm.vb</DependentUpon>
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -106,8 +147,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.vb</DependentUpon>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -127,9 +168,6 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Info.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

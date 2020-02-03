@@ -31,10 +31,10 @@ Partial Class MainForm
         Me.DebugToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreAllEVAIDsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.scMain = New System.Windows.Forms.SplitContainer()
-        Me.tbLog = New System.Windows.Forms.TextBox()
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
         Me.tsbBack = New System.Windows.Forms.ToolStripButton()
         Me.tsbForward = New System.Windows.Forms.ToolStripButton()
+        Me.tbLog = New System.Windows.Forms.TextBox()
         Me.MenuStrip1.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -56,7 +56,6 @@ Partial Class MainForm
         '
         'MenuStrip1
         '
-        Me.MenuStrip1.GripMargin = New System.Windows.Forms.Padding(2, 2, 0, 2)
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
         Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.DebugToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
@@ -115,17 +114,6 @@ Partial Class MainForm
         Me.scMain.SplitterDistance = 728
         Me.scMain.TabIndex = 2
         '
-        'tbLog
-        '
-        Me.tbLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.tbLog.Font = New System.Drawing.Font("Courier New", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.tbLog.Location = New System.Drawing.Point(0, 0)
-        Me.tbLog.Multiline = True
-        Me.tbLog.Name = "tbLog"
-        Me.tbLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLog.Size = New System.Drawing.Size(718, 1181)
-        Me.tbLog.TabIndex = 0
-        '
         'ToolStrip1
         '
         Me.ToolStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
@@ -153,6 +141,18 @@ Partial Class MainForm
         Me.tsbForward.Name = "tsbForward"
         Me.tsbForward.Size = New System.Drawing.Size(52, 29)
         Me.tsbForward.Text = ">>>"
+        '
+        'tbLog
+        '
+        Me.tbLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tbLog.Font = New System.Drawing.Font("Courier New", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.tbLog.Location = New System.Drawing.Point(0, 0)
+        Me.tbLog.Multiline = True
+        Me.tbLog.Name = "tbLog"
+        Me.tbLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.tbLog.Size = New System.Drawing.Size(718, 1181)
+        Me.tbLog.TabIndex = 0
+        Me.tbLog.WordWrap = False
         '
         'MainForm
         '

@@ -19,9 +19,9 @@ Public Class MainForm
         'delayedJourney=on                                  Zeigt nur verspätete oder ausfallende Züge an. 
 
         Dim Language As String = "d"
-        Dim Darstellung As String = "n"                     'n: Standard / l: nur Text OHNE ECHTZEIT
-        Dim QueryDate As String = Format(Now, "dd.MM.yy")   ' "12.01.20"
-        Dim QueryTime As String = Format(Now, "hh:mm")      '"12:00"
+        Dim Darstellung As String = "n"                             'n: Standard / l: nur Text OHNE ECHTZEIT
+        Dim QueryDate As String = Format(Now, "dd.MM.yy")           ' "12.01.20"
+        Dim QueryTime As String = Format(Now.AddHours(-1), "hh:mm")      '"12:00"
         Dim Station As String = "8004132"                   'Stachus
         Dim maxJourneys As String = "50"                    'Anzahl angezeigter Züge
         Dim BoardType As String = "dep"                     'arr/dep
