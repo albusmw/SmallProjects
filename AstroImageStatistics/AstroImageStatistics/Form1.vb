@@ -107,10 +107,10 @@ Public Class Form1
     End Sub
 
     Private Sub WriteTestDataToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles WriteTestDataToolStripMenuItem.Click
-        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS")
-        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") ': Process.Start("FITS_BitPix16.FITS")
-        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") ': Process.Start("FITS_BitPix32.FITS")
-        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") ': Process.Start("FITS_BitPix32f.FITS")
+        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS") : Process.Start("FITS_BitPix8.FITS")
+        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") : Process.Start("FITS_BitPix16.FITS")
+        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") : Process.Start("FITS_BitPix32.FITS")
+        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") : Process.Start("FITS_BitPix32f.FITS")
         cFITSWriter.WriteTestFile_Float64("FITS_BitPix64f.FITS") : Process.Start("FITS_BitPix64f.FITS")
         'MsgBox("OK")
     End Sub
