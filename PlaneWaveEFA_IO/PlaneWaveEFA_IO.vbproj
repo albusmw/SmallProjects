@@ -70,6 +70,7 @@
     <Compile Include="..\..\src\atomics\PlaneWaveEFA.vb">
       <Link>PlaneWaveEFA.vb</Link>
     </Compile>
+    <Compile Include="DB.vb" />
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
