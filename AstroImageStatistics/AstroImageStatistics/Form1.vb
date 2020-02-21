@@ -174,4 +174,8 @@ Public Class Form1
         System.Windows.Forms.Application.DoEvents()
     End Sub
 
+        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS") : Process.Start("FITS_BitPix8.FITS")
+        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") : Process.Start("FITS_BitPix16.FITS")
+        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") : Process.Start("FITS_BitPix32.FITS")
+        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") : Process.Start("FITS_BitPix32f.FITS")
 End Class
