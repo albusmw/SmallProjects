@@ -34,12 +34,20 @@ Public Class MainForm
             Log("GOTO over       : <" & GetGotoOver(EFA) & ">")
             LogSep("-"c)
 
-
+            'Temperature measurement is correct ...
             Log("T primary       : <" & GetTemperature(EFA, 0) & ">")
             LogSep("-"c)
             Log("T ambient       : <" & GetTemperature(EFA, 1) & ">")
             LogSep("-"c)
             Log("T secondary     : <" & GetTemperature(EFA, 2) & ">")
+            LogSep("-"c)
+
+            'Fans set and get is correct
+            Log("Fans            : <" & GetFans(EFA) & ">")
+            LogSep("-"c)
+            Log("Set fans OFF    : <" & SetFans(EFA, False) & ">")
+            LogSep("-"c)
+            Log("Fans            : <" & GetFans(EFA) & ">")
             LogSep("-"c)
 
             '-----------------------------------------------------
@@ -101,6 +109,34 @@ Public Class MainForm
         '-----------------------------------------------------
         'Decode
         Return Ato.PlaneWaveEFA.TEMP_GET_decode(AnswerBuffer)
+
+    End Function
+
+    Private Function GetFans(ByRef Port As IO.Ports.SerialPort) As Boolean
+
+        Log("Running command <Get Fans status> ...")
+        Ato.PlaneWaveEFA.PrepareCOM(Port)
+        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_GET
+
+        Dim AnswerBuffer As Byte() = {}
+        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+
+        '-----------------------------------------------------
+        'Decode
+        Return Ato.PlaneWaveEFA.FANS_GET_decode(AnswerBuffer)
+
+    End Function
+
+    Private Function SetFans(ByRef Port As IO.Ports.SerialPort, ByVal State As Boolean) As Boolean
+
+        Log("Running command <Set Fans status " & CStr(State) & "> ...")
+        Ato.PlaneWaveEFA.PrepareCOM(Port)
+        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_SET(State)
+
+        Dim AnswerBuffer As Byte() = {}
+        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+
+        Return True
 
     End Function
 
