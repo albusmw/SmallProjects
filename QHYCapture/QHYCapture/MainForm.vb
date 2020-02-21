@@ -30,6 +30,7 @@ Public Class MainForm
         Dim OverArea_H As UInteger = 0
 
         Dim bpp As UInteger = 0
+        Dim CamNumToUse As Integer = 0
 
         'Single Image Capture Mode Workflow
 
@@ -41,7 +42,7 @@ Public Class MainForm
             Stopper.Stamp("ScanQHYCCD")
             If CameraCount > 0 Then                                                                                                     'If there is a camera found
                 Dim CameraId As New System.Text.StringBuilder(0)                                                                        'Prepare camera ID holder
-                CallOK(QHY.QHYCamera.GetQHYCCDId(2, CameraId))                                                                          'Fetch camera ID
+                CallOK(QHY.QHYCamera.GetQHYCCDId(CamNumToUse, CameraId))                                                                'Fetch camera ID
                 Log("Found QHY camera <" & CameraId.ToString & ">")                                                                     'Display fetched camera ID
                 Dim CamHandle As IntPtr = QHY.QHYCamera.OpenQHYCCD(CameraId)                                                            'Open the camera
 
@@ -170,6 +171,8 @@ Public Class MainForm
                             'Run statistics
                             Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
                             LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat)
+                            Log("Capture #" & LoopCnt.ValRegIndep & " statistics:")
+                            Log(SingleStat.StatisticsReport)
                             Stopper.Stamp("Statistics")
 
                             'Plot histogram
@@ -192,7 +195,10 @@ Public Class MainForm
                                 Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
                                 If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
                                 Dim FITSName As String = System.IO.Path.Combine(Path, "QHY_EXP_" & Format(LoopCnt, "0000000")).Trim & ".fits"
-                                cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16)
+                                Dim CustomElement As New Collections.Generic.List(Of String())
+                                CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
+                                CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
+                                cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
                                 If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
                                 Stopper.Stamp("Store")
                             End If

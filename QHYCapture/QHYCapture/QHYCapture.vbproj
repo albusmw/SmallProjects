@@ -49,6 +49,9 @@
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSHeaderKeywords.vb">
+      <Link>cFITSHeaderKeywords.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cFITSWriter.vb">
       <Link>cFITSWriter.vb</Link>
     </Compile>
