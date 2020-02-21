@@ -84,6 +84,9 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\AstroCamTest\ImgArrayFunctions.vb">
+      <Link>ImgArrayFunctions.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
