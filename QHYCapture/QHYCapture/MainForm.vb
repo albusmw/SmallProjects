@@ -19,15 +19,9 @@ Public Class MainForm
         Dim Pixel_Size_W As Double = Double.NaN
         Dim Pixel_Size_H As Double = Double.NaN
 
-        Dim EffArea_X As UInteger = 0
-        Dim EffArea_Y As UInteger = 0
-        Dim EffArea_W As UInteger = 0
-        Dim EffArea_H As UInteger = 0
+        Dim EffArea As sRect_UInt
 
-        Dim OverArea_X As UInteger = 0
-        Dim OverArea_Y As UInteger = 0
-        Dim OverArea_W As UInteger = 0
-        Dim OverArea_H As UInteger = 0
+        Dim OverArea As sRect_UInt
 
         Dim bpp As UInteger = 0
         Dim CamNumToUse As Integer = 0
@@ -36,7 +30,7 @@ Public Class MainForm
 
         'GetQHYCCDSingleFrame(camhandle,& w,&h,&bpp,& channels, ImgData);
 
-        If CallOK(QHY.QHYCamera.InitQHYCCDResource) = True Then                                                             'Init DLL itself
+        If CallOK(QHY.QHYCamera.InitQHYCCDResource) = True Then                                                                         'Init DLL itself
             Stopper.Stamp("InitQHYCCDResource")
             Dim CameraCount As UInteger = QHY.QHYCamera.ScanQHYCCD                                                                      'Scan for connected cameras
             Stopper.Stamp("ScanQHYCCD")
@@ -71,14 +65,14 @@ Public Class MainForm
                         Log("  Chip  W x H    :" & Chip_Physical_W.ValRegIndep & " x " & Chip_Physical_H.ValRegIndep & " mm")
                         Log("  Image W x H    :" & Chip_Pixel_W.ValRegIndep & " x " & Chip_Pixel_H.ValRegIndep & " pixel")
                         Log("  Pixel W x H    :" & Pixel_Size_W.ValRegIndep & " x " & Pixel_Size_H.ValRegIndep & " um")
-                        QHY.QHYCamera.GetQHYCCDEffectiveArea(CamHandle, EffArea_X, EffArea_Y, EffArea_W, EffArea_H)
+                        QHY.QHYCamera.GetQHYCCDEffectiveArea(CamHandle, EffArea.X, EffArea.Y, EffArea.W, EffArea.H)
                         Log("CCD Effective Area:")
-                        Log("  Start X:Y    :" & EffArea_X.ValRegIndep & ":" & EffArea_Y.ValRegIndep)
-                        Log("  Size  X x Y  :" & EffArea_W.ValRegIndep & " x " & EffArea_H.ValRegIndep)
-                        QHY.QHYCamera.GetQHYCCDOverScanArea(CamHandle, OverArea_X, OverArea_Y, OverArea_W, OverArea_H)
+                        Log("  Start X:Y    :" & EffArea.X.ValRegIndep & ":" & EffArea.Y.ValRegIndep)
+                        Log("  Size  X x Y  :" & EffArea.W.ValRegIndep & " x " & EffArea.H.ValRegIndep)
+                        QHY.QHYCamera.GetQHYCCDOverScanArea(CamHandle, OverArea.X, OverArea.Y, OverArea.W, OverArea.H)
                         Log("CCD Overscan Area:")
-                        Log("  Start X:Y    :" & OverArea_X.ValRegIndep & ":" & OverArea_Y.ValRegIndep)
-                        Log("  Size  X x Y  :" & OverArea_W.ValRegIndep & " x " & OverArea_H.ValRegIndep)
+                        Log("  Start X:Y    :" & OverArea.X.ValRegIndep & ":" & OverArea.Y.ValRegIndep)
+                        Log("  Size  X x Y  :" & OverArea.W.ValRegIndep & " x " & OverArea.H.ValRegIndep)
 
                         Log("==============================================================================")
                         QHY.QHYCamera.GetQHYCCDSDKVersion(SDKVersion(0), SDKVersion(1), SDKVersion(2), SDKVersion(3))                   'Get the SDK version
@@ -134,6 +128,8 @@ Public Class MainForm
                         For LoopCnt As Integer = 1 To DB.CaptureCount
 
                             'Expose
+                            Dim ObsStart As DateTime = Now
+                            Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                             Stopper.Start()
                             CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
                             Stopper.Stamp("ExpQHYCCDSingleFrame")
@@ -156,13 +152,14 @@ Public Class MainForm
                             Log("Loaded image with " & Capture_W.ValRegIndep & "x" & Capture_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
                             Stopper.Stamp("GetQHYCCDSingleFrame")
 
+                            Dim ObsEnd As DateTime = Now
                             'Remove overscan
                             Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
                             If DB.RemoveOverscan = False Then
                                 SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))      'only convert flat byte buffer to UInt16 matrix data
                             Else
-                                Dim Overscan_X As UInteger = EffArea_X \ DB.Binning
-                                Dim Overscan_Y As UInteger = EffArea_Y \ DB.Binning
+                                Dim Overscan_X As UInteger = EffArea.X \ DB.Binning
+                                Dim Overscan_Y As UInteger = EffArea.Y \ DB.Binning
                                 Dim TempBuffer(,) As UInt16 = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))                        'convert flat to UInt16 matrix in a temporary buffer
                                 DB.IPP.Copy(TempBuffer, SingleStatCalc.DataProcessor_UInt16.ImageData, 0, CInt(Overscan_X - 1), CInt(Capture_H - Overscan_Y), CInt(Capture_W - Overscan_X))
                             End If
@@ -195,9 +192,29 @@ Public Class MainForm
                                 Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
                                 If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
                                 Dim FITSName As String = System.IO.Path.Combine(Path, "QHY_EXP_" & Format(LoopCnt, "0000000")).Trim & ".fits"
+
+                                'Compose all FITS keyword entries
                                 Dim CustomElement As New Collections.Generic.List(Of String())
+
+                                CustomElement.Add(New String() {eFITSKeywords.AUTHOR, DB.Author})
+                                CustomElement.Add(New String() {eFITSKeywords.TELESCOP, DB.Telescope})
+                                CustomElement.Add(New String() {eFITSKeywords.INSTRUME, CameraId.ToString})
+                                CustomElement.Add(New String() {eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W)})
+                                CustomElement.Add(New String() {eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H)})
+                                CustomElement.Add(New String() {eFITSKeywords.COLORTYP, "0"})
+
+                                CustomElement.Add(New String() {eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(ObsStart)})
+                                CustomElement.Add(New String() {eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(ObsEnd)})
+                                CustomElement.Add(New String() {eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(ObsStart)})
+                                CustomElement.Add(New String() {eFITSKeywords.TIME_END, cFITSKeywords.GetTime(ObsEnd)})
+
                                 CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
                                 CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
+                                CustomElement.Add(New String() {eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
+                                CustomElement.Add(New String() {eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
+                                CustomElement.Add(New String() {eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(ObsStartTemp)})
+
+                                'Create FITS file
                                 cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
                                 If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
                                 Stopper.Stamp("Store")

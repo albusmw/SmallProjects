@@ -1,11 +1,19 @@
 ﻿Option Explicit On
 Option Strict On
 
+Public Structure sRect_UInt
+    Dim X As UInteger
+    Dim Y As UInteger
+    Dim W As UInteger
+    Dim H As UInteger
+End Structure
+
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
     Const Cat1 As String = "1. Exposure"
     Const Cat2 As String = "2. Image storage"
+    Const Cat3 As String = "3. Imaging hardware"
 
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
@@ -43,12 +51,21 @@ Public Class cDB
     Public Property GUID As String = System.Guid.NewGuid().ToString
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("2. Store captured image?")>
+    <ComponentModel.DisplayName("2. Author")>
+    <ComponentModel.Description("Author")>
+    Public Property Author As String = "Martin Weiss"
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("3. Store captured image?")>
     Public Property StoreImage As Boolean = True
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("3. Open image automatically?")>
+    <ComponentModel.DisplayName("4. Open image automatically?")>
     Public Property AutoOpenImage As Boolean = True
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("1. Telescope used")>
+    Public Property Telescope As String = "Planewave CDK 12.5 with reducer"
 
 
     Public Property RemoveOverscan As Boolean = False

@@ -36,6 +36,8 @@ Partial Class MainForm
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
+        Me.ExperimentalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DMatrixCutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -70,7 +72,7 @@ Partial Class MainForm
         '
         'msMain
         '
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.ExperimentalToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Size = New System.Drawing.Size(790, 24)
@@ -98,7 +100,7 @@ Partial Class MainForm
         'ExitToolStripMenuItem
         '
         Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(143, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'CaptureToolStripMenuItem
@@ -111,7 +113,7 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'tbLogOutput
@@ -164,6 +166,19 @@ Partial Class MainForm
         Me.zgcMain.Size = New System.Drawing.Size(473, 223)
         Me.zgcMain.TabIndex = 0
         '
+        'ExperimentalToolStripMenuItem
+        '
+        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem})
+        Me.ExperimentalToolStripMenuItem.Name = "ExperimentalToolStripMenuItem"
+        Me.ExperimentalToolStripMenuItem.Size = New System.Drawing.Size(88, 20)
+        Me.ExperimentalToolStripMenuItem.Text = "Experimental"
+        '
+        'DMatrixCutToolStripMenuItem
+        '
+        Me.DMatrixCutToolStripMenuItem.Name = "DMatrixCutToolStripMenuItem"
+        Me.DMatrixCutToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.DMatrixCutToolStripMenuItem.Text = "2D matrix cut"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -203,4 +218,6 @@ Partial Class MainForm
     Friend WithEvents tbLogOutput As Windows.Forms.TextBox
     Friend WithEvents scMain As Windows.Forms.SplitContainer
     Friend WithEvents zgcMain As ZedGraph.ZedGraphControl
+    Friend WithEvents ExperimentalToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents DMatrixCutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 End Class
