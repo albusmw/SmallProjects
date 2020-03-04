@@ -24,48 +24,72 @@ Public Class cDB
     Public Plotter As cZEDGraphService
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("1. Exposure time [s]")>
+    <ComponentModel.DisplayName("1. Exposure type")>
+    <ComponentModel.Description("Light, Bias, Dark, Flat, or Tricolor.")>
+    Public Property ExposureType As String = "Light Frame"
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("2. Exposure time [s]")>
     <ComponentModel.Description("Exposure time [s]")>
     Public Property ExposureTime As Double = 1.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("2. Gain")>
+    <ComponentModel.DisplayName("3. Gain")>
     Public Property Gain As Double = 0.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("3. Offset")>
+    <ComponentModel.DisplayName("4. Offset")>
     Public Property Offset As Double = 0.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("4. Binning")>
+    <ComponentModel.DisplayName("5. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("5. # of captures")>
+    <ComponentModel.DisplayName("6. # of captures")>
     Public Property CaptureCount As Integer = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("1. GUID of the sequence")>
-    <ComponentModel.Description("Exposure time [s]")>
-    Public Property GUID As String = System.Guid.NewGuid().ToString
+    <ComponentModel.Description("Sequence GUID")>
+    Public Property GUID As String = System.Guid.NewGuid().ToString.Replace("-", String.Empty)
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("2. Author")>
+    <ComponentModel.DisplayName("2. Object")>
+    <ComponentModel.Description("Object")>
+    Public Property [Object] As String = "???"
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("3. Author")>
     <ComponentModel.Description("Author")>
     Public Property Author As String = "Martin Weiss"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("3. Store captured image?")>
+    <ComponentModel.DisplayName("4. Origin")>
+    <ComponentModel.Description("Origin")>
+    Public Property Origin As String = "Sternwarte Holzkirchen"
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("5. Store captured image?")>
     Public Property StoreImage As Boolean = True
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("4. Open image automatically?")>
+    <ComponentModel.DisplayName("6. Open image automatically?")>
     Public Property AutoOpenImage As Boolean = True
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("1. Telescope used")>
     Public Property Telescope As String = "Planewave CDK 12.5 with reducer"
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("2. Telescope aperture [mm]")>
+    Public Property TelescopeAperture As Double = 130.0
+
+    '''<summary>Telescope focal length [mm].</summary>
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("3. Telescope focal length [mm]")>
+    Public Property TelescopeFocalLength As Double = 800.0
 
 
     Public Property RemoveOverscan As Boolean = False

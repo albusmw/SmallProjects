@@ -189,25 +189,46 @@ Public Class MainForm
 
                             'Store image
                             If DB.StoreImage = True Then
+
                                 Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
                                 If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
                                 Dim FITSName As String = System.IO.Path.Combine(Path, "QHY_EXP_" & Format(LoopCnt, "0000000")).Trim & ".fits"
 
+                                'Precalculation
+                                Dim NAXIS1 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
+                                Dim NAXIS2 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
+                                Dim PLATESZ1 As Double = (Pixel_Size_W * NAXIS1) / 1000                         '[mm]
+                                Dim PLATESZ2 As Double = (Pixel_Size_H * NAXIS2) / 1000                         '[mm]
+                                Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
+                                Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
+
                                 'Compose all FITS keyword entries
                                 Dim CustomElement As New Collections.Generic.List(Of String())
 
+                                CustomElement.Add(New String() {eFITSKeywords.OBJECT, DB.Object})
                                 CustomElement.Add(New String() {eFITSKeywords.AUTHOR, DB.Author})
+                                CustomElement.Add(New String() {eFITSKeywords.ORIGIN, DB.Origin})
                                 CustomElement.Add(New String() {eFITSKeywords.TELESCOP, DB.Telescope})
+                                CustomElement.Add(New String() {eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB.TelescopeAperture / 1000.0)})
+                                CustomElement.Add(New String() {eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB.TelescopeFocalLength / 1000.0)})
                                 CustomElement.Add(New String() {eFITSKeywords.INSTRUME, CameraId.ToString})
                                 CustomElement.Add(New String() {eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W)})
                                 CustomElement.Add(New String() {eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H)})
-                                CustomElement.Add(New String() {eFITSKeywords.COLORTYP, "0"})
+                                CustomElement.Add(New String() {eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10)})                'calculated from the image data as ROI may be set ...
+                                CustomElement.Add(New String() {eFITSKeywords.PLATESZ2, cFITSKeywords.GetDouble(PLATESZ2 / 10)})                'calculated from the image data as ROI may be set ...
+                                CustomElement.Add(New String() {eFITSKeywords.FOV1, cFITSKeywords.GetDouble(FOV1)})
+                                CustomElement.Add(New String() {eFITSKeywords.FOV2, cFITSKeywords.GetDouble(FOV2)})
+                                'CustomElement.Add(New String() {eFITSKeywords.COLORTYP, "0"})                                                  '<- check
 
                                 CustomElement.Add(New String() {eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(ObsStart)})
                                 CustomElement.Add(New String() {eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(ObsEnd)})
                                 CustomElement.Add(New String() {eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(ObsStart)})
                                 CustomElement.Add(New String() {eFITSKeywords.TIME_END, cFITSKeywords.GetTime(ObsEnd)})
 
+                                CustomElement.Add(New String() {eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1))})
+                                CustomElement.Add(New String() {eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
+
+                                CustomElement.Add(New String() {eFITSKeywords.IMAGETYP, DB.ExposureType})
                                 CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
                                 CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
                                 CustomElement.Add(New String() {eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
