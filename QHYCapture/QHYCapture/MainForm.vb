@@ -4,8 +4,21 @@ Option Strict On
 Public Class MainForm
 
     Private DB As New cDB
+    Private CamHandle As IntPtr = IntPtr.Zero
 
     Private Sub RunCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunCaptureToolStripMenuItem.Click
+        QHYCapture("QHY_EXP_")
+    End Sub
+
+    Private Sub RunCaptureAllReadoutModesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunCaptureAllReadoutModesToolStripMenuItem.Click
+        For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
+            DB.ReadOutMode = Mode
+            pgMain.SelectedObject = DB
+            QHYCapture("QHY_EXP_" & Mode.ToString.Trim)
+        Next Mode
+    End Sub
+
+    Public Sub QHYCapture(ByVal FITSFileStart As String)
 
         Dim Stopper As New cStopper
         Stopper.Start()
@@ -38,12 +51,11 @@ Public Class MainForm
                 Dim CameraId As New System.Text.StringBuilder(0)                                                                        'Prepare camera ID holder
                 CallOK(QHY.QHYCamera.GetQHYCCDId(CamNumToUse, CameraId))                                                                'Fetch camera ID
                 Log("Found QHY camera <" & CameraId.ToString & ">")                                                                     'Display fetched camera ID
-                Dim CamHandle As IntPtr = QHY.QHYCamera.OpenQHYCCD(CameraId)                                                            'Open the camera
+                CamHandle = QHY.QHYCamera.OpenQHYCCD(CameraId)                                                                          'Open the camera
 
                 'NEW SDK READOUT MODE
                 Dim ReadoutModesCount As UInteger = 0
                 CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(CamHandle, ReadoutModesCount))
-
                 Dim AllReadOutModes As New Collections.Generic.List(Of String)
                 For ReadoutMode As UInteger = 0 To CUInt(ReadoutModesCount - 1)
                     Dim ReadoutModeName As New Text.StringBuilder
@@ -54,7 +66,7 @@ Public Class MainForm
                 Next ReadoutMode
                 Log("Available read-out modes:")
                 Log(AllReadOutModes)
-                CallOK(QHY.QHYCamera.SetQHYCCDReadMode(CamHandle, 0))
+                CallOK(QHY.QHYCamera.SetQHYCCDReadMode(CamHandle, DB.ReadOutMode))
 
                 If CallOK(QHY.QHYCamera.SetQHYCCDStreamMode(CamHandle, 0)) = True Then                                                  'Set single capture mode
                     If CallOK(QHY.QHYCamera.InitQHYCCD(CamHandle)) = True Then                                                          'Init the camera with the selected mode, ...
@@ -127,12 +139,41 @@ Public Class MainForm
 
                         For LoopCnt As Integer = 1 To DB.CaptureCount
 
-                            'Expose
+                            'Check and set temperature
+                            Do
+                                Dim CurrentTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+                                Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
+                                tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
+                                If System.Math.Abs(CurrentTemp - DB.TargetTemp) < 0.1 Then Exit Do
+                                System.Threading.Thread.Sleep(500)
+                                DE()
+                            Loop Until 1 = 0
+
+                            'Start expose
                             Dim ObsStart As DateTime = Now
                             Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                             Stopper.Start()
                             CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
                             Stopper.Stamp("ExpQHYCCDSingleFrame")
+
+                            'Idle exposure time
+                            If DB.ExposureTime > 1 Then
+                                Dim ExpStart As DateTime = Now
+                                tspbProgress.Maximum = CInt(DB.ExposureTime)
+                                Do
+                                    System.Threading.Thread.Sleep(500)
+                                    Dim TimePassed As Double = (Now - ExpStart).TotalSeconds
+                                    If TimePassed < tspbProgress.Maximum Then
+                                        tspbProgress.Value = CInt(TimePassed)
+                                        tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & tspbProgress.Maximum.ToString.Trim & " seconds exposed"
+                                    Else
+                                        tspbProgress.Value = 0
+                                        tsslProgress.Text = "---"
+                                        Exit Do
+                                    End If
+                                    DE()
+                                Loop Until 1 = 0
+                            End If
 
                             'Get the buffer size from the DLL - typically too big but does not care ...
                             Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(CamHandle)
@@ -192,7 +233,7 @@ Public Class MainForm
 
                                 Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
                                 If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
-                                Dim FITSName As String = System.IO.Path.Combine(Path, "QHY_EXP_" & Format(LoopCnt, "0000000")).Trim & ".fits"
+                                Dim FITSName As String = System.IO.Path.Combine(Path, FITSFileStart & Format(LoopCnt, "0000000")).Trim & ".fits"
 
                                 'Precalculation
                                 Dim NAXIS1 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
@@ -201,17 +242,18 @@ Public Class MainForm
                                 Dim PLATESZ2 As Double = (Pixel_Size_H * NAXIS2) / 1000                         '[mm]
                                 Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
                                 Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
+                                Dim CamReadOutMode As New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, DB.ReadOutMode, CamReadOutMode)
 
                                 'Compose all FITS keyword entries
                                 Dim CustomElement As New Collections.Generic.List(Of String())
 
-                                CustomElement.Add(New String() {eFITSKeywords.OBJECT, DB.Object})
-                                CustomElement.Add(New String() {eFITSKeywords.AUTHOR, DB.Author})
-                                CustomElement.Add(New String() {eFITSKeywords.ORIGIN, DB.Origin})
-                                CustomElement.Add(New String() {eFITSKeywords.TELESCOP, DB.Telescope})
+                                CustomElement.Add(New String() {eFITSKeywords.OBJECT, cFITSKeywords.GetString(DB.Object)})
+                                CustomElement.Add(New String() {eFITSKeywords.AUTHOR, cFITSKeywords.GetString(DB.Author)})
+                                CustomElement.Add(New String() {eFITSKeywords.ORIGIN, cFITSKeywords.GetString(DB.Origin)})
+                                CustomElement.Add(New String() {eFITSKeywords.TELESCOP, cFITSKeywords.GetString(DB.Telescope)})
                                 CustomElement.Add(New String() {eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB.TelescopeAperture / 1000.0)})
                                 CustomElement.Add(New String() {eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB.TelescopeFocalLength / 1000.0)})
-                                CustomElement.Add(New String() {eFITSKeywords.INSTRUME, CameraId.ToString})
+                                CustomElement.Add(New String() {eFITSKeywords.INSTRUME, cFITSKeywords.GetString(CameraId.ToString)})
                                 CustomElement.Add(New String() {eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W)})
                                 CustomElement.Add(New String() {eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H)})
                                 CustomElement.Add(New String() {eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10)})                'calculated from the image data as ROI may be set ...
@@ -228,12 +270,15 @@ Public Class MainForm
                                 CustomElement.Add(New String() {eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1))})
                                 CustomElement.Add(New String() {eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
 
-                                CustomElement.Add(New String() {eFITSKeywords.IMAGETYP, DB.ExposureType})
+                                CustomElement.Add(New String() {eFITSKeywords.IMAGETYP, cFITSKeywords.GetString(DB.ExposureType)})
                                 CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
                                 CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
                                 CustomElement.Add(New String() {eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
                                 CustomElement.Add(New String() {eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
+                                CustomElement.Add(New String() {eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp)})
                                 CustomElement.Add(New String() {eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(ObsStartTemp)})
+
+                                CustomElement.Add(New String() {eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(CamReadOutMode.ToString)})
 
                                 'Create FITS file
                                 cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
@@ -258,6 +303,7 @@ Public Class MainForm
 
                 QHY.QHYCamera.CloseQHYCCD(CamHandle)
                 QHY.QHYCamera.ReleaseQHYCCDResource()
+                CamHandle = IntPtr.Zero
 
             Else
                 Log("Init OK but no camera found!")
@@ -394,6 +440,20 @@ Public Class MainForm
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
         End
+    End Sub
+
+    Private Sub RunCaptureExposureSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunCaptureExposureSeriesToolStripMenuItem.Click
+        For Each Exposure As Double In New Double() {1, 2, 3, 6, 10, 20, 30, 60, 120, 240, 360, 480, 600}
+            DB.ExposureTime = Exposure
+            pgMain.SelectedObject = DB
+            QHYCapture("QHY_EXP_" & Exposure.ToString.Trim)
+        Next Exposure
+    End Sub
+
+    Private Sub tSetTemp_Tick(sender As Object, e As EventArgs) Handles tSetTemp.Tick
+        If CamHandle <> IntPtr.Zero Then
+            QHY.QHYCamera.ControlQHYCCDTemp(CamHandle, DB.TargetTemp)
+        End If
     End Sub
 
 End Class

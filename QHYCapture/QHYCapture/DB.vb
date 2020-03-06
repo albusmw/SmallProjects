@@ -8,6 +8,12 @@ Public Structure sRect_UInt
     Dim H As UInteger
 End Structure
 
+Public Enum eReadOutMode As UInteger
+    Photographic = 0
+    HighGain = 1
+    ExtendFullwell = 2
+End Enum
+
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
@@ -29,25 +35,34 @@ Public Class cDB
     Public Property ExposureType As String = "Light Frame"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("2. Exposure time [s]")>
+    <ComponentModel.DisplayName("2. Read-out mode")>
+    <ComponentModel.Description("Photographic, high-gain.")>
+    Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("3. Exposure time [s]")>
     <ComponentModel.Description("Exposure time [s]")>
     Public Property ExposureTime As Double = 1.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("3. Gain")>
-    Public Property Gain As Double = 0.0
+    <ComponentModel.DisplayName("4. Gain")>
+    Public Property Gain As Double = 26.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("4. Offset")>
-    Public Property Offset As Double = 0.0
+    <ComponentModel.DisplayName("5. Offset")>
+    Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("5. Binning")>
+    <ComponentModel.DisplayName("6. Target T")>
+    Public Property TargetTemp As Double = -15.0
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("7. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("6. # of captures")>
+    <ComponentModel.DisplayName("8. # of captures")>
     Public Property CaptureCount As Integer = 1
 
     <ComponentModel.Category(Cat2)>

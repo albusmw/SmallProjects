@@ -26,6 +26,8 @@ Partial Class MainForm
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tspbProgress = New System.Windows.Forms.ToolStripProgressBar()
+        Me.tsslProgress = New System.Windows.Forms.ToolStripStatusLabel()
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -33,11 +35,14 @@ Partial Class MainForm
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RunCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.RunCaptureAllReadoutModesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ExperimentalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DMatrixCutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
-        Me.ExperimentalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DMatrixCutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.RunCaptureExposureSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -54,10 +59,11 @@ Partial Class MainForm
         Me.pgMain.Name = "pgMain"
         Me.pgMain.Size = New System.Drawing.Size(281, 468)
         Me.pgMain.TabIndex = 0
+        Me.pgMain.ToolbarVisible = False
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress})
         Me.ssMain.Location = New System.Drawing.Point(0, 507)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Size = New System.Drawing.Size(790, 22)
@@ -69,6 +75,19 @@ Partial Class MainForm
         Me.tsslMain.Name = "tsslMain"
         Me.tsslMain.Size = New System.Drawing.Size(66, 17)
         Me.tsslMain.Text = "--- IDLE ---"
+        '
+        'tspbProgress
+        '
+        Me.tspbProgress.ForeColor = System.Drawing.Color.Lime
+        Me.tspbProgress.Name = "tspbProgress"
+        Me.tspbProgress.Size = New System.Drawing.Size(300, 16)
+        Me.tspbProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous
+        '
+        'tsslProgress
+        '
+        Me.tsslProgress.Name = "tsslProgress"
+        Me.tsslProgress.Size = New System.Drawing.Size(22, 17)
+        Me.tsslProgress.Text = "---"
         '
         'msMain
         '
@@ -105,7 +124,7 @@ Partial Class MainForm
         '
         'CaptureToolStripMenuItem
         '
-        Me.CaptureToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunCaptureToolStripMenuItem})
+        Me.CaptureToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunCaptureToolStripMenuItem, Me.RunCaptureAllReadoutModesToolStripMenuItem, Me.RunCaptureExposureSeriesToolStripMenuItem})
         Me.CaptureToolStripMenuItem.Name = "CaptureToolStripMenuItem"
         Me.CaptureToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
         Me.CaptureToolStripMenuItem.Text = "Capture"
@@ -113,8 +132,27 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(249, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
+        '
+        'RunCaptureAllReadoutModesToolStripMenuItem
+        '
+        Me.RunCaptureAllReadoutModesToolStripMenuItem.Name = "RunCaptureAllReadoutModesToolStripMenuItem"
+        Me.RunCaptureAllReadoutModesToolStripMenuItem.Size = New System.Drawing.Size(249, 22)
+        Me.RunCaptureAllReadoutModesToolStripMenuItem.Text = "Run capture - all read-out modes"
+        '
+        'ExperimentalToolStripMenuItem
+        '
+        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem})
+        Me.ExperimentalToolStripMenuItem.Name = "ExperimentalToolStripMenuItem"
+        Me.ExperimentalToolStripMenuItem.Size = New System.Drawing.Size(88, 20)
+        Me.ExperimentalToolStripMenuItem.Text = "Experimental"
+        '
+        'DMatrixCutToolStripMenuItem
+        '
+        Me.DMatrixCutToolStripMenuItem.Name = "DMatrixCutToolStripMenuItem"
+        Me.DMatrixCutToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
+        Me.DMatrixCutToolStripMenuItem.Text = "2D matrix cut"
         '
         'tbLogOutput
         '
@@ -166,18 +204,16 @@ Partial Class MainForm
         Me.zgcMain.Size = New System.Drawing.Size(473, 223)
         Me.zgcMain.TabIndex = 0
         '
-        'ExperimentalToolStripMenuItem
+        'RunCaptureExposureSeriesToolStripMenuItem
         '
-        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem})
-        Me.ExperimentalToolStripMenuItem.Name = "ExperimentalToolStripMenuItem"
-        Me.ExperimentalToolStripMenuItem.Size = New System.Drawing.Size(88, 20)
-        Me.ExperimentalToolStripMenuItem.Text = "Experimental"
+        Me.RunCaptureExposureSeriesToolStripMenuItem.Name = "RunCaptureExposureSeriesToolStripMenuItem"
+        Me.RunCaptureExposureSeriesToolStripMenuItem.Size = New System.Drawing.Size(249, 22)
+        Me.RunCaptureExposureSeriesToolStripMenuItem.Text = "Run capture - exposure series"
         '
-        'DMatrixCutToolStripMenuItem
+        'tSetTemp
         '
-        Me.DMatrixCutToolStripMenuItem.Name = "DMatrixCutToolStripMenuItem"
-        Me.DMatrixCutToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.DMatrixCutToolStripMenuItem.Text = "2D matrix cut"
+        Me.tSetTemp.Enabled = True
+        Me.tSetTemp.Interval = 500
         '
         'MainForm
         '
@@ -190,7 +226,7 @@ Partial Class MainForm
         Me.Controls.Add(Me.pgMain)
         Me.MainMenuStrip = Me.msMain
         Me.Name = "MainForm"
-        Me.Text = "MainForm"
+        Me.Text = "QHY Capture"
         Me.ssMain.ResumeLayout(False)
         Me.ssMain.PerformLayout()
         Me.msMain.ResumeLayout(False)
@@ -220,4 +256,9 @@ Partial Class MainForm
     Friend WithEvents zgcMain As ZedGraph.ZedGraphControl
     Friend WithEvents ExperimentalToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents DMatrixCutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tspbProgress As Windows.Forms.ToolStripProgressBar
+    Friend WithEvents tsslProgress As Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents RunCaptureAllReadoutModesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents RunCaptureExposureSeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tSetTemp As Windows.Forms.Timer
 End Class
