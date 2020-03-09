@@ -132,7 +132,11 @@ Public Class cDB
 
     <ComponentModel.Category(Cat5)>
     <ComponentModel.DisplayName("1. Log camera properties?")>
-    Public Property LogCameraProperties As Boolean = False
+    Public Property Log_CamProp As Boolean = False
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("2. Log timing?")>
+    Public Property Log_Timing As Boolean = False
 
 
     Public Property RemoveOverscan As Boolean = False

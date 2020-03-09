@@ -57,6 +57,7 @@ Public Class MainForm
                     Log("Found QHY camera <" & UsedCameraId.ToString & ">")                                                                 'Display fetched camera ID
                     CamHandle = QHY.QHYCamera.OpenQHYCCD(UsedCameraId)                                                                      'Open the camera
                     If CamHandle <> IntPtr.Zero Then
+
                         'NEW SDK READOUT MODE
                         Dim ReadoutModesCount As UInteger = 0
                         CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(CamHandle, ReadoutModesCount))
@@ -68,7 +69,7 @@ Public Class MainForm
                             CallOK(QHY.QHYCamera.GetQHYCCDReadModeResolution(CamHandle, ReadoutMode, ResX, ResY))
                             AllReadOutModes.Add(ReadoutMode.ValRegIndep & ": " & ReadoutModeName.ToString & " (" & ResX.ValRegIndep & "x" & ResY.ValRegIndep & ")")
                         Next ReadoutMode
-                        If DB.LogCameraProperties Then
+                        If DB.Log_CamProp Then
                             Log("Available read-out modes:")
                             Log(AllReadOutModes)
                         End If
@@ -112,7 +113,13 @@ Public Class MainForm
             QHY.QHYCamera.GetQHYCCDOverScanArea(CamHandle, OverArea.X, OverArea.Y, OverArea.W, OverArea.H)
 
             'Log chip properties
-            If DB.LogCameraProperties = True Then
+            If DB.Log_CamProp = True Then
+
+                Stopper.Start()
+
+                QHY.QHYCamera.GetQHYCCDSDKVersion(SDKVersion(0), SDKVersion(1), SDKVersion(2), SDKVersion(3))                   'Get the SDK version
+                Log("SDK version: " & BuildSDKVersion(SDKVersion))                                                              'Display the SDK version
+
                 Log("Chip info (bpp: " & bpp.ValRegIndep & ")")
                 Log("  Chip  W x H    :" & Chip_Physical_W.ValRegIndep & " x " & Chip_Physical_H.ValRegIndep & " mm")
                 Log("  Image W x H    :" & Chip_Pixel_W.ValRegIndep & " x " & Chip_Pixel_H.ValRegIndep & " pixel")
@@ -124,44 +131,40 @@ Public Class MainForm
                 Log("  Start X:Y    :" & OverArea.X.ValRegIndep & ":" & OverArea.Y.ValRegIndep)
                 Log("  Size  X x Y  :" & OverArea.W.ValRegIndep & " x " & OverArea.H.ValRegIndep)
                 Log("==============================================================================")
+
+                Log("ControlValues:")                                                                                           'Start reading all control values
+
+                'Display all properties available
+                For Each X As QHY.QHYCamera.CONTROL_ID In [Enum].GetValues(GetType(QHY.QHYCamera.CONTROL_ID))                   'Move over all Control ID's
+                    If QHY.QHYCamera.IsQHYCCDControlAvailable(CamHandle, X) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then    'If control is available
+                        Log("  " & X.ToString.Trim.PadRight(40) & ": NOT AVAILABLE")
+                    Else
+                        Dim Min As Double = Double.NaN
+                        Dim Max As Double = Double.NaN
+                        Dim Stepping As Double = Double.NaN
+                        Dim CurrentValue As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, X)
+                        If QHY.QHYCamera.GetQHYCCDParamMinMaxStep(CamHandle, X, Min, Max, Stepping) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
+                            Log("  " & X.ToString.Trim.PadRight(40) & ": " & Min.ValRegIndep & " ... <" & Stepping.ValRegIndep & "> ... " & Max.ValRegIndep & ", current: " & CurrentValue.ValRegIndep)
+                        Else
+                            Select Case CurrentValue
+                                Case UInteger.MaxValue
+                                    Log("  " & X.ToString.Trim.PadRight(40) & ": BOOL, current: TRUE")
+                                Case 0
+                                    Log("  " & X.ToString.Trim.PadRight(40) & ": BOOL, current: FALSE")
+                                Case Else
+                                    Log("  " & X.ToString.Trim.PadRight(40) & ": Discret, current: " & CurrentValue.ValRegIndep)
+                            End Select
+                        End If
+                    End If
+                Next X
+
+                Stopper.Stamp("GetQHYCCDParam")
+
+                Log("==============================================================================")
             End If
 
-            QHY.QHYCamera.GetQHYCCDSDKVersion(SDKVersion(0), SDKVersion(1), SDKVersion(2), SDKVersion(3))                   'Get the SDK version
-                Log("SDK version: " & BuildSDKVersion(SDKVersion))                                                              'Display the SDK version
-
-                If DB.LogCameraProperties Then
-                    Log("ControlValues:")                                                                                           'Start reading all control values
-                    Stopper.Start()
-
-                    'Display all properties available
-                    For Each X As QHY.QHYCamera.CONTROL_ID In [Enum].GetValues(GetType(QHY.QHYCamera.CONTROL_ID))                   'Move over all Control ID's
-                        If QHY.QHYCamera.IsQHYCCDControlAvailable(CamHandle, X) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then    'If control is available
-                            Log("  " & X.ToString.Trim.PadRight(40) & ": NOT AVAILABLE")
-                        Else
-                            Dim Min As Double = Double.NaN
-                            Dim Max As Double = Double.NaN
-                            Dim Stepping As Double = Double.NaN
-                            Dim CurrentValue As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, X)
-                            If QHY.QHYCamera.GetQHYCCDParamMinMaxStep(CamHandle, X, Min, Max, Stepping) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
-                                Log("  " & X.ToString.Trim.PadRight(40) & ": " & Min.ValRegIndep & " ... <" & Stepping.ValRegIndep & "> ... " & Max.ValRegIndep & ", current: " & CurrentValue.ValRegIndep)
-                            Else
-                                Select Case CurrentValue
-                                    Case UInteger.MaxValue
-                                        Log("  " & X.ToString.Trim.PadRight(40) & ": BOOL, current: TRUE")
-                                    Case 0
-                                        Log("  " & X.ToString.Trim.PadRight(40) & ": BOOL, current: FALSE")
-                                    Case Else
-                                        Log("  " & X.ToString.Trim.PadRight(40) & ": Discret, current: " & CurrentValue.ValRegIndep)
-                                End Select
-                            End If
-                        End If
-                    Next X
-                    Stopper.Stamp("GetQHYCCDParam")
-                    Log("==============================================================================")
-                End If
-
-                'Prepare buffers
-                Dim ReadResolution As UInteger = 16
+            'Prepare buffers
+            Dim ReadResolution As UInteger = 16
                 Dim ChannelToRead As UInteger = 0
 
                 Stopper.Stamp("Prepare buffers")
@@ -347,7 +350,7 @@ Public Class MainForm
                 Next LoopCnt
 
             'Display timing log
-            If DB.LogCameraProperties = True Then
+            If DB.Log_Timing = True Then
                 Log("--------------------------------------------------------------")
                 Log("TIMING:")
                 Log(Stopper.GetLog)

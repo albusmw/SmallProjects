@@ -12,6 +12,14 @@ Public Class Form1
     '''<summary>Last file opened.</summary>
     Private LastFile As String = String.Empty
 
+    '''<summary>Statistics processor (for the last file).</summary>
+    Dim SingleStatCalc As AstroNET.Statistics
+
+    '''<summary>Statistics for pixel with identical Y value.</summary>
+    Dim StatPerRow() As Ato.cSingleValueStatistics
+    '''<summary>Statistics for pixel with identical X value.</summary>
+    Dim StatPerCol() As Ato.cSingleValueStatistics
+
     '''<summary>Storage for a simple stack processing.</summary>
     Private StackingStatistics(,) As Ato.cSingleValueStatistics
 
@@ -27,7 +35,7 @@ Public Class Form1
 
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
-        Dim SingleStatCalc As New AstroNET.Statistics(IPP)
+        SingleStatCalc = New AstroNET.Statistics(IPP)
 
         'Log header data and detect if NAXIS3 is set
         Log("Loading file <" & FileName & "> ...")
@@ -47,14 +55,17 @@ Public Class Form1
         Select Case FITSHeader.BitPix
             Case 8
                 SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt8(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 16
                 SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt16(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 32
                 SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_UInt16.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(1)
             Case Else
@@ -134,6 +145,33 @@ Public Class Form1
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ForceUpdate()
         'Set style of the window
+        Disp.Plotter.SetCaptions(String.Empty, "Pixel value", "# of pixel with this value")
+        Disp.Plotter.MaximizePlotArea()
+        Disp.Hoster.Text = FileName
+        Disp.Hoster.Icon = Me.Icon
+        'Position window below the main window
+        Disp.Hoster.Left = Me.Left
+        Disp.Hoster.Top = Me.Top + Me.Height
+        Disp.Hoster.Height = Me.Height
+        Disp.Hoster.Width = Me.Width
+    End Sub
+
+    Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats() As Ato.cSingleValueStatistics)
+        Dim Disp As New cZEDGraphForm
+        Disp.PlotData(New Double() {1, 2, 3, 4})
+        'Plot data
+        Dim XAxis() As Double = Ato.cSingleValueStatistics.GetAspectVectorXAxis(Stats)
+        Disp.Plotter.Clear()
+        Disp.Plotter.PlotXvsY("Mean", XAxis, Ato.cSingleValueStatistics.GetAspectVector(Stats, Ato.cSingleValueStatistics.eAspects.Mean), New cZEDGraphService.sGraphStyle(Color.Black, 1))
+        Disp.Plotter.PlotXvsY("Max", XAxis, Ato.cSingleValueStatistics.GetAspectVector(Stats, Ato.cSingleValueStatistics.eAspects.Maximum), New cZEDGraphService.sGraphStyle(Color.Red, 1))
+        Disp.Plotter.PlotXvsY("Min", XAxis, Ato.cSingleValueStatistics.GetAspectVector(Stats, Ato.cSingleValueStatistics.eAspects.Minimum), New cZEDGraphService.sGraphStyle(Color.Green, 1))
+        Disp.Plotter.ManuallyScaleXAxis(XAxis(0), XAxis(XAxis.GetUpperBound(0)))
+        Disp.Plotter.AutoScaleYAxisLog()
+        Disp.Plotter.GridOnOff(True, True)
+        Disp.Plotter.ForceUpdate()
+        'Set style of the window
+        Disp.Plotter.SetCaptions(String.Empty, "Pixel index", "Statistics value")
+        Disp.Plotter.MaximizePlotArea()
         Disp.Hoster.Text = FileName
         Disp.Hoster.Icon = Me.Icon
         'Position window below the main window
@@ -322,6 +360,48 @@ Public Class Form1
             cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
             Process.Start(FileToGenerate)
         End If
+    End Sub
+
+    Private Sub RowAndColumnStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RowAndColumnStatisticsToolStripMenuItem.Click
+        Dim DataProcessed As Boolean = False
+        '1. Load data
+        If SingleStatCalc.DataProcessor_UInt16.ImageData.LongLength > 0 Then
+            With SingleStatCalc.DataProcessor_UInt16
+                ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
+                ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
+                For Idx1 As Integer = 0 To .ImageData.GetUpperBound(0)
+                    For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
+                        StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
+                        StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
+                    Next Idx2
+                Next Idx1
+                DataProcessed = True
+            End With
+        End If
+        If SingleStatCalc.DataProcessor_Int32.ImageData.LongLength > 0 Then
+            With SingleStatCalc.DataProcessor_Int32
+                ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
+                ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
+                For Idx1 As Integer = 0 To .ImageData.GetUpperBound(0)
+                    For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
+                        StatPerRow(Idx1).AddValue(.ImageData(Idx1, Idx2))
+                        StatPerCol(Idx2).AddValue(.ImageData(Idx1, Idx2))
+                    Next Idx2
+                Next Idx1
+                DataProcessed = True
+            End With
+        End If
+        '2. Plot data
+        If DataProcessed = True Then
+            PlotStatistics(LastFile & " - ROW STAT", StatPerRow)
+            PlotStatistics(LastFile & " - COL STAT", StatPerCol)
+        End If
+    End Sub
+
+    Private Sub InitStat(ByRef Vector() As Ato.cSingleValueStatistics)
+        For Idx As Integer = 0 To Vector.GetUpperBound(0)
+            Vector(Idx) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
+        Next Idx
     End Sub
 
 End Class
