@@ -135,6 +135,7 @@
     <Compile Include="..\..\..\src\atomics\ZEDGraphUtil.vb">
       <Link>ZEDGraphUtil.vb</Link>
     </Compile>
+    <Compile Include="cDB.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
