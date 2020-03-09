@@ -3,41 +3,110 @@ Option Strict On
 
 Public Class Form1
 
+    '''<summary>Handle to Intel IPP functions.</summary>
     Private IPP As cIntelIPP
+    '''<summary>Location of the EXE.</summary>
     Private MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly.Location)
+    '''<summary>Drag-and-drop handler.</summary>
+    Private WithEvents DD As Ato.DragDrop
+    '''<summary>Last file opened.</summary>
+    Private LastFile As String = String.Empty
+
+    '''<summary>Storage for a simple stack processing.</summary>
+    Private StackingStatistics(,) As Ato.cSingleValueStatistics
 
     Private Sub OpenFileToAnalyseToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenFileToAnalyseToolStripMenuItem.Click
+        If ofdMain.ShowDialog <> DialogResult.OK Then Exit Sub
+        LoadFile(ofdMain.FileName)
+    End Sub
 
-        With ofdMain
-            If .ShowDialog <> DialogResult.OK Then Exit Sub
-        End With
+    Private Sub LoadFile(ByVal FileName As String)
 
-        Dim File As String = ofdMain.FileName
-        Dim FileNameOnly As String = System.IO.Path.GetFileName(File)
-
-        Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(File))
+        Dim FileNameOnly As String = System.IO.Path.GetFileName(FileName)
+        Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
 
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
         Dim SingleStatCalc As New AstroNET.Statistics(IPP)
 
+        'Log header data and detect if NAXIS3 is set
+        Log("Loading file <" & FileName & "> ...")
+        Log("FITS header:")
+        Dim FITSHeaderDict As Dictionary(Of String, Object) = FITSHeader.GetListAsDictionary
+        For Each Entry As String In FITSHeaderDict.Keys
+            Log("  " & Entry & "=" & CStr(FITSHeaderDict(Entry)))
+        Next Entry
+        If FITSHeader.NAXIS > 2 Then
+            Log("!!! FITS file contains debayered data which are NOT displayed correct right now")
+        End If
+        Log(New String("-"c, 107))
+
+        'Perform the read operation
+        Dim UBound0 As Integer = -1
+        Dim UBound1 As Integer = -1
         Select Case FITSHeader.BitPix
+            Case 8
+                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt8(FileName, tsmiUseIPP.Checked)
+                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
+                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 16
-                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt16(File, True)
+                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt16(FileName, tsmiUseIPP.Checked)
+                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
+                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 32
-                SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(File, False)
+                SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, tsmiUseIPP.Checked)
+                UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
+                UBound1 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(1)
             Case Else
-                MsgBox("File format <" & FITSHeader.BitPix.ToString.Trim & "> not yet supported!")
+                Log("!!! File format <" & FITSHeader.BitPix.ToString.Trim & "> not yet supported!")
                 Exit Sub
         End Select
         Stopper.Stamp(FileNameOnly & ": Reading")
+
+        'Calculate the statistics
         Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
         Stopper.Stamp(FileNameOnly & ": Statistics")
-        Log("Statistics for <" & File & ">:")
-        Log(Stat.StatisticsReport.ToArray())
-        Log("-----------------------------------------------------------------------------------")
+        Log("Statistics:")
+        Log("  ", Stat.StatisticsReport.ToArray())
+        Log(New String("="c, 107))
 
-        PlotStatistics(File, Stat)
+        'Run the statistics-over-all
+        If tsmiStacking.Checked = True Then
+            If IsNothing(StackingStatistics) = True Then
+                'Init new
+                ReDim StackingStatistics(UBound0, UBound1)
+                For Idx1 As Integer = 0 To UBound0
+                    For Idx2 As Integer = 0 To UBound1
+                        StackingStatistics(Idx1, Idx2) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
+                        StackingStatistics(Idx1, Idx2).StoreRawValues = False
+                    Next Idx2
+                Next Idx1
+            End If
+            If StackingStatistics.GetUpperBound(0) = UBound0 And StackingStatistics.GetUpperBound(1) = UBound1 Then
+                Select Case FITSHeader.BitPix
+                    Case 8, 16
+                        For Idx1 As Integer = 0 To UBound0
+                            For Idx2 As Integer = 0 To UBound1
+                                StackingStatistics(Idx1, Idx2).AddValue(SingleStatCalc.DataProcessor_UInt16.ImageData(Idx1, Idx2))
+                            Next Idx2
+                        Next Idx1
+                    Case 32
+                        For Idx1 As Integer = 0 To UBound0
+                            For Idx2 As Integer = 0 To UBound1
+                                StackingStatistics(Idx1, Idx2).AddValue(SingleStatCalc.DataProcessor_Int32.ImageData(Idx1, Idx2))
+                            Next Idx2
+                        Next Idx1
+                End Select
+            Else
+                Log("!!! Dimension mismatch between the different images!")
+            End If
+            Stopper.Stamp(FileNameOnly & ": Stacking")
+        End If
+
+        'Plot statistics and remember this file as last processed file
+        PlotStatistics(FileName, Stat)
+        LastFile = FileName
+        Me.Focus()
 
     End Sub
 
@@ -48,6 +117,7 @@ Public Class Form1
     End Sub
 
     '''<summary>Open a simple form with a ZEDGraph on it and plots the statistical data.</summary>
+    '''<param name="FileName">Filename that is plotted (indicated in the header).</param>
     '''<param name="Stats">Statistics data to plot.</param>
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As AstroNET.Statistics.sStatistics)
         Dim Disp As New cZEDGraphForm
@@ -59,21 +129,20 @@ Public Class Form1
         Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
         Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
         Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram, New cZEDGraphService.sGraphStyle(Color.Black, 1))
-        Disp.Plotter.ManuallyScaleXAxis(Stats.MonoStatistics.Min, Stats.MonoStatistics.Max)
+        Disp.Plotter.ManuallyScaleXAxis(Stats.MonoStatistics.Min.Key, Stats.MonoStatistics.Max.Key)
         Disp.Plotter.AutoScaleYAxisLog()
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ForceUpdate()
+        'Set style of the window
         Disp.Hoster.Text = FileName
+        Disp.Hoster.Icon = Me.Icon
+        'Position window below the main window
+        Disp.Hoster.Left = Me.Left
+        Disp.Hoster.Top = Me.Top + Me.Height
+        Disp.Hoster.Height = Me.Height
+        Disp.Hoster.Width = Me.Width
     End Sub
 
-    Private Sub WriteTestDataToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles WriteTestDataToolStripMenuItem.Click
-        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS")
-        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") ': Process.Start("FITS_BitPix16.FITS")
-        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") ': Process.Start("FITS_BitPix32.FITS")
-        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") ': Process.Start("FITS_BitPix32f.FITS")
-        cFITSWriter.WriteTestFile_Float64("FITS_BitPix64f.FITS") : Process.Start("FITS_BitPix64f.FITS")
-        'MsgBox("OK")
-    End Sub
 
     Private Sub RemoveOverscanToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RemoveOverscanToolStripMenuItem.Click
 
@@ -128,6 +197,7 @@ Public Class Form1
         TestIPPPath(IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
         IPP = New cIntelIPP(IPPPath)
         cFITSReader.IPPPath = IPPPath
+        DD = New Ato.DragDrop(tbLogOutput, False)
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -143,8 +213,12 @@ Public Class Form1
     End Sub
 
     Private Sub Log(ByVal Text As List(Of String))
+        Log(Text.ToArray)
+    End Sub
+
+    Private Sub Log(ByVal Indent As String, ByVal Text() As String)
         For Each Line As String In Text
-            Log(Line, False)
+            Log(Indent & Line, False)
         Next Line
     End Sub
 
@@ -174,9 +248,80 @@ Public Class Form1
         System.Windows.Forms.Application.DoEvents()
     End Sub
 
-    'cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS") : Process.Start("FITS_BitPix8.FITS")
-    'cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") : Process.Start("FITS_BitPix16.FITS")
-    'cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") : Process.Start("FITS_BitPix32.FITS")
-    'cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") : Process.Start("FITS_BitPix32f.FITS")
+    Private Sub DD_DropOccured(Files() As String) Handles DD.DropOccured
+        'Handle drag-and-drop for all dropped FIT(s) files
+        For Each File As String In Files
+            If System.IO.Path.GetExtension(File).ToUpper.StartsWith(".FIT") Then LoadFile(File)
+        Next File
+    End Sub
+
+    Private Sub WriteTestDataToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles WriteTestDataToolStripMenuItem1.Click
+        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS")
+        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") ': Process.Start("FITS_BitPix16.FITS")
+        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") ': Process.Start("FITS_BitPix32.FITS")
+        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") ': Process.Start("FITS_BitPix32f.FITS")
+        cFITSWriter.WriteTestFile_Float64("FITS_BitPix64f.FITS") : Process.Start("FITS_BitPix64f.FITS")
+        'MsgBox("OK")
+    End Sub
+
+    Private Sub tsmiOpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiOpenLastFile.Click
+        If System.IO.File.Exists(LastFile) = True Then Process.Start(LastFile)
+    End Sub
+
+    Private Sub tsmiSaveMeanFile_Click(sender As Object, e As EventArgs) Handles tsmiSaveMeanFile.Click
+        If StackingStatistics.LongLength > 0 Then
+            Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
+            For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
+                For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
+                    ImageData(Idx1, Idx2) = CInt(StackingStatistics(Idx1, Idx2).Mean)
+                Next Idx2
+            Next Idx1
+            Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Stacking_Mean.fits")
+            cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
+            Process.Start(FileToGenerate)
+        End If
+    End Sub
+
+    Private Sub StdDevImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StdDevImageToolStripMenuItem.Click
+        If StackingStatistics.LongLength > 0 Then
+            Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
+            For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
+                For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
+                    ImageData(Idx1, Idx2) = CInt(StackingStatistics(Idx1, Idx2).Sigma)
+                Next Idx2
+            Next Idx1
+            Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Stacking_StdDev.fits")
+            cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
+            Process.Start(FileToGenerate)
+        End If
+    End Sub
+
+    Private Sub SumImageDoubleToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SumImageDoubleToolStripMenuItem.Click
+        If StackingStatistics.LongLength > 0 Then
+            Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Double
+            For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
+                For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
+                    ImageData(Idx1, Idx2) = CInt(StackingStatistics(Idx1, Idx2).Mean * StackingStatistics(Idx1, Idx2).ValueCount)
+                Next Idx2
+            Next Idx1
+            Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Stacking_Sum.fits")
+            cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Double)
+            Process.Start(FileToGenerate)
+        End If
+    End Sub
+
+    Private Sub MaxMinInt32ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MaxMinInt32ToolStripMenuItem.Click
+        If StackingStatistics.LongLength > 0 Then
+            Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
+            For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
+                For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
+                    ImageData(Idx1, Idx2) = CInt(StackingStatistics(Idx1, Idx2).MaxMin)
+                Next Idx2
+            Next Idx1
+            Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Stacking_MaxMin.fits")
+            cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
+            Process.Start(FileToGenerate)
+        End If
+    End Sub
 
 End Class

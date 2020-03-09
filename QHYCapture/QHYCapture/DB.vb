@@ -12,6 +12,7 @@ Public Enum eReadOutMode As UInteger
     Photographic = 0
     HighGain = 1
     ExtendFullwell = 2
+    Unvalid = UInteger.MaxValue
 End Enum
 
 '''<summary>Database holding relevant information.</summary>
@@ -20,6 +21,8 @@ Public Class cDB
     Const Cat1 As String = "1. Exposure"
     Const Cat2 As String = "2. Image storage"
     Const Cat3 As String = "3. Imaging hardware"
+    Const Cat4 As String = "4. Object description"
+    Const Cat5 As String = "5. Debug and logging"
 
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
@@ -40,6 +43,12 @@ Public Class cDB
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("2.1. Strema mode")>
+    <ComponentModel.Description("Photo (0) or Video(1).")>
+    Public Property StreamMode As UInteger = 0
+
+    '''<summary>Exposure time [s].</summary>
+    <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("3. Exposure time [s]")>
     <ComponentModel.Description("Exposure time [s]")>
     Public Property ExposureTime As Double = 1.0
@@ -53,8 +62,8 @@ Public Class cDB
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("6. Target T")>
-    Public Property TargetTemp As Double = -15.0
+    <ComponentModel.DisplayName("6. Target T - enter <-100 for do-not-use")>
+    Public Property TargetTemp As Double = -300
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("7. Binning")>
@@ -71,26 +80,29 @@ Public Class cDB
     Public Property GUID As String = System.Guid.NewGuid().ToString.Replace("-", String.Empty)
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("2. Object")>
-    <ComponentModel.Description("Object")>
-    Public Property [Object] As String = "???"
-
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("3. Author")>
+    <ComponentModel.DisplayName("2. Author")>
     <ComponentModel.Description("Author")>
     Public Property Author As String = "Martin Weiss"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("4. Origin")>
+    <ComponentModel.DisplayName("3. Origin")>
     <ComponentModel.Description("Origin")>
     Public Property Origin As String = "Sternwarte Holzkirchen"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("5. Store captured image?")>
+    <ComponentModel.DisplayName("4. Store captured image?")>
     Public Property StoreImage As Boolean = True
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("6. Open image automatically?")>
+    <ComponentModel.DisplayName("5. File name start")>
+    Public Property FileName As String = "QHY_capture_"
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("6. FITS extenstion")>
+    Public Property FITSExtension As String = "fits"
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("7. Open image automatically?")>
     Public Property AutoOpenImage As Boolean = True
 
     <ComponentModel.Category(Cat3)>
@@ -105,6 +117,22 @@ Public Class cDB
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("3. Telescope focal length [mm]")>
     Public Property TelescopeFocalLength As Double = 800.0
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("1. Object name")>
+    Public Property ObjectName As String = "---"
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("2. Object RA")>
+    Public Property ObjectRA As String = "HH:MM:SS.sss"
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("3. Object DEC")>
+    Public Property ObjectDEC As String = "dd:mm:ss.sss"
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("1. Log camera properties?")>
+    Public Property LogCameraProperties As Boolean = False
 
 
     Public Property RemoveOverscan As Boolean = False

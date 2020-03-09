@@ -22,19 +22,30 @@ Partial Class Form1
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenFileToAnalyseToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiOpenLastFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.WriteTestDataToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.StoreStackingResultToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSaveMeanFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiUseIPP = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiStacking = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.StdDevImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.SumImageDoubleToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MaxMinInt32ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -42,17 +53,17 @@ Partial Class Form1
         'MenuStrip1
         '
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.TestCodeToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.TestCodeToolStripMenuItem, Me.OptionsToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
-        Me.MenuStrip1.Size = New System.Drawing.Size(533, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(1134, 24)
         Me.MenuStrip1.TabIndex = 0
         Me.MenuStrip1.Text = "MenuStrip1"
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.WriteTestDataToolStripMenuItem, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem2, Me.StoreStackingResultToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -60,23 +71,50 @@ Partial Class Form1
         'OpenFileToAnalyseToolStripMenuItem
         '
         Me.OpenFileToAnalyseToolStripMenuItem.Name = "OpenFileToAnalyseToolStripMenuItem"
-        Me.OpenFileToAnalyseToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.OpenFileToAnalyseToolStripMenuItem.Text = "Open file to analyse"
+        Me.OpenFileToAnalyseToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.A), System.Windows.Forms.Keys)
+        Me.OpenFileToAnalyseToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.OpenFileToAnalyseToolStripMenuItem.Text = "Open file(s) to analyse"
+        '
+        'tsmiOpenLastFile
+        '
+        Me.tsmiOpenLastFile.Name = "tsmiOpenLastFile"
+        Me.tsmiOpenLastFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
+        Me.tsmiOpenLastFile.Size = New System.Drawing.Size(244, 22)
+        Me.tsmiOpenLastFile.Text = "Open last file processed"
+        '
+        'OpenEXELocationToolStripMenuItem
+        '
+        Me.OpenEXELocationToolStripMenuItem.Name = "OpenEXELocationToolStripMenuItem"
+        Me.OpenEXELocationToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.OpenEXELocationToolStripMenuItem.Text = "Open EXE location"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(177, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(241, 6)
         '
-        'WriteTestDataToolStripMenuItem
+        'ExitToolStripMenuItem
         '
-        Me.WriteTestDataToolStripMenuItem.Name = "WriteTestDataToolStripMenuItem"
-        Me.WriteTestDataToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.WriteTestDataToolStripMenuItem.Text = "Write test data"
+        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.ExitToolStripMenuItem.Text = "Exit"
+        '
+        'StoreStackingResultToolStripMenuItem
+        '
+        Me.StoreStackingResultToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSaveMeanFile, Me.SumImageDoubleToolStripMenuItem, Me.StdDevImageToolStripMenuItem, Me.MaxMinInt32ToolStripMenuItem})
+        Me.StoreStackingResultToolStripMenuItem.Name = "StoreStackingResultToolStripMenuItem"
+        Me.StoreStackingResultToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.StoreStackingResultToolStripMenuItem.Text = "Store stacking result"
+        '
+        'tsmiSaveMeanFile
+        '
+        Me.tsmiSaveMeanFile.Name = "tsmiSaveMeanFile"
+        Me.tsmiSaveMeanFile.Size = New System.Drawing.Size(183, 22)
+        Me.tsmiSaveMeanFile.Text = "Mean image [Int32]"
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -84,8 +122,37 @@ Partial Class Form1
         'RemoveOverscanToolStripMenuItem
         '
         Me.RemoveOverscanToolStripMenuItem.Name = "RemoveOverscanToolStripMenuItem"
-        Me.RemoveOverscanToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RemoveOverscanToolStripMenuItem.Size = New System.Drawing.Size(167, 22)
         Me.RemoveOverscanToolStripMenuItem.Text = "Remove overscan"
+        '
+        'WriteTestDataToolStripMenuItem1
+        '
+        Me.WriteTestDataToolStripMenuItem1.Name = "WriteTestDataToolStripMenuItem1"
+        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(167, 22)
+        Me.WriteTestDataToolStripMenuItem1.Text = "Write test data"
+        '
+        'OptionsToolStripMenuItem
+        '
+        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiUseIPP, Me.tsmiStacking})
+        Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
+        Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 22)
+        Me.OptionsToolStripMenuItem.Text = "Options"
+        '
+        'tsmiUseIPP
+        '
+        Me.tsmiUseIPP.Checked = True
+        Me.tsmiUseIPP.CheckOnClick = True
+        Me.tsmiUseIPP.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.tsmiUseIPP.Name = "tsmiUseIPP"
+        Me.tsmiUseIPP.Size = New System.Drawing.Size(139, 22)
+        Me.tsmiUseIPP.Text = "Use Intel IPP"
+        '
+        'tsmiStacking
+        '
+        Me.tsmiStacking.CheckOnClick = True
+        Me.tsmiStacking.Name = "tsmiStacking"
+        Me.tsmiStacking.Size = New System.Drawing.Size(139, 22)
+        Me.tsmiStacking.Text = "Stacking"
         '
         'tbLogOutput
         '
@@ -98,7 +165,7 @@ Partial Class Form1
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(517, 245)
+        Me.tbLogOutput.Size = New System.Drawing.Size(1118, 646)
         Me.tbLogOutput.TabIndex = 3
         Me.tbLogOutput.WordWrap = False
         '
@@ -106,10 +173,10 @@ Partial Class Form1
         '
         Me.StatusStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 270)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 671)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Padding = New System.Windows.Forms.Padding(1, 0, 9, 0)
-        Me.StatusStrip1.Size = New System.Drawing.Size(533, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(1134, 22)
         Me.StatusStrip1.TabIndex = 4
         Me.StatusStrip1.Text = "StatusStrip1"
         '
@@ -119,26 +186,38 @@ Partial Class Form1
         Me.tsslMain.Size = New System.Drawing.Size(22, 17)
         Me.tsslMain.Text = "---"
         '
-        'ExitToolStripMenuItem
+        'StdDevImageToolStripMenuItem
         '
-        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.ExitToolStripMenuItem.Text = "Exit"
+        Me.StdDevImageToolStripMenuItem.Name = "StdDevImageToolStripMenuItem"
+        Me.StdDevImageToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
+        Me.StdDevImageToolStripMenuItem.Text = "StdDev image"
         '
-        'OpenEXELocationToolStripMenuItem
+        'ToolStripMenuItem2
         '
-        Me.OpenEXELocationToolStripMenuItem.Name = "OpenEXELocationToolStripMenuItem"
-        Me.OpenEXELocationToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.OpenEXELocationToolStripMenuItem.Text = "Open EXE location"
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(241, 6)
+        '
+        'SumImageDoubleToolStripMenuItem
+        '
+        Me.SumImageDoubleToolStripMenuItem.Name = "SumImageDoubleToolStripMenuItem"
+        Me.SumImageDoubleToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
+        Me.SumImageDoubleToolStripMenuItem.Text = "Sum image [Double]"
+        '
+        'MaxMinInt32ToolStripMenuItem
+        '
+        Me.MaxMinInt32ToolStripMenuItem.Name = "MaxMinInt32ToolStripMenuItem"
+        Me.MaxMinInt32ToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
+        Me.MaxMinInt32ToolStripMenuItem.Text = "Max-Min [Int32]"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(533, 292)
+        Me.ClientSize = New System.Drawing.Size(1134, 693)
         Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.tbLogOutput)
         Me.Controls.Add(Me.MenuStrip1)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "Form1"
@@ -160,9 +239,19 @@ Partial Class Form1
     Friend WithEvents StatusStrip1 As StatusStrip
     Friend WithEvents tsslMain As ToolStripStatusLabel
     Friend WithEvents ToolStripMenuItem1 As ToolStripSeparator
-    Friend WithEvents WriteTestDataToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiOpenLastFile As ToolStripMenuItem
     Friend WithEvents TestCodeToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents RemoveOverscanToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ExitToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents OpenEXELocationToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents OptionsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiUseIPP As ToolStripMenuItem
+    Friend WithEvents WriteTestDataToolStripMenuItem1 As ToolStripMenuItem
+    Friend WithEvents tsmiStacking As ToolStripMenuItem
+    Friend WithEvents StoreStackingResultToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiSaveMeanFile As ToolStripMenuItem
+    Friend WithEvents StdDevImageToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
+    Friend WithEvents SumImageDoubleToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents MaxMinInt32ToolStripMenuItem As ToolStripMenuItem
 End Class

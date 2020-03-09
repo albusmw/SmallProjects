@@ -1,0 +1,6 @@
+﻿FITS keyword sources:
+- C:\Users\albus\Dropbox\Transfer Public\AndreasB\Abell29-C11Hy-Atik460EXm\Ha\Abell29-019H.fit)
+
+Ideas:
+- Add exposure counter (running 1/10 ...)
+- Add statistics via horizonal and vertical lines (this I did already in another software - evaluate "Horizontal banding" as described here: https://www.qhyccd.com/index.php?m=content&c=index&a=show&catid=30&id=260)

@@ -101,7 +101,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FITS_Keywords_Example1.txt" />
+    <Content Include="Ideas.txt" />
+    <Content Include="QHY600 Control Values.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
