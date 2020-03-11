@@ -136,6 +136,7 @@
       <Link>ZEDGraphUtil.vb</Link>
     </Compile>
     <Compile Include="cDB.vb" />
+    <Compile Include="cIntelIPP_NewCode.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>

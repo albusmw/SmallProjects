@@ -38,20 +38,19 @@ Partial Class Form1
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PlotStatisticsVsGainToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ReplotStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.AfiineTranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiUseIPP = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiStacking = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ResetStackingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ResetStackingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.PlotStatisticsVsGainToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
-        Me.ReplotStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -154,10 +153,21 @@ Partial Class Form1
         Me.RowAndColumnStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.RowAndColumnStatisticsToolStripMenuItem.Text = "Row and column statistics"
         '
+        'PlotStatisticsVsGainToolStripMenuItem
+        '
+        Me.PlotStatisticsVsGainToolStripMenuItem.Name = "PlotStatisticsVsGainToolStripMenuItem"
+        Me.PlotStatisticsVsGainToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.PlotStatisticsVsGainToolStripMenuItem.Text = "Plot statistics vs gain"
+        '
+        'ReplotStatisticsToolStripMenuItem
+        '
+        Me.ReplotStatisticsToolStripMenuItem.Name = "ReplotStatisticsToolStripMenuItem"
+        Me.ReplotStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.ReplotStatisticsToolStripMenuItem.Text = "Re-plot statistics"
+        '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.TranslateToolStripMenuItem})
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -174,28 +184,24 @@ Partial Class Form1
         Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
         Me.WriteTestDataToolStripMenuItem1.Text = "Write test data"
         '
+        'AfiineTranslateToolStripMenuItem
+        '
+        Me.AfiineTranslateToolStripMenuItem.Name = "AfiineTranslateToolStripMenuItem"
+        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.AfiineTranslateToolStripMenuItem.Text = "Afiine translate"
+        '
         'OptionsToolStripMenuItem
         '
-        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiUseIPP, Me.tsmiStacking, Me.ResetStackingToolStripMenuItem})
+        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ResetStackingToolStripMenuItem})
         Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
         Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 22)
         Me.OptionsToolStripMenuItem.Text = "Options"
         '
-        'tsmiUseIPP
+        'ResetStackingToolStripMenuItem
         '
-        Me.tsmiUseIPP.Checked = True
-        Me.tsmiUseIPP.CheckOnClick = True
-        Me.tsmiUseIPP.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.tsmiUseIPP.Name = "tsmiUseIPP"
-        Me.tsmiUseIPP.Size = New System.Drawing.Size(139, 22)
-        Me.tsmiUseIPP.Text = "Use Intel IPP"
-        '
-        'tsmiStacking
-        '
-        Me.tsmiStacking.CheckOnClick = True
-        Me.tsmiStacking.Name = "tsmiStacking"
-        Me.tsmiStacking.Size = New System.Drawing.Size(139, 22)
-        Me.tsmiStacking.Text = "Stacking"
+        Me.ResetStackingToolStripMenuItem.Name = "ResetStackingToolStripMenuItem"
+        Me.ResetStackingToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ResetStackingToolStripMenuItem.Text = "Reset stacking"
         '
         'ofdMain
         '
@@ -233,28 +239,12 @@ Partial Class Form1
         Me.tsslMain.Size = New System.Drawing.Size(22, 17)
         Me.tsslMain.Text = "---"
         '
-        'ResetStackingToolStripMenuItem
-        '
-        Me.ResetStackingToolStripMenuItem.Name = "ResetStackingToolStripMenuItem"
-        Me.ResetStackingToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.ResetStackingToolStripMenuItem.Text = "Reset stacking"
-        'PlotStatisticsVsGainToolStripMenuItem
-        Me.PlotStatisticsVsGainToolStripMenuItem.Name = "PlotStatisticsVsGainToolStripMenuItem"
-        Me.PlotStatisticsVsGainToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.PlotStatisticsVsGainToolStripMenuItem.Text = "Plot statistics vs gain"
-        '
         'pgMain
         '
         Me.pgMain.Location = New System.Drawing.Point(12, 27)
         Me.pgMain.Name = "pgMain"
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
-        '
-        'ReplotStatisticsToolStripMenuItem
-        '
-        Me.ReplotStatisticsToolStripMenuItem.Name = "ReplotStatisticsToolStripMenuItem"
-        Me.ReplotStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.ReplotStatisticsToolStripMenuItem.Text = "Re-plot statistics"
         '
         'Form1
         '
@@ -293,9 +283,7 @@ Partial Class Form1
     Friend WithEvents ExitToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents OpenEXELocationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents OptionsToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents tsmiUseIPP As ToolStripMenuItem
     Friend WithEvents WriteTestDataToolStripMenuItem1 As ToolStripMenuItem
-    Friend WithEvents tsmiStacking As ToolStripMenuItem
     Friend WithEvents StoreStackingResultToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiSaveMeanFile As ToolStripMenuItem
     Friend WithEvents StdDevImageToolStripMenuItem As ToolStripMenuItem
@@ -308,4 +296,5 @@ Partial Class Form1
     Friend WithEvents PlotStatisticsVsGainToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents pgMain As PropertyGrid
     Friend WithEvents ReplotStatisticsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents AfiineTranslateToolStripMenuItem As ToolStripMenuItem
 End Class

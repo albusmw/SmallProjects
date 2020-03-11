@@ -65,17 +65,17 @@ Public Class Form1
         Dim UBound1 As Integer = -1
         Select Case FITSHeader.BitPix
             Case 8
-                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt8(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
                 SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 16
-                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt16(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
                 SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1)
             Case 32
-                SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, tsmiUseIPP.Checked)
+                SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, DB.UseIPP)
                 SingleStatCalc.DataProcessor_UInt16.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(1)
@@ -103,7 +103,7 @@ Public Class Form1
         End If
 
         'Run the "stacking" (statistics for each point) is selected
-        If tsmiStacking.Checked = True Then
+        If DB.Stacking = True Then
             'Init new
             If IsNothing(StackingStatistics) = True Then
                 ReDim StackingStatistics(UBound0, UBound1)
@@ -172,10 +172,12 @@ Public Class Form1
         Disp.Hoster.Text = FileName
         Disp.Hoster.Icon = Me.Icon
         'Position window below the main window
-        Disp.Hoster.Left = Me.Left
-        Disp.Hoster.Top = Me.Top + Me.Height
-        Disp.Hoster.Height = Me.Height
-        Disp.Hoster.Width = Me.Width
+        If DB.StackGraphs = True Then
+            Disp.Hoster.Left = Me.Left
+            Disp.Hoster.Top = Me.Top + Me.Height
+            Disp.Hoster.Height = Me.Height
+            Disp.Hoster.Width = Me.Width
+        End If
     End Sub
 
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats() As Ato.cSingleValueStatistics)
@@ -463,7 +465,7 @@ Public Class Form1
         PlotStatistics(LastFile, LastStat)
     End Sub
 
-    Private Sub TranslateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TranslateToolStripMenuItem.Click
+    Private Sub TranslateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AfiineTranslateToolStripMenuItem.Click
         IntelIPP_NewCode.Translate("C:\Users\albus\Dropbox\Astro\!Bilder\Test-Daten\Debayer\Stack_16bits_936frames_152s.fits")
     End Sub
 
