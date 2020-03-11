@@ -3,14 +3,19 @@ Option Strict On
 
 Public Class Form1
 
+    Private DB As New cDB
+
     '''<summary>Handle to Intel IPP functions.</summary>
     Private IPP As cIntelIPP
     '''<summary>Location of the EXE.</summary>
     Private MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly.Location)
     '''<summary>Drag-and-drop handler.</summary>
     Private WithEvents DD As Ato.DragDrop
+
     '''<summary>Last file opened.</summary>
     Private LastFile As String = String.Empty
+
+    Private LastStat As AstroNET.Statistics.sStatistics
 
     '''<summary>Statistics processor (for the last file).</summary>
     Dim SingleStatCalc As AstroNET.Statistics
@@ -23,9 +28,13 @@ Public Class Form1
     '''<summary>Storage for a simple stack processing.</summary>
     Private StackingStatistics(,) As Ato.cSingleValueStatistics
 
+    Private StatVsGain As New Dictionary(Of Double, AstroImageStatistics.AstroNET.Statistics.sSingleChannelStatistics)
+
     Private Sub OpenFileToAnalyseToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenFileToAnalyseToolStripMenuItem.Click
         If ofdMain.ShowDialog <> DialogResult.OK Then Exit Sub
-        LoadFile(ofdMain.FileName)
+        For Each File As String In ofdMain.FileNames
+            LoadFile(File)
+        Next File
     End Sub
 
     Private Sub LoadFile(ByVal FileName As String)
@@ -36,6 +45,8 @@ Public Class Form1
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
         SingleStatCalc = New AstroNET.Statistics(IPP)
+
+        If DB.AutoClearLog = True Then tbLogOutput.Text = String.Empty
 
         'Log header data and detect if NAXIS3 is set
         Log("Loading file <" & FileName & "> ...")
@@ -75,16 +86,26 @@ Public Class Form1
         Stopper.Stamp(FileNameOnly & ": Reading")
 
         'Calculate the statistics
-        Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
+        LastStat = SingleStatCalc.ImageStatistics
         Stopper.Stamp(FileNameOnly & ": Statistics")
         Log("Statistics:")
-        Log("  ", Stat.StatisticsReport.ToArray())
+        Log("  ", LastStat.StatisticsReport.ToArray())
         Log(New String("="c, 107))
 
-        'Run the statistics-over-all
+        'Trace statistics vs gain
+        If FITSHeaderDict.ContainsKey("GAIN") Then
+            Dim Gain As Double = CDbl(FITSHeaderDict("GAIN"))
+            If StatVsGain.ContainsKey(Gain) = False Then
+                StatVsGain.Add(Gain, LastStat.MonoStatistics)
+            Else
+                StatVsGain(Gain) = LastStat.MonoStatistics
+            End If
+        End If
+
+        'Run the "stacking" (statistics for each point) is selected
         If tsmiStacking.Checked = True Then
+            'Init new
             If IsNothing(StackingStatistics) = True Then
-                'Init new
                 ReDim StackingStatistics(UBound0, UBound1)
                 For Idx1 As Integer = 0 To UBound0
                     For Idx2 As Integer = 0 To UBound1
@@ -93,6 +114,7 @@ Public Class Form1
                     Next Idx2
                 Next Idx1
             End If
+            'Add up statistics if dimension is matching
             If StackingStatistics.GetUpperBound(0) = UBound0 And StackingStatistics.GetUpperBound(1) = UBound1 Then
                 Select Case FITSHeader.BitPix
                     Case 8, 16
@@ -115,7 +137,7 @@ Public Class Form1
         End If
 
         'Plot statistics and remember this file as last processed file
-        PlotStatistics(FileName, Stat)
+        If DB.AutoOpenStatGraph = True Then PlotStatistics(FileName, LastStat)
         LastFile = FileName
         Me.Focus()
 
@@ -166,7 +188,6 @@ Public Class Form1
         Disp.Plotter.PlotXvsY("Max", XAxis, Ato.cSingleValueStatistics.GetAspectVector(Stats, Ato.cSingleValueStatistics.eAspects.Maximum), New cZEDGraphService.sGraphStyle(Color.Red, 1))
         Disp.Plotter.PlotXvsY("Min", XAxis, Ato.cSingleValueStatistics.GetAspectVector(Stats, Ato.cSingleValueStatistics.eAspects.Minimum), New cZEDGraphService.sGraphStyle(Color.Green, 1))
         Disp.Plotter.ManuallyScaleXAxis(XAxis(0), XAxis(XAxis.GetUpperBound(0)))
-        Disp.Plotter.AutoScaleYAxisLog()
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ForceUpdate()
         'Set style of the window
@@ -181,6 +202,31 @@ Public Class Form1
         Disp.Hoster.Width = Me.Width
     End Sub
 
+    Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As Dictionary(Of Double, AstroImageStatistics.AstroNET.Statistics.sSingleChannelStatistics))
+        Dim Disp As New cZEDGraphForm
+        Disp.PlotData(New Double() {1, 2, 3, 4})
+        'Plot data
+        Dim XAxis As New List(Of Double)
+        Dim YAxis As New List(Of Double)
+        For Each Entry As Double In Stats.Keys
+            XAxis.Add(Entry)
+            YAxis.Add(Stats(Entry).Mean)
+        Next Entry
+        Disp.Plotter.Clear()
+        Disp.Plotter.PlotXvsY("StdDev", XAxis.ToArray, YAxis.ToArray, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+        Disp.Plotter.GridOnOff(True, True)
+        Disp.Plotter.ForceUpdate()
+        'Set style of the window
+        Disp.Plotter.SetCaptions(String.Empty, "Gain", "StdDev")
+        Disp.Plotter.MaximizePlotArea()
+        Disp.Hoster.Text = FileName
+        Disp.Hoster.Icon = Me.Icon
+        'Position window below the main window
+        Disp.Hoster.Left = Me.Left
+        Disp.Hoster.Top = Me.Top + Me.Height
+        Disp.Hoster.Height = Me.Height
+        Disp.Hoster.Width = Me.Width
+    End Sub
 
     Private Sub RemoveOverscanToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RemoveOverscanToolStripMenuItem.Click
 
@@ -236,6 +282,7 @@ Public Class Form1
         IPP = New cIntelIPP(IPPPath)
         cFITSReader.IPPPath = IPPPath
         DD = New Ato.DragDrop(tbLogOutput, False)
+        pgMain.SelectedObject = DB
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -402,6 +449,18 @@ Public Class Form1
         For Idx As Integer = 0 To Vector.GetUpperBound(0)
             Vector(Idx) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
         Next Idx
+    End Sub
+
+    Private Sub ResetStackingToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ResetStackingToolStripMenuItem.Click
+        StackingStatistics = Nothing
+    End Sub
+
+    Private Sub PlotStatisticsVsGainToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PlotStatisticsVsGainToolStripMenuItem.Click
+        PlotStatistics(LastFile, StatVsGain)
+    End Sub
+
+    Private Sub ReplotStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReplotStatisticsToolStripMenuItem.Click
+        PlotStatistics(LastFile, LastStat)
     End Sub
 
     Private Sub TranslateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TranslateToolStripMenuItem.Click
