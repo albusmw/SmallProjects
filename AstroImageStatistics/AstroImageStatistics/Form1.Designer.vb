@@ -36,6 +36,8 @@ Partial Class Form1
         Me.MaxMinInt32ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
@@ -46,8 +48,7 @@ Partial Class Form1
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -137,9 +138,22 @@ Partial Class Form1
         Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
+        'SpecialAnalysisToolStripMenuItem
+        '
+        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem})
+        Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
+        Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
+        Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
+        '
+        'RowAndColumnStatisticsToolStripMenuItem
+        '
+        Me.RowAndColumnStatisticsToolStripMenuItem.Name = "RowAndColumnStatisticsToolStripMenuItem"
+        Me.RowAndColumnStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.RowAndColumnStatisticsToolStripMenuItem.Text = "Row and column statistics"
+        '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.TranslateToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -169,14 +183,14 @@ Partial Class Form1
         Me.tsmiUseIPP.CheckOnClick = True
         Me.tsmiUseIPP.CheckState = System.Windows.Forms.CheckState.Checked
         Me.tsmiUseIPP.Name = "tsmiUseIPP"
-        Me.tsmiUseIPP.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiUseIPP.Size = New System.Drawing.Size(139, 22)
         Me.tsmiUseIPP.Text = "Use Intel IPP"
         '
         'tsmiStacking
         '
         Me.tsmiStacking.CheckOnClick = True
         Me.tsmiStacking.Name = "tsmiStacking"
-        Me.tsmiStacking.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiStacking.Size = New System.Drawing.Size(139, 22)
         Me.tsmiStacking.Text = "Stacking"
         '
         'tbLogOutput
@@ -211,18 +225,11 @@ Partial Class Form1
         Me.tsslMain.Size = New System.Drawing.Size(22, 17)
         Me.tsslMain.Text = "---"
         '
-        'SpecialAnalysisToolStripMenuItem
+        'TranslateToolStripMenuItem
         '
-        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem})
-        Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
-        Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
-        Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
-        '
-        'RowAndColumnStatisticsToolStripMenuItem
-        '
-        Me.RowAndColumnStatisticsToolStripMenuItem.Name = "RowAndColumnStatisticsToolStripMenuItem"
-        Me.RowAndColumnStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.RowAndColumnStatisticsToolStripMenuItem.Text = "Row and column statistics"
+        Me.TranslateToolStripMenuItem.Name = "TranslateToolStripMenuItem"
+        Me.TranslateToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.TranslateToolStripMenuItem.Text = "Translate"
         '
         'Form1
         '
@@ -271,4 +278,5 @@ Partial Class Form1
     Friend WithEvents MaxMinInt32ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents SpecialAnalysisToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents RowAndColumnStatisticsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents TranslateToolStripMenuItem As ToolStripMenuItem
 End Class

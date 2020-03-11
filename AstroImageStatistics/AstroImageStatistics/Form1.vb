@@ -404,4 +404,8 @@ Public Class Form1
         Next Idx
     End Sub
 
+    Private Sub TranslateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TranslateToolStripMenuItem.Click
+        IntelIPP_NewCode.Translate("C:\Users\albus\Dropbox\Astro\!Bilder\Test-Daten\Debayer\Stack_16bits_936frames_152s.fits")
+    End Sub
+
 End Class
