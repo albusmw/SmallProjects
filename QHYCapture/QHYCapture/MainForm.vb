@@ -3,23 +3,25 @@ Option Strict On
 
 Public Class MainForm
 
+    '''<summary>DB that holds all relevant information.</summary>
     Private DB As New cDB
+    Private WithEvents DB_ServiceContract As cDB_ServiceContract
 
     Private CamHandle As IntPtr = IntPtr.Zero
     Private UsedReadMode As eReadOutMode = eReadOutMode.Unvalid
     Private UsedCameraId As System.Text.StringBuilder
     Private UsedStreamMode As UInteger = UInteger.MaxValue
 
-    '''<summary>Flag that indicates to halt the capture sequence.</summary>
-    Private StopFlag As Boolean = False
-
+    '''<summary>Run a single capture.</summary>
     Private Sub RunCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunCaptureToolStripMenuItem.Click
-        StopFlag = False
+        DB.StopFlag = False
         QHYCapture(DB.FileName, True)
     End Sub
 
     '''<summary>Command for a QHY capture run.</summary>
     Public Sub QHYCapture(ByVal FITSFileStart As String, ByVal CloseAtEnd As Boolean)
+
+        DB.RunningFlag = True
 
         Dim Stopper As New cStopper
         Stopper.Start()
@@ -41,8 +43,6 @@ Public Class MainForm
         Dim CamNumToUse As Integer = 0
 
         'Single Image Capture Mode Workflow
-
-        'GetQHYCCDSingleFrame(camhandle,& w,&h,&bpp,& channels, ImgData);
 
         'Init if not yet done
         If CamHandle = IntPtr.Zero Or UsedReadMode = eReadOutMode.Unvalid Or UsedStreamMode = UInteger.MaxValue Then
@@ -165,189 +165,189 @@ Public Class MainForm
 
             'Prepare buffers
             Dim ReadResolution As UInteger = 16
-                Dim ChannelToRead As UInteger = 0
+            Dim ChannelToRead As UInteger = 0
 
-                Stopper.Stamp("Prepare buffers")
+            Stopper.Stamp("Prepare buffers")
 
-                'Set exposure parameters
-                CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, DB.Binning, DB.Binning))
-                CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, 0, 0, Chip_Pixel_W \ DB.Binning, Chip_Pixel_H \ DB.Binning))
-                CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, ReadResolution))
-                CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
-                CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
-                CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
+            'Set exposure parameters
+            CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, DB.Binning, DB.Binning))
+            CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, 0, 0, Chip_Pixel_W \ DB.Binning, Chip_Pixel_H \ DB.Binning))
+            CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, ReadResolution))
+            CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
+            CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
+            CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
 
-                Dim LoopStat As New AstroNET.Statistics.sStatistics
-                Dim PinHandler As cIntelIPP.cPinHandler
-                Dim CamRawBuffer As Byte() = {}
-                Dim CamRawBufferPtr As IntPtr = Nothing
+            Dim LoopStat As New AstroNET.Statistics.sStatistics
+            Dim PinHandler As cIntelIPP.cPinHandler
+            Dim CamRawBuffer As Byte() = {}
+            Dim CamRawBufferPtr As IntPtr = Nothing
 
-                For LoopCnt As Integer = 1 To DB.CaptureCount
+            For LoopCnt As Integer = 1 To DB.CaptureCount
 
-                    'Cancel any running exposure
-                    CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(CamHandle))
-                    CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle))
+                'Cancel any running exposure
+                CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(CamHandle))
+                CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle))
 
-                    'Check and set temperature
-                    If DB.TargetTemp > -100 Then
-                        Do
-                            Dim CurrentTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
-                            Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
-                            tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
-                            If System.Math.Abs(CurrentTemp - DB.TargetTemp) < 0.1 Then Exit Do
-                            System.Threading.Thread.Sleep(500)
-                            DE()
-                        Loop Until 1 = 0
-                    End If
+                'Check and set temperature
+                If DB.TargetTemp > -100 Then
+                    Do
+                        Dim CurrentTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+                        Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
+                        tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
+                        If System.Math.Abs(CurrentTemp - DB.TargetTemp) < 0.1 Then Exit Do
+                        System.Threading.Thread.Sleep(500)
+                        DE()
+                    Loop Until 1 = 0
+                End If
 
-                    'Show status
-                    tsslMain.Text = "Taking capture " & LoopCnt.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
+                'Show status
+                tsslMain.Text = "Taking capture " & LoopCnt.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
 
-                    'Start expose
-                    Dim ObsStart As DateTime = Now
-                    Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
-                    Stopper.Start()
-                    CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
-                    Stopper.Stamp("ExpQHYCCDSingleFrame")
+                'Start expose
+                Dim ObsStart As DateTime = Now
+                Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+                Stopper.Start()
+                CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
+                Stopper.Stamp("ExpQHYCCDSingleFrame")
 
-                    'Idle exposure time
-                    If DB.ExposureTime > 1 Then
-                        Dim ExpStart As DateTime = Now
-                        tspbProgress.Maximum = CInt(DB.ExposureTime)
-                        Do
-                            System.Threading.Thread.Sleep(500)
-                            Dim TimePassed As Double = (Now - ExpStart).TotalSeconds
-                            If TimePassed < tspbProgress.Maximum Then
-                                tspbProgress.Value = CInt(TimePassed)
-                                tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & tspbProgress.Maximum.ToString.Trim & " seconds exposed"
-                            Else
-                                tspbProgress.Value = 0
-                                tsslProgress.Text = "---"
-                                Exit Do
-                            End If
-                            DE()
-                        Loop Until 1 = 0
-                    End If
+                'Idle exposure time
+                If DB.ExposureTime > 1 Then
+                    Dim ExpStart As DateTime = Now
+                    tspbProgress.Maximum = CInt(DB.ExposureTime)
+                    Do
+                        System.Threading.Thread.Sleep(500)
+                        Dim TimePassed As Double = (Now - ExpStart).TotalSeconds
+                        If TimePassed < tspbProgress.Maximum Then
+                            tspbProgress.Value = CInt(TimePassed)
+                            tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & tspbProgress.Maximum.ToString.Trim & " seconds exposed"
+                        Else
+                            tspbProgress.Value = 0
+                            tsslProgress.Text = "---"
+                            Exit Do
+                        End If
+                        DE()
+                    Loop Until 1 = 0
+                End If
 
-                    'Get the buffer size from the DLL - typically too big but does not care ...
-                    Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(CamHandle)
-                    Stopper.Stamp("GetQHYCCDMemLength")
-                    Log("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
-                    If CamRawBuffer.Length <> BytesToTransfer_reported Then
-                        PinHandler = New cIntelIPP.cPinHandler
-                        ReDim CamRawBuffer(CInt(BytesToTransfer_reported - 1))
-                        CamRawBufferPtr = PinHandler.Pin(CamRawBuffer)
-                    End If
+                'Get the buffer size from the DLL - typically too big but does not care ...
+                Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(CamHandle)
+                Stopper.Stamp("GetQHYCCDMemLength")
+                Log("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
+                If CamRawBuffer.Length <> BytesToTransfer_reported Then
+                    PinHandler = New cIntelIPP.cPinHandler
+                    ReDim CamRawBuffer(CInt(BytesToTransfer_reported - 1))
+                    CamRawBufferPtr = PinHandler.Pin(CamRawBuffer)
+                End If
 
-                    'Read image data from camera - ALWAYS WITH OVERSCAN
-                    Dim Capture_W As UInteger = 0 : Dim Capture_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
-                    CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(CamHandle, Capture_W, Capture_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
-                    Dim BytesToTransfer_calculated As Long = Capture_W * Capture_H * CInt(CaptureBits / 8)
-                    Log("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
-                    Log("Loaded image with " & Capture_W.ValRegIndep & "x" & Capture_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
-                    Stopper.Stamp("GetQHYCCDSingleFrame")
+                'Read image data from camera - ALWAYS WITH OVERSCAN
+                Dim Capture_W As UInteger = 0 : Dim Capture_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
+                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(CamHandle, Capture_W, Capture_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                Dim BytesToTransfer_calculated As Long = Capture_W * Capture_H * CInt(CaptureBits / 8)
+                Log("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
+                Log("Loaded image with " & Capture_W.ValRegIndep & "x" & Capture_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
+                Stopper.Stamp("GetQHYCCDSingleFrame")
 
-                    Dim ObsEnd As DateTime = Now
-                    'Remove overscan
-                    Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
-                    If DB.RemoveOverscan = False Then
-                        SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))      'only convert flat byte buffer to UInt16 matrix data
-                    Else
-                        Dim Overscan_X As UInteger = EffArea.X \ DB.Binning
-                        Dim Overscan_Y As UInteger = EffArea.Y \ DB.Binning
-                        Dim TempBuffer(,) As UInt16 = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))                        'convert flat to UInt16 matrix in a temporary buffer
-                        DB.IPP.Copy(TempBuffer, SingleStatCalc.DataProcessor_UInt16.ImageData, 0, CInt(Overscan_X - 1), CInt(Capture_H - Overscan_Y), CInt(Capture_W - Overscan_X))
-                    End If
-                    Stopper.Stamp("ChangeAspect")
+                Dim ObsEnd As DateTime = Now
+                'Remove overscan
+                Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
+                If DB.RemoveOverscan = False Then
+                    SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))      'only convert flat byte buffer to UInt16 matrix data
+                Else
+                    Dim Overscan_X As UInteger = EffArea.X \ DB.Binning
+                    Dim Overscan_Y As UInteger = EffArea.Y \ DB.Binning
+                    Dim TempBuffer(,) As UInt16 = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))                        'convert flat to UInt16 matrix in a temporary buffer
+                    DB.IPP.Copy(TempBuffer, SingleStatCalc.DataProcessor_UInt16.ImageData, 0, CInt(Overscan_X - 1), CInt(Capture_H - Overscan_Y), CInt(Capture_W - Overscan_X))
+                End If
+                Stopper.Stamp("ChangeAspect")
 
-                    'Run statistics
-                    Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
-                    LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat)
-                    Log("Capture #" & LoopCnt.ValRegIndep & " statistics:")
-                    Log(SingleStat.StatisticsReport)
-                    Stopper.Stamp("Statistics")
+                'Run statistics
+                Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
+                LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat)
+                Log("Capture #" & LoopCnt.ValRegIndep & " statistics:")
+                Log(SingleStat.StatisticsReport)
+                Stopper.Stamp("Statistics")
 
-                    'Plot histogram
-                    If IsNothing(DB.Plotter) = True Then DB.Plotter = New cZEDGraphService(zgcMain)
-                    DB.Plotter.Clear()
-                    DB.Plotter.PlotXvsY("R", LoopStat.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, 1))
-                    DB.Plotter.PlotXvsY("G1", LoopStat.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, 1))
-                    DB.Plotter.PlotXvsY("G2", LoopStat.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, 1))
-                    DB.Plotter.PlotXvsY("B", LoopStat.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, 1))
-                    DB.Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, 1))
-                    DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
+                'Plot histogram
+                If IsNothing(DB.Plotter) = True Then DB.Plotter = New cZEDGraphService(zgcMain)
+                DB.Plotter.Clear()
+                DB.Plotter.PlotXvsY("R", LoopStat.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, 1))
+                DB.Plotter.PlotXvsY("G1", LoopStat.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, 1))
+                DB.Plotter.PlotXvsY("G2", LoopStat.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, 1))
+                DB.Plotter.PlotXvsY("B", LoopStat.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, 1))
+                DB.Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, 1))
+                DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
 
-                    DB.Plotter.AutoScaleYAxisLog()
-                    DB.Plotter.GridOnOff(True, True)
-                    DB.Plotter.ForceUpdate()
-                    Stopper.Stamp("Plotter")
+                DB.Plotter.AutoScaleYAxisLog()
+                DB.Plotter.GridOnOff(True, True)
+                DB.Plotter.ForceUpdate()
+                Stopper.Stamp("Plotter")
 
-                    'Store image
-                    If DB.StoreImage = True Then
+                'Store image
+                If DB.StoreImage = True Then
 
-                        Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
-                        If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
-                        Dim FileCounter As String = String.Empty : If DB.CaptureCount > 1 Then FileCounter = "_#" & Format(LoopCnt, "000")
-                        Dim FITSName As String = System.IO.Path.Combine(Path, FITSFileStart & FileCounter).Trim & "." & DB.FITSExtension
+                    Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB.GUID)
+                    If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
+                    Dim FileCounter As String = String.Empty : If DB.CaptureCount > 1 Then FileCounter = "_#" & Format(LoopCnt, "000")
+                    Dim FITSName As String = System.IO.Path.Combine(Path, FITSFileStart & FileCounter).Trim & "." & DB.FITSExtension
 
-                        'Precalculation
-                        Dim NAXIS1 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
-                        Dim NAXIS2 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
-                        Dim PLATESZ1 As Double = (Pixel_Size_W * NAXIS1) / 1000                         '[mm]
-                        Dim PLATESZ2 As Double = (Pixel_Size_H * NAXIS2) / 1000                         '[mm]
-                        Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
-                        Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
-                        Dim CamReadOutMode As New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, DB.ReadOutMode, CamReadOutMode)
+                    'Precalculation
+                    Dim NAXIS1 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
+                    Dim NAXIS2 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
+                    Dim PLATESZ1 As Double = (Pixel_Size_W * NAXIS1) / 1000                         '[mm]
+                    Dim PLATESZ2 As Double = (Pixel_Size_H * NAXIS2) / 1000                         '[mm]
+                    Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
+                    Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB.TelescopeFocalLength)) * (180 / Math.PI)
+                    Dim CamReadOutMode As New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, DB.ReadOutMode, CamReadOutMode)
 
-                        'Compose all FITS keyword entries
-                        Dim CustomElement As New Collections.Generic.List(Of String())
+                    'Compose all FITS keyword entries
+                    Dim CustomElement As New Collections.Generic.List(Of String())
 
-                        CustomElement.Add(New String() {eFITSKeywords.OBS_ID, cFITSKeywords.GetString(DB.GUID)})
-                        CustomElement.Add(New String() {eFITSKeywords.PROGRAM, cFITSKeywords.GetString(Me.Text)})
+                    CustomElement.Add(New String() {eFITSKeywords.OBS_ID, cFITSKeywords.GetString(DB.GUID)})
+                    CustomElement.Add(New String() {eFITSKeywords.PROGRAM, cFITSKeywords.GetString(Me.Text)})
 
-                        AddNoEmptyElement(CustomElement, eFITSKeywords.OBJECT, cFITSKeywords.GetString(DB.ObjectName))
-                        AddNoEmptyElement(CustomElement, eFITSKeywords.RA, cFITSKeywords.GetString(DB.ObjectRA))
-                        AddNoEmptyElement(CustomElement, eFITSKeywords.DEC, cFITSKeywords.GetString(DB.ObjectDEC))
+                    AddNoEmptyElement(CustomElement, eFITSKeywords.OBJECT, cFITSKeywords.GetString(DB.ObjectName))
+                    AddNoEmptyElement(CustomElement, eFITSKeywords.RA, cFITSKeywords.GetString(DB.ObjectRA))
+                    AddNoEmptyElement(CustomElement, eFITSKeywords.DEC, cFITSKeywords.GetString(DB.ObjectDEC))
 
-                        CustomElement.Add(New String() {eFITSKeywords.AUTHOR, cFITSKeywords.GetString(DB.Author)})
-                        CustomElement.Add(New String() {eFITSKeywords.ORIGIN, cFITSKeywords.GetString(DB.Origin)})
-                        CustomElement.Add(New String() {eFITSKeywords.TELESCOP, cFITSKeywords.GetString(DB.Telescope)})
-                        CustomElement.Add(New String() {eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB.TelescopeAperture / 1000.0)})
-                        CustomElement.Add(New String() {eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB.TelescopeFocalLength / 1000.0)})
-                        CustomElement.Add(New String() {eFITSKeywords.INSTRUME, cFITSKeywords.GetString(UsedCameraId.ToString)})
-                        CustomElement.Add(New String() {eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W)})
-                        CustomElement.Add(New String() {eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H)})
-                        CustomElement.Add(New String() {eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10)})                'calculated from the image data as ROI may be set ...
-                        CustomElement.Add(New String() {eFITSKeywords.PLATESZ2, cFITSKeywords.GetDouble(PLATESZ2 / 10)})                'calculated from the image data as ROI may be set ...
-                        CustomElement.Add(New String() {eFITSKeywords.FOV1, cFITSKeywords.GetDouble(FOV1)})
-                        CustomElement.Add(New String() {eFITSKeywords.FOV2, cFITSKeywords.GetDouble(FOV2)})
-                        CustomElement.Add(New String() {eFITSKeywords.COLORTYP, "0"})                                                   '<- check
+                    CustomElement.Add(New String() {eFITSKeywords.AUTHOR, cFITSKeywords.GetString(DB.Author)})
+                    CustomElement.Add(New String() {eFITSKeywords.ORIGIN, cFITSKeywords.GetString(DB.Origin)})
+                    CustomElement.Add(New String() {eFITSKeywords.TELESCOP, cFITSKeywords.GetString(DB.Telescope)})
+                    CustomElement.Add(New String() {eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB.TelescopeAperture / 1000.0)})
+                    CustomElement.Add(New String() {eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB.TelescopeFocalLength / 1000.0)})
+                    CustomElement.Add(New String() {eFITSKeywords.INSTRUME, cFITSKeywords.GetString(UsedCameraId.ToString)})
+                    CustomElement.Add(New String() {eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W)})
+                    CustomElement.Add(New String() {eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H)})
+                    CustomElement.Add(New String() {eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10)})                'calculated from the image data as ROI may be set ...
+                    CustomElement.Add(New String() {eFITSKeywords.PLATESZ2, cFITSKeywords.GetDouble(PLATESZ2 / 10)})                'calculated from the image data as ROI may be set ...
+                    CustomElement.Add(New String() {eFITSKeywords.FOV1, cFITSKeywords.GetDouble(FOV1)})
+                    CustomElement.Add(New String() {eFITSKeywords.FOV2, cFITSKeywords.GetDouble(FOV2)})
+                    CustomElement.Add(New String() {eFITSKeywords.COLORTYP, "0"})                                                   '<- check
 
-                        CustomElement.Add(New String() {eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(ObsStart)})
-                        CustomElement.Add(New String() {eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(ObsEnd)})
-                        CustomElement.Add(New String() {eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(ObsStart)})
-                        CustomElement.Add(New String() {eFITSKeywords.TIME_END, cFITSKeywords.GetTime(ObsEnd)})
+                    CustomElement.Add(New String() {eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(ObsStart)})
+                    CustomElement.Add(New String() {eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(ObsEnd)})
+                    CustomElement.Add(New String() {eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(ObsStart)})
+                    CustomElement.Add(New String() {eFITSKeywords.TIME_END, cFITSKeywords.GetTime(ObsEnd)})
 
-                        CustomElement.Add(New String() {eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1))})
-                        CustomElement.Add(New String() {eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
+                    CustomElement.Add(New String() {eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1))})
+                    CustomElement.Add(New String() {eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
 
-                        CustomElement.Add(New String() {eFITSKeywords.IMAGETYP, cFITSKeywords.GetString(DB.ExposureType)})
-                        CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
-                        CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
-                        CustomElement.Add(New String() {eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
-                        CustomElement.Add(New String() {eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
-                        CustomElement.Add(New String() {eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp)})
-                        CustomElement.Add(New String() {eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(ObsStartTemp)})
+                    CustomElement.Add(New String() {eFITSKeywords.IMAGETYP, cFITSKeywords.GetString(DB.ExposureType)})
+                    CustomElement.Add(New String() {eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
+                    CustomElement.Add(New String() {eFITSKeywords.GAIN, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
+                    CustomElement.Add(New String() {eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
+                    CustomElement.Add(New String() {eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
+                    CustomElement.Add(New String() {eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp)})
+                    CustomElement.Add(New String() {eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(ObsStartTemp)})
 
-                        CustomElement.Add(New String() {eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(CamReadOutMode.ToString)})
+                    CustomElement.Add(New String() {eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(CamReadOutMode.ToString)})
 
-                        'Create FITS file
-                        cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
-                        If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
-                        Stopper.Stamp("Store")
-                    End If
+                    'Create FITS file
+                    cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
+                    If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
+                    Stopper.Stamp("Store")
+                End If
 
-                Next LoopCnt
+            Next LoopCnt
 
             'Display timing log
             If DB.Log_Timing = True Then
@@ -360,14 +360,15 @@ Public Class MainForm
             'Release buffer handles
             PinHandler = Nothing
 
-            End If
+        End If
 
-            'Close camera if selected
-            If CloseAtEnd = True Then
+        'Close camera if selected
+        If CloseAtEnd = True Then
             CloseCamera()
         End If
 
         tsslMain.Text = "--IDLE--"
+        DB.RunningFlag = False
 
     End Sub
 
@@ -483,6 +484,10 @@ Public Class MainForm
     End Sub
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        'Load INI
+        If System.IO.File.Exists(DB.MyINI) Then DB.INI.Load(DB.MyINI)
+
         'Load IPP
         Try
             For Each IPPRoot As String In DB.IPPRoots
@@ -499,16 +504,32 @@ Public Class MainForm
                 MsgBox("IPP not found!")
             End If
         Catch ex As Exception
-            MsgBox("Generic error: <" & ex.Message & ">")
+            MsgBox("Generic error on loading IPP: <" & ex.Message & ">")
         End Try
         cFITSWriter.IPPPath = DB.IPP.IPPPath
         cFITSWriter.UseIPPForWriting = True
+
+        'Start WCF
+        'netsh http add urlacl url=http://+:1250/ user=DESKTOP-I7\albusmw
+        DB_ServiceContract = New cDB_ServiceContract(DB)
+        Dim WebServicePort As String = DB.INI.Get("Connections", "WebInterfacePort", "0")
+        If WebServicePort <> "0" Then
+            Dim WebServiceAdr As String = "http://localhost:" & WebServicePort & "/"
+            DB.SetupWCF = New ServiceModel.Web.WebServiceHost(GetType(cDB_ServiceContract), New Uri(WebServiceAdr))
+            DB.serviceBehavior = DB.SetupWCF.Description.Behaviors.Find(Of ServiceModel.Description.ServiceDebugBehavior)
+            DB.serviceBehavior.HttpHelpPageEnabled = True
+            DB.serviceBehavior.IncludeExceptionDetailInFaults = True
+            DB.SetupWCF.Open()
+        End If
+
         'Other objects
         DB.Plotter = New cZEDGraphService(zgcMain)
         pgMain.SelectedObject = DB
+
         'Set toolstrip icons
         tsbCapture.Image = ilMain.Images.Item("Capture.png")
         tsbStopCapture.Image = ilMain.Images.Item("StopCapture.png")
+
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -522,11 +543,11 @@ Public Class MainForm
     End Sub
 
     Private Sub tsbCapture_Click(sender As Object, e As EventArgs) Handles tsbCapture.Click
-        QHYCapture(DB.FileName, True)
+        If CType(sender, System.Windows.Forms.ToolStripButton).Enabled = True Then QHYCapture(DB.FileName, True)
     End Sub
 
     Private Sub tsbStopCapture_Click(sender As Object, e As EventArgs) Handles tsbStopCapture.Click
-        StopFlag = True
+        DB.StopFlag = True
     End Sub
 
     Private Sub BiasCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BiasCaptureToolStripMenuItem.Click
@@ -538,34 +559,34 @@ Public Class MainForm
     End Sub
 
     Private Sub AllReadoutModesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AllReadoutModesToolStripMenuItem.Click
-        StopFlag = False
+        DB.StopFlag = False
         For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
             DB.ReadOutMode = Mode
             pgMain.SelectedObject = DB : DE()
             QHYCapture(DB.FileName & Mode.ToString.Trim, False)
-            If StopFlag = True Then Exit For
+            If DB.StopFlag = True Then Exit For
         Next Mode
         CloseCamera()
     End Sub
 
     Private Sub ExposureTimeSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExposureTimeSeriesToolStripMenuItem.Click
-        StopFlag = False
+        DB.StopFlag = False
         For Each Exposure As Double In New Double() {1, 2, 3, 6, 10, 20, 30, 60, 120, 240, 360, 480, 600}
             DB.ExposureTime = Exposure
             pgMain.SelectedObject = DB : DE()
             QHYCapture("QHY_EXP_" & Exposure.ToString.Trim, False)
-            If StopFlag = True Then Exit For
+            If DB.StopFlag = True Then Exit For
         Next Exposure
         CloseCamera()
     End Sub
 
     Private Sub GainVariationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GainVariationToolStripMenuItem.Click
-        StopFlag = False
+        DB.StopFlag = False
         For Gain As Double = 0 To 200 Step 5
             DB.Gain = Gain
             pgMain.SelectedObject = DB : DE()
             QHYCapture("QHY_GAIN_" & Gain.ValRegIndep("000"), False)
-            If StopFlag = True Then Exit For
+            If DB.StopFlag = True Then Exit For
         Next Gain
         CloseCamera()
     End Sub
@@ -576,6 +597,19 @@ Public Class MainForm
         DB.ObjectDEC = String.Empty
         DB.Telescope = String.Empty
         pgMain.SelectedObject = DB : DE()
+    End Sub
+
+    Private Sub TestWebInterfaceToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestWebInterfaceToolStripMenuItem.Click
+        'Test call for the web interface
+        System.Diagnostics.Process.Start("http://localhost:1250/GetParameterList")
+    End Sub
+
+    Private Sub DB_ServiceContract_ValueChanged() Handles DB_ServiceContract.ValueChanged
+        pgMain.SelectedObject = DB : DE()
+    End Sub
+
+    Private Sub DB_ServiceContract_StartExposure() Handles DB_ServiceContract.StartExposure
+        tsbCapture_Click(tsbCapture, Nothing)
     End Sub
 
 End Class

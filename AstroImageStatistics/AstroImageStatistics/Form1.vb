@@ -3,6 +3,8 @@ Option Strict On
 
 Public Class Form1
 
+    Private LogContent As New System.Text.StringBuilder
+
     Private DB As New cDB
 
     '''<summary>Handle to Intel IPP functions.</summary>
@@ -46,15 +48,20 @@ Public Class Form1
         Dim FITSReader As New cFITSReader
         SingleStatCalc = New AstroNET.Statistics(IPP)
 
-        If DB.AutoClearLog = True Then tbLogOutput.Text = String.Empty
+        If DB.AutoClearLog = True Then
+            LogContent.Clear()
+            UpdateLog
+        End If
 
         'Log header data and detect if NAXIS3 is set
         Log("Loading file <" & FileName & "> ...")
         Log("FITS header:")
         Dim FITSHeaderDict As Dictionary(Of String, Object) = FITSHeader.GetListAsDictionary
+        Dim ContentToPrint As New List(Of String)
         For Each Entry As String In FITSHeaderDict.Keys
-            Log("  " & Entry & "=" & CStr(FITSHeaderDict(Entry)))
+            ContentToPrint.Add("  " & Entry.PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
         Next Entry
+        Log(ContentToPrint)
         If FITSHeader.NAXIS > 2 Then
             Log("!!! FITS file contains debayered data which are NOT displayed correct right now")
         End If
@@ -143,6 +150,7 @@ Public Class Form1
 
     End Sub
 
+    '''<summary>Take an IPP path if there is not yet one set.</summary>
     Private Sub TestIPPPath(ByRef CurrentPath As String, ByVal Path As String)
         If System.IO.Directory.Exists(Path) Then
             If String.IsNullOrEmpty(CurrentPath) = True Then CurrentPath = Path
@@ -153,15 +161,20 @@ Public Class Form1
     '''<param name="FileName">Filename that is plotted (indicated in the header).</param>
     '''<param name="Stats">Statistics data to plot.</param>
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As AstroNET.Statistics.sStatistics)
+        If IsNothing(Stats.BayerHistograms) = True And IsNothing(Stats.MonochromHistogram) = True Then Exit Sub
         Dim Disp As New cZEDGraphForm
         Disp.PlotData(New Double() {1, 2, 3, 4})
         'Plot histogram
         Disp.Plotter.Clear()
-        Disp.Plotter.PlotXvsY("R", Stats.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
-        Disp.Plotter.PlotXvsY("G1", Stats.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
-        Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
-        Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
-        Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+        If IsNothing(Stats.BayerHistograms) = False Then
+            Disp.Plotter.PlotXvsY("R", Stats.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
+            Disp.Plotter.PlotXvsY("G1", Stats.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
+            Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
+            Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
+        End If
+        If IsNothing(Stats.MonochromHistogram) = False Then
+            Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+        End If
         Disp.Plotter.ManuallyScaleXAxis(Stats.MonoStatistics.Min.Key, Stats.MonoStatistics.Max.Key)
         Disp.Plotter.AutoScaleYAxisLog()
         Disp.Plotter.GridOnOff(True, True)
@@ -278,13 +291,29 @@ Public Class Form1
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles Me.Load
-        Dim IPPPath As String = String.Empty
-        TestIPPPath(IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64_win\ipp")
-        TestIPPPath(IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
-        IPP = New cIntelIPP(IPPPath)
-        cFITSReader.IPPPath = IPPPath
+
+        'Get build data
+        Dim BuildDate As String = String.Empty
+        Dim AllResources As String() = System.Reflection.Assembly.GetExecutingAssembly.GetManifestResourceNames
+        For Each Entry As String In AllResources
+            If Entry.EndsWith(".BuildDate.txt") Then
+                BuildDate = " (Build of " & (New System.IO.StreamReader(System.Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream(Entry)).ReadToEnd.Trim).Replace(",", ".") & ")"
+                Exit For
+            End If
+        Next Entry
+        Me.Text &= BuildDate
+
+        'IPP laden
+        DB.MyIPPPath = String.Empty
+        TestIPPPath(DB.MyIPPPath, System.IO.Path.Combine(MyPath, "ipp"))
+        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\redist\intel64_win\ipp")
+        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64_win\ipp")
+        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
+        IPP = New cIntelIPP(DB.MyIPPPath)
+        cFITSReader.IPPPath = DB.MyIPPPath
         DD = New Ato.DragDrop(tbLogOutput, False)
         pgMain.SelectedObject = DB
+
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -296,7 +325,7 @@ Public Class Form1
     End Sub
 
     Private Sub Log(ByVal Text As String)
-        Log(Text, False)
+        Log(Text, False, True)
     End Sub
 
     Private Sub Log(ByVal Text As List(Of String))
@@ -305,30 +334,41 @@ Public Class Form1
 
     Private Sub Log(ByVal Indent As String, ByVal Text() As String)
         For Each Line As String In Text
-            Log(Indent & Line, False)
+            Log(Indent & Line, False, False)
         Next Line
+        UpdateLog()
     End Sub
 
     Private Sub Log(ByVal Text() As String)
         For Each Line As String In Text
-            Log(Line, False)
+            Log(Line, False, False)
         Next Line
+        UpdateLog()
     End Sub
 
-    Private Sub Log(ByVal Text As String, ByVal LogInStatus As Boolean)
+    Private Sub Log(ByVal Text As String, ByVal LogInStatus As Boolean, ByVal AutoUpdate As Boolean)
         Text = Format(Now, "HH.mm.ss:fff") & "|" & Text
-        With tbLogOutput
-            If .Text.Length = 0 Then
-                .Text = Text
+        With LogContent
+            If .Length = 0 Then
+                .Append(Text)
             Else
-                .Text &= System.Environment.NewLine & Text
+                .Append(System.Environment.NewLine & Text)
             End If
-            .SelectionStart = .Text.Length - 1
-            .SelectionLength = 0
-            .ScrollToCaret()
+            If AutoUpdate = True Then UpdateLog()
             If LogInStatus = True Then tsslMain.Text = Text
         End With
         DE()
+    End Sub
+
+    Private Sub UpdateLog()
+        With tbLogOutput
+            .Text = LogContent.ToString
+            If .Text.Length > 0 Then
+                .SelectionStart = .Text.Length - 1
+                .SelectionLength = 0
+                .ScrollToCaret()
+            End If
+        End With
     End Sub
 
     Private Sub DE()
@@ -453,10 +493,6 @@ Public Class Form1
         Next Idx
     End Sub
 
-    Private Sub ResetStackingToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ResetStackingToolStripMenuItem.Click
-        StackingStatistics = Nothing
-    End Sub
-
     Private Sub PlotStatisticsVsGainToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PlotStatisticsVsGainToolStripMenuItem.Click
         PlotStatistics(LastFile, StatVsGain)
     End Sub
@@ -467,6 +503,76 @@ Public Class Form1
 
     Private Sub TranslateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AfiineTranslateToolStripMenuItem.Click
         IntelIPP_NewCode.Translate("C:\Users\albus\Dropbox\Astro\!Bilder\Test-Daten\Debayer\Stack_16bits_936frames_152s.fits")
+    End Sub
+
+    Private Sub StoreStatisticsEXCELFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StoreStatisticsEXCELFileToolStripMenuItem.Click
+
+        Dim AddHisto As Boolean = True
+
+        Using workbook As New ClosedXML.Excel.XLWorkbook
+
+            Dim XY As New List(Of Object())
+
+            '1.) Histogram
+            If AddHisto = True Then
+                For Each Key As Long In LastStat.MonochromHistogram.Keys
+                    Dim Values As New List(Of Object)
+                    Values.Add(Key)
+                    Values.Add(LastStat.MonochromHistogram(Key))
+                    If LastStat.BayerHistograms(0, 0).ContainsKey(Key) Then Values.Add(LastStat.BayerHistograms(0, 0)(Key)) Else Values.Add(String.Empty)
+                    If LastStat.BayerHistograms(0, 1).ContainsKey(Key) Then Values.Add(LastStat.BayerHistograms(0, 1)(Key)) Else Values.Add(String.Empty)
+                    If LastStat.BayerHistograms(1, 0).ContainsKey(Key) Then Values.Add(LastStat.BayerHistograms(1, 0)(Key)) Else Values.Add(String.Empty)
+                    If LastStat.BayerHistograms(1, 1).ContainsKey(Key) Then Values.Add(LastStat.BayerHistograms(1, 1)(Key)) Else Values.Add(String.Empty)
+                    XY.Add(Values.ToArray)
+                Next Key
+                Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
+                worksheet.Cell(1, 1).InsertData(New List(Of String)({"Pixel value", "Count Mono", "Count Bayer_0_0", "Count Bayer_0_1", "Count Bayer_1_0", "Count Bayer_1_1"}), True)
+                worksheet.Cell(2, 1).InsertData(XY)
+                For Each col In worksheet.ColumnsUsed
+                    col.AdjustToContents()
+                Next col
+            End If
+
+            '2.) Row and column
+            If IsNothing(StatPerRow) = False Then
+                XY.Clear()
+                For Idx As Integer = 0 To StatPerRow.GetUpperBound(0)
+                    With StatPerRow(Idx)
+                        XY.Add(New Object() {Idx + 1, .Minimum, .Mean, .Maximum, .Sigma})
+                    End With
+                Next Idx
+                Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Row Statistics")
+                worksheet.Cell(1, 1).InsertData(New List(Of String)({"Row #", "Min", "Mean", "Max", "Sigma"}), True)
+                worksheet.Cell(2, 1).InsertData(XY)
+                For Each col In worksheet.ColumnsUsed
+                    col.AdjustToContents()
+                Next col
+            End If
+            If IsNothing(StatPerCol) = False Then
+                XY.Clear()
+                For Idx As Integer = 0 To StatPerCol.GetUpperBound(0)
+                    With StatPerCol(Idx)
+                        XY.Add(New Object() {Idx + 1, .Minimum, .Mean, .Maximum, .Sigma})
+                    End With
+                Next Idx
+                Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Column Statistics")
+                worksheet.Cell(1, 1).InsertData(New List(Of String)({"Column #", "Min", "Mean", "Max", "Sigma"}), True)
+                worksheet.Cell(2, 1).InsertData(XY)
+                For Each col In worksheet.ColumnsUsed
+                    col.AdjustToContents()
+                Next col
+            End If
+
+            '3.) Save and open
+            Dim FileToGenerate As String = IO.Path.Combine(MyPath, "AstroImageStatistics.xlsx")
+            workbook.SaveAs(FileToGenerate)
+            Process.Start(FileToGenerate)
+        End Using
+
+    End Sub
+
+    Private Sub ResetStackingToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ResetStackingToolStripMenuItem1.Click
+        StackingStatistics = Nothing
     End Sub
 
 End Class

@@ -70,6 +70,9 @@
     <Compile Include="..\..\..\src\atomics\Generics.vb">
       <Link>Generics.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\INI_IO.vb">
+      <Link>INI_IO.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
       <Link>ZedGraphService.vb</Link>
     </Compile>
@@ -80,10 +83,14 @@
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="WCF.vb" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activation" />
+    <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="ZedGraph">
       <HintPath>..\..\..\src\bin\ZedGraph.dll</HintPath>

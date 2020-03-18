@@ -29,11 +29,14 @@ Partial Class Form1
         Me.tsmiOpenLastFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.StoreStatisticsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreStackingResultToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveMeanFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.SumImageDoubleToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StdDevImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MaxMinInt32ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ResetStackingToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -44,8 +47,6 @@ Partial Class Form1
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.AfiineTranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ResetStackingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
@@ -58,7 +59,7 @@ Partial Class Form1
         'MenuStrip1
         '
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.TestCodeToolStripMenuItem, Me.OptionsToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.TestCodeToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
@@ -68,7 +69,7 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem2, Me.StoreStackingResultToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.StoreStackingResultToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -98,9 +99,15 @@ Partial Class Form1
         Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
         Me.ToolStripMenuItem2.Size = New System.Drawing.Size(241, 6)
         '
+        'StoreStatisticsEXCELFileToolStripMenuItem
+        '
+        Me.StoreStatisticsEXCELFileToolStripMenuItem.Name = "StoreStatisticsEXCELFileToolStripMenuItem"
+        Me.StoreStatisticsEXCELFileToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.StoreStatisticsEXCELFileToolStripMenuItem.Text = "Store statistics EXCEL file"
+        '
         'StoreStackingResultToolStripMenuItem
         '
-        Me.StoreStackingResultToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSaveMeanFile, Me.SumImageDoubleToolStripMenuItem, Me.StdDevImageToolStripMenuItem, Me.MaxMinInt32ToolStripMenuItem})
+        Me.StoreStackingResultToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSaveMeanFile, Me.SumImageDoubleToolStripMenuItem, Me.StdDevImageToolStripMenuItem, Me.MaxMinInt32ToolStripMenuItem, Me.ToolStripMenuItem3, Me.ResetStackingToolStripMenuItem1})
         Me.StoreStackingResultToolStripMenuItem.Name = "StoreStackingResultToolStripMenuItem"
         Me.StoreStackingResultToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
         Me.StoreStackingResultToolStripMenuItem.Text = "Store stacking result"
@@ -128,6 +135,17 @@ Partial Class Form1
         Me.MaxMinInt32ToolStripMenuItem.Name = "MaxMinInt32ToolStripMenuItem"
         Me.MaxMinInt32ToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
         Me.MaxMinInt32ToolStripMenuItem.Text = "Max-Min [Int32]"
+        '
+        'ToolStripMenuItem3
+        '
+        Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(180, 6)
+        '
+        'ResetStackingToolStripMenuItem1
+        '
+        Me.ResetStackingToolStripMenuItem1.Name = "ResetStackingToolStripMenuItem1"
+        Me.ResetStackingToolStripMenuItem1.Size = New System.Drawing.Size(183, 22)
+        Me.ResetStackingToolStripMenuItem1.Text = "Reset stacking"
         '
         'ToolStripMenuItem1
         '
@@ -175,33 +193,20 @@ Partial Class Form1
         'RemoveOverscanToolStripMenuItem
         '
         Me.RemoveOverscanToolStripMenuItem.Name = "RemoveOverscanToolStripMenuItem"
-        Me.RemoveOverscanToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RemoveOverscanToolStripMenuItem.Size = New System.Drawing.Size(167, 22)
         Me.RemoveOverscanToolStripMenuItem.Text = "Remove overscan"
         '
         'WriteTestDataToolStripMenuItem1
         '
         Me.WriteTestDataToolStripMenuItem1.Name = "WriteTestDataToolStripMenuItem1"
-        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
+        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(167, 22)
         Me.WriteTestDataToolStripMenuItem1.Text = "Write test data"
         '
         'AfiineTranslateToolStripMenuItem
         '
         Me.AfiineTranslateToolStripMenuItem.Name = "AfiineTranslateToolStripMenuItem"
-        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(167, 22)
         Me.AfiineTranslateToolStripMenuItem.Text = "Afiine translate"
-        '
-        'OptionsToolStripMenuItem
-        '
-        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ResetStackingToolStripMenuItem})
-        Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
-        Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 22)
-        Me.OptionsToolStripMenuItem.Text = "Options"
-        '
-        'ResetStackingToolStripMenuItem
-        '
-        Me.ResetStackingToolStripMenuItem.Name = "ResetStackingToolStripMenuItem"
-        Me.ResetStackingToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.ResetStackingToolStripMenuItem.Text = "Reset stacking"
         '
         'ofdMain
         '
@@ -259,7 +264,7 @@ Partial Class Form1
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "Form1"
-        Me.Text = "Astro Image Statistics"
+        Me.Text = "Astro Image Statistics Version 0.2"
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
         Me.StatusStrip1.ResumeLayout(False)
@@ -282,7 +287,6 @@ Partial Class Form1
     Friend WithEvents RemoveOverscanToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ExitToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents OpenEXELocationToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents OptionsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents WriteTestDataToolStripMenuItem1 As ToolStripMenuItem
     Friend WithEvents StoreStackingResultToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiSaveMeanFile As ToolStripMenuItem
@@ -292,9 +296,11 @@ Partial Class Form1
     Friend WithEvents MaxMinInt32ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents SpecialAnalysisToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents RowAndColumnStatisticsToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents ResetStackingToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents PlotStatisticsVsGainToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents pgMain As PropertyGrid
     Friend WithEvents ReplotStatisticsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents AfiineTranslateToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents StoreStatisticsEXCELFileToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem3 As ToolStripSeparator
+    Friend WithEvents ResetStackingToolStripMenuItem1 As ToolStripMenuItem
 End Class

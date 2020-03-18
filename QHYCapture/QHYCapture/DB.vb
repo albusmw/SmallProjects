@@ -18,19 +18,37 @@ End Enum
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
-    Const Cat1 As String = "1. Exposure"
-    Const Cat2 As String = "2. Image storage"
-    Const Cat3 As String = "3. Imaging hardware"
-    Const Cat4 As String = "4. Object description"
-    Const Cat5 As String = "5. Debug and logging"
-
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property MyINI As String = System.IO.Path.Combine(New String() {MyPath, "Config.INI"})
+
+    '''<summary>INI access object.</summary>
+    Public INI As New Ato.cINI_IO
+
+    '''<summary>Flag that indicates the sequence is running.</summary>
+    <ComponentModel.Browsable(False)>
+    Public Property RunningFlag As Boolean = False
+
+    '''<summary>Flag that indicates to halt the capture sequence.</summary>
+    <ComponentModel.Browsable(False)>
+    Public Property StopFlag As Boolean = False
+
+    'WCF
+    Public SetupWCF As ServiceModel.Web.WebServiceHost
+    Public serviceBehavior As ServiceModel.Description.ServiceDebugBehavior
 
     Public IPPRoots As String() = {"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64\ipp", "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp\"}
     Public IPP As cIntelIPP
 
     Public Plotter As cZEDGraphService
+
+    Const Cat1 As String = "1. Exposure"
+    Const Cat2 As String = "2. Image storage"
+    Const Cat3 As String = "3. Imaging hardware"
+    Const Cat4 As String = "4. Object description"
+    Const Cat5 As String = "5. Debug and logging"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("1. Exposure type")>
@@ -62,7 +80,8 @@ Public Class cDB
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("6. Target T - enter <-100 for do-not-use")>
+    <ComponentModel.DisplayName("6. Target Temp")>
+    <ComponentModel.Description("Enter <-100 for do-not-use")>
     Public Property TargetTemp As Double = -300
 
     <ComponentModel.Category(Cat1)>
@@ -71,7 +90,12 @@ Public Class cDB
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("8. # of captures")>
+    <ComponentModel.DisplayName("8. Remove overscan?")>
+    <ComponentModel.Description("Remove overscan area")>
+    Public Property RemoveOverscan As Boolean = False
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("9. # of captures")>
     Public Property CaptureCount As Integer = 1
 
     <ComponentModel.Category(Cat2)>
@@ -137,8 +161,5 @@ Public Class cDB
     <ComponentModel.Category(Cat5)>
     <ComponentModel.DisplayName("2. Log timing?")>
     Public Property Log_Timing As Boolean = False
-
-
-    Public Property RemoveOverscan As Boolean = False
 
 End Class

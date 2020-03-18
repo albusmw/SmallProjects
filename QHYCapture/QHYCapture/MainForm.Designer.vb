@@ -34,33 +34,34 @@ Partial Class MainForm
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TestWebInterfaceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RunCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AllReadoutModesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExposureTimeSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GainVariationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PresetsToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NoRealObjectToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExperimentalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DMatrixCutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BiasCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
-        Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsbCapture = New System.Windows.Forms.ToolStripButton()
         Me.tsbStopCapture = New System.Windows.Forms.ToolStripButton()
         Me.ilMain = New System.Windows.Forms.ImageList(Me.components)
-        Me.PresetsToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.NoRealObjectToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
+        Me.tsMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
         Me.scMain.SuspendLayout()
-        Me.tsMain.SuspendLayout()
         Me.SuspendLayout()
         '
         'pgMain
@@ -69,7 +70,7 @@ Partial Class MainForm
             Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.pgMain.Location = New System.Drawing.Point(12, 65)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(281, 761)
+        Me.pgMain.Size = New System.Drawing.Size(362, 761)
         Me.pgMain.TabIndex = 0
         Me.pgMain.ToolbarVisible = False
         '
@@ -112,7 +113,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -120,19 +121,25 @@ Partial Class MainForm
         'ExplorerHereToolStripMenuItem
         '
         Me.ExplorerHereToolStripMenuItem.Name = "ExplorerHereToolStripMenuItem"
-        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(143, 22)
+        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.ExplorerHereToolStripMenuItem.Text = "Explorer here"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(140, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(165, 6)
         '
         'ExitToolStripMenuItem
         '
         Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(143, 22)
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
+        '
+        'TestWebInterfaceToolStripMenuItem
+        '
+        Me.TestWebInterfaceToolStripMenuItem.Name = "TestWebInterfaceToolStripMenuItem"
+        Me.TestWebInterfaceToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.TestWebInterfaceToolStripMenuItem.Text = "Test web interface"
         '
         'CaptureToolStripMenuItem
         '
@@ -144,14 +151,14 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'SeriesToolStripMenuItem
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -171,6 +178,19 @@ Partial Class MainForm
         Me.GainVariationToolStripMenuItem.Name = "GainVariationToolStripMenuItem"
         Me.GainVariationToolStripMenuItem.Size = New System.Drawing.Size(181, 22)
         Me.GainVariationToolStripMenuItem.Text = "Gain variation"
+        '
+        'PresetsToolStripMenuItem1
+        '
+        Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
+        Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
+        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(138, 22)
+        Me.PresetsToolStripMenuItem1.Text = "Presets"
+        '
+        'NoRealObjectToolStripMenuItem
+        '
+        Me.NoRealObjectToolStripMenuItem.Name = "NoRealObjectToolStripMenuItem"
+        Me.NoRealObjectToolStripMenuItem.Size = New System.Drawing.Size(165, 22)
+        Me.NoRealObjectToolStripMenuItem.Text = "Camera-only test"
         '
         'ExperimentalToolStripMenuItem
         '
@@ -208,28 +228,8 @@ Partial Class MainForm
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(1089, 380)
+        Me.tbLogOutput.Size = New System.Drawing.Size(1008, 294)
         Me.tbLogOutput.TabIndex = 3
-        '
-        'scMain
-        '
-        Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.scMain.Location = New System.Drawing.Point(299, 65)
-        Me.scMain.Name = "scMain"
-        Me.scMain.Orientation = System.Windows.Forms.Orientation.Horizontal
-        '
-        'scMain.Panel1
-        '
-        Me.scMain.Panel1.Controls.Add(Me.zgcMain)
-        '
-        'scMain.Panel2
-        '
-        Me.scMain.Panel2.Controls.Add(Me.tbLogOutput)
-        Me.scMain.Size = New System.Drawing.Size(1095, 761)
-        Me.scMain.SplitterDistance = 371
-        Me.scMain.TabIndex = 4
         '
         'zgcMain
         '
@@ -245,7 +245,7 @@ Partial Class MainForm
         Me.zgcMain.ScrollMinX = 0R
         Me.zgcMain.ScrollMinY = 0R
         Me.zgcMain.ScrollMinY2 = 0R
-        Me.zgcMain.Size = New System.Drawing.Size(1089, 365)
+        Me.zgcMain.Size = New System.Drawing.Size(1008, 365)
         Me.zgcMain.TabIndex = 0
         '
         'tSetTemp
@@ -287,18 +287,25 @@ Partial Class MainForm
         Me.ilMain.Images.SetKeyName(0, "Capture.png")
         Me.ilMain.Images.SetKeyName(1, "StopCapture.png")
         '
-        'PresetsToolStripMenuItem1
+        'scMain
         '
-        Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
-        Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
-        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
-        Me.PresetsToolStripMenuItem1.Text = "Presets"
+        Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.scMain.Location = New System.Drawing.Point(380, 65)
+        Me.scMain.Name = "scMain"
+        Me.scMain.Orientation = System.Windows.Forms.Orientation.Horizontal
         '
-        'NoRealObjectToolStripMenuItem
+        'scMain.Panel1
         '
-        Me.NoRealObjectToolStripMenuItem.Name = "NoRealObjectToolStripMenuItem"
-        Me.NoRealObjectToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.NoRealObjectToolStripMenuItem.Text = "Camera-only test"
+        Me.scMain.Panel1.Controls.Add(Me.zgcMain)
+        '
+        'scMain.Panel2
+        '
+        Me.scMain.Panel2.Controls.Add(Me.tbLogOutput)
+        Me.scMain.Size = New System.Drawing.Size(1014, 761)
+        Me.scMain.SplitterDistance = 371
+        Me.scMain.TabIndex = 4
         '
         'MainForm
         '
@@ -317,13 +324,13 @@ Partial Class MainForm
         Me.ssMain.PerformLayout()
         Me.msMain.ResumeLayout(False)
         Me.msMain.PerformLayout()
+        Me.tsMain.ResumeLayout(False)
+        Me.tsMain.PerformLayout()
         Me.scMain.Panel1.ResumeLayout(False)
         Me.scMain.Panel2.ResumeLayout(False)
         Me.scMain.Panel2.PerformLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
-        Me.tsMain.ResumeLayout(False)
-        Me.tsMain.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -340,7 +347,6 @@ Partial Class MainForm
     Friend WithEvents RunCaptureToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents tsslMain As Windows.Forms.ToolStripStatusLabel
     Friend WithEvents tbLogOutput As Windows.Forms.TextBox
-    Friend WithEvents scMain As Windows.Forms.SplitContainer
     Friend WithEvents zgcMain As ZedGraph.ZedGraphControl
     Friend WithEvents ExperimentalToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents DMatrixCutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
@@ -359,4 +365,6 @@ Partial Class MainForm
     Friend WithEvents GainVariationToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents PresetsToolStripMenuItem1 As Windows.Forms.ToolStripMenuItem
     Friend WithEvents NoRealObjectToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents TestWebInterfaceToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents scMain As Windows.Forms.SplitContainer
 End Class

@@ -18,7 +18,16 @@ Public Class cDB
     <ComponentModel.DisplayName("Use IPP?")>
     Public Property UseIPP As Boolean = True
 
+    <ComponentModel.DisplayName("Used IPP path")>
+    Public ReadOnly Property IPPPath As String
+        Get
+            Return MyIPPPath
+        End Get
+    End Property
+
     <ComponentModel.DisplayName("Stacking?")>
     Public Property Stacking As Boolean = False
+
+    Public MyIPPPath As String = String.Empty
 
 End Class
