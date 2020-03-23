@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class MainForm
     Inherits System.Windows.Forms.Form
 
     'Das Formular überschreibt den Löschvorgang, um die Komponentenliste zu bereinigen.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class MainForm
     'Hinweis: Die folgende Prozedur ist für den Windows Form-Designer erforderlich.
     'Das Bearbeiten ist mit dem Windows Form-Designer möglich.  
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
@@ -56,9 +56,9 @@ Partial Class MainForm
         Me.tsbStopCapture = New System.Windows.Forms.ToolStripButton()
         Me.ilMain = New System.Windows.Forms.ImageList(Me.components)
         Me.scMain = New System.Windows.Forms.SplitContainer()
-        Me.FocusWindowToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.scTextBox = New System.Windows.Forms.SplitContainer()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
+        Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -202,7 +202,7 @@ Partial Class MainForm
         '
         'ExperimentalToolStripMenuItem
         '
-        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem, Me.FocusWindowToolStripMenuItem})
+        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem})
         Me.ExperimentalToolStripMenuItem.Name = "ExperimentalToolStripMenuItem"
         Me.ExperimentalToolStripMenuItem.Size = New System.Drawing.Size(88, 20)
         Me.ExperimentalToolStripMenuItem.Text = "Experimental"
@@ -215,7 +215,7 @@ Partial Class MainForm
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -223,13 +223,13 @@ Partial Class MainForm
         'BiasCaptureToolStripMenuItem
         '
         Me.BiasCaptureToolStripMenuItem.Name = "BiasCaptureToolStripMenuItem"
-        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
         Me.BiasCaptureToolStripMenuItem.Text = "Bias capture"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'tbStatistics
@@ -319,12 +319,6 @@ Partial Class MainForm
         Me.scMain.SplitterDistance = 371
         Me.scMain.TabIndex = 4
         '
-        'FocusWindowToolStripMenuItem
-        '
-        Me.FocusWindowToolStripMenuItem.Name = "FocusWindowToolStripMenuItem"
-        Me.FocusWindowToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.FocusWindowToolStripMenuItem.Text = "Focus window"
-        '
         'scTextBox
         '
         Me.scTextBox.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -355,6 +349,12 @@ Partial Class MainForm
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
         Me.tbLogOutput.Size = New System.Drawing.Size(1008, 135)
         Me.tbLogOutput.TabIndex = 4
+        '
+        'CenterROIToolStripMenuItem
+        '
+        Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'MainForm
         '
@@ -422,7 +422,7 @@ Partial Class MainForm
     Friend WithEvents TestWebInterfaceToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents scMain As Windows.Forms.SplitContainer
     Friend WithEvents FastLiveModeToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-    Friend WithEvents FocusWindowToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents scTextBox As Windows.Forms.SplitContainer
     Friend WithEvents tbLogOutput As Windows.Forms.TextBox
+    Friend WithEvents CenterROIToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 End Class

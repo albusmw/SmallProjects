@@ -8,6 +8,15 @@ Public Structure sRect_UInt
     Dim H As UInteger
 End Structure
 
+'''<summary>Filter as to be send as ASCII string.</summary>
+Public Enum eFilter As Byte
+    L = 0
+    R = 1
+    G = 2
+    B = 3
+    H_alpha = 4
+End Enum
+
 Public Enum eStreamMode As UInteger
     SingleFrame = 0
     LiveFrame = 1
@@ -129,6 +138,10 @@ Public Class cDB
     <ComponentModel.DisplayName("9. # of captures")>
     Public Property CaptureCount As Integer = 1
 
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("10. Filter slot")>
+    Public Property FilerSlot As eFilter = eFilter.H_alpha
+
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("1. GUID of the sequence")>
     <ComponentModel.Description("Sequence GUID")>
@@ -166,12 +179,17 @@ Public Class cDB
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("2. Telescope aperture [mm]")>
-    Public Property TelescopeAperture As Double = 130.0
+    Public Property TelescopeAperture As Double = 317.0
 
     '''<summary>Telescope focal length [mm].</summary>
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("3. Telescope focal length [mm]")>
-    Public Property TelescopeFocalLength As Double = 800.0
+    Public Property TelescopeFocalLength As Double = 1676.4
+
+    '''<summary>Telescope focal length [mm].</summary>
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("4. Camera to search")>
+    Public Property CamToUse As String = "QHY600M"
 
     <ComponentModel.Category(Cat4)>
     <ComponentModel.DisplayName("1. Object name")>

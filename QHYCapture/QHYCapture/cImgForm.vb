@@ -24,7 +24,8 @@ Public Class cImgForm
         End If
     End Sub
 
-    Public Function Show() As System.Windows.Forms.PictureBox
+    Public Function Show(ByVal NewTitle As String) As System.Windows.Forms.PictureBox
+        Hoster.Text = NewTitle
         Hoster.Show()
         Return Image
     End Function
