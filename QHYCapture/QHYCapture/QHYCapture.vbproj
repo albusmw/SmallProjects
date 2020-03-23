@@ -58,6 +58,9 @@
     <Compile Include="..\..\..\src\atomics\cIntelIPP.vb">
       <Link>cIntelIPP.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\cLockBitmap.vb">
+      <Link>cLockBitmap.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cStatMultiThread.vb">
       <Link>cStatMultiThread.vb</Link>
     </Compile>
@@ -76,7 +79,12 @@
     <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
       <Link>ZedGraphService.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\GUIElements\PictureBoxEx.vb">
+      <Link>PictureBoxEx.vb</Link>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DB.vb" />
+    <Compile Include="cImgForm.vb" />
     <Compile Include="MainForm.Designer.vb">
       <DependentUpon>MainForm.vb</DependentUpon>
     </Compile>

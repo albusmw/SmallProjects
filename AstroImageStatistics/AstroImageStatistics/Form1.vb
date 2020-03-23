@@ -167,13 +167,13 @@ Public Class Form1
         'Plot histogram
         Disp.Plotter.Clear()
         If IsNothing(Stats.BayerHistograms) = False Then
-            Disp.Plotter.PlotXvsY("R", Stats.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
-            Disp.Plotter.PlotXvsY("G1", Stats.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
-            Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
-            Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
+            Disp.Plotter.PlotXvsY("R", Stats.BayerHistograms(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, 1))
+            Disp.Plotter.PlotXvsY("G1", Stats.BayerHistograms(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
+            Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
+            Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, 1))
         End If
         If IsNothing(Stats.MonochromHistogram) = False Then
-            Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+            Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram, 1, New cZEDGraphService.sGraphStyle(Color.Black, 1))
         End If
         Disp.Plotter.ManuallyScaleXAxis(Stats.MonoStatistics.Min.Key, Stats.MonoStatistics.Max.Key)
         Disp.Plotter.AutoScaleYAxisLog()

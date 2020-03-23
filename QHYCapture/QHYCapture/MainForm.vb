@@ -167,11 +167,22 @@ Public Class MainForm
             Dim ReadResolution As UInteger = 16
             Dim ChannelToRead As UInteger = 0
 
+            'Calculate ROI parameters passed to camera
+            Dim ROI As New System.Drawing.Rectangle
+            With ROI
+                .X = CInt(DB.ROI_X)
+                .Y = CInt(DB.ROI_Y)
+                .Width = CInt(DB.ROI_Width)
+                If (DB.ROI_X + DB.ROI_Width > Chip_Pixel_W) Or (.Width = 0) Then .Width = CInt(Chip_Pixel_W - DB.ROI_X)
+                .Height = CInt(DB.ROI_Height)
+                If (DB.ROI_Y + DB.ROI_Height > Chip_Pixel_H) Or (.Height = 0) Then .Height = CInt(Chip_Pixel_H - DB.ROI_Y)
+            End With
+
             Stopper.Stamp("Prepare buffers")
 
             'Set exposure parameters
             CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, DB.Binning, DB.Binning))
-            CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, 0, 0, Chip_Pixel_W \ DB.Binning, Chip_Pixel_H \ DB.Binning))
+            CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, CUInt(ROI.X), CUInt(ROI.Y), CUInt(ROI.Width \ DB.Binning), CUInt(ROI.Height \ DB.Binning)))
             CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, ReadResolution))
             CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
             CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
@@ -203,12 +214,17 @@ Public Class MainForm
                 'Show status
                 tsslMain.Text = "Taking capture " & LoopCnt.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
 
-                'Start expose
+                'Start expose (single or live frame mode)
                 Dim ObsStart As DateTime = Now
                 Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                 Stopper.Start()
-                CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
-                Stopper.Stamp("ExpQHYCCDSingleFrame")
+                If DB.StreamMode = eStreamMode.SingleFrame Then
+                    CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
+                    Stopper.Stamp("ExpQHYCCDSingleFrame")
+                Else
+                    CallOK("BeginQHYCCDLive", QHY.QHYCamera.BeginQHYCCDLive(CamHandle))
+                    Stopper.Stamp("BeginQHYCCDLive")
+                End If
 
                 'Idle exposure time
                 If DB.ExposureTime > 1 Then
@@ -240,41 +256,80 @@ Public Class MainForm
                 End If
 
                 'Read image data from camera - ALWAYS WITH OVERSCAN
-                Dim Capture_W As UInteger = 0 : Dim Capture_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
-                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(CamHandle, Capture_W, Capture_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
-                Dim BytesToTransfer_calculated As Long = Capture_W * Capture_H * CInt(CaptureBits / 8)
+                Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
+                If DB.StreamMode = eStreamMode.SingleFrame Then
+                    CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                Else
+                    Dim LiveModeReady As UInteger = 123456
+                    Dim LiveModePollCount As Integer = 0
+                    Do
+                        LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
+                        LiveModePollCount += 1
+                    Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or DB.StopFlag = True
+                End If
+                Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / 8)
                 Log("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
-                Log("Loaded image with " & Capture_W.ValRegIndep & "x" & Capture_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
+                Log("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
                 Stopper.Stamp("GetQHYCCDSingleFrame")
 
                 Dim ObsEnd As DateTime = Now
                 'Remove overscan
                 Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
                 If DB.RemoveOverscan = False Then
-                    SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))      'only convert flat byte buffer to UInt16 matrix data
+                    SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
                 Else
                     Dim Overscan_X As UInteger = EffArea.X \ DB.Binning
                     Dim Overscan_Y As UInteger = EffArea.Y \ DB.Binning
-                    Dim TempBuffer(,) As UInt16 = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))                        'convert flat to UInt16 matrix in a temporary buffer
-                    DB.IPP.Copy(TempBuffer, SingleStatCalc.DataProcessor_UInt16.ImageData, 0, CInt(Overscan_X - 1), CInt(Capture_H - Overscan_Y), CInt(Capture_W - Overscan_X))
+                    Dim TempBuffer(,) As UInt16 = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))                        'convert flat to UInt16 matrix in a temporary buffer
+                    DB.IPP.Copy(TempBuffer, SingleStatCalc.DataProcessor_UInt16.ImageData, 0, CInt(Overscan_X - 1), CInt(Captured_H - Overscan_Y), CInt(Captured_W - Overscan_X))
                 End If
                 Stopper.Stamp("ChangeAspect")
 
                 'Run statistics
                 Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat)
-                Log("Capture #" & LoopCnt.ValRegIndep & " statistics:")
-                Log(SingleStat.StatisticsReport)
+
+                'Display statistics
+                If DB.Log_ClearStat = True Then DB.Log_Statistics.Clear()
+                LogStatistics("Capture #" & LoopCnt.ValRegIndep & " statistics:")
+                For Each Line As String In SingleStat.StatisticsReport
+                    LogStatistics(Line)
+                Next Line
+                'on loop mode and statistics clear, display total statistics
+                If DB.CaptureCount > 1 And DB.Log_ClearStat = True Then
+                    LogStatistics("Total statistics:")
+                    For Each Line As String In LoopStat.StatisticsReport
+                        LogStatistics(Line)
+                    Next Line
+                End If
+
                 Stopper.Stamp("Statistics")
 
                 'Plot histogram
+                Dim PlotCurrentStatistics As Boolean = True
+                Dim PlotMeanStatistics As Boolean = True
+                Dim NormFactor As Double = LoopCnt
+                Dim CurveMode As cZEDGraphService.eCurveMode = cZEDGraphService.eCurveMode.LinesAndPoints
+                Dim CurrentCurveWidth As Integer = 1
+                Dim MeanCurveWidth As Integer = 2
                 If IsNothing(DB.Plotter) = True Then DB.Plotter = New cZEDGraphService(zgcMain)
                 DB.Plotter.Clear()
-                DB.Plotter.PlotXvsY("R", LoopStat.BayerHistograms(0, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, 1))
-                DB.Plotter.PlotXvsY("G1", LoopStat.BayerHistograms(0, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, 1))
-                DB.Plotter.PlotXvsY("G2", LoopStat.BayerHistograms(1, 0), New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, 1))
-                DB.Plotter.PlotXvsY("B", LoopStat.BayerHistograms(1, 1), New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, 1))
-                DB.Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, 1))
+                'Plot mean statistics
+                If DB.CaptureCount > 1 And PlotMeanStatistics = True Then
+                    DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms(0, 0), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
+                    DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms(0, 1), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
+                    DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms(1, 0), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
+                    DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms(1, 1), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
+                    DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram, NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
+                End If
+                'Plot current statistics
+                If PlotCurrentStatistics = True Then
+                    DB.Plotter.PlotXvsY("R", SingleStat.BayerHistograms(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("G1", SingleStat.BayerHistograms(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("G2", SingleStat.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("B", SingleStat.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
+                End If
                 DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
 
                 DB.Plotter.AutoScaleYAxisLog()
@@ -347,7 +402,14 @@ Public Class MainForm
                     Stopper.Stamp("Store")
                 End If
 
+                If DB.StopFlag = True Then Exit For
+
             Next LoopCnt
+
+            'Stop live mode if used
+            If DB.StreamMode = eStreamMode.LiveFrame Then
+                CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(CamHandle))
+            End If
 
             'Display timing log
             If DB.Log_Timing = True Then
@@ -420,7 +482,7 @@ Public Class MainForm
         If ErrorCode = 0 Then
             Return True
         Else
-            Log("########## QHY ERROR on <" & Action & ">: <" & ErrorCode.ValRegIndep & "> #####")
+            Log("########## QHY ERROR on <" & Action & ">: <0x" & Hex(ErrorCode) & "> #####")
             Return False
         End If
     End Function
@@ -453,14 +515,31 @@ Public Class MainForm
         Log(Text, False)
     End Sub
 
+    Private Sub LogStatistics(ByVal Text As String)
+        Text = Format(Now, "HH.mm.ss:fff") & "|" & Text
+        If DB.Log_Statistics.Length = 0 Then
+            DB.Log_Statistics.Append(Text)
+        Else
+            DB.Log_Statistics.Append(System.Environment.NewLine & Text)
+        End If
+        With tbStatistics
+            .Text = DB.Log_Statistics.ToString
+            .SelectionStart = .Text.Length - 1
+            .SelectionLength = 0
+            .ScrollToCaret()
+        End With
+        DE()
+    End Sub
+
     Private Sub Log(ByVal Text As String, ByVal LogInStatus As Boolean)
         Text = Format(Now, "HH.mm.ss:fff") & "|" & Text
+        If DB.Log_Generic.Length = 0 Then
+            DB.Log_Generic.Append(Text)
+        Else
+            DB.Log_Generic.Append(System.Environment.NewLine & Text)
+        End If
         With tbLogOutput
-            If .Text.Length = 0 Then
-                .Text = Text
-            Else
-                .Text &= System.Environment.NewLine & Text
-            End If
+            .Text = DB.Log_Generic.ToString
             .SelectionStart = .Text.Length - 1
             .SelectionLength = 0
             .ScrollToCaret()
@@ -468,6 +547,10 @@ Public Class MainForm
         End With
         DE()
     End Sub
+
+    Private Function TimeStamp() As String
+        Return Format(Now, "HH.mm.ss:fff")
+    End Function
 
     Private Sub EndAction()
         Log("=========================================", False)
@@ -571,7 +654,16 @@ Public Class MainForm
 
     Private Sub ExposureTimeSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExposureTimeSeriesToolStripMenuItem.Click
         DB.StopFlag = False
-        For Each Exposure As Double In New Double() {1, 2, 3, 6, 10, 20, 30, 60, 120, 240, 360, 480, 600}
+        'For lust of all exposure times
+        Dim AllExposureTimes As New Collections.Generic.List(Of Double)
+        For Exp As Integer = 0 To 2
+            For Base As Double = 1 To 9
+                AllExposureTimes.Add(Base * (10 ^ Exp))
+            Next Base
+        Next Exp
+        AllExposureTimes.Sort()
+        'Run series
+        For Each Exposure As Double In AllExposureTimes
             DB.ExposureTime = Exposure
             pgMain.SelectedObject = DB : DE()
             QHYCapture("QHY_EXP_" & Exposure.ToString.Trim, False)
@@ -610,6 +702,42 @@ Public Class MainForm
 
     Private Sub DB_ServiceContract_StartExposure() Handles DB_ServiceContract.StartExposure
         tsbCapture_Click(tsbCapture, Nothing)
+    End Sub
+
+    Private Sub FastLiveModeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FastLiveModeToolStripMenuItem.Click
+        With DB
+            .StreamMode = eStreamMode.LiveFrame
+            .ExposureTime = 0.000001
+            .ROI_Width = 1000
+            .ROI_Height = 1000
+            .CaptureCount = 10000
+            .StoreImage = False
+            .Log_ClearStat = True
+        End With
+        pgMain.SelectedObject = DB : DE()
+    End Sub
+
+    Private Sub FocusWindowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FocusWindowToolStripMenuItem.Click
+        Dim FocusWindow As New cImgForm
+        FocusWindow.Show()
+        Dim OutputImage As New cLockBitmap(20, 20)
+        OutputImage.LockBits()
+        Dim Stride As Integer = OutputImage.BitmapData.Stride
+        Dim BytePerPixel As Integer = OutputImage.ColorBytesPerPixel
+        Dim YOffset As Integer = 0
+        For Y As Integer = 0 To OutputImage.Height - 1
+            Dim BaseOffset As Integer = YOffset
+            For X As Integer = 0 To OutputImage.Width - 1
+                Dim Coloring As Drawing.Color = Drawing.Color.FromArgb(X * 6, Y * 6, X + Y)
+                OutputImage.Pixels(BaseOffset) = Coloring.R
+                OutputImage.Pixels(BaseOffset + 1) = Coloring.G
+                OutputImage.Pixels(BaseOffset + 2) = Coloring.B
+                BaseOffset += BytePerPixel
+            Next X
+            YOffset += Stride
+        Next Y
+        OutputImage.UnlockBits()
+        FocusWindow.Image.Image = OutputImage.BitmapToProcess
     End Sub
 
 End Class

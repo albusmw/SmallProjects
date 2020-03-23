@@ -47,7 +47,8 @@ Partial Class MainForm
         Me.DMatrixCutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BiasCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tbLogOutput = New System.Windows.Forms.TextBox()
+        Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tbStatistics = New System.Windows.Forms.TextBox()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
@@ -55,6 +56,9 @@ Partial Class MainForm
         Me.tsbStopCapture = New System.Windows.Forms.ToolStripButton()
         Me.ilMain = New System.Windows.Forms.ImageList(Me.components)
         Me.scMain = New System.Windows.Forms.SplitContainer()
+        Me.FocusWindowToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.scTextBox = New System.Windows.Forms.SplitContainer()
+        Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -62,6 +66,10 @@ Partial Class MainForm
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
         Me.scMain.SuspendLayout()
+        CType(Me.scTextBox, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scTextBox.Panel1.SuspendLayout()
+        Me.scTextBox.Panel2.SuspendLayout()
+        Me.scTextBox.SuspendLayout()
         Me.SuspendLayout()
         '
         'pgMain
@@ -194,7 +202,7 @@ Partial Class MainForm
         '
         'ExperimentalToolStripMenuItem
         '
-        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem})
+        Me.ExperimentalToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DMatrixCutToolStripMenuItem, Me.FocusWindowToolStripMenuItem})
         Me.ExperimentalToolStripMenuItem.Name = "ExperimentalToolStripMenuItem"
         Me.ExperimentalToolStripMenuItem.Size = New System.Drawing.Size(88, 20)
         Me.ExperimentalToolStripMenuItem.Text = "Experimental"
@@ -202,12 +210,12 @@ Partial Class MainForm
         'DMatrixCutToolStripMenuItem
         '
         Me.DMatrixCutToolStripMenuItem.Name = "DMatrixCutToolStripMenuItem"
-        Me.DMatrixCutToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
+        Me.DMatrixCutToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.DMatrixCutToolStripMenuItem.Text = "2D matrix cut"
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -215,21 +223,25 @@ Partial Class MainForm
         'BiasCaptureToolStripMenuItem
         '
         Me.BiasCaptureToolStripMenuItem.Name = "BiasCaptureToolStripMenuItem"
-        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.BiasCaptureToolStripMenuItem.Text = "Bias capture"
         '
-        'tbLogOutput
+        'FastLiveModeToolStripMenuItem
         '
-        Me.tbLogOutput.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbLogOutput.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.tbLogOutput.Location = New System.Drawing.Point(3, 3)
-        Me.tbLogOutput.Multiline = True
-        Me.tbLogOutput.Name = "tbLogOutput"
-        Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(1008, 294)
-        Me.tbLogOutput.TabIndex = 3
+        Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
+        '
+        'tbStatistics
+        '
+        Me.tbStatistics.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tbStatistics.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.tbStatistics.Location = New System.Drawing.Point(0, 0)
+        Me.tbStatistics.Multiline = True
+        Me.tbStatistics.Name = "tbStatistics"
+        Me.tbStatistics.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.tbStatistics.Size = New System.Drawing.Size(1008, 241)
+        Me.tbStatistics.TabIndex = 3
         '
         'zgcMain
         '
@@ -302,10 +314,47 @@ Partial Class MainForm
         '
         'scMain.Panel2
         '
-        Me.scMain.Panel2.Controls.Add(Me.tbLogOutput)
+        Me.scMain.Panel2.Controls.Add(Me.scTextBox)
         Me.scMain.Size = New System.Drawing.Size(1014, 761)
         Me.scMain.SplitterDistance = 371
         Me.scMain.TabIndex = 4
+        '
+        'FocusWindowToolStripMenuItem
+        '
+        Me.FocusWindowToolStripMenuItem.Name = "FocusWindowToolStripMenuItem"
+        Me.FocusWindowToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FocusWindowToolStripMenuItem.Text = "Focus window"
+        '
+        'scTextBox
+        '
+        Me.scTextBox.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.scTextBox.Location = New System.Drawing.Point(3, 3)
+        Me.scTextBox.Name = "scTextBox"
+        Me.scTextBox.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scTextBox.Panel1
+        '
+        Me.scTextBox.Panel1.Controls.Add(Me.tbStatistics)
+        '
+        'scTextBox.Panel2
+        '
+        Me.scTextBox.Panel2.Controls.Add(Me.tbLogOutput)
+        Me.scTextBox.Size = New System.Drawing.Size(1008, 380)
+        Me.scTextBox.SplitterDistance = 241
+        Me.scTextBox.TabIndex = 4
+        '
+        'tbLogOutput
+        '
+        Me.tbLogOutput.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tbLogOutput.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.tbLogOutput.Location = New System.Drawing.Point(0, 0)
+        Me.tbLogOutput.Multiline = True
+        Me.tbLogOutput.Name = "tbLogOutput"
+        Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.tbLogOutput.Size = New System.Drawing.Size(1008, 135)
+        Me.tbLogOutput.TabIndex = 4
         '
         'MainForm
         '
@@ -328,9 +377,14 @@ Partial Class MainForm
         Me.tsMain.PerformLayout()
         Me.scMain.Panel1.ResumeLayout(False)
         Me.scMain.Panel2.ResumeLayout(False)
-        Me.scMain.Panel2.PerformLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
+        Me.scTextBox.Panel1.ResumeLayout(False)
+        Me.scTextBox.Panel1.PerformLayout()
+        Me.scTextBox.Panel2.ResumeLayout(False)
+        Me.scTextBox.Panel2.PerformLayout()
+        CType(Me.scTextBox, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scTextBox.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -346,7 +400,7 @@ Partial Class MainForm
     Friend WithEvents CaptureToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents RunCaptureToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents tsslMain As Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents tbLogOutput As Windows.Forms.TextBox
+    Friend WithEvents tbStatistics As Windows.Forms.TextBox
     Friend WithEvents zgcMain As ZedGraph.ZedGraphControl
     Friend WithEvents ExperimentalToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents DMatrixCutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
@@ -367,4 +421,8 @@ Partial Class MainForm
     Friend WithEvents NoRealObjectToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents TestWebInterfaceToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents scMain As Windows.Forms.SplitContainer
+    Friend WithEvents FastLiveModeToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents FocusWindowToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents scTextBox As Windows.Forms.SplitContainer
+    Friend WithEvents tbLogOutput As Windows.Forms.TextBox
 End Class

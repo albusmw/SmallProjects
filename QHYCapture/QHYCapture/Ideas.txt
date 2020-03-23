@@ -5,3 +5,5 @@ Ideas:
 - Add exposure counter (running 1/10 ...)
 - Add statistics via horizonal and vertical lines (this I did already in another software - evaluate "Horizontal banding" as described here: https://www.qhyccd.com/index.php?m=content&c=index&a=show&catid=30&id=260)
   DONE IN ImageStatstics software ...
+- In live mode reset statistics and clear log window
+- 2 windows, 1 statistics and 1 log

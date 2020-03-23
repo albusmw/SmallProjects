@@ -8,6 +8,11 @@ Public Structure sRect_UInt
     Dim H As UInteger
 End Structure
 
+Public Enum eStreamMode As UInteger
+    SingleFrame = 0
+    LiveFrame = 1
+End Enum
+
 Public Enum eReadOutMode As UInteger
     Photographic = 0
     HighGain = 1
@@ -23,6 +28,12 @@ Public Class cDB
 
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property MyINI As String = System.IO.Path.Combine(New String() {MyPath, "Config.INI"})
+
+    <ComponentModel.Browsable(False)>
+    Public Log_Statistics As New Text.StringBuilder
+
+    <ComponentModel.Browsable(False)>
+    Public Log_Generic As New Text.StringBuilder
 
     '''<summary>INI access object.</summary>
     Public INI As New Ato.cINI_IO
@@ -61,9 +72,9 @@ Public Class cDB
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("2.1. Strema mode")>
+    <ComponentModel.DisplayName("2.1. Stream mode")>
     <ComponentModel.Description("Photo (0) or Video(1).")>
-    Public Property StreamMode As UInteger = 0
+    Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
     '''<summary>Exposure time [s].</summary>
     <ComponentModel.Category(Cat1)>
@@ -88,6 +99,26 @@ Public Class cDB
     <ComponentModel.DisplayName("7. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
     Public Property Binning As UInteger = 1
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("7.1. ROI - X")>
+    <ComponentModel.Description("ROI X start - ROI without binning")>
+    Public Property ROI_X As UInteger = 0
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("7.2. ROI - Y")>
+    <ComponentModel.Description("ROI Y start - ROI without binning")>
+    Public Property ROI_Y As UInteger = 0
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("7.3. ROI - width")>
+    <ComponentModel.Description("ROI width, 0 for full - width - ROI without binning")>
+    Public Property ROI_Width As UInteger = 0
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("7.4. ROI - height")>
+    <ComponentModel.Description("ROI height, 0 for full - ROI without binning")>
+    Public Property ROI_Height As UInteger = 0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("8. Remove overscan?")>
@@ -161,5 +192,10 @@ Public Class cDB
     <ComponentModel.Category(Cat5)>
     <ComponentModel.DisplayName("2. Log timing?")>
     Public Property Log_Timing As Boolean = False
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("3. Clear statistics log?")>
+    <ComponentModel.Description("Clear statistics log on every measurement")>
+    Public Property Log_ClearStat As Boolean = False
 
 End Class
