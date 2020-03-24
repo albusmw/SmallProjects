@@ -4,8 +4,8 @@ Option Strict On
 Public Structure sRect_UInt
     Dim X As UInteger
     Dim Y As UInteger
-    Dim W As UInteger
-    Dim H As UInteger
+    Dim Width As UInteger
+    Dim Height As UInteger
 End Structure
 
 '''<summary>Filter as to be send as ASCII string.</summary>
@@ -39,9 +39,6 @@ Public Class cDB
     Public ReadOnly Property MyINI As String = System.IO.Path.Combine(New String() {MyPath, "Config.INI"})
 
     <ComponentModel.Browsable(False)>
-    Public Log_Statistics As New Text.StringBuilder
-
-    <ComponentModel.Browsable(False)>
     Public Log_Generic As New Text.StringBuilder
 
     '''<summary>INI access object.</summary>
@@ -64,156 +61,194 @@ Public Class cDB
 
     Public Plotter As cZEDGraphService
 
-    Const Cat1 As String = "1. Exposure"
-    Const Cat2 As String = "2. Image storage"
-    Const Cat3 As String = "3. Imaging hardware"
-    Const Cat4 As String = "4. Object description"
-    Const Cat5 As String = "5. Debug and logging"
+    Const Cat1 As String = "1. Imaging hardware"
+    Const Cat2 As String = "2. Exposure"
+    Const Cat3 As String = "3. Image storage"
+    Const Cat4 As String = "4. Debug and logging"
+
+    '''<summary>Camera to search for.</summary>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   1. Camera to search")>
+    <ComponentModel.Description("Search string for the camera - string must occure in the CameraID.")>
+    <ComponentModel.DefaultValue("QHY600M")>
+    Public Property CamToUse As String = "QHY600M"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("1. Exposure type")>
-    <ComponentModel.Description("Light, Bias, Dark, Flat, or Tricolor.")>
-    Public Property ExposureType As String = "Light Frame"
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("2. Read-out mode")>
+    <ComponentModel.DisplayName("   2. Read-out mode")>
     <ComponentModel.Description("Photographic, high-gain.")>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("2.1. Stream mode")>
+    <ComponentModel.DisplayName("   3. Stream mode")>
     <ComponentModel.Description("Photo (0) or Video(1).")>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
-    '''<summary>Exposure time [s].</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("3. Exposure time [s]")>
-    <ComponentModel.Description("Exposure time [s]")>
-    Public Property ExposureTime As Double = 1.0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("4. Gain")>
-    Public Property Gain As Double = 26.0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("5. Offset")>
-    Public Property Offset As Double = 50.0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("6. Target Temp")>
+    <ComponentModel.DisplayName("   4. Target Temp")>
     <ComponentModel.Description("Enter <-100 for do-not-use")>
+    <ComponentModel.DefaultValue(-300)>
     Public Property TargetTemp As Double = -300
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("7. Binning")>
+    <ComponentModel.DisplayName("   5. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
+    <ComponentModel.DefaultValue(1)>
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("7.1. ROI - X")>
-    <ComponentModel.Description("ROI X start - ROI without binning")>
-    Public Property ROI_X As UInteger = 0
+    <ComponentModel.DisplayName("   6. ROI")>
+    <ComponentModel.Description("ROI (without binning)")>
+    Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("7.2. ROI - Y")>
-    <ComponentModel.Description("ROI Y start - ROI without binning")>
-    Public Property ROI_Y As UInteger = 0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("7.3. ROI - width")>
-    <ComponentModel.Description("ROI width, 0 for full - width - ROI without binning")>
-    Public Property ROI_Width As UInteger = 0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("7.4. ROI - height")>
-    <ComponentModel.Description("ROI height, 0 for full - ROI without binning")>
-    Public Property ROI_Height As UInteger = 0
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("8. Remove overscan?")>
-    <ComponentModel.Description("Remove overscan area")>
-    Public Property RemoveOverscan As Boolean = False
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("9. # of captures")>
-    Public Property CaptureCount As Integer = 1
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("10. Filter slot")>
-    Public Property FilerSlot As eFilter = eFilter.H_alpha
+    '===================================================================================================
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("1. GUID of the sequence")>
+    <ComponentModel.DisplayName("   1. # of captures")>
+    <ComponentModel.DefaultValue(1)>
+    Public Property CaptureCount As Integer = 1
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   2. Filter slot")>
+    Public Property FilerSlot As eFilter = eFilter.H_alpha
+
+    '''<summary>Exposure time [s].</summary>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   3. Exposure time [s]")>
+    <ComponentModel.Description("Exposure time [s]")>
+    <ComponentModel.DefaultValue(1.0)>
+    Public Property ExposureTime As Double = 1.0
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   4. Gain")>
+    <ComponentModel.Description("Gain to set")>
+    <ComponentModel.DefaultValue(26.0)>
+    Public Property Gain As Double = 26.0
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   5. Offset")>
+    <ComponentModel.Description("Offset to set")>
+    <ComponentModel.DefaultValue(50.0)>
+    Public Property Offset As Double = 50.0
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   1. Store captured image?")>
+    <ComponentModel.Description("Store the captured image")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property StoreImage As Boolean = True
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   2. Remove overscan?")>
+    <ComponentModel.Description("Remove the overscan area in the stored file")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property RemoveOverscan As Boolean = False
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   3. File name start")>
+    <ComponentModel.Description("File name start to use")>
+    <ComponentModel.DefaultValue("QHY_capture_")>
+    Public Property FileName As String = "QHY_capture_"
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   4. FITS extenstion")>
+    <ComponentModel.Description("Extension to use for FITS files")>
+    <ComponentModel.DefaultValue("fits")>
+    Public Property FITSExtension As String = "fits"
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   5. Open image automatically?")>
+    <ComponentModel.Description("Automaticall open a stored FITS file with the default editor")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property AutoOpenImage As Boolean = True
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   1. Log camera properties?")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_CamProp As Boolean = False
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   2. Log timing?")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_Timing As Boolean = False
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   3. Log verbose?")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_Verbose As Boolean = False
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   4. Clear statistics log?")>
+    <ComponentModel.Description("Clear statistics log on every measurement")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_ClearStat As Boolean = False
+
+End Class
+
+'''<summary>Database holding meta data information.</summary>
+Public Class cDB_meta
+
+    Const Cat1 As String = "1. Generic"
+    Const Cat2 As String = "2. Object"
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   0. 10Micron IP")>
+    <ComponentModel.Description("IP of the 10Micron mount")>
+    Public Property IP_10Micron As String = "192.168.10.119"
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   1. GUID of the sequence")>
     <ComponentModel.Description("Sequence GUID")>
     Public Property GUID As String = System.Guid.NewGuid().ToString.Replace("-", String.Empty)
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("2. Author")>
-    <ComponentModel.Description("Author")>
+    '''<summary>Exposure type.</summary>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   2. Exposure type")>
+    <ComponentModel.Description("Light, Bias, Dark, Flat, or Tricolor.")>
+    Public Property ExposureType As String = "Light Frame"
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   2. Author")>
+    <ComponentModel.Description("Author to add to the meta data.")>
     Public Property Author As String = "Martin Weiss"
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("3. Origin")>
-    <ComponentModel.Description("Origin")>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   3. Origin")>
+    <ComponentModel.Description("Origin to add to the meta data.")>
     Public Property Origin As String = "Sternwarte Holzkirchen"
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("4. Store captured image?")>
-    Public Property StoreImage As Boolean = True
-
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("5. File name start")>
-    Public Property FileName As String = "QHY_capture_"
-
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("6. FITS extenstion")>
-    Public Property FITSExtension As String = "fits"
-
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("7. Open image automatically?")>
-    Public Property AutoOpenImage As Boolean = True
-
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("1. Telescope used")>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   4. Telescope used")>
+    <ComponentModel.Description("Telescope name to add to the meta data.")>
     Public Property Telescope As String = "Planewave CDK 12.5 with reducer"
 
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("2. Telescope aperture [mm]")>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   5. Telescope aperture [mm]")>
+    <ComponentModel.Description("Telescope aperture to add to the meta data.")>
     Public Property TelescopeAperture As Double = 317.0
 
     '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("3. Telescope focal length [mm]")>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   6. Telescope focal length [mm]")>
+    <ComponentModel.Description("Telescope focal length to add to the meta data.")>
     Public Property TelescopeFocalLength As Double = 1676.4
 
-    '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("4. Camera to search")>
-    Public Property CamToUse As String = "QHY600M"
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("1. Object name")>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   1. Name")>
+    <ComponentModel.Description("Name of the object (NGC1234, ...).")>
+    <ComponentModel.DefaultValue("---")>
     Public Property ObjectName As String = "---"
 
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("2. Object RA")>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   2. RA")>
+    <ComponentModel.DefaultValue("HH:MM:SS.sss")>
     Public Property ObjectRA As String = "HH:MM:SS.sss"
 
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("3. Object DEC")>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   3. DEC")>
+    <ComponentModel.DefaultValue("dd:mm:ss.sss")>
     Public Property ObjectDEC As String = "dd:mm:ss.sss"
-
-    <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("1. Log camera properties?")>
-    Public Property Log_CamProp As Boolean = False
-
-    <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("2. Log timing?")>
-    Public Property Log_Timing As Boolean = False
-
-    <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("3. Clear statistics log?")>
-    <ComponentModel.Description("Clear statistics log on every measurement")>
-    Public Property Log_ClearStat As Boolean = False
 
 End Class

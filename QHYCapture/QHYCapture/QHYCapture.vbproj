@@ -46,6 +46,9 @@
     <Folder Include="My Project\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\MyRemoteObservatory\c10Micron.vb">
+      <Link>c10Micron.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
@@ -63,6 +66,9 @@
     </Compile>
     <Compile Include="..\..\..\src\atomics\cLockBitmap.vb">
       <Link>cLockBitmap.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cRTFGeneration.vb">
+      <Link>cRTFGeneration.vb</Link>
     </Compile>
     <Compile Include="..\..\..\src\atomics\cStatMultiThread.vb">
       <Link>cStatMultiThread.vb</Link>
