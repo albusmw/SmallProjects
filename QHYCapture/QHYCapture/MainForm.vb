@@ -253,25 +253,25 @@ Public Class MainForm
 
                 Stopper.Stamp("Statistics")
 
+                '================================================================================
                 'Plot histogram
-                Dim PlotCurrentStatistics As Boolean = True
-                Dim PlotMeanStatistics As Boolean = True
+
                 Dim NormFactor As Double = LoopCnt
                 Dim CurveMode As cZEDGraphService.eCurveMode = cZEDGraphService.eCurveMode.LinesAndPoints
                 Dim CurrentCurveWidth As Integer = 1
                 Dim MeanCurveWidth As Integer = 2
                 If IsNothing(DB.Plotter) = True Then DB.Plotter = New cZEDGraphService(zgcMain)
                 DB.Plotter.Clear()
-                'Plot mean statistics
-                If DB.CaptureCount > 1 And PlotMeanStatistics = True Then
+                'Mean statistics
+                If DB.CaptureCount > 1 And LoopCnt > 1 And DB.PlotMeanStatistics = True Then
                     DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms(0, 0), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
                     DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms(0, 1), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
                     DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms(1, 0), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
                     DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms(1, 1), NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
                     DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram, NormFactor, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
                 End If
-                'Plot current statistics
-                If PlotCurrentStatistics = True Then
+                'Current statistics
+                If DB.PlotSingleStatistics = True Then
                     DB.Plotter.PlotXvsY("R", SingleStat.BayerHistograms(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
                     DB.Plotter.PlotXvsY("G1", SingleStat.BayerHistograms(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
                     DB.Plotter.PlotXvsY("G2", SingleStat.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
@@ -285,7 +285,9 @@ Public Class MainForm
                 DB.Plotter.ForceUpdate()
                 Stopper.Stamp("Plotter")
 
+                '================================================================================
                 'Display focus image if required
+
                 If SingleStat.MonoStatistics.Samples <= 1000000 Then
                     If IsNothing(FocusWindow) = True Then
                         FocusWindow = New cImgForm
@@ -294,7 +296,9 @@ Public Class MainForm
                     UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics.Max.Key)
                 End If
 
+                '================================================================================
                 'Store image
+
                 If DB.StoreImage = True Then
 
                     Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB_meta.GUID)
@@ -364,12 +368,16 @@ Public Class MainForm
 
             Next LoopCnt
 
+            '================================================================================
             'Stop live mode if used
+
             If DB.StreamMode = eStreamMode.LiveFrame Then
                 CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(CamHandle))
             End If
 
+            '================================================================================
             'Display timing log
+
             If DB.Log_Timing = True Then
                 Log("--------------------------------------------------------------")
                 Log("TIMING:")
@@ -696,22 +704,30 @@ Public Class MainForm
         Form.Image.Image = OutputImage.BitmapToProcess
     End Sub
 
+    '''<summary>Read the current filter wheel position.</summary>
+    '''<seealso cref="https://note.youdao.com/share/?token=48C579B49B5840609AB9B6D7D375B742&gid=7195236"/>
     Private Sub CheckFilter(ByRef CamHandle As IntPtr)
         Dim FilterState(63) As Byte
         Dim Pinner As New cIntelIPP.cPinHandler
         Dim FilterStatePtr As IntPtr = Pinner.Pin(FilterState)
-        If QHY.QHYCamera.GetQHYCCDCFWStatus(CamHandle, FilterStatePtr) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
-            Dim Filter As Char = Chr(FilterState(0))
-            Select Case Filter
-                Case "0"c To "9"c
-                    Log("Filter wheel found @ position <" & CType(Val(Filter.ToString), eFilter) & ">")
-                Case Else
-                    Log("Filter wheel found @ ?? position <" & Filter.ToString & ">")
-            End Select
+        If QHY.QHYCamera.IsQHYCCDCFWPlugged(CamHandle) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
+            Log("No filter wheel detected")
         Else
-            Log("Filter wheel found but could not read status!")
+            Dim NumberOfSlots As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CFWSLOTSNUM)
+            Log("Filter wheel with <" & NumberOfSlots.ValRegIndep & "> sloted detected")
+            If QHY.QHYCamera.GetQHYCCDCFWStatus(CamHandle, FilterStatePtr) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
+                Dim Filter As Char = Chr(FilterState(0))
+                Select Case Filter
+                    Case "0"c To "9"c
+                        Log("Filter wheel found @ position <" & CType(Val(Filter.ToString) + 1, eFilter) & ">")
+                    Case Else
+                        Log("Filter wheel found @ ?? position <" & Filter.ToString & ">")
+                End Select
+            Else
+                Log("Filter wheel found but could not read status!")
+            End If
+            Pinner = Nothing
         End If
-        Pinner = Nothing
     End Sub
 
     Private Sub SelectFilter(ByRef CamHandle As IntPtr, ByVal Filter As eFilter)
@@ -855,6 +871,34 @@ Public Class MainForm
     Private Sub FITSCommentToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSCommentToolStripMenuItem.Click
         Dim FITSKey As New cFITSKey
         MsgBox(FITSKey(eFITSKeywords.COLORTYP))
+    End Sub
+
+    Private Sub USBTreeReaderToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles USBTreeReaderToolStripMenuItem.Click
+        Dim USBTreeExe As String = Everything.GetSearchResult("UsbTreeView.exe")(0)
+        Dim DumpFile As String = "C:\Users\albusmw\Dropbox\UsbTreeView_report_STERNWARTE.txt"
+        If System.IO.File.Exists(DumpFile) = True Then System.IO.File.Delete(DumpFile)
+        Dim EXE As Diagnostics.Process = Diagnostics.Process.Start(USBTreeExe, "/R=""" & DumpFile & """")
+        EXE.WaitForExit()
+        Dim FoundPorts As New Collections.Generic.Dictionary(Of String, String)
+        Dim LastPort As String = String.Empty
+        For Each Line As String In System.IO.File.ReadAllLines(DumpFile)
+            If Line.StartsWith("Port Chain") Then
+                LastPort = Line.Replace("Port Chain", String.Empty).Trim.TrimStart(":"c).Trim
+                FoundPorts.Add(LastPort, String.Empty)
+            End If
+            If Line.Trim.StartsWith("Device Description") Then
+                FoundPorts(LastPort) = Line.Replace("Device Description", String.Empty).Trim.TrimStart(":"c).Trim
+            End If
+            If Line.Trim.StartsWith("COM-Port") Then
+                FoundPorts(LastPort) &= " - " & Line.Replace("COM-Port", String.Empty).Trim.TrimStart(":"c).Trim
+            End If
+        Next Line
+        'Remove empty entries with no device descriptor
+        Dim FinalList As New Collections.Generic.Dictionary(Of String, String)
+        For Each Entry As String In FoundPorts.Keys
+            If FoundPorts(Entry).Length > 0 Then FinalList.Add(Entry, FoundPorts(Entry))
+        Next
+        MsgBox(FoundPorts.Count.ToString.Trim & " ports found!")
     End Sub
 
 End Class

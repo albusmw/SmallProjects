@@ -76,6 +76,9 @@
     <Compile Include="..\..\..\src\atomics\cStopper.vb">
       <Link>cStopper.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\Everything.vb">
+      <Link>Everything.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\Extensions.vb">
       <Link>Extensions.vb</Link>
     </Compile>
@@ -125,6 +128,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\..\src\bin\Everything64.dll">
+      <Link>Everything64.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Ideas.txt" />
     <Content Include="QHY600 Control Values.txt" />
   </ItemGroup>

@@ -49,6 +49,8 @@ Partial Class MainForm
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.LoadPositionFrom10MicronToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FITSCommentToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
@@ -64,8 +66,7 @@ Partial Class MainForm
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
-        Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.FITSCommentToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -249,6 +250,19 @@ Partial Class MainForm
         Me.LoadPositionFrom10MicronToolStripMenuItem.Size = New System.Drawing.Size(228, 22)
         Me.LoadPositionFrom10MicronToolStripMenuItem.Text = "Load position from 10Micron"
         '
+        'TESTToolStripMenuItem
+        '
+        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSCommentToolStripMenuItem, Me.USBTreeReaderToolStripMenuItem})
+        Me.TESTToolStripMenuItem.Name = "TESTToolStripMenuItem"
+        Me.TESTToolStripMenuItem.Size = New System.Drawing.Size(73, 20)
+        Me.TESTToolStripMenuItem.Text = "!!! TEST !!!!!"
+        '
+        'FITSCommentToolStripMenuItem
+        '
+        Me.FITSCommentToolStripMenuItem.Name = "FITSCommentToolStripMenuItem"
+        Me.FITSCommentToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FITSCommentToolStripMenuItem.Text = "FITS comment"
+        '
         'zgcMain
         '
         Me.zgcMain.Dock = System.Windows.Forms.DockStyle.Fill
@@ -423,18 +437,11 @@ Partial Class MainForm
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
         '
-        'TESTToolStripMenuItem
+        'USBTreeReaderToolStripMenuItem
         '
-        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSCommentToolStripMenuItem})
-        Me.TESTToolStripMenuItem.Name = "TESTToolStripMenuItem"
-        Me.TESTToolStripMenuItem.Size = New System.Drawing.Size(73, 20)
-        Me.TESTToolStripMenuItem.Text = "!!! TEST !!!!!"
-        '
-        'FITSCommentToolStripMenuItem
-        '
-        Me.FITSCommentToolStripMenuItem.Name = "FITSCommentToolStripMenuItem"
-        Me.FITSCommentToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.FITSCommentToolStripMenuItem.Text = "FITS comment"
+        Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
         '
         'MainForm
         '
@@ -517,4 +524,5 @@ Partial Class MainForm
     Friend WithEvents rtbStatistics As Windows.Forms.RichTextBox
     Friend WithEvents TESTToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents FITSCommentToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents USBTreeReaderToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 End Class

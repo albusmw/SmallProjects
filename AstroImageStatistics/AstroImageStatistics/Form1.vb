@@ -228,7 +228,7 @@ Public Class Form1
             YAxis.Add(Stats(Entry).Mean)
         Next Entry
         Disp.Plotter.Clear()
-        Disp.Plotter.PlotXvsY("StdDev", XAxis.ToArray, YAxis.ToArray, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+        Disp.Plotter.PlotXvsY("StdDev", XAxis.ToArray, YAxis.ToArray, New cZEDGraphService.sGraphStyle(Color.Black, cZEDGraphService.eCurveMode.Dots, 1))
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ForceUpdate()
         'Set style of the window

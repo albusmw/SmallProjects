@@ -165,25 +165,37 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   1. Log camera properties?")>
+    <ComponentModel.DisplayName("   1. Log camera properties")>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_CamProp As Boolean = False
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   2. Log timing?")>
+    <ComponentModel.DisplayName("   2. Log timing")>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_Timing As Boolean = False
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   3. Log verbose?")>
+    <ComponentModel.DisplayName("   3. Log verbose")>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_Verbose As Boolean = False
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   4. Clear statistics log?")>
+    <ComponentModel.DisplayName("   4. Clear statistics log")>
     <ComponentModel.Description("Clear statistics log on every measurement")>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_ClearStat As Boolean = False
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   5. Plot single statistics")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property PlotSingleStatistics As Boolean = True
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   5. Plot mean statistics")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property PlotMeanStatistics As Boolean = True
+
+
 
 End Class
 

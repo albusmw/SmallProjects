@@ -180,6 +180,7 @@ Partial Class Form1
         'ReplotStatisticsToolStripMenuItem
         '
         Me.ReplotStatisticsToolStripMenuItem.Name = "ReplotStatisticsToolStripMenuItem"
+        Me.ReplotStatisticsToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
         Me.ReplotStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.ReplotStatisticsToolStripMenuItem.Text = "Re-plot statistics"
         '
