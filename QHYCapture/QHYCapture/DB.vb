@@ -10,11 +10,12 @@ End Structure
 
 '''<summary>Filter as to be send as ASCII string.</summary>
 Public Enum eFilter As Byte
-    L = 0
-    R = 1
-    G = 2
-    B = 3
-    H_alpha = 4
+    Invalid = 0
+    L = 1
+    R = 2
+    G = 3
+    B = 4
+    H_alpha = 5
 End Enum
 
 Public Enum eStreamMode As UInteger
@@ -109,7 +110,7 @@ Public Class cDB
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   2. Filter slot")>
-    Public Property FilerSlot As eFilter = eFilter.H_alpha
+    Public Property FilterSlot As eFilter = eFilter.H_alpha
 
     '''<summary>Exposure time [s].</summary>
     <ComponentModel.Category(Cat2)>
@@ -194,6 +195,12 @@ Public Class cDB
     <ComponentModel.DisplayName("   5. Plot mean statistics")>
     <ComponentModel.DefaultValue(True)>
     Public Property PlotMeanStatistics As Boolean = True
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   6. Plot limits fixed")>
+    <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property PlotLimitsFixed As Boolean = False
 
 
 

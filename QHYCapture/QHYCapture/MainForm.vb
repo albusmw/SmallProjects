@@ -42,19 +42,17 @@ Public Class MainForm
         DB.RunningFlag = True
 
         'Try to get a suitable camera and continue if found
-        If InitQHY(DB.CamToUse) = False Then Log("No suitable camera found!")
+        If InitQHY(DB.CamToUse, Stopper) = False Then Log("No suitable camera found!")
         If CamHandle <> IntPtr.Zero Then
 
             'Get chip properties
             QHY.QHYCamera.GetQHYCCDChipInfo(CamHandle, Chip_Physical_W, Chip_Physical_H, Chip_Pixel_W, Chip_Pixel_H, Pixel_Size_W, Pixel_Size_H, bpp)
             QHY.QHYCamera.GetQHYCCDEffectiveArea(CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
             QHY.QHYCamera.GetQHYCCDOverScanArea(CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
+            Stopper.Stamp("Get chip properties")
 
             'Log chip properties
             If DB.Log_CamProp = True Then
-
-                Stopper.Start()
-
                 QHY.QHYCamera.GetQHYCCDSDKVersion(SDKVersion(0), SDKVersion(1), SDKVersion(2), SDKVersion(3))                   'Get the SDK version
                 Log("SDK version: " & BuildSDKVersion(SDKVersion))                                                              'Display the SDK version
 
@@ -96,12 +94,12 @@ Public Class MainForm
                     End If
                 Next X
 
-                Stopper.Stamp("GetQHYCCDParam")
+                Stopper.Stamp("GetQHYCCDParams")
 
                 Log("==============================================================================")
             End If
 
-            'Prepare buffers
+
             Dim ReadResolution As UInteger = 16
             Dim ChannelToRead As UInteger = 0
 
@@ -116,8 +114,6 @@ Public Class MainForm
                 If (DB.ROI.Y + DB.ROI.Height > Chip_Pixel_H) Or (.Height = 0) Then .Height = CInt(Chip_Pixel_H - DB.ROI.Y)
             End With
 
-            Stopper.Stamp("Prepare buffers")
-
             'Set exposure parameters
             CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, DB.Binning, DB.Binning))
             CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, CUInt(ROI.X), CUInt(ROI.Y), CUInt(ROI.Width \ DB.Binning), CUInt(ROI.Height \ DB.Binning)))
@@ -125,24 +121,29 @@ Public Class MainForm
             CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
             CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
             CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
+            Stopper.Stamp("Set exposure parameters")
 
+            'Prepare buffers
             Dim LoopStat As New AstroNET.Statistics.sStatistics
             Dim PinHandler As cIntelIPP.cPinHandler
             Dim CamRawBuffer As Byte() = {}
             Dim CamRawBufferPtr As IntPtr = Nothing
+            Stopper.Stamp("Prepare buffers")
 
             'Filter wheel
-            CheckFilter(CamHandle)
-            SelectFilter(CamHandle, DB.FilerSlot)
-            System.Threading.Thread.Sleep(1000)
-            CheckFilter(CamHandle)
+            If DB.FilterSlot <> eFilter.Invalid Then
+                ActiveFilter(CamHandle, DB.FilterSlot)
+            End If
+            Stopper.Stamp("Select filter")
 
             For LoopCnt As Integer = 1 To DB.CaptureCount
 
                 'Cancel any running exposure
                 CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(CamHandle))
                 CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle))
+                Stopper.Stamp("Cancel exposure")
 
+                '================================================================================
                 'Check and set temperature
                 If DB.TargetTemp > -100 Then
                     Do
@@ -154,12 +155,13 @@ Public Class MainForm
                         DE()
                     Loop Until 1 = 0
                 End If
+                Stopper.Stamp("Set temperature")
 
-                'Show status
-                tsslMain.Text = "Taking capture " & LoopCnt.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
-
+                '================================================================================
                 'Start expose (single or live frame mode)
+                tsslMain.Text = "Taking capture " & LoopCnt.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
                 Dim ObsStart As DateTime = Now
+                Dim ObsEnd As DateTime = DateTime.MinValue
                 Dim ObsStartTemp As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                 Stopper.Start()
                 If DB.StreamMode = eStreamMode.SingleFrame Then
@@ -190,16 +192,18 @@ Public Class MainForm
                     Loop Until 1 = 0
                 End If
 
+                '================================================================================
                 'Get the buffer size from the DLL - typically too big but does not care ...
                 Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(CamHandle)
-                Stopper.Stamp("GetQHYCCDMemLength")
                 LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 If CamRawBuffer.Length <> BytesToTransfer_reported Then
                     PinHandler = New cIntelIPP.cPinHandler
                     ReDim CamRawBuffer(CInt(BytesToTransfer_reported - 1))
                     CamRawBufferPtr = PinHandler.Pin(CamRawBuffer)
                 End If
+                Stopper.Stamp("GetQHYCCDMemLength & pinning")
 
+                '================================================================================
                 'Read image data from camera - ALWAYS WITH OVERSCAN
                 Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
                 If DB.StreamMode = eStreamMode.SingleFrame Then
@@ -217,8 +221,8 @@ Public Class MainForm
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
                 Stopper.Stamp("GetQHYCCDSingleFrame")
-                Dim ObsEnd As DateTime = Now
 
+                '================================================================================
                 'Remove overscan
                 Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
                 SingleStatCalc.DataProcessor_UInt16.ImageData = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
@@ -232,9 +236,11 @@ Public Class MainForm
                 End If
                 Stopper.Stamp("ChangeAspect")
 
+                '================================================================================
                 'Run statistics
                 Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat)
+                Stopper.Stamp("Statistics - calc")
 
                 'Display statistics
                 Dim DisplaySumStat As Boolean = False
@@ -250,8 +256,7 @@ Public Class MainForm
                 Next Idx
                 RTFGen.ForceRefresh()
                 DE()
-
-                Stopper.Stamp("Statistics")
+                Stopper.Stamp("Statistics - text")
 
                 '================================================================================
                 'Plot histogram
@@ -278,12 +283,16 @@ Public Class MainForm
                     DB.Plotter.PlotXvsY("B", SingleStat.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
                     DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
                 End If
-                DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
+                If DB.PlotLimitsFixed = True Then
+                    DB.Plotter.ManuallyScaleXAxis(0, 65536)
+                Else
+                    DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
+                End If
 
                 DB.Plotter.AutoScaleYAxisLog()
                 DB.Plotter.GridOnOff(True, True)
                 DB.Plotter.ForceUpdate()
-                Stopper.Stamp("Plotter")
+                Stopper.Stamp("Statistics - plot")
 
                 '================================================================================
                 'Display focus image if required
@@ -294,6 +303,7 @@ Public Class MainForm
                         FocusWindow.Show("Focus Window")
                     End If
                     UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics.Max.Key)
+                    Stopper.Stamp("Focus window")
                 End If
 
                 '================================================================================
@@ -361,8 +371,9 @@ Public Class MainForm
                     'Create FITS file
                     cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
                     If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
-                    Stopper.Stamp("Store")
+
                 End If
+                Stopper.Stamp("Store image")
 
                 If DB.StopFlag = True Then Exit For
 
@@ -375,23 +386,24 @@ Public Class MainForm
                 CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(CamHandle))
             End If
 
-            '================================================================================
-            'Display timing log
-
-            If DB.Log_Timing = True Then
-                Log("--------------------------------------------------------------")
-                Log("TIMING:")
-                Log(Stopper.GetLog)
-                Log("--------------------------------------------------------------")
-            End If
-
             'Release buffer handles
             PinHandler = Nothing
 
         End If
 
-        'Close camera if selected
+        'Close camera if selected 
         If CloseAtEnd = True Then CloseCamera()
+        Stopper.Stamp("CloseCamera")
+
+        '================================================================================
+        'Display timing log
+
+        If DB.Log_Timing = True Then
+            Log("--------------------------------------------------------------")
+            Log("TIMING:")
+            Log(Stopper.GetLog)
+            Log("--------------------------------------------------------------")
+        End If
 
         tsslMain.Text = "--IDLE--"
         DB.RunningFlag = False
@@ -401,6 +413,7 @@ Public Class MainForm
     Private Sub CloseCamera()
         If CamHandle <> IntPtr.Zero Then
             Log("Closing camera ...")
+            QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle)
             QHY.QHYCamera.CloseQHYCCD(CamHandle)
             QHY.QHYCamera.ReleaseQHYCCDResource()
             CamHandle = IntPtr.Zero
@@ -704,50 +717,66 @@ Public Class MainForm
         Form.Image.Image = OutputImage.BitmapToProcess
     End Sub
 
-    '''<summary>Read the current filter wheel position.</summary>
-    '''<seealso cref="https://note.youdao.com/share/?token=48C579B49B5840609AB9B6D7D375B742&gid=7195236"/>
-    Private Sub CheckFilter(ByRef CamHandle As IntPtr)
-        Dim FilterState(63) As Byte
-        Dim Pinner As New cIntelIPP.cPinHandler
-        Dim FilterStatePtr As IntPtr = Pinner.Pin(FilterState)
-        If QHY.QHYCamera.IsQHYCCDCFWPlugged(CamHandle) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
-            Log("No filter wheel detected")
-        Else
-            Dim NumberOfSlots As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CFWSLOTSNUM)
-            Log("Filter wheel with <" & NumberOfSlots.ValRegIndep & "> sloted detected")
-            If QHY.QHYCamera.GetQHYCCDCFWStatus(CamHandle, FilterStatePtr) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
-                Dim Filter As Char = Chr(FilterState(0))
-                Select Case Filter
-                    Case "0"c To "9"c
-                        Log("Filter wheel found @ position <" & CType(Val(Filter.ToString) + 1, eFilter) & ">")
-                    Case Else
-                        Log("Filter wheel found @ ?? position <" & Filter.ToString & ">")
-                End Select
-            Else
-                Log("Filter wheel found but could not read status!")
-            End If
-            Pinner = Nothing
+    Private Function ActiveFilter(ByRef CamHandle As IntPtr, ByVal FilterToSelect As eFilter) As eFilter
+        Dim RetVal As eFilter = eFilter.Invalid
+        If CheckFilter(CamHandle) <> FilterToSelect Then
+            Do
+                SelectFilter(CamHandle, FilterToSelect)
+                System.Threading.Thread.Sleep(500)
+                RetVal = CheckFilter(CamHandle)
+            Loop Until RetVal = FilterToSelect
         End If
-    End Sub
+        Return RetVal
+    End Function
 
-    Private Sub SelectFilter(ByRef CamHandle As IntPtr, ByVal Filter As eFilter)
+    '''<summary>Read the current filter wheel position.</summary>
+    '''<returns>Filter that is IN or invalid if there was something wrong.</returns>
+    '''<seealso cref="https://note.youdao.com/share/?token=48C579B49B5840609AB9B6D7D375B742&gid=7195236"/>
+    Private Function CheckFilter(ByRef CamHandle As IntPtr) As eFilter
+        Dim RetVal As eFilter = eFilter.Invalid
         Dim FilterState(63) As Byte
         Dim Pinner As New cIntelIPP.cPinHandler
         Dim FilterStatePtr As IntPtr = Pinner.Pin(FilterState)
-        If Filter <> -1 Then
-            FilterState(0) = CByte(Asc(Filter.ToString.Trim))
+        Dim NumberOfSlots As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CFWSLOTSNUM)
+        LogVerbose("Filter wheel with <" & NumberOfSlots.ValRegIndep & "> sloted detected")
+        If QHY.QHYCamera.GetQHYCCDCFWStatus(CamHandle, FilterStatePtr) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
+            Dim Filter As Char = Chr(FilterState(0))        ' '0' means filter position 1, '1' means filter position 2, ...
+            Select Case Filter
+                Case "0"c To "9"c
+                    RetVal = CType(Val(Filter.ToString) + 1, eFilter)
+                    Log("Filter wheel position <" & [Enum].GetName(GetType(eFilter), RetVal) & ">")
+                Case "N"c
+                    Log("Filter wheel running ...")
+                Case Else
+                    Log("Filter wheel position answer <" & Filter.ToString & "> is ??????")
+            End Select
+        Else
+            LogError("Filter wheel found but could not read status!")
+        End If
+        Pinner = Nothing
+        Return RetVal
+    End Function
+
+    '''<summary>Select a certain filter.</summary>
+    Private Function SelectFilter(ByRef CamHandle As IntPtr, ByVal FilterToSelect As eFilter) As eFilter
+        Dim RetVal As eFilter = eFilter.Invalid
+        Dim FilterState(63) As Byte
+        Dim Pinner As New cIntelIPP.cPinHandler
+        Dim FilterStatePtr As IntPtr = Pinner.Pin(FilterState)
+        If FilterToSelect <> eFilter.Invalid Then
+            FilterState(0) = CByte(Asc((FilterToSelect - 1).ToString.Trim))
             If QHY.QHYCamera.SendOrder2QHYCCDCFW(CamHandle, FilterStatePtr, 1) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
-                Log("  Filter selected: " & Filter.ToString.Trim)
+                Log("  Filter requested: " & FilterToSelect.ToString.Trim)
+                RetVal = FilterToSelect
             Else
-                Log("  !!! Filter select failed: " & DB.FilerSlot.ToString.Trim)
+                LogError("  !!! Filter select failed: " & DB.FilterSlot.ToString.Trim)
             End If
         End If
         Pinner = Nothing
-    End Sub
+        Return FilterToSelect
+    End Function
 
-    Private Function InitQHY(ByVal CamID As String) As Boolean
-
-        Dim Stopper As New cStopper
+    Private Function InitQHY(ByVal CamID As String, ByRef Stopper As cStopper) As Boolean
 
         'Init if not yet done
         If CamHandle = IntPtr.Zero Or UsedReadMode = eReadOutMode.Unvalid Or UsedStreamMode = UInteger.MaxValue Then
@@ -831,12 +860,14 @@ Public Class MainForm
         End If
 
         'Everything OK
+        Stopper.Stamp("InitQHY")
         Return True
 
     End Function
 
     Private Sub FilterSelectionToolStripMenuItem_Click(sender As Object, e As EventArgs)
-        If InitQHY(DB.CamToUse) = False Then
+        Dim Stopper As New cStopper
+        If InitQHY(DB.CamToUse, Stopper) = False Then
             Log("No suitable camera found!")
         Else
             'Filter test
