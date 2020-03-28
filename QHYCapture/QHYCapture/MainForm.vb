@@ -333,8 +333,8 @@ Public Class MainForm
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.PROGRAM), cFITSKeywords.GetString(Me.Text)})
 
                     AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.OBJECT), cFITSKeywords.GetString(DB_meta.ObjectName))
-                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.RA), cFITSKeywords.GetString(DB_meta.ObjectRA))
-                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.DEC), cFITSKeywords.GetString(DB_meta.ObjectDEC))
+                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.RA), cFITSKeywords.GetString(DB_meta.TelescopeRightAscension))
+                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.DEC), cFITSKeywords.GetString(DB_meta.TelescopeDeclination))
 
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.AUTHOR), cFITSKeywords.GetString(DB_meta.Author)})
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.ORIGIN), cFITSKeywords.GetString(DB_meta.Origin)})
@@ -658,8 +658,8 @@ Public Class MainForm
 
     Private Sub NoRealObjectToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NoRealObjectToolStripMenuItem.Click
         DB_meta.ObjectName = String.Empty
-        DB_meta.ObjectRA = String.Empty
-        DB_meta.ObjectDEC = String.Empty
+        DB_meta.TelescopeRightAscension = String.Empty
+        DB_meta.TelescopeDeclination = String.Empty
         DB_meta.Telescope = String.Empty
         RefreshProperties()
     End Sub
@@ -887,8 +887,12 @@ Public Class MainForm
         Dim Client10Micron As New Net.Sockets.TcpClient(DB_meta.IP_10Micron, 3490)
         Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
         c10Micron.SendQuery(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
-        DB_meta.ObjectRA = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.CurrentRA)
-        DB_meta.ObjectDEC = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.CurrentDec)
+        DB_meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
+        DB_meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
+        DB_meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
+        DB_meta.TelescopeDeclination = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeDeclination)
+        DB_meta.TelescopeAltitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAltitude)
+        DB_meta.TelescopeAzimuth = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAzimuth)
         RefreshProperties()
     End Sub
 

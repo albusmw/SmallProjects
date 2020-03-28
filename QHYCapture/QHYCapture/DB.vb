@@ -211,6 +211,7 @@ Public Class cDB_meta
 
     Const Cat1 As String = "1. Generic"
     Const Cat2 As String = "2. Object"
+    Const NotSet As String = "-----"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   0. 10Micron IP")>
@@ -225,49 +226,77 @@ Public Class cDB_meta
     '''<summary>Exposure type.</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   2. Exposure type")>
-    <ComponentModel.Description("Light, Bias, Dark, Flat, or Tricolor.")>
-    Public Property ExposureType As String = "Light Frame"
+    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
+    <ComponentModel.DefaultValue("TestOnly")>
+    Public Property ExposureType As String = "TestOnly"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   2. Author")>
     <ComponentModel.Description("Author to add to the meta data.")>
+    <ComponentModel.DefaultValue("Martin Weiss")>
     Public Property Author As String = "Martin Weiss"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   3. Origin")>
+    <ComponentModel.DisplayName("   3. Site longitude")>
+    <ComponentModel.Description("Longitude of the site.")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property SiteLongitude As String = NotSet
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   4. Site latitude")>
+    <ComponentModel.Description("Latitude of the site.")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property SiteLatitude As String = NotSet
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   5. Origin")>
     <ComponentModel.Description("Origin to add to the meta data.")>
+    <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
     Public Property Origin As String = "Sternwarte Holzkirchen"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   4. Telescope used")>
+    <ComponentModel.DisplayName("   6. Telescope used")>
     <ComponentModel.Description("Telescope name to add to the meta data.")>
+    <ComponentModel.DefaultValue("Planewave CDK 12.5 with reducer")>
     Public Property Telescope As String = "Planewave CDK 12.5 with reducer"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   5. Telescope aperture [mm]")>
+    <ComponentModel.DisplayName("   7. Telescope aperture [mm]")>
     <ComponentModel.Description("Telescope aperture to add to the meta data.")>
+    <ComponentModel.DefaultValue(317.0)>
     Public Property TelescopeAperture As Double = 317.0
 
     '''<summary>Telescope focal length [mm].</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   6. Telescope focal length [mm]")>
+    <ComponentModel.DisplayName("   8. Telescope focal length [mm]")>
     <ComponentModel.Description("Telescope focal length to add to the meta data.")>
+    <ComponentModel.DefaultValue(1676.4)>
     Public Property TelescopeFocalLength As Double = 1676.4
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   1. Name")>
     <ComponentModel.Description("Name of the object (NGC1234, ...).")>
-    <ComponentModel.DefaultValue("---")>
-    Public Property ObjectName As String = "---"
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property ObjectName As String = NotSet
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   2. RA")>
-    <ComponentModel.DefaultValue("HH:MM:SS.sss")>
-    Public Property ObjectRA As String = "HH:MM:SS.sss"
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeRightAscension As String = NotSet
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   3. DEC")>
-    <ComponentModel.DefaultValue("dd:mm:ss.sss")>
-    Public Property ObjectDEC As String = "dd:mm:ss.sss"
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeDeclination As String = NotSet
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   4. Altitude")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeAltitude As String = NotSet
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   5. Azimut")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeAzimuth As String = NotSet
 
 End Class
