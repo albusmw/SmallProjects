@@ -120,6 +120,7 @@ Public Class MainForm
             CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, ReadResolution))
             CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
             CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
+            CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_USBTRAFFIC, 0))
             CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
             Stopper.Stamp("Set exposure parameters")
 
@@ -131,8 +132,9 @@ Public Class MainForm
             Stopper.Stamp("Prepare buffers")
 
             'Filter wheel
+            Dim FilterActive As eFilter = eFilter.Invalid
             If DB.FilterSlot <> eFilter.Invalid Then
-                ActiveFilter(CamHandle, DB.FilterSlot)
+                FilterActive = ActiveFilter(CamHandle, DB.FilterSlot)
             End If
             Stopper.Stamp("Select filter")
 
@@ -302,7 +304,7 @@ Public Class MainForm
                         FocusWindow = New cImgForm
                         FocusWindow.Show("Focus Window")
                     End If
-                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics.Max.Key)
+                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics.Min.Key, SingleStat.MonoStatistics.Max.Key)
                     Stopper.Stamp("Focus window")
                 End If
 
@@ -313,8 +315,6 @@ Public Class MainForm
 
                     Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB_meta.GUID)
                     If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
-                    Dim FileCounter As String = String.Empty : If DB.CaptureCount > 1 Then FileCounter = "_#" & Format(LoopCnt, "000")
-                    Dim FITSName As String = System.IO.Path.Combine(Path, FITSFileStart & FileCounter).Trim & "." & DB.FITSExtension
 
                     'Precalculation
                     Dim NAXIS1 As Integer = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
@@ -324,6 +324,9 @@ Public Class MainForm
                     Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
                     Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
                     Dim CamReadOutMode As New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, DB.ReadOutMode, CamReadOutMode)
+                    Dim FITS_ExpTime As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000
+                    Dim FITS_Gain As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN)
+                    Dim FITS_Offset As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET)
 
                     'Compose all FITS keyword entries
                     Dim CustomElement As New Collections.Generic.List(Of String())
@@ -359,9 +362,9 @@ Public Class MainForm
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.CRPIX2), cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
 
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.IMAGETYP), cFITSKeywords.GetString(DB_meta.ExposureType)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.EXPTIME), cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.GAIN), cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN))})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.OFFSET), cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET))})
+                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.EXPTIME), cFITSKeywords.GetDouble(FITS_ExpTime)})
+                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.GAIN), cFITSKeywords.GetDouble(FITS_Gain)})
+                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.OFFSET), cFITSKeywords.GetDouble(FITS_Offset)})
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.BRIGHTNESS), cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.SETTEMP), cFITSKeywords.GetDouble(DB.TargetTemp)})
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.CCDTEMP), cFITSKeywords.GetDouble(ObsStartTemp)})
@@ -369,6 +372,16 @@ Public Class MainForm
                     CustomElement.Add(New String() {FITSKey(eFITSKeywords.QHY_MODE), cFITSKeywords.GetString(CamReadOutMode.ToString)})
 
                     'Create FITS file
+                    Dim FileNameToWrite As String = FITSFileStart
+                    FileNameToWrite = FileNameToWrite.Replace("$IDX$", Format(LoopCnt, "000"))
+                    FileNameToWrite = FileNameToWrite.Replace("$CNT$", Format(DB.CaptureCount, "000"))
+                    FileNameToWrite = FileNameToWrite.Replace("$EXP$", FITS_ExpTime.ValRegIndep)
+                    FileNameToWrite = FileNameToWrite.Replace("$GAIN$", FITS_Gain.ValRegIndep)
+                    FileNameToWrite = FileNameToWrite.Replace("$OFFS$", FITS_Offset.ValRegIndep)
+                    FileNameToWrite = FileNameToWrite.Replace("$FILT$", [Enum].GetName(GetType(eFilter), FilterActive))
+                    FileNameToWrite = FileNameToWrite.Replace("$RMODE$", [Enum].GetName(GetType(eReadOutMode), DB.ReadOutMode))
+
+                    Dim FITSName As String = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
                     cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
                     If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
 
@@ -681,7 +694,7 @@ Public Class MainForm
         With DB
             .StreamMode = eStreamMode.LiveFrame
             .ExposureTime = 0.01
-            .Gain = 120
+            .Gain = 20
             .ROI = New Drawing.Rectangle(.ROI.X, .ROI.Y, 1000, 1000)
             .CaptureCount = 10000
             .StoreImage = False
@@ -694,7 +707,7 @@ Public Class MainForm
     '''<param name="Form">Focus window.</param>
     '''<param name="Data">Data to display.</param>
     '''<param name="MaxData">Maximum in the data in order to normalize correct.</param>
-    Private Sub UpdateFocusWindow(ByRef Form As cImgForm, ByRef Data(,) As UInt16, ByVal MaxData As Long)
+    Private Sub UpdateFocusWindow(ByRef Form As cImgForm, ByRef Data(,) As UInt16, ByVal MinData As Long, ByVal MaxData As Long)
         Dim OutputImage As New cLockBitmap(Data.GetUpperBound(0), Data.GetUpperBound(1))
         If MaxData = 0 Then MaxData = 1
         OutputImage.LockBits()
@@ -704,8 +717,8 @@ Public Class MainForm
         For Y As Integer = 0 To OutputImage.Height - 1
             Dim BaseOffset As Integer = YOffset
             For X As Integer = 0 To OutputImage.Width - 1
-                Dim DispVal As Integer = CInt(Data(X, Y) * (255 / MaxData))
-                Dim Coloring As Drawing.Color = cColorMaps.Jet(DispVal)
+                Dim DispVal As Integer = CInt((Data(X, Y) - MinData) * (255 / (MaxData - MinData)))
+                Dim Coloring As Drawing.Color = cColorMaps.Bone(DispVal)
                 OutputImage.Pixels(BaseOffset) = Coloring.R
                 OutputImage.Pixels(BaseOffset + 1) = Coloring.G
                 OutputImage.Pixels(BaseOffset + 2) = Coloring.B
@@ -724,7 +737,9 @@ Public Class MainForm
                 SelectFilter(CamHandle, FilterToSelect)
                 System.Threading.Thread.Sleep(500)
                 RetVal = CheckFilter(CamHandle)
-            Loop Until RetVal = FilterToSelect
+            Loop Until RetVal = FilterToSelect Or DB.StopFlag = True
+        Else
+            RetVal = FilterToSelect
         End If
         Return RetVal
     End Function
@@ -884,6 +899,10 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadPositionFrom10MicronToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LoadPositionFrom10MicronToolStripMenuItem.Click
+        Load10MicronData()
+    End Sub
+
+    Private Sub Load10MicronData()
         Dim Client10Micron As New Net.Sockets.TcpClient(DB_meta.IP_10Micron, 3490)
         Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
         c10Micron.SendQuery(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
@@ -934,6 +953,29 @@ Public Class MainForm
             If FoundPorts(Entry).Length > 0 Then FinalList.Add(Entry, FoundPorts(Entry))
         Next
         MsgBox(FoundPorts.Count.ToString.Trim & " ports found!")
+    End Sub
+
+    Private Sub TestSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestSeriesToolStripMenuItem.Click
+        DB.StopFlag = False
+        DB.StoreImage = True
+        DB.AutoOpenImage = False
+        DB.ExposureTime = 60
+        For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
+            DB.ReadOutMode = Mode
+            For Each Filter As eFilter In New eFilter() {eFilter.H_alpha, eFilter.L, eFilter.R, eFilter.G, eFilter.B}
+                DB.FilterSlot = Filter
+                For Gain As Double = 20 To 100 Step 20
+                    DB.Gain = Gain
+                    Load10MicronData()
+                    RefreshProperties()
+                    QHYCapture(DB.FileName, False)
+                    If DB.StopFlag = True Then Exit For
+                Next Gain
+                If DB.StopFlag = True Then Exit For
+            Next Filter
+            If DB.StopFlag = True Then Exit For
+        Next Mode
+        CloseCamera()
     End Sub
 
 End Class

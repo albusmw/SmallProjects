@@ -149,7 +149,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   3. File name start")>
     <ComponentModel.Description("File name start to use")>
     <ComponentModel.DefaultValue("QHY_capture_")>
-    Public Property FileName As String = "QHY_capture_"
+    Public Property FileName As String = "QHY600_$FILT$_$EXP$_$GAIN$_$OFFS$_$IDX$_$CNT$_$RMODE$"
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   4. FITS extenstion")>
