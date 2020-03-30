@@ -202,7 +202,7 @@ Public Class Form1
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As AstroNET.Statistics.sStatistics)
         If IsNothing(Stats.BayerHistograms) = True And IsNothing(Stats.MonochromHistogram) = True Then Exit Sub
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData(New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
         'Plot histogram
         Disp.Plotter.Clear()
         If IsNothing(Stats.BayerHistograms) = False Then
@@ -234,7 +234,7 @@ Public Class Form1
 
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats() As Ato.cSingleValueStatistics)
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData(New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
         'Plot data
         Dim XAxis() As Double = Ato.cSingleValueStatistics.GetAspectVectorXAxis(Stats)
         Disp.Plotter.Clear()
@@ -259,7 +259,7 @@ Public Class Form1
 
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As Dictionary(Of Double, AstroImageStatistics.AstroNET.Statistics.sSingleChannelStatistics))
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData(New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
         'Plot data
         Dim XAxis As New List(Of Double)
         Dim YAxis As New List(Of Double)
@@ -766,7 +766,7 @@ Public Class Form1
         Dim Disp As New cZEDGraphForm
         Dim PlotData As Generic.Dictionary(Of Long, UInt32) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram)
         Dim XAxis As Double() = PlotData.KeyList.ToDouble
-        Disp.PlotData(New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
         'Plot data
         Disp.Plotter.Clear()
         Disp.Plotter.PlotXvsY("Mono", XAxis, PlotData.ValueList.ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -857,5 +857,56 @@ Public Class Form1
         JNowRA = X.RAApparent
         JNowDec = X.DECApparent
     End Function
+
+    Private Sub tsmiCalcVignette_Click(sender As Object, e As EventArgs) Handles tsmiCalcVignette.Click
+
+        'Calculate the vignette
+        Dim Stopper As New cStopper
+        Stopper.Start()
+        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(AstroNET.Statistics.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, 1000))
+        Log(Stopper.Stamp("Vignette"))
+
+        'Display the vignette
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
+
+    End Sub
+
+    Private Sub tsmiCorrectVignette_Click(sender As Object, e As EventArgs) Handles tsmiCorrectVignette.Click
+
+        Running()
+
+        'Calculate the vignette
+        Dim Stopper As New cStopper
+        Stopper.Start()
+        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(AstroNET.Statistics.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, 1000))
+        Log(Stopper.Stamp("Vignette"))
+
+        'Display the vignette
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
+
+        'Calculate the fitting
+        Dim Polynomial() As Double = {}
+        SignalProcessing.RegressPoly(Vignette.KeyList.ToArray, Vignette.ValueList.ToArray, 8, Polynomial)
+        Dim Vignette_Y_Fit As Double() = SignalProcessing.ApplyPoly(Vignette.KeyList.ToArray, Polynomial)
+        Disp1.PlotData("Fitting", Vignette.KeyList.ToArray, Vignette_Y_Fit)
+        IPP.DivC(Vignette_Y_Fit, IPP.Max(Vignette_Y_Fit))                                                       'Norm to maximum
+        Dim NormMin As Double = IPP.Min(Vignette_Y_Fit)
+        IPP.DivC(Vignette_Y_Fit, NormMin)
+        Dim VignetteCorrection As New Dictionary(Of Double, Double)
+        Dim YPtr As Integer = 0
+        For Each Entry As Double In Vignette.KeyList
+            VignetteCorrection.Add(Entry, Vignette_Y_Fit(YPtr))
+            YPtr += 1
+        Next Entry
+        Stopper.Stamp("Vignette fitting")
+
+        'Correct the vignette
+        AstroNET.Statistics.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData, VignetteCorrection)
+        Stopper.Stamp("Vignette correction")
+
+        CalculateStatistics()
+        Idle()
+
+    End Sub
 
 End Class

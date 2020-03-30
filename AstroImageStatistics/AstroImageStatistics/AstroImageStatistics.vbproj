@@ -172,6 +172,9 @@
     <Compile Include="..\..\..\src\atomics\ImageProcessing.vb">
       <Link>ImageProcessing.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\SignalProcessing.vb">
+      <Link>SignalProcessing.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\ZEDGraphForm.vb">
       <Link>ZEDGraphForm.vb</Link>
     </Compile>

@@ -49,6 +49,7 @@ Partial Class Form1
         Me.BasicProcessingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AdjustRGBChannelsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StretcherToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SolveImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
@@ -61,7 +62,8 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.SolveImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiCalcVignette = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiCorrectVignette = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -182,7 +184,7 @@ Partial Class Form1
         '
         'SpecialAnalysisToolStripMenuItem
         '
-        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem})
+        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette})
         Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
         Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
         Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
@@ -215,7 +217,7 @@ Partial Class Form1
         '
         'BasicProcessingToolStripMenuItem
         '
-        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.SolveImageToolStripMenuItem})
+        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.SolveImageToolStripMenuItem, Me.tsmiCorrectVignette})
         Me.BasicProcessingToolStripMenuItem.Name = "BasicProcessingToolStripMenuItem"
         Me.BasicProcessingToolStripMenuItem.Size = New System.Drawing.Size(106, 22)
         Me.BasicProcessingToolStripMenuItem.Text = "Basic processing"
@@ -231,6 +233,12 @@ Partial Class Form1
         Me.StretcherToolStripMenuItem.Name = "StretcherToolStripMenuItem"
         Me.StretcherToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
         Me.StretcherToolStripMenuItem.Text = "Stretcher"
+        '
+        'SolveImageToolStripMenuItem
+        '
+        Me.SolveImageToolStripMenuItem.Name = "SolveImageToolStripMenuItem"
+        Me.SolveImageToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
+        Me.SolveImageToolStripMenuItem.Text = "Solve image"
         '
         'TestCodeToolStripMenuItem
         '
@@ -314,11 +322,17 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'SolveImageToolStripMenuItem
+        'tsmiCalcVignette
         '
-        Me.SolveImageToolStripMenuItem.Name = "SolveImageToolStripMenuItem"
-        Me.SolveImageToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
-        Me.SolveImageToolStripMenuItem.Text = "Solve image"
+        Me.tsmiCalcVignette.Name = "tsmiCalcVignette"
+        Me.tsmiCalcVignette.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiCalcVignette.Text = "Vignette"
+        '
+        'tsmiCorrectVignette
+        '
+        Me.tsmiCorrectVignette.Name = "tsmiCorrectVignette"
+        Me.tsmiCorrectVignette.Size = New System.Drawing.Size(183, 22)
+        Me.tsmiCorrectVignette.Text = "Correct vignette"
         '
         'Form1
         '
@@ -382,4 +396,6 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
     Friend WithEvents ADUQuantizationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents SolveImageToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiCalcVignette As ToolStripMenuItem
+    Friend WithEvents tsmiCorrectVignette As ToolStripMenuItem
 End Class
