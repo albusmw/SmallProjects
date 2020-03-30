@@ -32,7 +32,10 @@ Partial Class MainForm
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiLoad10MicronData = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestWebInterfaceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -49,16 +52,16 @@ Partial Class MainForm
         Me.BiasCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
-        Me.LoadPositionFrom10MicronToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.FITSCommentToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MiscToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ResetLoopStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsbCapture = New System.Windows.Forms.ToolStripButton()
         Me.tsbStopCapture = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ilMain = New System.Windows.Forms.ImageList(Me.components)
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.tcMain = New System.Windows.Forms.TabControl()
@@ -69,7 +72,6 @@ Partial Class MainForm
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
-        Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -129,7 +131,7 @@ Partial Class MainForm
         '
         'msMain
         '
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.TESTToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.TESTToolStripMenuItem, Me.MiscToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Size = New System.Drawing.Size(936, 24)
@@ -138,7 +140,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.tsmiLoad10MicronData, Me.ToolStripMenuItem4, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -146,24 +148,41 @@ Partial Class MainForm
         'ExplorerHereToolStripMenuItem
         '
         Me.ExplorerHereToolStripMenuItem.Name = "ExplorerHereToolStripMenuItem"
-        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
+        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(262, 22)
         Me.ExplorerHereToolStripMenuItem.Text = "Explorer here"
+        '
+        'ExploreCurrentCampaignToolStripMenuItem
+        '
+        Me.ExploreCurrentCampaignToolStripMenuItem.Name = "ExploreCurrentCampaignToolStripMenuItem"
+        Me.ExploreCurrentCampaignToolStripMenuItem.Size = New System.Drawing.Size(262, 22)
+        Me.ExploreCurrentCampaignToolStripMenuItem.Text = "Explore current campaign"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(207, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(259, 6)
+        '
+        'tsmiLoad10MicronData
+        '
+        Me.tsmiLoad10MicronData.Name = "tsmiLoad10MicronData"
+        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(262, 22)
+        Me.tsmiLoad10MicronData.Text = "Load FITS meta data from 10Micron"
+        '
+        'ToolStripMenuItem4
+        '
+        Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
+        Me.ToolStripMenuItem4.Size = New System.Drawing.Size(259, 6)
         '
         'ExitToolStripMenuItem
         '
         Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(262, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'TestWebInterfaceToolStripMenuItem
         '
         Me.TestWebInterfaceToolStripMenuItem.Name = "TestWebInterfaceToolStripMenuItem"
-        Me.TestWebInterfaceToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
+        Me.TestWebInterfaceToolStripMenuItem.Size = New System.Drawing.Size(262, 22)
         Me.TestWebInterfaceToolStripMenuItem.Text = "Test web interface"
         '
         'CaptureToolStripMenuItem
@@ -176,14 +195,14 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'SeriesToolStripMenuItem
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -208,7 +227,7 @@ Partial Class MainForm
         '
         Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
         Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
-        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(138, 22)
+        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
         Me.PresetsToolStripMenuItem1.Text = "Presets"
         '
         'NoRealObjectToolStripMenuItem
@@ -220,17 +239,17 @@ Partial Class MainForm
         'ToolStripMenuItem3
         '
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(135, 6)
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
         '
         'TestSeriesToolStripMenuItem
         '
         Me.TestSeriesToolStripMenuItem.Name = "TestSeriesToolStripMenuItem"
-        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.TestSeriesToolStripMenuItem.Text = "Test series"
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem, Me.ToolStripMenuItem2, Me.LoadPositionFrom10MicronToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -238,50 +257,46 @@ Partial Class MainForm
         'BiasCaptureToolStripMenuItem
         '
         Me.BiasCaptureToolStripMenuItem.Name = "BiasCaptureToolStripMenuItem"
-        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(228, 22)
+        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.BiasCaptureToolStripMenuItem.Text = "Bias capture"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(228, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(228, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
-        '
-        'ToolStripMenuItem2
-        '
-        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
-        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(225, 6)
-        '
-        'LoadPositionFrom10MicronToolStripMenuItem
-        '
-        Me.LoadPositionFrom10MicronToolStripMenuItem.Name = "LoadPositionFrom10MicronToolStripMenuItem"
-        Me.LoadPositionFrom10MicronToolStripMenuItem.Size = New System.Drawing.Size(228, 22)
-        Me.LoadPositionFrom10MicronToolStripMenuItem.Text = "Load position from 10Micron"
         '
         'TESTToolStripMenuItem
         '
-        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSCommentToolStripMenuItem, Me.USBTreeReaderToolStripMenuItem})
+        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.USBTreeReaderToolStripMenuItem})
         Me.TESTToolStripMenuItem.Name = "TESTToolStripMenuItem"
         Me.TESTToolStripMenuItem.Size = New System.Drawing.Size(73, 20)
         Me.TESTToolStripMenuItem.Text = "!!! TEST !!!!!"
         '
-        'FITSCommentToolStripMenuItem
-        '
-        Me.FITSCommentToolStripMenuItem.Name = "FITSCommentToolStripMenuItem"
-        Me.FITSCommentToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
-        Me.FITSCommentToolStripMenuItem.Text = "FITS comment"
-        '
         'USBTreeReaderToolStripMenuItem
         '
         Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
-        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
+        '
+        'MiscToolStripMenuItem
+        '
+        Me.MiscToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ResetLoopStatisticsToolStripMenuItem})
+        Me.MiscToolStripMenuItem.Name = "MiscToolStripMenuItem"
+        Me.MiscToolStripMenuItem.Size = New System.Drawing.Size(44, 20)
+        Me.MiscToolStripMenuItem.Text = "Misc"
+        '
+        'ResetLoopStatisticsToolStripMenuItem
+        '
+        Me.ResetLoopStatisticsToolStripMenuItem.Name = "ResetLoopStatisticsToolStripMenuItem"
+        Me.ResetLoopStatisticsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ResetLoopStatisticsToolStripMenuItem.Text = "Reset loop statistics"
         '
         'zgcMain
         '
@@ -305,7 +320,7 @@ Partial Class MainForm
         '
         'tsMain
         '
-        Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture})
+        Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture, Me.ToolStripSeparator1})
         Me.tsMain.Location = New System.Drawing.Point(0, 24)
         Me.tsMain.Name = "tsMain"
         Me.tsMain.Size = New System.Drawing.Size(936, 38)
@@ -329,6 +344,11 @@ Partial Class MainForm
         Me.tsbStopCapture.Size = New System.Drawing.Size(35, 35)
         Me.tsbStopCapture.Text = "Stop"
         Me.tsbStopCapture.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 38)
         '
         'ilMain
         '
@@ -457,12 +477,6 @@ Partial Class MainForm
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
         '
-        'ExploreCurrentCampaignToolStripMenuItem
-        '
-        Me.ExploreCurrentCampaignToolStripMenuItem.Name = "ExploreCurrentCampaignToolStripMenuItem"
-        Me.ExploreCurrentCampaignToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
-        Me.ExploreCurrentCampaignToolStripMenuItem.Text = "Explore current campaign"
-        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -536,16 +550,18 @@ Partial Class MainForm
     Friend WithEvents TabPage1 As Windows.Forms.TabPage
     Friend WithEvents TabPage2 As Windows.Forms.TabPage
     Friend WithEvents pgMeta As Windows.Forms.PropertyGrid
-    Friend WithEvents ToolStripMenuItem2 As Windows.Forms.ToolStripSeparator
-    Friend WithEvents LoadPositionFrom10MicronToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents scMain As Windows.Forms.SplitContainer
     Friend WithEvents SplitContainer2 As Windows.Forms.SplitContainer
     Friend WithEvents SplitContainer3 As Windows.Forms.SplitContainer
     Friend WithEvents rtbStatistics As Windows.Forms.RichTextBox
     Friend WithEvents TESTToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-    Friend WithEvents FITSCommentToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents USBTreeReaderToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem3 As Windows.Forms.ToolStripSeparator
     Friend WithEvents TestSeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ExploreCurrentCampaignToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents MiscToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ResetLoopStatisticsToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem4 As Windows.Forms.ToolStripSeparator
+    Friend WithEvents tsmiLoad10MicronData As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As Windows.Forms.ToolStripSeparator
 End Class

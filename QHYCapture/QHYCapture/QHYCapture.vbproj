@@ -139,6 +139,8 @@
       <Link>Everything64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="BuildDate.txt" />
+    <Content Include="FITS_header_keywords.txt" />
     <Content Include="Ideas.txt" />
     <Content Include="QHY600 Control Values.txt" />
   </ItemGroup>
@@ -146,4 +148,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>echo %25date%25 %25time%25 &gt; "$(ProjectDir)\BuildDate.txt"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -1,12 +1,27 @@
 ﻿Option Explicit On
 Option Strict On
 
+Public Structure sSize_UInt
+    Dim Width As UInteger
+    Dim Height As UInteger
+End Structure
+
+Public Structure sSize_Dbl
+    Dim Width As Double
+    Dim Height As Double
+End Structure
+
 Public Structure sRect_UInt
     Dim X As UInteger
     Dim Y As UInteger
     Dim Width As UInteger
     Dim Height As UInteger
 End Structure
+
+Public Enum eReadResolution
+    Res8Bit = 0
+    Res16Bit = 16
+End Enum
 
 '''<summary>Filter as to be send as ASCII string.</summary>
 Public Enum eFilter As Byte
@@ -97,9 +112,34 @@ Public Class cDB
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   6. ROI")>
+    <ComponentModel.DisplayName("   6. Read resolution")>
+    <ComponentModel.Description("Read resolution")>
+    <ComponentModel.DefaultValue(eReadResolution.Res16Bit)>
+    Public Property ReadResolution As eReadResolution = eReadResolution.Res16Bit
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   7. ROI")>
     <ComponentModel.Description("ROI (without binning)")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
+
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property ROISet() As Boolean
+        Get
+            If ROI.X = 0 And ROI.Y = 0 And ROI.Width = 0 And ROI.Height = 0 Then Return False Else Return True
+        End Get
+    End Property
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   9. USB traffic")>
+    <ComponentModel.Description("USB traffic - 0 ... <1> ... 60")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property USBTraffic As Double = 0.0
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   10. DDR RAM")>
+    <ComponentModel.Description("Use DDR RAM?")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property DDR_RAM As Boolean = True
 
     '===================================================================================================
 
@@ -121,15 +161,21 @@ Public Class cDB
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   4. Gain")>
-    <ComponentModel.Description("Gain to set")>
+    <ComponentModel.Description("Gain to set - 0 ... <1> ... 200")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   5. Offset")>
-    <ComponentModel.Description("Offset to set")>
+    <ComponentModel.Description("Offset to set - 0 ... <1> ... 255")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("  6. Write always")>
+    <ComponentModel.Description("Write all exposure data on each exposure start?")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property WriteOnEachExposure As Boolean = True
 
     '===================================================================================================
 
@@ -162,6 +208,12 @@ Public Class cDB
     <ComponentModel.Description("Automaticall open a stored FITS file with the default editor")>
     <ComponentModel.DefaultValue(True)>
     Public Property AutoOpenImage As Boolean = True
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   6. Show live image")>
+    <ComponentModel.Description("Show a live image?")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property ShowLiveImage As Boolean = False
 
     '===================================================================================================
 
