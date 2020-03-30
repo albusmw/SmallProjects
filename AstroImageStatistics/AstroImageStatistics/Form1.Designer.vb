@@ -61,6 +61,7 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
+        Me.SolveImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -214,7 +215,7 @@ Partial Class Form1
         '
         'BasicProcessingToolStripMenuItem
         '
-        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem})
+        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.SolveImageToolStripMenuItem})
         Me.BasicProcessingToolStripMenuItem.Name = "BasicProcessingToolStripMenuItem"
         Me.BasicProcessingToolStripMenuItem.Size = New System.Drawing.Size(106, 22)
         Me.BasicProcessingToolStripMenuItem.Text = "Basic processing"
@@ -313,6 +314,12 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
+        'SolveImageToolStripMenuItem
+        '
+        Me.SolveImageToolStripMenuItem.Name = "SolveImageToolStripMenuItem"
+        Me.SolveImageToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
+        Me.SolveImageToolStripMenuItem.Text = "Solve image"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -374,4 +381,5 @@ Partial Class Form1
     Friend WithEvents BitGrayscaleFileGenerationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
     Friend WithEvents ADUQuantizationToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents SolveImageToolStripMenuItem As ToolStripMenuItem
 End Class

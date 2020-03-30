@@ -59,6 +59,10 @@
     <ApplicationIcon>Statistics.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ASCOM.Astrometry, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Windows\assembly\GAC_MSIL\ASCOM.Astrometry\6.0.0.0__565de7938946fba7\ASCOM.Astrometry.dll</HintPath>
+    </Reference>
     <Reference Include="ClosedXML, Version=0.94.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ClosedXML.0.94.2\lib\net46\ClosedXML.dll</HintPath>
     </Reference>
@@ -111,11 +115,23 @@
     <Compile Include="..\..\..\AstroCamTest\ImgArrayFunctions.vb">
       <Link>ImgArrayFunctions.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\MyRemoteObservatory\cPlateSolve.vb">
+      <Link>cPlateSolve.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\AstroCalc.vb">
+      <Link>AstroCalc.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\cAstroParser.vb">
+      <Link>cAstroParser.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cFITSHeaderChanger.vb">
       <Link>cFITSHeaderChanger.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSHeaderKeywords.vb">
+      <Link>cFITSHeaderKeywords.vb</Link>
     </Compile>
     <Compile Include="..\..\..\src\atomics\cFITSHeaderParser.vb">
       <Link>cFITSHeaderParser.vb</Link>

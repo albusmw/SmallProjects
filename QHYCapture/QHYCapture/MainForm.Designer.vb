@@ -43,6 +43,8 @@ Partial Class MainForm
         Me.GainVariationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.NoRealObjectToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.TestSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BiasCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -67,8 +69,7 @@ Partial Class MainForm
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
-        Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.TestSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -137,7 +138,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -145,24 +146,24 @@ Partial Class MainForm
         'ExplorerHereToolStripMenuItem
         '
         Me.ExplorerHereToolStripMenuItem.Name = "ExplorerHereToolStripMenuItem"
-        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.ExplorerHereToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
         Me.ExplorerHereToolStripMenuItem.Text = "Explorer here"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(165, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(207, 6)
         '
         'ExitToolStripMenuItem
         '
         Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'TestWebInterfaceToolStripMenuItem
         '
         Me.TestWebInterfaceToolStripMenuItem.Name = "TestWebInterfaceToolStripMenuItem"
-        Me.TestWebInterfaceToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.TestWebInterfaceToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
         Me.TestWebInterfaceToolStripMenuItem.Text = "Test web interface"
         '
         'CaptureToolStripMenuItem
@@ -175,14 +176,14 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'SeriesToolStripMenuItem
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -207,7 +208,7 @@ Partial Class MainForm
         '
         Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
         Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
-        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
+        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(138, 22)
         Me.PresetsToolStripMenuItem1.Text = "Presets"
         '
         'NoRealObjectToolStripMenuItem
@@ -215,6 +216,17 @@ Partial Class MainForm
         Me.NoRealObjectToolStripMenuItem.Name = "NoRealObjectToolStripMenuItem"
         Me.NoRealObjectToolStripMenuItem.Size = New System.Drawing.Size(165, 22)
         Me.NoRealObjectToolStripMenuItem.Text = "Camera-only test"
+        '
+        'ToolStripMenuItem3
+        '
+        Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(135, 6)
+        '
+        'TestSeriesToolStripMenuItem
+        '
+        Me.TestSeriesToolStripMenuItem.Name = "TestSeriesToolStripMenuItem"
+        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.TestSeriesToolStripMenuItem.Text = "Test series"
         '
         'PresetsToolStripMenuItem
         '
@@ -262,13 +274,13 @@ Partial Class MainForm
         'FITSCommentToolStripMenuItem
         '
         Me.FITSCommentToolStripMenuItem.Name = "FITSCommentToolStripMenuItem"
-        Me.FITSCommentToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FITSCommentToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
         Me.FITSCommentToolStripMenuItem.Text = "FITS comment"
         '
         'USBTreeReaderToolStripMenuItem
         '
         Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
-        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
         Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
         '
         'zgcMain
@@ -445,16 +457,11 @@ Partial Class MainForm
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
         '
-        'ToolStripMenuItem3
+        'ExploreCurrentCampaignToolStripMenuItem
         '
-        Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
-        '
-        'TestSeriesToolStripMenuItem
-        '
-        Me.TestSeriesToolStripMenuItem.Name = "TestSeriesToolStripMenuItem"
-        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.TestSeriesToolStripMenuItem.Text = "Test series"
+        Me.ExploreCurrentCampaignToolStripMenuItem.Name = "ExploreCurrentCampaignToolStripMenuItem"
+        Me.ExploreCurrentCampaignToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
+        Me.ExploreCurrentCampaignToolStripMenuItem.Text = "Explore current campaign"
         '
         'MainForm
         '
@@ -540,4 +547,5 @@ Partial Class MainForm
     Friend WithEvents USBTreeReaderToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem3 As Windows.Forms.ToolStripSeparator
     Friend WithEvents TestSeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ExploreCurrentCampaignToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 End Class

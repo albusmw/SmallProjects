@@ -88,6 +88,37 @@ Public Class Form1
                 SingleStatCalc.DataProcessor_UInt16.ImageData = {{}}
                 UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(1)
+            Case -32
+                Log("Special mode - trying to get fixed point ...")
+                Dim Data(,) As Single = FITSReader.ReadInFloat32(FileName, False)
+                'Calculate the histogramm
+                Dim ADUHistogramm As New Dictionary(Of Single, UInt32)
+                For Idx1 As Integer = 0 To Data.GetUpperBound(0)
+                    For Idx2 As Integer = 0 To Data.GetUpperBound(1)
+                        If ADUHistogramm.ContainsKey(Data(Idx1, Idx2)) = True Then
+                            ADUHistogramm(Data(Idx1, Idx2)) = ADUHistogramm(Data(Idx1, Idx2)) + CType(1, UInt32)
+                        Else
+                            ADUHistogramm.Add(Data(Idx1, Idx2), 1)
+                        End If
+                    Next Idx2
+                Next Idx1
+                ADUHistogramm = cGenerics.SortDictionary(ADUHistogramm)
+                Dim Result As Collections.Generic.Dictionary(Of Single, UInt32) = AstroNET.Statistics.GetQuantizationHisto(ADUHistogramm)
+                Dim QuantError As Single = 0
+                For Each Entry As Single In ADUHistogramm.Keys
+                    QuantError += Math.Abs(CSng(Math.Round(Entry * 10, 0)) - (Entry * 10))
+                Next Entry
+                QuantError /= Result.Count
+                If QuantError = 0 Then
+                    ReDim SingleStatCalc.DataProcessor_Int32.ImageData(Data.GetUpperBound(0), Data.GetUpperBound(1))
+                    For Idx1 As Integer = 0 To Data.GetUpperBound(0)
+                        For Idx2 As Integer = 0 To Data.GetUpperBound(1)
+                            SingleStatCalc.DataProcessor_Int32.ImageData(Idx1, Idx2) = CInt(Data(Idx1, Idx2) * 10)
+                        Next Idx2
+                    Next Idx1
+                    SingleStatCalc.DataProcessor_UInt16.ImageData = {{}}
+                End If
+                MsgBox(ADUHistogramm.Count & " ADU values found!")
             Case Else
                 Log("!!! File format <" & FITSHeader.BitPix.ToString.Trim & "> not yet supported!")
                 Exit Sub
@@ -733,12 +764,12 @@ Public Class Form1
 
     Private Sub ADUQuantizationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ADUQuantizationToolStripMenuItem.Click
         Dim Disp As New cZEDGraphForm
-        Dim PlotData As Generic.Dictionary(Of UInt32, UInt64) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram)
-        Dim XAxis As Double() = cGenerics.GetDictionaryKeys(PlotData).ToDouble
+        Dim PlotData As Generic.Dictionary(Of Long, UInt32) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram)
+        Dim XAxis As Double() = PlotData.KeyList.ToDouble
         Disp.PlotData(New Double() {1, 2, 3, 4})
         'Plot data
         Disp.Plotter.Clear()
-        Disp.Plotter.PlotXvsY("Mono", XAxis, cGenerics.GetDictionaryValues(PlotData).ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
+        Disp.Plotter.PlotXvsY("Mono", XAxis, PlotData.ValueList.ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ManuallyScaleXAxis(XAxis(0), XAxis(XAxis.GetUpperBound(0)))
         Disp.Plotter.AutoScaleYAxisLog()
@@ -748,5 +779,83 @@ Public Class Form1
         Disp.Plotter.MaximizePlotArea()
         Disp.Hoster.Icon = Me.Icon
     End Sub
+
+    Private Sub SolveImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SolveImageToolStripMenuItem.Click
+
+        Dim Solver As New cPlateSolve
+        Dim FileToRun As String = LastFile
+        Dim Binning As Integer = 1
+
+        'Get the FITS header information
+        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun)
+        Dim File_RA_JNow As String = String.Empty
+        Dim File_Dec_JNow As String = String.Empty
+        Dim File_FOV1 As String = String.Empty
+        Dim File_FOV2 As String = String.Empty
+        For Each Entry As cFITSHeaderParser.sHeaderElement In X
+            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.RA) Then File_RA_JNow = Entry.Value.Trim("'"c).Trim.Trim("'"c)
+            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.DEC) Then File_Dec_JNow = Entry.Value.Trim("'"c).Trim.Trim("'"c)
+            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.FOV1) Then File_FOV1 = Entry.Value.Trim
+            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.FOV2) Then File_FOV2 = Entry.Value.Trim
+        Next Entry
+
+        'Data from QHYCapture are in JNow, so convert to J2000 for PlateSolve
+        Dim File_RA_J2000 As Double = Double.NaN
+        Dim File_Dec_J2000 As Double = Double.NaN
+        JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
+
+        'Run plate solve
+        Dim FITSFile1 As String = ofdMain.FileName
+        Dim ErrorCode1 As String = String.Empty
+        Dim SolverIn_RA As String() = File_RA_JNow.Trim.Trim("'"c).Split(":"c)
+        Dim SolverIn_Dec As String() = File_Dec_JNow.Trim.Trim("'"c).Split(":"c)
+        cPlateSolve.PlateSolvePath = "C:\Bin\PlateSolve2\PlateSolve2.exe"
+        With Solver
+            .SetRA(CInt(SolverIn_RA(0)), CInt(SolverIn_RA(1)), Val(SolverIn_RA(2)))                     'theoretical position (Wikipedia, J2000.0)
+            .SetDec(CInt(SolverIn_Dec(0)), CInt(SolverIn_Dec(1)), Val(SolverIn_Dec(2)))                 'theoretical position (Wikipedia, J2000.0)
+            .SetDimX(Val(File_FOV1) * 60)                                                   'constant for system [telescope-camera]
+            .SetDimY(Val(File_FOV2) * 60)                                                   'constant for system [telescope-camera]
+            .HoldOpenTime = 100
+            Dim RawOut As String() = {}
+            ErrorCode1 = .Solve(LastFile, RawOut)
+        End With
+
+        'Convert
+        Dim RadToH As Double = 12 / Math.PI
+        Dim RadToGrad As Double = (180 / Math.PI)
+        Dim JNow_RA_solved As Double = Double.NaN
+        Dim JNow_Dec_solved As Double = Double.NaN
+        J2000ToJNow(Solver.SolvedRA * RadToH, Solver.SolvedDec * RadToGrad, JNow_RA_solved, JNow_Dec_solved)
+
+        Dim Output As New List(Of String)
+        Output.Add("Start with   RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow)")
+        Output.Add("             RA <" & Ato.AstroCalc.FormatHMS(File_RA_J2000) & ">, DEC <" & Ato.AstroCalc.Format360Degree(File_Dec_J2000) & "> (J2000)")
+        Output.Add("Solved as    RA <" & Ato.AstroCalc.FormatHMS(Solver.SolvedRA * RadToH) & ">, DEC <" & Ato.AstroCalc.Format360Degree(Solver.SolvedDec * RadToGrad) & "> (J2000)")
+        Output.Add("Converted to RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
+
+        MsgBox(Join(Output.ToArray, System.Environment.NewLine))
+
+
+    End Sub
+
+    '''<summary>Convert JNow to J2000 epoch.</summary>
+    '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
+    Public Shared Sub JNowToJ2000(ByVal JNowRA As Double, ByVal JNowDec As Double, ByRef J2000RA As Double, ByRef J2000Dec As Double)
+        Dim X As New ASCOM.Astrometry.Transform.Transform
+        X.JulianDateUTC = (New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)
+        X.SetApparent(JNowRA, JNowDec)
+        J2000RA = X.RAJ2000
+        J2000Dec = X.DecJ2000
+    End Sub
+
+    '''<summary>Convert J2000 to JNow epoch.</summary>
+    '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
+    Public Shared Function J2000ToJNow(ByVal J2000RA As Double, ByVal J2000Dec As Double, ByRef JNowRA As Double, ByRef JNowDec As Double) As Short
+        Dim X As New ASCOM.Astrometry.Transform.Transform
+        X.JulianDateUTC = (New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)
+        X.SetJ2000(J2000RA, J2000Dec)
+        JNowRA = X.RAApparent
+        JNowDec = X.DECApparent
+    End Function
 
 End Class

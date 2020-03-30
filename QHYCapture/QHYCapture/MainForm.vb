@@ -327,49 +327,50 @@ Public Class MainForm
                     Dim FITS_ExpTime As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000
                     Dim FITS_Gain As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN)
                     Dim FITS_Offset As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET)
+                    Dim FITS_Brightness As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS)
 
                     'Compose all FITS keyword entries
                     Dim CustomElement As New Collections.Generic.List(Of String())
-                    Dim FITSKey As New cFITSKey
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.OBS_ID), cFITSKeywords.GetString(DB_meta.GUID)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.PROGRAM), cFITSKeywords.GetString(Me.Text)})
 
-                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.OBJECT), cFITSKeywords.GetString(DB_meta.ObjectName))
-                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.RA), cFITSKeywords.GetString(DB_meta.TelescopeRightAscension))
-                    AddNoEmptyElement(CustomElement, FITSKey(eFITSKeywords.DEC), cFITSKeywords.GetString(DB_meta.TelescopeDeclination))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.OBS_ID, cFITSKeywords.GetString(DB_meta.GUID))
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.AUTHOR), cFITSKeywords.GetString(DB_meta.Author)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.ORIGIN), cFITSKeywords.GetString(DB_meta.Origin)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.TELESCOP), cFITSKeywords.GetString(DB_meta.Telescope)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.TELAPER), cFITSKeywords.GetDouble(DB_meta.TelescopeAperture / 1000.0)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.TELFOC), cFITSKeywords.GetDouble(DB_meta.TelescopeFocalLength / 1000.0)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.INSTRUME), cFITSKeywords.GetString(UsedCameraId.ToString)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.PIXSIZE1), cFITSKeywords.GetDouble(Pixel_Size_W)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.PIXSIZE2), cFITSKeywords.GetDouble(Pixel_Size_H)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.PLATESZ1), cFITSKeywords.GetDouble(PLATESZ1 / 10)})                'calculated from the image data as ROI may be set ...
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.PLATESZ2), cFITSKeywords.GetDouble(PLATESZ2 / 10)})                'calculated from the image data as ROI may be set ...
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.FOV1), cFITSKeywords.GetDouble(FOV1)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.FOV2), cFITSKeywords.GetDouble(FOV2)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.COLORTYP), "0"})                                                   '<- check
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.OBJECT, cFITSKeywords.GetString(DB_meta.ObjectName))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.RA, cFITSKeywords.GetString(DB_meta.TelescopeRightAscension))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.DEC, cFITSKeywords.GetString(DB_meta.TelescopeDeclination))
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.DATE_OBS), cFITSKeywords.GetDateWithTime(ObsStart)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.DATE_END), cFITSKeywords.GetDateWithTime(ObsEnd)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.TIME_OBS), cFITSKeywords.GetTime(ObsStart)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.TIME_END), cFITSKeywords.GetTime(ObsEnd)})
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.AUTHOR, cFITSKeywords.GetString(DB_meta.Author))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.ORIGIN, cFITSKeywords.GetString(DB_meta.Origin))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.TELESCOP, cFITSKeywords.GetString(DB_meta.Telescope))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB_meta.TelescopeAperture / 1000.0))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB_meta.TelescopeFocalLength / 1000.0))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.INSTRUME, cFITSKeywords.GetString(UsedCameraId.ToString))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size_W))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size_H))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10))                'calculated from the image data as ROI may be set ...
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.PLATESZ2, cFITSKeywords.GetDouble(PLATESZ2 / 10))                'calculated from the image data as ROI may be set ...
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.FOV1, cFITSKeywords.GetDouble(FOV1))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.FOV2, cFITSKeywords.GetDouble(FOV2))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.COLORTYP, "0")                                                   '<- check
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.CRPIX1), cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1))})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.CRPIX2), cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1))})
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(ObsStart))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(ObsEnd))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(ObsStart))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.TIME_END, cFITSKeywords.GetTime(ObsEnd))
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.IMAGETYP), cFITSKeywords.GetString(DB_meta.ExposureType)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.EXPTIME), cFITSKeywords.GetDouble(FITS_ExpTime)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.GAIN), cFITSKeywords.GetDouble(FITS_Gain)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.OFFSET), cFITSKeywords.GetDouble(FITS_Offset)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.BRIGHTNESS), cFITSKeywords.GetDouble(QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS))})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.SETTEMP), cFITSKeywords.GetDouble(DB.TargetTemp)})
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.CCDTEMP), cFITSKeywords.GetDouble(ObsStartTemp)})
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (NAXIS1 + 1)))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (NAXIS2 + 1)))
 
-                    CustomElement.Add(New String() {FITSKey(eFITSKeywords.QHY_MODE), cFITSKeywords.GetString(CamReadOutMode.ToString)})
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.IMAGETYP, cFITSKeywords.GetString(DB_meta.ExposureType))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(FITS_ExpTime))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.GAIN, cFITSKeywords.GetDouble(FITS_Gain))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(FITS_Offset))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(FITS_Brightness))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(ObsStartTemp))
+
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(CamReadOutMode.ToString))
+                    AddFITSHeaderCard(CustomElement, eFITSKeywords.PROGRAM, cFITSKeywords.GetString(Me.Text))
 
                     'Create FITS file
                     Dim FileNameToWrite As String = FITSFileStart
@@ -423,6 +424,13 @@ Public Class MainForm
 
     End Sub
 
+    Private Sub AddFITSHeaderCard(ByRef Container As Collections.Generic.List(Of String()), ByVal Keyword As eFITSKeywords, ByVal VAlue As String)
+        If String.IsNullOrEmpty(VAlue) = False Then
+            Dim FITSKey As New cFITSKey
+            Container.Add(New String() {FITSKey(Keyword), VAlue, FITSKey.Comment(Keyword)})
+        End If
+    End Sub
+
     Private Sub CloseCamera()
         If CamHandle <> IntPtr.Zero Then
             Log("Closing camera ...")
@@ -431,10 +439,6 @@ Public Class MainForm
             QHY.QHYCamera.ReleaseQHYCCDResource()
             CamHandle = IntPtr.Zero
         End If
-    End Sub
-
-    Private Sub AddNoEmptyElement(ByRef Elements As Collections.Generic.List(Of String()), ByVal Key As String, ByVal Value As String)
-        If String.IsNullOrEmpty(Value) = False Then Elements.Add(New String() {Key, Value})
     End Sub
 
     '===============================================================================================
@@ -976,6 +980,11 @@ Public Class MainForm
             If DB.StopFlag = True Then Exit For
         Next Mode
         CloseCamera()
+    End Sub
+
+    Private Sub ExploreCurrentCampaignToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExploreCurrentCampaignToolStripMenuItem.Click
+        Dim FolderToOpen As String = System.IO.Path.Combine(DB.MyPath, DB_meta.GUID)
+        If System.IO.Directory.Exists(FolderToOpen) = True Then System.Diagnostics.Process.Start(FolderToOpen)
     End Sub
 
 End Class

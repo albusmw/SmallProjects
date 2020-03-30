@@ -10,10 +10,11 @@
     <AssemblyName>QHYCapture</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Empty</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -49,8 +50,14 @@
     <Compile Include="..\..\..\MyRemoteObservatory\c10Micron.vb">
       <Link>c10Micron.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\AstroCalc.vb">
+      <Link>AstroCalc.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cAstroParser.vb">
+      <Link>cAstroParser.vb</Link>
     </Compile>
     <Compile Include="..\..\..\src\atomics\cColorMaps.vb">
       <Link>cColorMaps.vb</Link>
@@ -134,6 +141,9 @@
     </Content>
     <Content Include="Ideas.txt" />
     <Content Include="QHY600 Control Values.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
