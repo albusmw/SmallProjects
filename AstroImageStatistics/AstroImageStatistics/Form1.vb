@@ -764,12 +764,12 @@ Public Class Form1
 
     Private Sub ADUQuantizationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ADUQuantizationToolStripMenuItem.Click
         Dim Disp As New cZEDGraphForm
-        Dim PlotData As Generic.Dictionary(Of Long, UInt32) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram)
+        Dim PlotData As Generic.Dictionary(Of Long, UInt64) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram)
         Dim XAxis As Double() = PlotData.KeyList.ToDouble
         Disp.PlotData("Test", New Double() {1, 2, 3, 4})
         'Plot data
         Disp.Plotter.Clear()
-        Disp.Plotter.PlotXvsY("Mono", XAxis, PlotData.ValueList.ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
+        Disp.Plotter.PlotXvsY("Mono", XAxis, PlotData.ValueList.ToArray.ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
         Disp.Plotter.GridOnOff(True, True)
         Disp.Plotter.ManuallyScaleXAxis(XAxis(0), XAxis(XAxis.GetUpperBound(0)))
         Disp.Plotter.AutoScaleYAxisLog()

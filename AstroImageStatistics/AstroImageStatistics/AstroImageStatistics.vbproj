@@ -148,6 +148,9 @@
     <Compile Include="..\..\..\src\atomics\cLockBitmap.vb">
       <Link>cLockBitmap.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\ComponentModel.vb">
+      <Link>ComponentModel.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cSingleValueStatistics.vb">
       <Link>cSingleValueStatistics.vb</Link>
     </Compile>

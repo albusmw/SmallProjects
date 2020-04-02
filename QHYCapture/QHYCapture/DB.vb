@@ -71,6 +71,8 @@ End Enum
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
+    Public Stopper As New cStopper
+
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
 
@@ -115,6 +117,7 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   2. Read-out mode")>
     <ComponentModel.Description("Photographic, high-gain.")>
+    <ComponentModel.DefaultValue(eReadOutMode.Photographic)>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
@@ -125,13 +128,13 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   4. Target Temp")>
     <ComponentModel.Description("Enter <-100 for do-not-use")>
-    <ComponentModel.DefaultValue(-300)>
-    Public Property TargetTemp As Double = -300
+    <ComponentModel.DefaultValue(-300.0)>
+    Public Property TargetTemp As Double = -300.0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   5. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
-    <ComponentModel.DefaultValue(1)>
+    <ComponentModel.DefaultValue(CType(1, UInt32))>
     Public Property Binning As UInteger = 1
 
     <ComponentModel.Category(Cat1)>
@@ -144,13 +147,6 @@ Public Class cDB
     <ComponentModel.DisplayName("   7. ROI")>
     <ComponentModel.Description("ROI (without binning)")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
-
-    <ComponentModel.Browsable(False)>
-    Public ReadOnly Property ROISet() As Boolean
-        Get
-            If ROI.X = 0 And ROI.Y = 0 And ROI.Width = 0 And ROI.Height = 0 Then Return False Else Return True
-        End Get
-    End Property
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   9. USB traffic")>
@@ -168,7 +164,7 @@ Public Class cDB
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   1. # of captures")>
-    <ComponentModel.DefaultValue(1)>
+    <ComponentModel.DefaultValue(CType(1, UInt32))>
     Public Property CaptureCount As UInt32 = 1
 
     <ComponentModel.Category(Cat2)>
@@ -195,7 +191,13 @@ Public Class cDB
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("  6. Write always")>
+    <ComponentModel.DisplayName("   6. Remove overscan?")>
+    <ComponentModel.Description("Remove the overscan area in the stored file")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property RemoveOverscan As Boolean = False
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("  7. Config for each capture")>
     <ComponentModel.Description("Write all exposure data on each exposure start?")>
     <ComponentModel.DefaultValue(True)>
     Public Property ConfigAlways As Boolean = True
@@ -207,12 +209,6 @@ Public Class cDB
     <ComponentModel.Description("Store the captured image")>
     <ComponentModel.DefaultValue(True)>
     Public Property StoreImage As Boolean = True
-
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   2. Remove overscan?")>
-    <ComponentModel.Description("Remove the overscan area in the stored file")>
-    <ComponentModel.DefaultValue(False)>
-    Public Property RemoveOverscan As Boolean = False
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   3. File name start")>
@@ -277,7 +273,14 @@ Public Class cDB
     <ComponentModel.DefaultValue(False)>
     Public Property PlotLimitsFixed As Boolean = False
 
+    '===================================================================================================
 
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property ROISet() As Boolean
+        Get
+            If ROI.X = 0 And ROI.Y = 0 And ROI.Width = 0 And ROI.Height = 0 Then Return False Else Return True
+        End Get
+    End Property
 
 End Class
 

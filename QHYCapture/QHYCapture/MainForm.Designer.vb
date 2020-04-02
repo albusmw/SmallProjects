@@ -29,6 +29,7 @@ Partial Class MainForm
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tspbProgress = New System.Windows.Forms.ToolStripProgressBar()
         Me.tsslProgress = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsmiFPSIndicator = New System.Windows.Forms.ToolStripStatusLabel()
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -72,7 +73,8 @@ Partial Class MainForm
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
-        Me.tsmiFPSIndicator = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.StoreStatisticsAsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -130,6 +132,12 @@ Partial Class MainForm
         Me.tsslProgress.Size = New System.Drawing.Size(22, 17)
         Me.tsslProgress.Text = "---"
         '
+        'tsmiFPSIndicator
+        '
+        Me.tsmiFPSIndicator.Name = "tsmiFPSIndicator"
+        Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 17)
+        Me.tsmiFPSIndicator.Text = "FPS: ???"
+        '
         'msMain
         '
         Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.TESTToolStripMenuItem, Me.MiscToolStripMenuItem})
@@ -141,7 +149,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.tsmiLoad10MicronData, Me.ToolStripMenuItem4, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.tsmiLoad10MicronData, Me.ToolStripMenuItem4, Me.ExitToolStripMenuItem, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -196,14 +204,14 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'SeriesToolStripMenuItem
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -228,7 +236,7 @@ Partial Class MainForm
         '
         Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
         Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
-        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(138, 22)
+        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
         Me.PresetsToolStripMenuItem1.Text = "Presets"
         '
         'NoRealObjectToolStripMenuItem
@@ -240,12 +248,12 @@ Partial Class MainForm
         'ToolStripMenuItem3
         '
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(135, 6)
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
         '
         'TestSeriesToolStripMenuItem
         '
         Me.TestSeriesToolStripMenuItem.Name = "TestSeriesToolStripMenuItem"
-        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
+        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.TestSeriesToolStripMenuItem.Text = "Test series"
         '
         'PresetsToolStripMenuItem
@@ -283,7 +291,7 @@ Partial Class MainForm
         'USBTreeReaderToolStripMenuItem
         '
         Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
-        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
         '
         'MiscToolStripMenuItem
@@ -398,7 +406,7 @@ Partial Class MainForm
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(304, 393)
+        Me.TabPage2.Size = New System.Drawing.Size(415, 393)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Meta data"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -408,7 +416,7 @@ Partial Class MainForm
         Me.pgMeta.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMeta.Location = New System.Drawing.Point(3, 3)
         Me.pgMeta.Name = "pgMeta"
-        Me.pgMeta.Size = New System.Drawing.Size(298, 387)
+        Me.pgMeta.Size = New System.Drawing.Size(409, 387)
         Me.pgMeta.TabIndex = 1
         Me.pgMeta.ToolbarVisible = False
         '
@@ -478,11 +486,11 @@ Partial Class MainForm
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
         '
-        'tsmiFPSIndicator
+        'StoreStatisticsAsEXCELFileToolStripMenuItem
         '
-        Me.tsmiFPSIndicator.Name = "tsmiFPSIndicator"
-        Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 17)
-        Me.tsmiFPSIndicator.Text = "FPS: ???"
+        Me.StoreStatisticsAsEXCELFileToolStripMenuItem.Name = "StoreStatisticsAsEXCELFileToolStripMenuItem"
+        Me.StoreStatisticsAsEXCELFileToolStripMenuItem.Size = New System.Drawing.Size(262, 22)
+        Me.StoreStatisticsAsEXCELFileToolStripMenuItem.Text = "Store statistics as EXCEL file"
         '
         'MainForm
         '
@@ -572,4 +580,6 @@ Partial Class MainForm
     Friend WithEvents tsmiLoad10MicronData As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripSeparator1 As Windows.Forms.ToolStripSeparator
     Friend WithEvents tsmiFPSIndicator As Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents StoreStatisticsAsEXCELFileToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents sfdMain As Windows.Forms.SaveFileDialog
 End Class
