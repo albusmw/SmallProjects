@@ -1,6 +1,29 @@
 ﻿Option Explicit On
 Option Strict On
 
+'''<summary>Characteristics data of one single capture.</summary>
+Public Class cSingleCaptureData
+    '''<summary>Running capture index.</summary>
+    Public CaptureIdx As UInt32 = 0
+    '''<summary>Temperature [°C] at start of exposure.</summary>
+    Public ObsStartTemp As Double = Double.NaN
+    '''<summary>Selected filter.</summary>
+    Public FilterActive As eFilter = eFilter.Invalid
+    '''<summary>Time at observation start.</summary>
+    Public ObsStart As DateTime = Now
+    '''<summary>Time at observation end.</summary>
+    Public ObsEnd As DateTime = DateTime.MinValue
+    Public CamReadOutMode As New Text.StringBuilder
+    Public ExpTime As Double = Double.NaN
+    Public Gain As Double = Double.NaN
+    Public Offset As Double = Double.NaN
+    Public Brightness As Double = Double.NaN
+    '''<summary>Number of pixel in X direction (bigger axis).</summary>
+    Public NAXIS1 As Integer = -1
+    '''<summary>Number of pixel in Y direction (bigger axis).</summary>
+    Public NAXIS2 As Integer = -1
+End Class
+
 Public Structure sSize_UInt
     Dim Width As UInteger
     Dim Height As UInteger
@@ -146,7 +169,7 @@ Public Class cDB
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   1. # of captures")>
     <ComponentModel.DefaultValue(1)>
-    Public Property CaptureCount As Integer = 1
+    Public Property CaptureCount As UInt32 = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   2. Filter slot")>
@@ -175,7 +198,7 @@ Public Class cDB
     <ComponentModel.DisplayName("  6. Write always")>
     <ComponentModel.Description("Write all exposure data on each exposure start?")>
     <ComponentModel.DefaultValue(True)>
-    Public Property WriteOnEachExposure As Boolean = True
+    Public Property ConfigAlways As Boolean = True
 
     '===================================================================================================
 
@@ -206,8 +229,8 @@ Public Class cDB
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   5. Open image automatically?")>
     <ComponentModel.Description("Automaticall open a stored FITS file with the default editor")>
-    <ComponentModel.DefaultValue(True)>
-    Public Property AutoOpenImage As Boolean = True
+    <ComponentModel.DefaultValue(False)>
+    Public Property AutoOpenImage As Boolean = False
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   6. Show live image")>

@@ -72,6 +72,7 @@ Partial Class MainForm
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
+        Me.tsmiFPSIndicator = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -97,13 +98,13 @@ Partial Class MainForm
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(3, 3)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(298, 387)
+        Me.pgMain.Size = New System.Drawing.Size(409, 387)
         Me.pgMain.TabIndex = 0
         Me.pgMain.ToolbarVisible = False
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress, Me.tsmiFPSIndicator})
         Me.ssMain.Location = New System.Drawing.Point(0, 598)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Size = New System.Drawing.Size(936, 22)
@@ -195,14 +196,14 @@ Partial Class MainForm
         'RunCaptureToolStripMenuItem
         '
         Me.RunCaptureToolStripMenuItem.Name = "RunCaptureToolStripMenuItem"
-        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.RunCaptureToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.RunCaptureToolStripMenuItem.Text = "Run capture"
         '
         'SeriesToolStripMenuItem
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -227,7 +228,7 @@ Partial Class MainForm
         '
         Me.PresetsToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NoRealObjectToolStripMenuItem})
         Me.PresetsToolStripMenuItem1.Name = "PresetsToolStripMenuItem1"
-        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(180, 22)
+        Me.PresetsToolStripMenuItem1.Size = New System.Drawing.Size(138, 22)
         Me.PresetsToolStripMenuItem1.Text = "Presets"
         '
         'NoRealObjectToolStripMenuItem
@@ -239,12 +240,12 @@ Partial Class MainForm
         'ToolStripMenuItem3
         '
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(135, 6)
         '
         'TestSeriesToolStripMenuItem
         '
         Me.TestSeriesToolStripMenuItem.Name = "TestSeriesToolStripMenuItem"
-        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.TestSeriesToolStripMenuItem.Size = New System.Drawing.Size(138, 22)
         Me.TestSeriesToolStripMenuItem.Text = "Test series"
         '
         'PresetsToolStripMenuItem
@@ -282,7 +283,7 @@ Partial Class MainForm
         'USBTreeReaderToolStripMenuItem
         '
         Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
-        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
         Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
         '
         'MiscToolStripMenuItem
@@ -295,7 +296,7 @@ Partial Class MainForm
         'ResetLoopStatisticsToolStripMenuItem
         '
         Me.ResetLoopStatisticsToolStripMenuItem.Name = "ResetLoopStatisticsToolStripMenuItem"
-        Me.ResetLoopStatisticsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ResetLoopStatisticsToolStripMenuItem.Size = New System.Drawing.Size(177, 22)
         Me.ResetLoopStatisticsToolStripMenuItem.Text = "Reset loop statistics"
         '
         'zgcMain
@@ -310,7 +311,7 @@ Partial Class MainForm
         Me.zgcMain.ScrollMinX = 0R
         Me.zgcMain.ScrollMinY = 0R
         Me.zgcMain.ScrollMinY2 = 0R
-        Me.zgcMain.Size = New System.Drawing.Size(620, 407)
+        Me.zgcMain.Size = New System.Drawing.Size(509, 407)
         Me.zgcMain.TabIndex = 0
         '
         'tSetTemp
@@ -365,7 +366,7 @@ Partial Class MainForm
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(312, 107)
+        Me.tbLogOutput.Size = New System.Drawing.Size(423, 107)
         Me.tbLogOutput.TabIndex = 4
         Me.tbLogOutput.WordWrap = False
         '
@@ -377,7 +378,7 @@ Partial Class MainForm
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
         Me.tcMain.SelectedIndex = 0
-        Me.tcMain.Size = New System.Drawing.Size(312, 419)
+        Me.tcMain.Size = New System.Drawing.Size(423, 419)
         Me.tcMain.TabIndex = 6
         '
         'TabPage1
@@ -386,7 +387,7 @@ Partial Class MainForm
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(304, 393)
+        Me.TabPage1.Size = New System.Drawing.Size(415, 393)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Exposure"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -427,7 +428,7 @@ Partial Class MainForm
         '
         Me.scMain.Panel2.Controls.Add(Me.SplitContainer3)
         Me.scMain.Size = New System.Drawing.Size(936, 530)
-        Me.scMain.SplitterDistance = 312
+        Me.scMain.SplitterDistance = 423
         Me.scMain.TabIndex = 7
         '
         'SplitContainer2
@@ -444,7 +445,7 @@ Partial Class MainForm
         'SplitContainer2.Panel2
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.tbLogOutput)
-        Me.SplitContainer2.Size = New System.Drawing.Size(312, 530)
+        Me.SplitContainer2.Size = New System.Drawing.Size(423, 530)
         Me.SplitContainer2.SplitterDistance = 419
         Me.SplitContainer2.TabIndex = 0
         '
@@ -462,7 +463,7 @@ Partial Class MainForm
         'SplitContainer3.Panel2
         '
         Me.SplitContainer3.Panel2.Controls.Add(Me.rtbStatistics)
-        Me.SplitContainer3.Size = New System.Drawing.Size(620, 530)
+        Me.SplitContainer3.Size = New System.Drawing.Size(509, 530)
         Me.SplitContainer3.SplitterDistance = 407
         Me.SplitContainer3.TabIndex = 0
         '
@@ -472,10 +473,16 @@ Partial Class MainForm
         Me.rtbStatistics.Dock = System.Windows.Forms.DockStyle.Fill
         Me.rtbStatistics.Location = New System.Drawing.Point(0, 0)
         Me.rtbStatistics.Name = "rtbStatistics"
-        Me.rtbStatistics.Size = New System.Drawing.Size(620, 119)
+        Me.rtbStatistics.Size = New System.Drawing.Size(509, 119)
         Me.rtbStatistics.TabIndex = 0
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
+        '
+        'tsmiFPSIndicator
+        '
+        Me.tsmiFPSIndicator.Name = "tsmiFPSIndicator"
+        Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 17)
+        Me.tsmiFPSIndicator.Text = "FPS: ???"
         '
         'MainForm
         '
@@ -564,4 +571,5 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem4 As Windows.Forms.ToolStripSeparator
     Friend WithEvents tsmiLoad10MicronData As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripSeparator1 As Windows.Forms.ToolStripSeparator
+    Friend WithEvents tsmiFPSIndicator As Windows.Forms.ToolStripStatusLabel
 End Class

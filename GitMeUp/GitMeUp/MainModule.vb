@@ -12,17 +12,14 @@ Module MainModule
 
             Dim Command As String = String.Empty
             Console.WriteLine("p - Pull-Merge")
-            Console.WriteLine("u - Untracked / modified files")
             Console.WriteLine("s - Status")
             Console.WriteLine("x - Exit")
             Console.WriteLine("Selection: ")
             Select Case Console.ReadKey.Key
                 Case ConsoleKey.P
                     Command = "pull"
-                Case ConsoleKey.U
-                    Command = "status -s -u"
                 Case ConsoleKey.S
-                    Command = "status"
+                    Command = "status -s"
                 Case ConsoleKey.X
                     Exit Do
             End Select
@@ -40,7 +37,7 @@ Module MainModule
                                 Console.WriteLine(">> " & GitRepo)
                                 Console.WriteLine(Answer)
                             End If
-                        Case "status -s -u"
+                        Case "status -s"
                             If Answer.Length > 0 Then
                                 Console.WriteLine(">> " & GitRepo)
                                 Console.WriteLine(Answer)
