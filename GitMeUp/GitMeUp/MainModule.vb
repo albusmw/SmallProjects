@@ -11,11 +11,12 @@ Module MainModule
         Do
 
             Dim Commands As New List(Of String)
-            Console.WriteLine("p - Pull-Merge")
-            Console.WriteLine("s - Status")
-            Console.WriteLine("c - Commit")
-            Console.WriteLine("x - Exit")
-            Console.WriteLine("Selection: ")
+            Console.WriteLine("Available commands:")
+            Console.WriteLine("  p - Pull-Merge")
+            Console.WriteLine("  s - Status")
+            Console.WriteLine("  c - Commit")
+            Console.WriteLine("  x - Exit")
+            Console.Write("  Selection: ")
             Select Case Console.ReadKey.Key
                 Case ConsoleKey.P
                     Commands.Add("pull")
@@ -28,11 +29,11 @@ Module MainModule
                     Exit Do
             End Select
             Console.Clear()
-            Console.WriteLine("---------------------------------------------------")
 
             Dim GitRoot As String = "C:\GIT"
             For Each Directory As String In System.IO.Directory.GetDirectories(GitRoot)
                 Dim GitRepo As String = ">>" & Directory.Replace(GitRoot, String.Empty)
+                Console.WriteLine("   +++++ <" & GitRepo & "> +++++")
                 If System.IO.Directory.Exists(System.IO.Path.Combine(Directory, ".git")) Then
                     For Each GITCommand As String In Commands
                         Dim Answer As String = RunGitCommand(Directory, GITCommand).TrimEnd(New Char() {Chr(10), Chr(13)})
@@ -44,8 +45,7 @@ Module MainModule
                                 End If
                             Case "status -s"
                                 If Answer.Length > 0 Then
-                                    Console.WriteLine(">> " & GitRepo)
-                                    Console.WriteLine(Answer)
+                                    Console.WriteLine(GitRepo & " -> " & Answer)
                                 End If
                             Case Else
                                 Console.WriteLine(">> " & GitRepo)
