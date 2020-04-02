@@ -10,16 +10,20 @@ Module MainModule
 
         Do
 
-            Dim Command As String = String.Empty
+            Dim Commands As New List(Of String)
             Console.WriteLine("p - Pull-Merge")
             Console.WriteLine("s - Status")
+            Console.WriteLine("c - Commit")
             Console.WriteLine("x - Exit")
             Console.WriteLine("Selection: ")
             Select Case Console.ReadKey.Key
                 Case ConsoleKey.P
-                    Command = "pull"
+                    Commands.Add("pull")
                 Case ConsoleKey.S
-                    Command = "status -s"
+                    Commands.Add("status -s")
+                Case ConsoleKey.C
+                    Commands.Add("add *")
+                    Commands.Add("commit -m " & InputBox("Commit message:", "Commit message", "Updates"))
                 Case ConsoleKey.X
                     Exit Do
             End Select
@@ -30,21 +34,23 @@ Module MainModule
             For Each Directory As String In System.IO.Directory.GetDirectories(GitRoot)
                 Dim GitRepo As String = ">>" & Directory.Replace(GitRoot, String.Empty)
                 If System.IO.Directory.Exists(System.IO.Path.Combine(Directory, ".git")) Then
-                    Dim Answer As String = RunGitCommand(Directory, Command).TrimEnd(New Char() {Chr(10), Chr(13)})
-                    Select Case Command
-                        Case "pull"
-                            If Answer <> "Already up to date." Then
+                    For Each GITCommand As String In Commands
+                        Dim Answer As String = RunGitCommand(Directory, GITCommand).TrimEnd(New Char() {Chr(10), Chr(13)})
+                        Select Case GITCommand
+                            Case "pull"
+                                If Answer <> "Already up to date." Then
+                                    Console.WriteLine(">> " & GitRepo)
+                                    Console.WriteLine(Answer)
+                                End If
+                            Case "status -s"
+                                If Answer.Length > 0 Then
+                                    Console.WriteLine(">> " & GitRepo)
+                                    Console.WriteLine(Answer)
+                                End If
+                            Case Else
                                 Console.WriteLine(">> " & GitRepo)
-                                Console.WriteLine(Answer)
-                            End If
-                        Case "status -s"
-                            If Answer.Length > 0 Then
-                                Console.WriteLine(">> " & GitRepo)
-                                Console.WriteLine(Answer)
-                            End If
-                        Case Else
-                            Console.WriteLine(">> " & GitRepo)
-                    End Select
+                        End Select
+                    Next GITCommand
                 End If
             Next Directory
 
