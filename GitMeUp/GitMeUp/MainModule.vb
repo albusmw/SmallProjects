@@ -14,7 +14,7 @@ Module MainModule
             Console.WriteLine("Available commands:")
             Console.WriteLine("  p - Pull-Merge")
             Console.WriteLine("  s - Status")
-            Console.WriteLine("  c - Commit")
+            Console.WriteLine("  c - Commit & push")
             Console.WriteLine("  x - Exit")
             Console.Write("  Selection: ")
             Select Case Console.ReadKey.Key
@@ -25,6 +25,7 @@ Module MainModule
                 Case ConsoleKey.C
                     Commands.Add("add *")
                     Commands.Add("commit -m " & InputBox("Commit message:", "Commit message", "Updates"))
+                    Commands.Add("push")
                 Case ConsoleKey.X
                     Exit Do
             End Select
