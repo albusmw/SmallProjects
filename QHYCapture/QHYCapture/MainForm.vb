@@ -267,7 +267,7 @@ Partial Public Class MainForm
 
                 If DB.StoreImage = True Then
 
-                    Dim Path As String = System.IO.Path.Combine(DB.MyPath, DB_meta.GUID)
+                    Dim Path As String = System.IO.Path.Combine(DB.StoragePath, DB_meta.GUID)
                     If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
 
                     'Compose all FITS keyword entries
@@ -468,10 +468,12 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub ExplorerHereToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExplorerHereToolStripMenuItem.Click
-        Diagnostics.Process.Start(DB.MyPath)
+        Diagnostics.Process.Start(DB.EXEPath)
     End Sub
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        tsmiNewGUID_Click(Nothing, Nothing)
 
         'Get build data
         Dim BuildDate As String = String.Empty
@@ -725,7 +727,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub ExploreCurrentCampaignToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExploreCurrentCampaignToolStripMenuItem.Click
-        Dim FolderToOpen As String = System.IO.Path.Combine(DB.MyPath, DB_meta.GUID)
+        Dim FolderToOpen As String = System.IO.Path.Combine(DB.StoragePath, DB_meta.GUID)
         If System.IO.Directory.Exists(FolderToOpen) = True Then System.Diagnostics.Process.Start(FolderToOpen)
     End Sub
 
@@ -791,11 +793,16 @@ Partial Public Class MainForm
             Next col
 
             '4) Save and open
-            Dim FileToGenerate As String = IO.Path.Combine(DB.MyPath, sfdMain.FileName)
+            Dim FileToGenerate As String = IO.Path.Combine(DB.StoragePath, sfdMain.FileName)
             workbook.SaveAs(FileToGenerate)
 
         End Using
 
+    End Sub
+
+    Private Sub tsmiNewGUID_Click(sender As Object, e As EventArgs) Handles tsmiNewGUID.Click
+        DB_meta.GUID = Format(Now, "yyyy_MM_dd_HH_mm_ss")
+        RefreshProperties()
     End Sub
 
 End Class

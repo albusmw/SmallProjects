@@ -341,7 +341,7 @@ Partial Public Class MainForm
 
         'Precalculation
         Dim PLATESZ1 As Double = (Pixel_Size.Width * SingleCaptureData.NAXIS1) / 1000                           '[mm]
-        Dim PLATESZ2 As Double = (Pixel_Size.Height * SingleCaptureData.NAXIS1) / 1000                          '[mm]
+        Dim PLATESZ2 As Double = (Pixel_Size.Height * SingleCaptureData.NAXIS2) / 1000                          '[mm]
         Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
         Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
 

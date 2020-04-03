@@ -77,10 +77,10 @@ Public Class cDB
     Public Stopper As New cStopper
 
     <ComponentModel.Browsable(False)>
-    Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+    Public ReadOnly Property EXEPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
 
     <ComponentModel.Browsable(False)>
-    Public ReadOnly Property MyINI As String = System.IO.Path.Combine(New String() {MyPath, "Config.INI"})
+    Public ReadOnly Property MyINI As String = System.IO.Path.Combine(New String() {EXEPath, "Config.INI"})
 
     <ComponentModel.Browsable(False)>
     Public Log_Generic As New Text.StringBuilder
@@ -194,7 +194,7 @@ Public Class cDB
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   6. Remove overscan?")>
+    <ComponentModel.DisplayName("   6. Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored file")>
     <ComponentModel.DefaultValue(False)>
     Public Property RemoveOverscan As Boolean = False
@@ -208,10 +208,16 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   1. Store captured image?")>
+    <ComponentModel.DisplayName("   1. Store captured image")>
     <ComponentModel.Description("Store the captured image")>
     <ComponentModel.DefaultValue(True)>
     Public Property StoreImage As Boolean = True
+
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   2. Storage path")>
+    <ComponentModel.Description("Root path to store images")>
+    <ComponentModel.DefaultValue("C:\DATA_IO\QHYCapture")>
+    Public Property StoragePath As String = "C:\DATA_IO\QHYCapture"
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   3. File name start")>
@@ -302,7 +308,7 @@ Public Class cDB_meta
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   1. GUID of the sequence")>
     <ComponentModel.Description("Sequence GUID")>
-    Public Property GUID As String = System.Guid.NewGuid().ToString.Replace("-", String.Empty)
+    Public Property GUID As String = String.Empty
 
     '''<summary>Exposure type.</summary>
     <ComponentModel.Category(Cat1)>
