@@ -101,10 +101,10 @@ Public Class frmMain
         Log("Writing full image")
         FITSHeaderElements.Clear()
         FITSHeaderElements.AddRange(GetStandardFITSHeader)
-        FITSHeaderElements.Add(New String() {eFITSKeywords.EXPTIME, CStr(DB.ExpTime.ToString.Trim.Replace(",", "."))})                            'exposure time
-        FITSHeaderElements.Add(New String() {eFITSKeywords.GAIN, CStr(DB.ASCOM_Camera.Gain.ToString.Trim.Replace(",", "."))})                     'GAIN is not a standard FITS header keyword ...
-        FITSHeaderElements.Add(New String() {eFITSKeywords.FOCUS, FocusString})                                                                   'focuser position
-        FITSHeaderElements.Add(New String() {eFITSKeywords.SETTEMP, CStr(DB.ASCOM_Camera.CCDTemperature)})                                        'CCD temperature current
+        FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.EXPTIME), CStr(DB.ExpTime.ToString.Trim.Replace(",", "."))})                            'exposure time
+        FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.GAIN), CStr(DB.ASCOM_Camera.Gain.ToString.Trim.Replace(",", "."))})                     'GAIN is not a standard FITS header keyword ...
+        FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.FOCUS), FocusString})                                                                   'focuser position
+        FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.SETTEMP), CStr(DB.ASCOM_Camera.CCDTemperature)})                                        'CCD temperature current
         'FITSHeaderElements.Add(New String() {eFITSKeywords.BAYERPAT, "1"})                                                                        'the camera has a bayer pattern
         'FITSHeaderElements.Add(New String() {eFITSKeywords.COLORTYP, "RGGB"})                                                                     'bayer pattern
         Filename = DB.LogFolder & "\FOCUS_FULL_" & FocusString & ".FITS"
@@ -153,10 +153,10 @@ Public Class frmMain
             Log("Writing focus image <" & FocusString & ">")
 
             FITSHeaderElements.AddRange(GetStandardFITSHeader)
-            FITSHeaderElements.Add(New String() {eFITSKeywords.EXPTIME, CStr(DB.ExpTime.ToString.Trim.Replace(",", "."))})                            'exposure time
-            FITSHeaderElements.Add(New String() {eFITSKeywords.GAIN, CStr(DB.ASCOM_Camera.Gain.ToString.Trim.Replace(",", "."))})                     'GAIN is not a standard FITS header keyword ...
-            FITSHeaderElements.Add(New String() {eFITSKeywords.FOCUS, FocusString})                                                                   'focuser position
-            FITSHeaderElements.Add(New String() {eFITSKeywords.SETTEMP, CStr(DB.ASCOM_Camera.CCDTemperature)})                                        'CCD temperature current
+            FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.EXPTIME), CStr(DB.ExpTime.ToString.Trim.Replace(",", "."))})                            'exposure time
+            FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.GAIN), CStr(DB.ASCOM_Camera.Gain.ToString.Trim.Replace(",", "."))})                     'GAIN is not a standard FITS header keyword ...
+            FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.FOCUS), FocusString})                                                                   'focuser position
+            FITSHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.SETTEMP), CStr(DB.ASCOM_Camera.CCDTemperature)})                                        'CCD temperature current
             'FITSHeaderElements.Add(New String() {eFITSKeywords.BAYERPAT, "1"})                                                                        'the camera has a bayer pattern
             'FITSHeaderElements.Add(New String() {eFITSKeywords.COLORTYP, "RGGB"})                                                                     'bayer pattern
             Filename = DB.LogFolder & "\FOCUS_ROI_" & FocusString & ".FITS"
@@ -240,15 +240,15 @@ Public Class frmMain
 
     Private Function GetStandardFITSHeader() As List(Of String())
         Dim CustomHeaderElements As New List(Of String())
-        CustomHeaderElements.Add(New String() {eFITSKeywords.OBJECT, "AUTO_FOCUS"})                                                                 'verbose object name (e.g. "M45")
-        CustomHeaderElements.Add(New String() {eFITSKeywords.OBSERVER, "AstroFocus"})                                                               'observer
-        CustomHeaderElements.Add(New String() {eFITSKeywords.TELESCOP, "PlaneWave CDK 12.5"})                                                       'observing instrument
-        CustomHeaderElements.Add(New String() {eFITSKeywords.INSTRUME, "ZWO ASI094MC Pro"})                                                         'observing camera
-        CustomHeaderElements.Add(New String() {eFITSKeywords.TELFOC, "2541"})
-        CustomHeaderElements.Add(New String() {eFITSKeywords.TELAPER, "0.318"})
-        CustomHeaderElements.Add(New String() {eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(Now)})                                         'observation start time
-        CustomHeaderElements.Add(New String() {eFITSKeywords.RA, DB.RecJ2000})
-        CustomHeaderElements.Add(New String() {eFITSKeywords.DEC, DB.DecJ2000.ToString.Trim.Replace(",", ".")})
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.OBJECT), "AUTO_FOCUS"})                                                                 'verbose object name (e.g. "M45")
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.OBSERVER), "AstroFocus"})                                                               'observer
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.TELESCOP), "PlaneWave CDK 12.5"})                                                       'observing instrument
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.INSTRUME), "ZWO ASI094MC Pro"})                                                         'observing camera
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.TELFOC), "2541"})
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.TELAPER), "0.318"})
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.DATE_OBS), cFITSKeywords.GetDateWithTime(Now)})                                         'observation start time
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.RA), DB.RecJ2000})
+        CustomHeaderElements.Add(New String() {FITSKeyword.GetKeyword(eFITSKeywords.DEC), DB.DecJ2000.ToString.Trim.Replace(",", ".")})
         Return CustomHeaderElements
     End Function
 

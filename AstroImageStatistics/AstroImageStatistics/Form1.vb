@@ -102,7 +102,7 @@ Public Class Form1
                         End If
                     Next Idx2
                 Next Idx1
-                ADUHistogramm = cGenerics.SortDictionary(ADUHistogramm)
+                ADUHistogramm = ADUHistogramm.SortDictionary
                 Dim Result As Collections.Generic.Dictionary(Of Single, UInt32) = AstroNET.Statistics.GetQuantizationHisto(ADUHistogramm)
                 Dim QuantError As Single = 0
                 For Each Entry As Single In ADUHistogramm.Keys
@@ -874,26 +874,27 @@ Public Class Form1
         'Calculate the vignette
         Dim Stopper As New cStopper
         Stopper.Start()
-        Dim Vignette As Dictionary(Of Double, Double)
+        Dim Vignette As New Dictionary(Of Double, Double)
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataProcessorUsed
                 Case "UInt16"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData)
                 Case "UInt32"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
             End Select
         Else
             Select Case SingleStatCalc.DataProcessorUsed
                 Case "UInt16"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution)
                 Case "UInt32"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
             End Select
         End If
+        Vignette = Vignette.SortDictionary
         Log(Stopper.Stamp("Vignette"))
 
         'Display the vignette
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", Vignette)
 
     End Sub
 
@@ -904,26 +905,27 @@ Public Class Form1
         'Calculate the vignette
         Dim Stopper As New cStopper
         Stopper.Start()
-        Dim Vignette As Dictionary(Of Double, Double)
+        Dim Vignette As New Dictionary(Of Double, Double)
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataProcessorUsed
                 Case "UInt16"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData)
                 Case "UInt32"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
             End Select
         Else
             Select Case SingleStatCalc.DataProcessorUsed
                 Case "UInt16"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution)
                 Case "UInt32"
-                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
             End Select
         End If
+        Vignette = Vignette.SortDictionary
         Log(Stopper.Stamp("Vignette"))
 
         'Display the vignette
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", Vignette)
 
         'Calculate the fitting
         Dim Polynomial() As Double = {}
@@ -956,21 +958,21 @@ Public Class Form1
 
     End Sub
 
-    Private Sub VignetteInfinitToolStripMenuItem_Click(sender As Object, e As EventArgs)
-
-        'Calculate the vignette
-        Dim Stopper As New cStopper
-        Stopper.Start()
-        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
-        Log(Stopper.Stamp("Vignette"))
-
-        'Display the vignette
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
-
-    End Sub
-
     Private Sub FITSGrepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSGrepToolStripMenuItem.Click
         Dim X As New frmFITSGrep : X.Show()
+    End Sub
+
+    Private Sub ASCOMDynamicallyToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ASCOMDynamicallyToolStripMenuItem.Click
+        'Working but NOVAS31 does not ...
+        Dim Astrometry As Object = System.Reflection.Assembly.Load("ASCOM.Astrometry").CreateInstance("ASCOM.Astrometry.Transform.Transform")
+        Dim dynamicType As Type = Astrometry.GetType
+        Dim dynamicObject As Object = Activator.CreateInstance(dynamicType)
+        Dim NOVAS31 As Object = System.Reflection.Assembly.Load("ASCOM.Astrometry").CreateInstance("ASCOM.Astrometry.NOVAS.NOVAS31")
+        Dim JulianDate As Double = CDbl(dynamicType.InvokeMember("JulianDate", Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.InvokeMethod, Type.DefaultBinder, NOVAS31, New Object() {CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour}))
+        dynamicType.InvokeMember("JulianDateUTC", Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.SetProperty, Type.DefaultBinder, Astrometry, New Object() {(New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)})
+        dynamicType.InvokeMember("SetApparent", Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.InvokeMethod, Type.DefaultBinder, Astrometry, New Object() {CDbl(1.0), CDbl(2.0)})
+        Dim J2000RA As Double = CDbl(dynamicType.GetProperty("RAJ2000").GetValue(Astrometry))
+        Dim DecJ2000 As Double = CDbl(dynamicType.GetProperty("DecJ2000").GetValue(Astrometry))
     End Sub
 
 End Class

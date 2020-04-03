@@ -25,9 +25,9 @@ Partial Class Form1
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenFileToAnalyseToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenLastFile = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.StoreStatisticsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
@@ -40,6 +40,7 @@ Partial Class Form1
         Me.ResetStackingToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveImageData = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -64,7 +65,7 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ASCOMDynamicallyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -87,6 +88,12 @@ Partial Class Form1
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
         '
+        'FITSGrepToolStripMenuItem
+        '
+        Me.FITSGrepToolStripMenuItem.Name = "FITSGrepToolStripMenuItem"
+        Me.FITSGrepToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.FITSGrepToolStripMenuItem.Text = "FITS Grep"
+        '
         'OpenFileToAnalyseToolStripMenuItem
         '
         Me.OpenFileToAnalyseToolStripMenuItem.Name = "OpenFileToAnalyseToolStripMenuItem"
@@ -100,12 +107,6 @@ Partial Class Form1
         Me.tsmiOpenLastFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
         Me.tsmiOpenLastFile.Size = New System.Drawing.Size(246, 22)
         Me.tsmiOpenLastFile.Text = "Open last file processed"
-        '
-        'OpenEXELocationToolStripMenuItem
-        '
-        Me.OpenEXELocationToolStripMenuItem.Name = "OpenEXELocationToolStripMenuItem"
-        Me.OpenEXELocationToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
-        Me.OpenEXELocationToolStripMenuItem.Text = "Open EXE location"
         '
         'ToolStripMenuItem2
         '
@@ -176,6 +177,12 @@ Partial Class Form1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
         Me.ToolStripMenuItem1.Size = New System.Drawing.Size(243, 6)
+        '
+        'OpenEXELocationToolStripMenuItem
+        '
+        Me.OpenEXELocationToolStripMenuItem.Name = "OpenEXELocationToolStripMenuItem"
+        Me.OpenEXELocationToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.OpenEXELocationToolStripMenuItem.Text = "Open EXE location"
         '
         'ExitToolStripMenuItem
         '
@@ -255,7 +262,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -335,11 +342,11 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'FITSGrepToolStripMenuItem
+        'ASCOMDynamicallyToolStripMenuItem
         '
-        Me.FITSGrepToolStripMenuItem.Name = "FITSGrepToolStripMenuItem"
-        Me.FITSGrepToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
-        Me.FITSGrepToolStripMenuItem.Text = "FITS Grep"
+        Me.ASCOMDynamicallyToolStripMenuItem.Name = "ASCOMDynamicallyToolStripMenuItem"
+        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.ASCOMDynamicallyToolStripMenuItem.Text = "ASCOM dynamically"
         '
         'Form1
         '
@@ -406,4 +413,5 @@ Partial Class Form1
     Friend WithEvents tsmiCalcVignette As ToolStripMenuItem
     Friend WithEvents tsmiCorrectVignette As ToolStripMenuItem
     Friend WithEvents FITSGrepToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ASCOMDynamicallyToolStripMenuItem As ToolStripMenuItem
 End Class
