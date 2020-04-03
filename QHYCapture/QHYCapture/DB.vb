@@ -56,16 +56,19 @@ Public Enum eFilter As Byte
     H_alpha = 5
 End Enum
 
+'''<summary>Available stream modes.</summary>
 Public Enum eStreamMode As UInteger
     SingleFrame = 0
     LiveFrame = 1
+    Invalid = UInteger.MaxValue
 End Enum
 
+'''<summary>Available readout modes.</summary>
 Public Enum eReadOutMode As UInteger
     Photographic = 0
     HighGain = 1
     ExtendFullwell = 2
-    Unvalid = UInteger.MaxValue
+    Invalid = UInteger.MaxValue
 End Enum
 
 '''<summary>Database holding relevant information.</summary>

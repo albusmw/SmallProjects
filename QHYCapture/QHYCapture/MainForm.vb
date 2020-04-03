@@ -17,9 +17,9 @@ Partial Public Class MainForm
     '''<summary>Handle to the camera.</summary>
     Private CamHandle As IntPtr = IntPtr.Zero
 
-    Private UsedReadMode As eReadOutMode = eReadOutMode.Unvalid
+    Private UsedReadMode As eReadOutMode = eReadOutMode.Invalid
     Private UsedCameraId As System.Text.StringBuilder
-    Private UsedStreamMode As UInteger = UInteger.MaxValue
+    Private UsedStreamMode As eStreamMode = eStreamMode.Invalid
 
     Private RTFGen As New Atomic.cRTFGenerator
     Private FocusWindow As cImgForm = Nothing
@@ -102,15 +102,19 @@ Partial Public Class MainForm
             DB.Stopper.Stamp("Select filter")
 
             'Enter capture loop
-            Dim LastCaptureEnd As DateTime = DateTime.MinValue                          'last capture end to calculate a FPS number
+            Dim EndTimeStamps As New Collections.Generic.List(Of DateTime)
             Dim TotalCaptureTime As Double = 0
+            Dim LastCaptureData As New cSingleCaptureData
+
             For CaptureIdx As UInt32 = 1 To DB.CaptureCount
 
                 '================================================================================
-                ' START EXPOSURE
+                ' START EXPOSURE ON FIRST ENTRY
                 '================================================================================
 
-                Dim SingleCaptureData As cSingleCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
+                If CaptureIdx = 1 Then
+                    LastCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
+                End If
 
                 '================================================================================
                 ' WAIT FOR END AND READ BUFFERS
@@ -141,15 +145,9 @@ Partial Public Class MainForm
                         DE()
                     Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or DB.StopFlag = True
                 End If
+                LastCaptureData.ObsEnd = Now
+                EndTimeStamps.Add(LastCaptureData.ObsEnd)
 
-                'FPS calculation
-                SingleCaptureData.ObsEnd = Now
-                If LastCaptureEnd <> DateTime.MinValue Then
-                    Dim ThisDuration As Double = (SingleCaptureData.ObsEnd - LastCaptureEnd).TotalSeconds
-                    TotalCaptureTime += ThisDuration
-                    tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureIdx / TotalCaptureTime, "0.0") & " FPS"
-                End If
-                LastCaptureEnd = SingleCaptureData.ObsEnd
 
                 Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
@@ -167,13 +165,29 @@ Partial Public Class MainForm
                         LogError("Overscan removal FAILED")
                     End If
                 End If
-                SingleCaptureData.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
-                SingleCaptureData.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
+                LastCaptureData.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
+                LastCaptureData.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
                 DB.Stopper.Stamp("ChangeAspect")
+
+                '================================================================================
+                'STORE AND RETRIGGER CAPTURE
+                '================================================================================
+
+                Dim SingleCaptureData As cSingleCaptureData = LastCaptureData
+                If (CaptureIdx < DB.CaptureCount) And (DB.StopFlag = False) Then
+                    LastCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
+                End If
 
                 '================================================================================
                 'STATISTICS AND PLOTTING
                 '================================================================================
+
+                'FPS calculation
+                If EndTimeStamps.Count > 2 Then
+                    Dim ThisDuration As Double = (EndTimeStamps(EndTimeStamps.Count - 1) - EndTimeStamps(EndTimeStamps.Count - 2)).TotalSeconds
+                    TotalCaptureTime += ThisDuration
+                    tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureIdx / TotalCaptureTime, "0.0") & " FPS"
+                End If
 
                 Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat) : LoopStatCount += 1
@@ -386,15 +400,11 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub LogTiming(ByVal Text As String, ByVal Ticker As System.Diagnostics.Stopwatch)
-        Log(Text & ": " & Ticker.ElapsedMilliseconds.ValRegIndep & " ms", False)
+        Log(Text & ": " & Ticker.ElapsedMilliseconds.ValRegIndep & " ms")
     End Sub
 
     Private Sub LogError(ByVal Text As String)
-        Log("########### " & Text & " ###########", False)
-    End Sub
-
-    Private Sub Log(ByVal Text As String)
-        Log(Text, False)
+        Log("########### " & Text & " ###########")
     End Sub
 
     Private Sub LogVerbose(ByVal Text As String)
@@ -409,33 +419,36 @@ Partial Public Class MainForm
 
     Private Sub Log(ByVal Text As Collections.Generic.List(Of String))
         For Each Line As String In Text
-            Log(Line, False)
+            Line = Format(Now, "HH.mm.ss:fff") & "|" & Line
+            If DB.Log_Generic.Length = 0 Then
+                DB.Log_Generic.Append(Text)
+            Else
+                DB.Log_Generic.Append(System.Environment.NewLine & Line)
+            End If
         Next Line
-    End Sub
-
-    Private Sub Log(ByVal Text() As String)
-        For Each Line As String In Text
-            Log(Line, False)
-        Next Line
+        DisplayLog()
     End Sub
 
     Private Sub LogStart(ByVal Text As String)
-        Log(Text, False)
+        Log(Text)
     End Sub
 
-    Private Sub Log(ByVal Text As String, ByVal LogInStatus As Boolean)
+    Private Sub Log(ByVal Text As String)
         Text = Format(Now, "HH.mm.ss:fff") & "|" & Text
         If DB.Log_Generic.Length = 0 Then
             DB.Log_Generic.Append(Text)
         Else
             DB.Log_Generic.Append(System.Environment.NewLine & Text)
         End If
+        DisplayLog()
+    End Sub
+
+    Private Sub DisplayLog()
         With tbLogOutput
             .Text = DB.Log_Generic.ToString
             .SelectionStart = .Text.Length - 1
             .SelectionLength = 0
             .ScrollToCaret()
-            If LogInStatus = True Then tsslMain.Text = Text
         End With
         DE()
     End Sub
@@ -445,7 +458,7 @@ Partial Public Class MainForm
     End Function
 
     Private Sub EndAction()
-        Log("=========================================", False)
+        Log("=========================================")
         tsslMain.Text = "--IDLE--"
         DE()
     End Sub
@@ -553,7 +566,7 @@ Partial Public Class MainForm
         For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
             DB.ReadOutMode = Mode
             RefreshProperties()
-            QHYCapture(DB.FileName & Mode.ToString.Trim, False)
+            QHYCapture(DB.FileName, False)
             If DB.StopFlag = True Then Exit For
         Next Mode
         CloseCamera()
@@ -573,7 +586,7 @@ Partial Public Class MainForm
         For Each Exposure As Double In AllExposureTimes
             DB.ExposureTime = Exposure
             RefreshProperties()
-            QHYCapture("QHY_EXP_" & Exposure.ToString.Trim, False)
+            QHYCapture(DB.FileName, False)
             If DB.StopFlag = True Then Exit For
         Next Exposure
         CloseCamera()
@@ -584,7 +597,7 @@ Partial Public Class MainForm
         For Gain As Double = 0 To 200 Step 5
             DB.Gain = Gain
             RefreshProperties()
-            QHYCapture("QHY_GAIN_" & Gain.ValRegIndep("000"), False)
+            QHYCapture(DB.FileName, False)
             If DB.StopFlag = True Then Exit For
         Next Gain
         CloseCamera()
@@ -691,21 +704,23 @@ Partial Public Class MainForm
         DB.StoreImage = True
         DB.AutoOpenImage = False
         DB.ExposureTime = 60
-        For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
-            DB.ReadOutMode = Mode
-            For Each Filter As eFilter In New eFilter() {eFilter.H_alpha, eFilter.L, eFilter.R, eFilter.G, eFilter.B}
-                DB.FilterSlot = Filter
-                For Gain As Double = 20 To 100 Step 20
-                    DB.Gain = Gain
-                    Load10MicronData()
-                    RefreshProperties()
-                    QHYCapture(DB.FileName, False)
+        For Each ReadOutMode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
+            If ReadOutMode <> eReadOutMode.Invalid Then
+                DB.ReadOutMode = ReadOutMode
+                For Each Filter As eFilter In New eFilter() {eFilter.H_alpha}
+                    DB.FilterSlot = Filter
+                    For Gain As Double = 0 To 200 Step 1
+                        DB.Gain = Gain
+                        Load10MicronData()
+                        RefreshProperties()
+                        QHYCapture(DB.FileName, False)
+                        If DB.StopFlag = True Then Exit For
+                    Next Gain
                     If DB.StopFlag = True Then Exit For
-                Next Gain
+                Next Filter
                 If DB.StopFlag = True Then Exit For
-            Next Filter
-            If DB.StopFlag = True Then Exit For
-        Next Mode
+            End If
+        Next ReadOutMode
         CloseCamera()
     End Sub
 

@@ -82,7 +82,7 @@ Partial Public Class MainForm
     Private Function InitQHY(ByVal CamID As String) As Boolean
 
         'Init if not yet done
-        If CamHandle = IntPtr.Zero Or UsedReadMode = eReadOutMode.Unvalid Or UsedStreamMode = UInteger.MaxValue Then
+        If CamHandle = IntPtr.Zero Or UsedReadMode = eReadOutMode.Invalid Or UsedStreamMode = UInteger.MaxValue Then
 
             If CallOK(QHY.QHYCamera.InitQHYCCDResource) = True Then                                                                         'Init DLL itself
                 DB.Stopper.Stamp("InitQHYCCDResource")
