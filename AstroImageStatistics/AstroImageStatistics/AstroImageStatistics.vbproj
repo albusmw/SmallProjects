@@ -163,6 +163,9 @@
     <Compile Include="..\..\..\src\atomics\DragDrop.vb">
       <Link>DragDrop.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\Everything.vb">
+      <Link>Everything.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\Extensions.vb">
       <Link>Extensions.vb</Link>
     </Compile>
@@ -196,6 +199,12 @@
       <DependentUpon>Form1.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmFITSGrep.Designer.vb">
+      <DependentUpon>frmFITSGrep.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmFITSGrep.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -215,6 +224,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFITSGrep.resx">
+      <DependentUpon>frmFITSGrep.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -238,6 +250,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BuildDate.txt" />
+    <Content Include="..\..\..\src\bin\Everything64.dll">
+      <Link>Everything64.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="FITSHeaderKeywords.txt" />
     <Content Include="Statistics.ico" />
     <Content Include="ToDo.txt" />

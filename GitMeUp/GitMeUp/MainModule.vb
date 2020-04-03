@@ -33,9 +33,10 @@ Module MainModule
 
             Dim GitRoot As String = "C:\GIT"
             For Each Directory As String In System.IO.Directory.GetDirectories(GitRoot)
-                Dim GitRepo As String = ">>" & Directory.Replace(GitRoot, String.Empty)
-                Console.WriteLine("   +++++ <" & GitRepo & "> +++++")
+                Dim GitRepo As String = Directory.Replace(GitRoot, String.Empty)
+                'Only enter directories that are GIT repos
                 If System.IO.Directory.Exists(System.IO.Path.Combine(Directory, ".git")) Then
+                    Console.WriteLine("   +++++ <" & GitRepo & "> +++++")
                     For Each GITCommand As String In Commands
                         Dim Answer As String = RunGitCommand(Directory, GITCommand).TrimEnd(New Char() {Chr(10), Chr(13)})
                         Select Case GITCommand
@@ -48,8 +49,8 @@ Module MainModule
                                 If Answer.Length > 0 Then
                                     Console.WriteLine(GitRepo & " -> " & Answer)
                                 End If
-                            Case Else
-                                Console.WriteLine(">> " & GitRepo)
+                            Case "push"
+                                Console.WriteLine(Answer)
                         End Select
                     Next GITCommand
                 End If

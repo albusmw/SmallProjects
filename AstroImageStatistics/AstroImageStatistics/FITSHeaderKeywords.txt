@@ -147,3 +147,9 @@ GLAT        -46.0174380744293          degrees           Galactic latitude (b) a
      
 MOONMASK '/wise/fops/ref/coadd/wise-w1-moonmask.fits'    Moon image mask used in processing (for
                                                          internal tracking). Band dependent.
+
+
+
+
+21.37.21:623|  DATE-LOC  =                   '2020-04-02T14:55:53'
+21.37.21:623|  DATE-OBS  =                   '2020-04-02T18:55:53'

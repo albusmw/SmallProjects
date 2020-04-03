@@ -208,7 +208,7 @@ Public Class Form1
         If IsNothing(Stats.BayerHistograms) = False Then
             Disp.Plotter.PlotXvsY("R", Stats.BayerHistograms(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
             Disp.Plotter.PlotXvsY("G1", Stats.BayerHistograms(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
-            Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.DarkGreen, DB.PlotStyle, 1))
+            Disp.Plotter.PlotXvsY("G2", Stats.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
             Disp.Plotter.PlotXvsY("B", Stats.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
         End If
         If IsNothing(Stats.MonochromHistogram) = False Then
@@ -492,41 +492,47 @@ Public Class Form1
     End Sub
 
     Private Sub RowAndColumnStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RowAndColumnStatisticsToolStripMenuItem.Click
+
         Running()
+
         Dim DataProcessed As Boolean = False
+
         '1. Load data
-        If SingleStatCalc.DataProcessor_UInt16.ImageData.LongLength > 0 Then
-            With SingleStatCalc.DataProcessor_UInt16
-                ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
-                ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
-                For Idx1 As Integer = 0 To .ImageData.GetUpperBound(0)
-                    For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
-                        StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
-                        StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
-                    Next Idx2
-                Next Idx1
-                DataProcessed = True
-            End With
-        End If
-        If SingleStatCalc.DataProcessor_Int32.ImageData.LongLength > 0 Then
-            With SingleStatCalc.DataProcessor_Int32
-                ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
-                ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
-                For Idx1 As Integer = 0 To .ImageData.GetUpperBound(0)
-                    For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
-                        StatPerRow(Idx1).AddValue(.ImageData(Idx1, Idx2))
-                        StatPerCol(Idx2).AddValue(.ImageData(Idx1, Idx2))
-                    Next Idx2
-                Next Idx1
-                DataProcessed = True
-            End With
-        End If
+        Select Case SingleStatCalc.DataProcessorUsed
+            Case "UInt16"
+                With SingleStatCalc.DataProcessor_UInt16
+                    ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
+                    ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
+                    Parallel.For(0, .ImageData.GetUpperBound(0) + 1, Sub(Idx1)
+                                                                         For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
+                                                                             StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
+                                                                             StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
+                                                                         Next Idx2
+                                                                     End Sub)
+                    DataProcessed = True
+                End With
+            Case "Int32"
+                With SingleStatCalc.DataProcessor_Int32
+                    ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
+                    ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
+                    Parallel.For(0, .ImageData.GetUpperBound(0) + 1, Sub(Idx1)
+                                                                         For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
+                                                                             StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
+                                                                             StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
+                                                                         Next Idx2
+                                                                     End Sub)
+                    DataProcessed = True
+                End With
+        End Select
+
         '2. Plot data
         If DataProcessed = True Then
             PlotStatistics(LastFile & " - ROW STAT", StatPerRow)
             PlotStatistics(LastFile & " - COL STAT", StatPerCol)
         End If
+
         Idle()
+
     End Sub
 
     Private Sub InitStat(ByRef Vector() As Ato.cSingleValueStatistics)
@@ -639,6 +645,7 @@ Public Class Form1
     End Sub
 
     Private Sub AdjustRGBChannelsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AdjustRGBChannelsToolStripMenuItem.Click
+
         'Calculate the maximum modus (the most propable value in the channel) and normalize all channels to this channel
         Running()
         Dim ClipCount(1, 1) As Integer
@@ -653,7 +660,7 @@ Public Class Form1
                 For BayerIdx2 As Integer = 0 To 1
                     ClipCount(BayerIdx1, BayerIdx2) = 0
                     Dim Norm As Double = ModusRef / LastStat.BayerStatistics(BayerIdx1, BayerIdx2).Modus.Key
-                    If ModusRef <> LastStat.BayerStatistics(BayerIdx1, BayerIdx2).Modus.Key Then
+                    If ModusRef <> LastStat.BayerStatistics(BayerIdx1, BayerIdx2).Modus.Key Then                                                        'skip channels that do not need a change
                         For PixelIdx1 As Integer = BayerIdx1 To SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) Step 2
                             For PixelIdx2 As Integer = BayerIdx2 To SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) Step 2
                                 Dim NewValue As Double = Math.Round(SingleStatCalc.DataProcessor_UInt16.ImageData(PixelIdx1, PixelIdx2) * Norm)
@@ -669,13 +676,17 @@ Public Class Form1
                 Next BayerIdx2
             Next BayerIdx1
         End If
+
+        'Log
         For BayerIdx1 As Integer = 0 To 1
             For BayerIdx2 As Integer = 0 To 1
-                Log("Clip count for channel [" & BayerIdx1.ValRegIndep & "] : " & BayerIdx2.ValRegIndep & ": " & ClipCount(BayerIdx1, BayerIdx2).ValRegIndep)
+                Log("Clip count for channel [" & BayerIdx1.ValRegIndep & ":" & BayerIdx2.ValRegIndep & "]: " & ClipCount(BayerIdx1, BayerIdx2).ValRegIndep)
             Next BayerIdx2
         Next BayerIdx1
+
         CalculateStatistics()
         Idle()
+
     End Sub
 
     Private Sub tsmiSaveImageData_Click(sender As Object, e As EventArgs) Handles tsmiSaveImageData.Click
@@ -863,7 +874,22 @@ Public Class Form1
         'Calculate the vignette
         Dim Stopper As New cStopper
         Stopper.Start()
-        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(AstroNET.Statistics.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, 1000))
+        Dim Vignette As Dictionary(Of Double, Double)
+        If DB.VigResolution = 0 Then
+            Select Case SingleStatCalc.DataProcessorUsed
+                Case "UInt16"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
+                Case "UInt32"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData))
+            End Select
+        Else
+            Select Case SingleStatCalc.DataProcessorUsed
+                Case "UInt16"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution))
+                Case "UInt32"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution))
+            End Select
+        End If
         Log(Stopper.Stamp("Vignette"))
 
         'Display the vignette
@@ -878,7 +904,22 @@ Public Class Form1
         'Calculate the vignette
         Dim Stopper As New cStopper
         Stopper.Start()
-        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(AstroNET.Statistics.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, 1000))
+        Dim Vignette As Dictionary(Of Double, Double)
+        If DB.VigResolution = 0 Then
+            Select Case SingleStatCalc.DataProcessorUsed
+                Case "UInt16"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
+                Case "UInt32"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData))
+            End Select
+        Else
+            Select Case SingleStatCalc.DataProcessorUsed
+                Case "UInt16"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData, DB.VigResolution))
+                Case "UInt32"
+                    Vignette = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution))
+            End Select
+        End If
         Log(Stopper.Stamp("Vignette"))
 
         'Display the vignette
@@ -901,12 +942,35 @@ Public Class Form1
         Stopper.Stamp("Vignette fitting")
 
         'Correct the vignette
-        AstroNET.Statistics.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData, VignetteCorrection)
+        Select Case SingleStatCalc.DataProcessorUsed
+            Case "UInt16"
+                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData, VignetteCorrection)
+            Case "UInt32"
+                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt32.ImageData, VignetteCorrection)
+        End Select
+
         Stopper.Stamp("Vignette correction")
 
         CalculateStatistics()
         Idle()
 
+    End Sub
+
+    Private Sub VignetteInfinitToolStripMenuItem_Click(sender As Object, e As EventArgs)
+
+        'Calculate the vignette
+        Dim Stopper As New cStopper
+        Stopper.Start()
+        Dim Vignette As Dictionary(Of Double, Double) = cGenerics.SortDictionary(ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData))
+        Log(Stopper.Stamp("Vignette"))
+
+        'Display the vignette
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", cGenerics.SortDictionary(Vignette))
+
+    End Sub
+
+    Private Sub FITSGrepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSGrepToolStripMenuItem.Click
+        Dim X As New frmFITSGrep : X.Show()
     End Sub
 
 End Class

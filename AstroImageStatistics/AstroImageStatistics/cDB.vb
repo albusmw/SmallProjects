@@ -18,6 +18,11 @@ Public Class cDB
     <ComponentModel.DefaultValue(False)>
     Public Property Stacking As Boolean = False
 
+    <ComponentModel.Category(Cat_analysis)>
+    <ComponentModel.DisplayName("3.) Vignette resolution")>
+    <ComponentModel.DefaultValue(1000)>
+    Public Property VigResolution As Integer = 1000
+
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName("1.) Clean log on any analysis?")>
     <ComponentModel.DefaultValue(True)>
