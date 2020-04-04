@@ -90,11 +90,11 @@ Partial Public Class MainForm
                 DB.Stopper.Stamp("ScanQHYCCD")
                 If CameraCount > 0 Then                                                                                                     'If there is a camera found
 
-                    Dim CamScanReport As New Collections.Generic.List(Of String)
+                    Dim CamScanReport As New List(Of String)
 
                     'Get all cameras
                     CamScanReport.Add("Found " & CameraCount.ValRegIndep & " cameras:")
-                    Dim AllCameras As New Collections.Generic.Dictionary(Of Integer, System.Text.StringBuilder)
+                    Dim AllCameras As New Dictionary(Of Integer, System.Text.StringBuilder)
                     For Idx As Integer = 0 To CInt(CameraCount - 1)
                         Dim CurrentCamID As New System.Text.StringBuilder(0)                                                                'Prepare camera ID holder
                         If CallOK(QHY.QHYCamera.GetQHYCCDId(Idx, CurrentCamID)) = True Then                                                               'Fetch camera ID
@@ -129,7 +129,7 @@ Partial Public Class MainForm
                         'NEW SDK READOUT MODE
                         Dim ReadoutModesCount As UInteger = 0
                         CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(CamHandle, ReadoutModesCount))
-                        Dim AllReadOutModes As New Collections.Generic.List(Of String)
+                        Dim AllReadOutModes As New List(Of String)
                         For ReadoutMode As UInteger = 0 To CUInt(ReadoutModesCount - 1)
                             Dim ReadoutModeName As New Text.StringBuilder
                             Dim ResX As UInteger = 0 : Dim ResY As UInteger = 0
@@ -335,9 +335,9 @@ Partial Public Class MainForm
     '''<summary>Calculate all entries from the FITS header.</summary>
     '''<param name="SingleCaptureData">Capture configuration.</param>
     '''<param name="FileNameToWrite">File name with replacement parameters to use.</param>
-    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureData, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As Collections.Generic.List(Of String())
+    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureData, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As List(Of String())
 
-        Dim CustomElement As New Collections.Generic.List(Of String())
+        Dim CustomElement As New List(Of String())
 
         'Precalculation
         Dim PLATESZ1 As Double = (Pixel_Size.Width * SingleCaptureData.NAXIS1) / 1000                           '[mm]
@@ -380,6 +380,7 @@ Partial Public Class MainForm
         AddFITSHeaderCard(CustomElement, eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(SingleCaptureData.Brightness))
         AddFITSHeaderCard(CustomElement, eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp))
         AddFITSHeaderCard(CustomElement, eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(SingleCaptureData.ObsStartTemp))
+        AddFITSHeaderCard(CustomElement, eFITSKeywords.FOCUS, cFITSKeywords.GetDouble(SingleCaptureData.TelescopeFocus))
 
         AddFITSHeaderCard(CustomElement, eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(SingleCaptureData.CamReadOutMode.ToString))
         AddFITSHeaderCard(CustomElement, eFITSKeywords.PROGRAM, cFITSKeywords.GetString(Me.Text))
@@ -398,7 +399,7 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Add a certain FITS header card.</summary>
-    Private Sub AddFITSHeaderCard(ByRef Container As Collections.Generic.List(Of String()), ByVal Keyword As eFITSKeywords, ByVal VAlue As String)
+    Private Sub AddFITSHeaderCard(ByRef Container As List(Of String()), ByVal Keyword As eFITSKeywords, ByVal VAlue As String)
         If String.IsNullOrEmpty(VAlue) = False Then
             Dim FITSKey As New cFITSKey
             Container.Add(New String() {FITSKey(Keyword), VAlue, FITSKey.Comment(Keyword)})

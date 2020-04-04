@@ -8,7 +8,9 @@ Partial Public Class MainForm
 
     '''<summary>DB that holds all relevant information.</summary>
     Private DB As New cDB
+    '''<summary>DB that holds meta information.</summary>
     Private DB_meta As New cDB_meta
+    '''<summary>WCF interface.</summary>
     Private WithEvents DB_ServiceContract As cDB_ServiceContract
 
     '''<summary>Indicate that a property was changed and parameters need to be updated in the camera.</summary>
@@ -102,7 +104,7 @@ Partial Public Class MainForm
             DB.Stopper.Stamp("Select filter")
 
             'Enter capture loop
-            Dim EndTimeStamps As New Collections.Generic.List(Of DateTime)
+            Dim EndTimeStamps As New List(Of DateTime)
             Dim TotalCaptureTime As Double = 0
             Dim LastCaptureData As New cSingleCaptureData
 
@@ -198,8 +200,8 @@ Partial Public Class MainForm
                 If DB.Log_ClearStat = True Then RTFGen.Clear()
                 If DB.CaptureCount > 1 And DB.Log_ClearStat = True Then DisplaySumStat = True
                 RTFGen.AddEntry("Capture #" & CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
-                Dim SingStat As Collections.Generic.List(Of String) = SingleStat.StatisticsReport
-                Dim TotaStat As Collections.Generic.List(Of String) = LoopStat.StatisticsReport
+                Dim SingStat As List(Of String) = SingleStat.StatisticsReport
+                Dim TotaStat As List(Of String) = LoopStat.StatisticsReport
                 For Idx As Integer = 0 To SingStat.Count - 1
                     Dim Line As String = SingStat(Idx)
                     If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics.ReportHeaderLength + 2)
@@ -272,7 +274,7 @@ Partial Public Class MainForm
 
                     'Compose all FITS keyword entries
                     Dim FileNameToWrite As String = FITSFileStart
-                    Dim CustomElement As Collections.Generic.List(Of String()) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
+                    Dim CustomElement As List(Of String()) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
 
                     Dim FITSName As String = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
                     cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData, cFITSWriter.eBitPix.Int16, CustomElement)
@@ -371,7 +373,7 @@ Partial Public Class MainForm
     '===============================================================================================
 
     Private Function BuildSDKVersion(ByRef Digits() As UInteger) As String
-        Dim RetVal As New Collections.Generic.List(Of String)
+        Dim RetVal As New List(Of String)
         For Each Entry As UInteger In Digits
             RetVal.Add(Entry.ValRegIndep)
         Next Entry
@@ -411,13 +413,13 @@ Partial Public Class MainForm
         If DB.Log_Verbose = True Then Log(Text)
     End Sub
 
-    Private Sub LogVerbose(ByVal Text As Collections.Generic.List(Of String))
+    Private Sub LogVerbose(ByVal Text As List(Of String))
         For Each Line As String In Text
             LogVerbose(Line)
         Next Line
     End Sub
 
-    Private Sub Log(ByVal Text As Collections.Generic.List(Of String))
+    Private Sub Log(ByVal Text As List(Of String))
         For Each Line As String In Text
             Line = Format(Now, "HH.mm.ss:fff") & "|" & Line
             If DB.Log_Generic.Length = 0 Then
@@ -512,7 +514,7 @@ Partial Public Class MainForm
 
         'Start WCF
         'netsh http add urlacl url=http://+:1250/ user=DESKTOP-I7\albusmw
-        DB_ServiceContract = New cDB_ServiceContract(DB)
+        DB_ServiceContract = New cDB_ServiceContract(DB, DB_meta)
         Dim WebServicePort As String = DB.INI.Get("Connections", "WebInterfacePort", "1250")
         If WebServicePort <> "0" Then
             Dim WebServiceAdr As String = "http://localhost:" & WebServicePort & "/"
@@ -577,7 +579,7 @@ Partial Public Class MainForm
     Private Sub ExposureTimeSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExposureTimeSeriesToolStripMenuItem.Click
         DB.StopFlag = False
         'For lust of all exposure times
-        Dim AllExposureTimes As New Collections.Generic.List(Of Double)
+        Dim AllExposureTimes As New List(Of Double)
         For Exp As Integer = 0 To 2
             For Base As Double = 1 To 9
                 AllExposureTimes.Add(Base * (10 ^ Exp))
@@ -679,7 +681,7 @@ Partial Public Class MainForm
         If System.IO.File.Exists(DumpFile) = True Then System.IO.File.Delete(DumpFile)
         Dim EXE As Diagnostics.Process = Diagnostics.Process.Start(USBTreeExe, "/R=""" & DumpFile & """")
         EXE.WaitForExit()
-        Dim FoundPorts As New Collections.Generic.Dictionary(Of String, String)
+        Dim FoundPorts As New Dictionary(Of String, String)
         Dim LastPort As String = String.Empty
         For Each Line As String In System.IO.File.ReadAllLines(DumpFile)
             If Line.StartsWith("Port Chain") Then
@@ -694,7 +696,7 @@ Partial Public Class MainForm
             End If
         Next Line
         'Remove empty entries with no device descriptor
-        Dim FinalList As New Collections.Generic.Dictionary(Of String, String)
+        Dim FinalList As New Dictionary(Of String, String)
         For Each Entry As String In FoundPorts.Keys
             If FoundPorts(Entry).Length > 0 Then FinalList.Add(Entry, FoundPorts(Entry))
         Next
@@ -761,9 +763,9 @@ Partial Public Class MainForm
 
             '1.) Histogram
             If AddHisto = True Then
-                Dim XY As New Collections.Generic.List(Of Object())
+                Dim XY As New List(Of Object())
                 For Each Key As Long In LoopStat.MonochromHistogram.Keys
-                    Dim Values As New Collections.Generic.List(Of Object)
+                    Dim Values As New List(Of Object)
                     Values.Add(Key)
                     Values.Add(LoopStat.MonochromHistogram(Key))
                     If LoopStat.BayerHistograms(0, 0).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms(0, 0)(Key)) Else Values.Add(String.Empty)
@@ -773,7 +775,7 @@ Partial Public Class MainForm
                     XY.Add(Values.ToArray)
                 Next Key
                 Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
-                worksheet.Cell(1, 1).InsertData(New Collections.Generic.List(Of String)({"Pixel value", "Count Mono", "Count Bayer_0_0", "Count Bayer_0_1", "Count Bayer_1_0", "Count Bayer_1_1"}), True)
+                worksheet.Cell(1, 1).InsertData(New List(Of String)({"Pixel value", "Count Mono", "Count Bayer_0_0", "Count Bayer_0_1", "Count Bayer_1_0", "Count Bayer_1_1"}), True)
                 worksheet.Cell(2, 1).InsertData(XY)
                 For Each col In worksheet.ColumnsUsed
                     col.AdjustToContents()
@@ -781,12 +783,12 @@ Partial Public Class MainForm
             End If
 
             '2.) Histo density
-            Dim HistDens As New Collections.Generic.List(Of Object())
+            Dim HistDens As New List(Of Object())
             For Each Key As UInteger In LoopStat.MonoStatistics.HistXDist.Keys
                 HistDens.Add(New Object() {Key, LoopStat.MonoStatistics.HistXDist(Key)})
             Next Key
             Dim worksheet2 As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram Density")
-            worksheet2.Cell(1, 1).InsertData(New Collections.Generic.List(Of String)({"Step size", "Count"}), True)
+            worksheet2.Cell(1, 1).InsertData(New List(Of String)({"Step size", "Count"}), True)
             worksheet2.Cell(2, 1).InsertData(HistDens)
             For Each col In worksheet2.ColumnsUsed
                 col.AdjustToContents()

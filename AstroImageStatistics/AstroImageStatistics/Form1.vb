@@ -16,8 +16,15 @@ Public Class Form1
 
     '''<summary>Last file opened.</summary>
     Private LastFile As String = String.Empty
-
+    '''<summary>Last FITS header.</summary>
+    Private LastFITSHeader As cFITSHeaderParser
+    '''<summary>Statistics of the last plot.</summary>
     Private LastStat As AstroNET.Statistics.sStatistics
+
+    '''<summary>Statistics of all processed files.</summary>
+    Private AllStat As New Dictionary(Of String, AstroNET.Statistics.sStatistics)
+    '''<summary>Statistics of all processed files.</summary>
+    Private AllHeaders As New Dictionary(Of String, Dictionary(Of String, String))
 
     '''<summary>Statistics processor (for the last file).</summary>
     Dim SingleStatCalc As AstroNET.Statistics
@@ -42,7 +49,6 @@ Public Class Form1
     Private Sub LoadFile(ByVal FileName As String)
 
         Dim FileNameOnly As String = System.IO.Path.GetFileName(FileName)
-        Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
         SingleStatCalc = New AstroNET.Statistics(IPP)
@@ -57,14 +63,16 @@ Public Class Form1
         'Log header data and detect if NAXIS3 is set
         Log("Loading file <" & FileName & "> ...")
         Log("  -> <" & System.IO.Path.GetFileNameWithoutExtension(FileName) & ">")
+        LastFile = FileName
         Log("FITS header:")
-        Dim FITSHeaderDict As Dictionary(Of String, Object) = FITSHeader.GetListAsDictionary
+        LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
+        Dim FITSHeaderDict As Dictionary(Of String, String) = LastFITSHeader.GetCardsAsDictionary
         Dim ContentToPrint As New List(Of String)
         For Each Entry As String In FITSHeaderDict.Keys
             ContentToPrint.Add("  " & Entry.PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
         Next Entry
         Log(ContentToPrint)
-        If FITSHeader.NAXIS > 2 Then
+        If LastFITSHeader.NAXIS > 2 Then
             Log("!!! FITS file contains debayered data which are NOT displayed correct right now")
         End If
         Log(New String("-"c, 107))
@@ -72,7 +80,7 @@ Public Class Form1
         'Perform the read operation
         Dim UBound0 As Integer = -1
         Dim UBound1 As Integer = -1
-        Select Case FITSHeader.BitPix
+        Select Case LastFITSHeader.BitPix
             Case 8
                 SingleStatCalc.DataProcessor_UInt16.ImageData = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
                 SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
@@ -91,36 +99,12 @@ Public Class Form1
             Case -32
                 Log("Special mode - trying to get fixed point ...")
                 Dim Data(,) As Single = FITSReader.ReadInFloat32(FileName, False)
-                'Calculate the histogramm
-                Dim ADUHistogramm As New Dictionary(Of Single, UInt32)
-                For Idx1 As Integer = 0 To Data.GetUpperBound(0)
-                    For Idx2 As Integer = 0 To Data.GetUpperBound(1)
-                        If ADUHistogramm.ContainsKey(Data(Idx1, Idx2)) = True Then
-                            ADUHistogramm(Data(Idx1, Idx2)) = ADUHistogramm(Data(Idx1, Idx2)) + CType(1, UInt32)
-                        Else
-                            ADUHistogramm.Add(Data(Idx1, Idx2), 1)
-                        End If
-                    Next Idx2
-                Next Idx1
-                ADUHistogramm = ADUHistogramm.SortDictionary
-                Dim Result As Collections.Generic.Dictionary(Of Single, UInt32) = AstroNET.Statistics.GetQuantizationHisto(ADUHistogramm)
-                Dim QuantError As Single = 0
-                For Each Entry As Single In ADUHistogramm.Keys
-                    QuantError += Math.Abs(CSng(Math.Round(Entry * 10, 0)) - (Entry * 10))
-                Next Entry
-                QuantError /= Result.Count
-                If QuantError = 0 Then
-                    ReDim SingleStatCalc.DataProcessor_Int32.ImageData(Data.GetUpperBound(0), Data.GetUpperBound(1))
-                    For Idx1 As Integer = 0 To Data.GetUpperBound(0)
-                        For Idx2 As Integer = 0 To Data.GetUpperBound(1)
-                            SingleStatCalc.DataProcessor_Int32.ImageData(Idx1, Idx2) = CInt(Data(Idx1, Idx2) * 10)
-                        Next Idx2
-                    Next Idx1
-                    SingleStatCalc.DataProcessor_UInt16.ImageData = {{}}
-                End If
-                MsgBox(ADUHistogramm.Count & " ADU values found!")
+                Dim histData = From clr In Data.AsParallel
+                               Group By clr Into Hist = Group
+                               Select New With {.Color = clr, .Count = Hist.LongCount}
+                Log(histData.Count.ToString.Trim & " different values")
             Case Else
-                Log("!!! File format <" & FITSHeader.BitPix.ToString.Trim & "> not yet supported!")
+                Log("!!! File format <" & LastFITSHeader.BitPix.ToString.Trim & "> not yet supported!")
                 Exit Sub
         End Select
         Stopper.Stamp(FileNameOnly & ": Reading")
@@ -128,6 +112,18 @@ Public Class Form1
         'Calculate the statistics
         CalculateStatistics()
         Stopper.Stamp(FileNameOnly & ": Statistics")
+
+        'Record statistics
+        If AllStat.ContainsKey(FileName) = False Then
+            AllStat.Add(FileName, LastStat)
+        Else
+            AllStat(FileName) = LastStat
+        End If
+        If AllHeaders.ContainsKey(FileName) = False Then
+            AllHeaders.Add(FileName, FITSHeaderDict)
+        Else
+            AllHeaders(FileName) = FITSHeaderDict
+        End If
 
         'Trace statistics vs gain
         If FITSHeaderDict.ContainsKey("GAIN") Then
@@ -153,7 +149,7 @@ Public Class Form1
             End If
             'Add up statistics if dimension is matching
             If StackingStatistics.GetUpperBound(0) = UBound0 And StackingStatistics.GetUpperBound(1) = UBound1 Then
-                Select Case FITSHeader.BitPix
+                Select Case LastFITSHeader.BitPix
                     Case 8, 16
                         For Idx1 As Integer = 0 To UBound0
                             For Idx2 As Integer = 0 To UBound1
@@ -175,7 +171,6 @@ Public Class Form1
 
         'Plot statistics and remember this file as last processed file
         If DB.AutoOpenStatGraph = True Then PlotStatistics(FileName, LastStat)
-        LastFile = FileName
         Me.Focus()
 
         Idle()
@@ -699,13 +694,13 @@ Public Class Form1
                     Select Case sfdMain.FilterIndex
                         Case 1
                             'FITS 16 bit fixed
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Int16)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Int16, LastFITSHeader.GetCardsAsList)
                         Case 2
                             'FITS 32 bit fixed
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Int32)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Int32, LastFITSHeader.GetCardsAsList)
                         Case 3
                             'FITS 32 bit float
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Single)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Single, LastFITSHeader.GetCardsAsList)
                         Case 4
                             'TIFF
                             Dim stream As New IO.FileStream(sfdMain.FileName, IO.FileMode.Create)
@@ -791,7 +786,7 @@ Public Class Form1
         Disp.Hoster.Icon = Me.Icon
     End Sub
 
-    Private Sub SolveImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SolveImageToolStripMenuItem.Click
+    Private Sub tsmiPlateSolve_Click(sender As Object, e As EventArgs) Handles tsmiPlateSolve.Click
 
         Dim Solver As New cPlateSolve
         Dim FileToRun As String = LastFile
@@ -810,7 +805,7 @@ Public Class Form1
             If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.FOV2) Then File_FOV2 = Entry.Value.Trim
         Next Entry
 
-        'Data from QHYCapture are in JNow, so convert to J2000 for PlateSolve
+        'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
         Dim File_RA_J2000 As Double = Double.NaN
         Dim File_Dec_J2000 As Double = Double.NaN
         JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
@@ -845,7 +840,6 @@ Public Class Form1
         Output.Add("Converted to RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
 
         MsgBox(Join(Output.ToArray, System.Environment.NewLine))
-
 
     End Sub
 
@@ -973,6 +967,21 @@ Public Class Form1
         dynamicType.InvokeMember("SetApparent", Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.InvokeMethod, Type.DefaultBinder, Astrometry, New Object() {CDbl(1.0), CDbl(2.0)})
         Dim J2000RA As Double = CDbl(dynamicType.GetProperty("RAJ2000").GetValue(Astrometry))
         Dim DecJ2000 As Double = CDbl(dynamicType.GetProperty("DecJ2000").GetValue(Astrometry))
+    End Sub
+
+    Private Sub ClearStatisticsMemoryToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearStatisticsMemoryToolStripMenuItem.Click
+        AllStat.Clear()
+    End Sub
+
+    Private Sub FocusToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FocusToolStripMenuItem.Click
+        Dim Plot_X As New List(Of Double)
+        Dim Plot_Y As New List(Of Double)
+        For Each FileName As String In AllStat.Keys
+            Dim FocusPos As String = System.IO.Path.GetFileNameWithoutExtension(FileName).Split("_"c)(1)
+            Plot_X.Add(Val(FocusPos))
+            Plot_Y.Add(Val(AllStat(FileName).MonoStatistics.Max.Key))
+        Next FileName
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Focus - MAX VALUE", Plot_X.ToArray, Plot_Y.ToArray)
     End Sub
 
 End Class

@@ -9,7 +9,7 @@ Public Class IntelIPP_NewCode
 
         Dim FileNameOnly As String = System.IO.Path.GetFileName(FileName)
         Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
-        Dim FITSHeaderDict As Dictionary(Of String, Object) = FITSHeader.GetListAsDictionary
+        Dim FITSHeaderDict As Dictionary(Of String, String) = FITSHeader.GetCardsAsDictionary
         Dim FITSReader As New cFITSReader
         Dim ImageData(,) As UInt16 = FITSReader.ReadInUInt16(FileName, True)
 

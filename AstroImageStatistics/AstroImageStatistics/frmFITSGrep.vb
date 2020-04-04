@@ -27,15 +27,18 @@ Public Class frmFITSGrep
             If FileName.Length > MaxPathLength Then MaxPathLength = FileName.Length
         Next FileName
 
-        'Output results
-        Dim EmptryString As String = "----"
-        Dim Output As New List(Of String)
+        'Get all headers
+        Dim AllHeaders As New Dictionary(Of String, Dictionary(Of String, String))
         For Each FileName As String In QueryResults
-            FileName = FileName.Trim
-            Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
-            Dim FITSHeaderDict As Dictionary(Of String, Object) = FITSHeader.GetListAsDictionary
-            Output.Add(FileName.PadRight(MaxPathLength) & " : " & GetCard(FITSHeader, eFITSKeywords.BITPIX, EmptryString) & "|" & GetCard(FITSHeader, eFITSKeywords.NAXIS3, EmptryString) & "|" & GetCard(FITSHeader, eFITSKeywords.AUTHOR, EmptryString))
-            tspbMain.Value += 1 : DE()
+            AllHeaders.Add(FileName.Trim, (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName.Trim))).GetCardsAsDictionary)
+            tspbMain.Value += 1
+        Next FileName
+
+        'Output results
+        Dim Output As New List(Of String)
+        Dim EmptyString As String = "----"
+        For Each FileName As String In AllHeaders.Keys
+            Output.Add(FileName.PadRight(MaxPathLength) & " : " & GetCard(AllHeaders(FileName), eFITSKeywords.BITPIX, EmptyString) & "|" & GetCard(AllHeaders(FileName), eFITSKeywords.NAXIS3, EmptyString) & "|" & GetCard(AllHeaders(FileName), eFITSKeywords.AUTHOR, EmptyString))
         Next FileName
 
         'Finish
@@ -45,13 +48,12 @@ Public Class frmFITSGrep
 
     End Sub
 
-    Private Function GetCard(ByRef FITSHeader As cFITSHeaderParser, ByVal Card As eFITSKeywords, ByVal EmptyString As String) As String
+    Private Function GetCard(ByVal FITSHeader As Dictionary(Of String, String), ByVal Card As eFITSKeywords, ByVal EmptyString As String) As String
         Dim Keyword As String = FITSKeyword.GetKeyword(Card)
-        Dim Value As String = FITSHeader.ElementValue(Keyword)
-        If IsNothing(Value) = True Then
-            Return Keyword & "=" & EmptyString
+        If FITSHeader.ContainsKey(Keyword) Then
+            Return Keyword & "=" & FITSHeader(Keyword).Trim
         Else
-            Return Keyword & "=" & Value.Trim
+            Return Keyword & "=" & EmptyString
         End If
     End Function
 

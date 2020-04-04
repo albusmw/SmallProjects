@@ -51,13 +51,14 @@ Partial Class Form1
         Me.BasicProcessingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AdjustRGBChannelsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StretcherToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SolveImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPlateSolve = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiCorrectVignette = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RemoveOverscanToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.AfiineTranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BitGrayscaleFileGenerationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ASCOMDynamicallyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -65,7 +66,10 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.ASCOMDynamicallyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ClearStatisticsMemoryToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
+        Me.FocusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -77,13 +81,13 @@ Partial Class Form1
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
-        Me.msMain.Size = New System.Drawing.Size(1134, 24)
+        Me.msMain.Size = New System.Drawing.Size(1498, 24)
         Me.msMain.TabIndex = 0
         Me.msMain.Text = "MenuStrip1"
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ExitToolStripMenuItem, Me.ToolStripMenuItem5, Me.ClearStatisticsMemoryToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -231,7 +235,7 @@ Partial Class Form1
         '
         'BasicProcessingToolStripMenuItem
         '
-        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.SolveImageToolStripMenuItem, Me.tsmiCorrectVignette})
+        Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.tsmiPlateSolve, Me.tsmiCorrectVignette})
         Me.BasicProcessingToolStripMenuItem.Name = "BasicProcessingToolStripMenuItem"
         Me.BasicProcessingToolStripMenuItem.Size = New System.Drawing.Size(106, 22)
         Me.BasicProcessingToolStripMenuItem.Text = "Basic processing"
@@ -248,11 +252,11 @@ Partial Class Form1
         Me.StretcherToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
         Me.StretcherToolStripMenuItem.Text = "Stretcher"
         '
-        'SolveImageToolStripMenuItem
+        'tsmiPlateSolve
         '
-        Me.SolveImageToolStripMenuItem.Name = "SolveImageToolStripMenuItem"
-        Me.SolveImageToolStripMenuItem.Size = New System.Drawing.Size(183, 22)
-        Me.SolveImageToolStripMenuItem.Text = "Solve image"
+        Me.tsmiPlateSolve.Name = "tsmiPlateSolve"
+        Me.tsmiPlateSolve.Size = New System.Drawing.Size(183, 22)
+        Me.tsmiPlateSolve.Text = "Plate solve image"
         '
         'tsmiCorrectVignette
         '
@@ -262,7 +266,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -291,6 +295,12 @@ Partial Class Form1
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Text = "16bit grayscale file generation"
         '
+        'ASCOMDynamicallyToolStripMenuItem
+        '
+        Me.ASCOMDynamicallyToolStripMenuItem.Name = "ASCOMDynamicallyToolStripMenuItem"
+        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.ASCOMDynamicallyToolStripMenuItem.Text = "ASCOM dynamically"
+        '
         'ofdMain
         '
         Me.ofdMain.Multiselect = True
@@ -306,7 +316,7 @@ Partial Class Form1
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(861, 643)
+        Me.tbLogOutput.Size = New System.Drawing.Size(1225, 1021)
         Me.tbLogOutput.TabIndex = 3
         Me.tbLogOutput.WordWrap = False
         '
@@ -314,10 +324,10 @@ Partial Class Form1
         '
         Me.ssMain.ImageScalingSize = New System.Drawing.Size(24, 24)
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslRunning, Me.tsslMain})
-        Me.ssMain.Location = New System.Drawing.Point(0, 671)
+        Me.ssMain.Location = New System.Drawing.Point(0, 1049)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Padding = New System.Windows.Forms.Padding(1, 0, 9, 0)
-        Me.ssMain.Size = New System.Drawing.Size(1134, 22)
+        Me.ssMain.Size = New System.Drawing.Size(1498, 22)
         Me.ssMain.TabIndex = 4
         Me.ssMain.Text = "StatusStrip1"
         '
@@ -342,17 +352,33 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'ASCOMDynamicallyToolStripMenuItem
+        'ToolStripMenuItem5
         '
-        Me.ASCOMDynamicallyToolStripMenuItem.Name = "ASCOMDynamicallyToolStripMenuItem"
-        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
-        Me.ASCOMDynamicallyToolStripMenuItem.Text = "ASCOM dynamically"
+        Me.ToolStripMenuItem5.Name = "ToolStripMenuItem5"
+        Me.ToolStripMenuItem5.Size = New System.Drawing.Size(243, 6)
+        '
+        'ClearStatisticsMemoryToolStripMenuItem
+        '
+        Me.ClearStatisticsMemoryToolStripMenuItem.Name = "ClearStatisticsMemoryToolStripMenuItem"
+        Me.ClearStatisticsMemoryToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.ClearStatisticsMemoryToolStripMenuItem.Text = "Clear statistics memory"
+        '
+        'ToolStripMenuItem6
+        '
+        Me.ToolStripMenuItem6.Name = "ToolStripMenuItem6"
+        Me.ToolStripMenuItem6.Size = New System.Drawing.Size(228, 6)
+        '
+        'FocusToolStripMenuItem
+        '
+        Me.FocusToolStripMenuItem.Name = "FocusToolStripMenuItem"
+        Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.FocusToolStripMenuItem.Text = "Focus"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1134, 693)
+        Me.ClientSize = New System.Drawing.Size(1498, 1071)
         Me.Controls.Add(Me.pgMain)
         Me.Controls.Add(Me.ssMain)
         Me.Controls.Add(Me.tbLogOutput)
@@ -409,9 +435,13 @@ Partial Class Form1
     Friend WithEvents BitGrayscaleFileGenerationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
     Friend WithEvents ADUQuantizationToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents SolveImageToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiPlateSolve As ToolStripMenuItem
     Friend WithEvents tsmiCalcVignette As ToolStripMenuItem
     Friend WithEvents tsmiCorrectVignette As ToolStripMenuItem
     Friend WithEvents FITSGrepToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ASCOMDynamicallyToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem5 As ToolStripSeparator
+    Friend WithEvents ClearStatisticsMemoryToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem6 As ToolStripSeparator
+    Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
 End Class

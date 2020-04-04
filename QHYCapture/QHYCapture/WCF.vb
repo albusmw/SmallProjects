@@ -15,7 +15,7 @@ Public Interface IDB
     '''<summary>Get a list of all available parameters.</summary>
     <ServiceModel.Web.WebGet(UriTemplate:="GetParameterList", ResponseFormat:=IDB_Properties.ResponseFormat, BodyStyle:=IDB_Properties.BodyStyle)>
     <ServiceModel.OperationContract()>
-    Function GetParameterList() As Collections.Generic.List(Of String)
+    Function GetParameterList() As List(Of String)
 
     '''<summary>Get value of a certain parameter.</summary>
     <ServiceModel.Web.WebGet(UriTemplate:="GetParameter/{Key}", ResponseFormat:=IDB_Properties.ResponseFormat, BodyStyle:=IDB_Properties.BodyStyle)>
@@ -32,6 +32,11 @@ Public Interface IDB
     <ServiceModel.OperationContract()>
     Function RunExposure() As Object
 
+    '''<summary>Run an exposure.</summary>
+    <ServiceModel.Web.WebGet(UriTemplate:="GetLog", ResponseFormat:=IDB_Properties.ResponseFormat, BodyStyle:=IDB_Properties.BodyStyle)>
+    <ServiceModel.OperationContract()>
+    Function GetLog() As String()
+
 End Interface
 
 '''<summary>Database holding relevant information.</summary>
@@ -39,6 +44,9 @@ Public Class cDB_ServiceContract : Implements IDB
 
     '''<summary>DB objec to get information from.</summary>
     Private Shared DB As cDB
+
+    '''<summary>DB objec to get information from.</summary>
+    Private Shared DB_meta As cDB_meta
 
     '''<summary>Raise event if a value was changed e.g. from the WCF.</summary>
     Public Shared Event ValueChanged()
@@ -51,16 +59,21 @@ Public Class cDB_ServiceContract : Implements IDB
     End Sub
 
     '''<summary>Configure the DB to use.</summary>
-    Public Sub New(ByRef DBToUse As cDB)
-        DB = DBToUse
+    Public Sub New(ByRef DB_ToUse As cDB, ByRef DB_meta_ToUse As cDB_meta)
+        DB = DB_ToUse
+        DB_meta = DB_meta_ToUse
     End Sub
 
     '''<summary>Get a list of all available parameters.</summary>
-    Public Function GetParameterList() As Collections.Generic.List(Of String) Implements IDB.GetParameterList
-        Dim RetVal As New Collections.Generic.List(Of String)
+    Public Function GetParameterList() As List(Of String) Implements IDB.GetParameterList
+        Dim RetVal As New List(Of String)
         For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
             RetVal.Add(SingleProperty.Name)
         Next SingleProperty
+        For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
+            RetVal.Add(SingleProperty.Name)
+        Next SingleProperty
+        RetVal.Sort()
         Return RetVal
     End Function
 
@@ -69,6 +82,11 @@ Public Class cDB_ServiceContract : Implements IDB
         For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
             If Key.ToUpper = SingleProperty.Name.ToUpper Then
                 Return SingleProperty.GetValue(DB, Nothing)
+            End If
+        Next SingleProperty
+        For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
+            If Key.ToUpper = SingleProperty.Name.ToUpper Then
+                Return SingleProperty.GetValue(DB_meta, Nothing)
             End If
         Next SingleProperty
         Return Nothing
@@ -87,11 +105,26 @@ Public Class cDB_ServiceContract : Implements IDB
                 Return SingleProperty.GetValue(DB, Nothing)
             End If
         Next SingleProperty
+        For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
+            If Key.ToUpper = SingleProperty.Name.ToUpper Then
+                Select Case SingleProperty.PropertyType.Name.ToUpper
+                    Case "Double".ToUpper
+                        Dim NewProp As Double
+                        If Double.TryParse(Value, NewProp) = True Then SingleProperty.SetValue(DB_meta, NewProp)
+                End Select
+                RaiseEvent ValueChanged()
+                Return SingleProperty.GetValue(DB_meta, Nothing)
+            End If
+        Next SingleProperty
         Return Nothing
     End Function
 
     Public Function RunExposure() As Object Implements IDB.RunExposure
         RaiseEvent StartExposure()
+    End Function
+
+    Public Function GetLog() As String() Implements IDB.GetLog
+        Return Split(DB.Log_Generic.ToString, System.Environment.NewLine)
     End Function
 
 End Class

@@ -9,14 +9,21 @@ Public Class cSingleCaptureData
     Public ObsStartTemp As Double = Double.NaN
     '''<summary>Selected filter.</summary>
     Public FilterActive As eFilter = eFilter.Invalid
+    '''<summary>Telescope focus position.</summary>
+    Public TelescopeFocus As Double = Double.NaN
     '''<summary>Time at observation start.</summary>
     Public ObsStart As DateTime = Now
     '''<summary>Time at observation end.</summary>
     Public ObsEnd As DateTime = DateTime.MinValue
+    '''<summary>Selected QHY read-out mode.</summary>
     Public CamReadOutMode As New Text.StringBuilder
+    '''<summary>Exposure time [s].</summary>
     Public ExpTime As Double = Double.NaN
+    '''<summary>Selected gain value.</summary>
     Public Gain As Double = Double.NaN
+    '''<summary>Selected offset value.</summary>
     Public Offset As Double = Double.NaN
+    '''<summary>Selected brightness value.</summary>
     Public Brightness As Double = Double.NaN
     '''<summary>Number of pixel in X direction (bigger axis).</summary>
     Public NAXIS1 As Integer = -1
@@ -359,6 +366,13 @@ Public Class cDB_meta
     <ComponentModel.Description("Telescope focal length to add to the meta data.")>
     <ComponentModel.DefaultValue(1676.4)>
     Public Property TelescopeFocalLength As Double = 1676.4
+
+    '''<summary>Telescope focal length [mm].</summary>
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   9. Telescope focus position")>
+    <ComponentModel.Description("Focuser position reported by the telescope.")>
+    <ComponentModel.DefaultValue(Double.NaN)>
+    Public Property TelescopeFocus As Double = Double.NaN
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   1. Name")>
