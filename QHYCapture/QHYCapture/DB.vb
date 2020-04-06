@@ -26,9 +26,9 @@ Public Class cSingleCaptureData
     '''<summary>Selected brightness value.</summary>
     Public Brightness As Double = Double.NaN
     '''<summary>Number of pixel in X direction (bigger axis).</summary>
-    Public NAXIS1 As Integer = -1
+    Public NAXIS1 As UInteger = 0
     '''<summary>Number of pixel in Y direction (bigger axis).</summary>
-    Public NAXIS2 As Integer = -1
+    Public NAXIS2 As UInteger = 0
 End Class
 
 Public Structure sSize_UInt
@@ -51,6 +51,12 @@ End Structure
 Public Enum eReadResolution
     Res8Bit = 0
     Res16Bit = 16
+End Enum
+
+Public Enum ePlotLimitMode
+    Auto
+    MaxScale
+    LeaveAsIs
 End Enum
 
 '''<summary>Filter as to be send as ASCII string.</summary>
@@ -115,7 +121,8 @@ Public Class cDB
     Const Cat1 As String = "1. Imaging hardware"
     Const Cat2 As String = "2. Exposure"
     Const Cat3 As String = "3. Image storage"
-    Const Cat4 As String = "4. Debug and logging"
+    Const Cat4 As String = "4. Plot and statistics"
+    Const Cat5 As String = "4. Debug and logging"
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
@@ -144,8 +151,8 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   5. Binning")>
     <ComponentModel.Description("Binning (NxN)")>
-    <ComponentModel.DefaultValue(CType(1, UInt32))>
-    Public Property Binning As UInteger = 1
+    <ComponentModel.DefaultValue(1)>
+    Public Property Binning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   6. Read resolution")>
@@ -174,8 +181,8 @@ Public Class cDB
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   1. # of captures")>
-    <ComponentModel.DefaultValue(CType(1, UInt32))>
-    Public Property CaptureCount As UInt32 = 1
+    <ComponentModel.DefaultValue(1)>
+    Public Property CaptureCount As Int32 = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   2. Filter slot")>
@@ -229,7 +236,7 @@ Public Class cDB
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   3. File name start")>
     <ComponentModel.Description("File name start to use")>
-    <ComponentModel.DefaultValue("QHY_capture_")>
+    <ComponentModel.DefaultValue("QHY600_$FILT$_$EXP$_$GAIN$_$OFFS$_$IDX$_$CNT$_$RMODE$")>
     Public Property FileName As String = "QHY600_$FILT$_$EXP$_$GAIN$_$OFFS$_$IDX$_$CNT$_$RMODE$"
 
     <ComponentModel.Category(Cat3)>
@@ -253,41 +260,45 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   1. Log camera properties")>
-    <ComponentModel.DefaultValue(False)>
-    Public Property Log_CamProp As Boolean = False
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   2. Log timing")>
-    <ComponentModel.DefaultValue(False)>
-    Public Property Log_Timing As Boolean = False
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   3. Log verbose")>
-    <ComponentModel.DefaultValue(False)>
-    Public Property Log_Verbose As Boolean = False
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   4. Clear statistics log")>
+    <ComponentModel.DisplayName("   1. Single statistics log")>
     <ComponentModel.Description("Clear statistics log on every measurement")>
-    <ComponentModel.DefaultValue(False)>
-    Public Property Log_ClearStat As Boolean = False
+    <ComponentModel.DefaultValue(True)>
+    Public Property Log_ClearStat As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   5. Plot single statistics")>
+    <ComponentModel.DisplayName("   2. Plot single statistics")>
     <ComponentModel.DefaultValue(True)>
     Public Property PlotSingleStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   5. Plot mean statistics")>
+    <ComponentModel.DisplayName("   3. Plot mean statistics")>
     <ComponentModel.DefaultValue(True)>
     Public Property PlotMeanStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   6. Plot limits fixed")>
+    <ComponentModel.DisplayName("   4. Plot limits fixed")>
     <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
     <ComponentModel.DefaultValue(False)>
-    Public Property PlotLimitsFixed As Boolean = False
+    Public Property PlotLimitMode As ePlotLimitMode = ePlotLimitMode.Auto
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("   1. Log camera properties")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_CamProp As Boolean = False
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("   2. Log timing")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_Timing As Boolean = False
+
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("   3. Log verbose")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Log_Verbose As Boolean = False
+
+
 
     '===================================================================================================
 
@@ -399,5 +410,10 @@ Public Class cDB_meta
     <ComponentModel.DisplayName("   5. Azimut")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property TelescopeAzimuth As String = NotSet
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   6. Load 10Micron data")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property Load10MicronDataAlways As Boolean = False
 
 End Class

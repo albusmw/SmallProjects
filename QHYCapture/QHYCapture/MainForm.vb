@@ -108,7 +108,7 @@ Partial Public Class MainForm
             Dim TotalCaptureTime As Double = 0
             Dim LastCaptureData As New cSingleCaptureData
 
-            For CaptureIdx As UInt32 = 1 To DB.CaptureCount
+            For CaptureIdx As UInt32 = 1 To CUInt(DB.CaptureCount)
 
                 '================================================================================
                 ' START EXPOSURE ON FIRST ENTRY
@@ -150,7 +150,6 @@ Partial Public Class MainForm
                 LastCaptureData.ObsEnd = Now
                 EndTimeStamps.Add(LastCaptureData.ObsEnd)
 
-
                 Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
@@ -167,8 +166,8 @@ Partial Public Class MainForm
                         LogError("Overscan removal FAILED")
                     End If
                 End If
-                LastCaptureData.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1
-                LastCaptureData.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1
+                LastCaptureData.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1)
+                LastCaptureData.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1)
                 DB.Stopper.Stamp("ChangeAspect")
 
                 '================================================================================
@@ -192,6 +191,8 @@ Partial Public Class MainForm
                 End If
 
                 Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
+                SingleStat.MonoStatistics.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics.Height = SingleCaptureData.NAXIS2
+
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat) : LoopStatCount += 1
                 DB.Stopper.Stamp("Statistics - calc")
 
@@ -239,11 +240,14 @@ Partial Public Class MainForm
                     DB.Plotter.PlotXvsY("B", SingleStat.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
                     DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
                 End If
-                If DB.PlotLimitsFixed = True Then
-                    DB.Plotter.ManuallyScaleXAxis(0, 65536)
-                Else
-                    DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
-                End If
+                Select Case DB.PlotLimitMode
+                    Case ePlotLimitMode.Auto
+                        DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
+                    Case ePlotLimitMode.MaxScale
+                        DB.Plotter.ManuallyScaleXAxis(0, 65536)
+                    Case ePlotLimitMode.LeaveAsIs
+                        'Just do nothing ...
+                End Select
 
                 DB.Plotter.AutoScaleYAxisLog()
                 DB.Plotter.GridOnOff(True, True)
@@ -256,7 +260,13 @@ Partial Public Class MainForm
                     Dim SizeInfo As String = String.Empty
                     SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(0) + 1).ValRegIndep & "x"
                     SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData.GetUpperBound(1) + 1).ValRegIndep
+                    Dim NewWindowRequired As Boolean = False
                     If IsNothing(FocusWindow) = True Then
+                        NewWindowRequired = True
+                    Else
+                        If FocusWindow.Hoster.IsDisposed = True Then NewWindowRequired = True
+                    End If
+                    If NewWindowRequired = True Then
                         FocusWindow = New cImgForm
                         FocusWindow.Show("Focus Window <" & SizeInfo & ">")
                     End If
@@ -634,7 +644,7 @@ Partial Public Class MainForm
             .ExposureTime = 0.01
             .Gain = 20
             .ROI = New Drawing.Rectangle(.ROI.X, .ROI.Y, 100, 100)
-            .CaptureCount = UInt32.MaxValue
+            .CaptureCount = Int32.MaxValue
             .StoreImage = False
             .Log_ClearStat = True
             .DDR_RAM = False
@@ -643,8 +653,6 @@ Partial Public Class MainForm
         End With
         RefreshProperties()
     End Sub
-
-
 
     Private Sub FilterSelectionToolStripMenuItem_Click(sender As Object, e As EventArgs)
         Dim Stopper As New cStopper
@@ -733,7 +741,7 @@ Partial Public Class MainForm
         If System.IO.Directory.Exists(FolderToOpen) = True Then System.Diagnostics.Process.Start(FolderToOpen)
     End Sub
 
-    Private Sub ResetLoopStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ResetLoopStatisticsToolStripMenuItem.Click
+    Private Sub tsmiResetLoopStat_Click(sender As Object, e As EventArgs) Handles tsmiResetLoopStat.Click
         LoopStat = New AstroNET.Statistics.sStatistics
         LoopStatCount = 0
     End Sub

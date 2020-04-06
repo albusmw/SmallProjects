@@ -24,6 +24,8 @@ Partial Public Class MainForm
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
 
+        If DB_meta.Load10MicronDataAlways = True Then Load10MicronData()
+
         With SingleCaptureData
             .CaptureIdx = CaptureIdx
             .FilterActive = FilterActive
@@ -269,7 +271,7 @@ Partial Public Class MainForm
 
     ''<summary>Set the exposure parameters</summary>
     Private Sub SetExpParameters(ByVal ROIForCapture As System.Drawing.Rectangle)
-        CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, DB.Binning, DB.Binning))
+        CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, CUInt(DB.Binning), CUInt(DB.Binning)))
         CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, CUInt(ROIForCapture.X), CUInt(ROIForCapture.Y), CUInt(ROIForCapture.Width \ DB.Binning), CUInt(ROIForCapture.Height \ DB.Binning)))
         CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, DB.ReadResolution))
         CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
