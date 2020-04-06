@@ -431,7 +431,7 @@ Public Class Form1
     End Sub
 
     Private Sub tsmiSaveMeanFile_Click(sender As Object, e As EventArgs) Handles tsmiSaveMeanFile.Click
-        If StackingStatistics.LongLength > 0 Then
+        If StackedStatPresent() = True Then
             Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
             For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                 For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
@@ -445,7 +445,7 @@ Public Class Form1
     End Sub
 
     Private Sub StdDevImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StdDevImageToolStripMenuItem.Click
-        If StackingStatistics.LongLength > 0 Then
+        If StackedStatPresent() = True Then
             Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
             For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                 For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
@@ -459,7 +459,7 @@ Public Class Form1
     End Sub
 
     Private Sub SumImageDoubleToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SumImageDoubleToolStripMenuItem.Click
-        If StackingStatistics.LongLength > 0 Then
+        If StackedStatPresent() = True Then
             Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Double
             For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                 For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
@@ -473,7 +473,7 @@ Public Class Form1
     End Sub
 
     Private Sub MaxMinInt32ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MaxMinInt32ToolStripMenuItem.Click
-        If StackingStatistics.LongLength > 0 Then
+        If StackedStatPresent() = True Then
             Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
             For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                 For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
@@ -485,6 +485,12 @@ Public Class Form1
             Process.Start(FileToGenerate)
         End If
     End Sub
+
+    Private Function StackedStatPresent() As Boolean
+        If IsNothing(StackingStatistics) = True Then Return False
+        If StackingStatistics.LongLength = 0 Then Return False
+        Return True
+    End Function
 
     Private Sub RowAndColumnStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RowAndColumnStatisticsToolStripMenuItem.Click
 
@@ -687,7 +693,7 @@ Public Class Form1
     Private Sub tsmiSaveImageData_Click(sender As Object, e As EventArgs) Handles tsmiSaveImageData.Click
         'TODO: Save also non-UInt16 data
         With sfdMain
-            .Filter = "FITS 16-bit fixed|*.fits|FITS 32-bit fixed|*.fits|FITS 32-bit float|*.fits|TIFF|*.tif|JPG|*.jpg|PNG|*.png"
+            .Filter = "FITS 16-bit fixed|*.fits|FITS 32-bit fixed|*.fits|FITS 32-bit float|*.fits|TIFF 16-bit|*.tif|JPG|*.jpg|PNG|*.png"
             If .ShowDialog = DialogResult.OK Then
                 Running()
                 With SingleStatCalc.DataProcessor_UInt16
@@ -703,11 +709,12 @@ Public Class Form1
                             cFITSWriter.Write(sfdMain.FileName, .ImageData, cFITSWriter.eBitPix.Single, LastFITSHeader.GetCardsAsList)
                         Case 4
                             'TIFF
-                            Dim stream As New IO.FileStream(sfdMain.FileName, IO.FileMode.Create)
-                            Dim encoder As New System.Windows.Media.Imaging.TiffBitmapEncoder()
-                            encoder.Compression = Windows.Media.Imaging.TiffCompressOption.Zip
-                            encoder.Frames.Add(Windows.Media.Imaging.BitmapFrame.Create(New System.IO.MemoryStream(cLockBitmap.CalculateOutputBitmap(.ImageData, LastStat.MonoStatistics.Max.Key).Pixels)))
-                            encoder.Save(stream)
+                            'Dim stream As New IO.FileStream(sfdMain.FileName, IO.FileMode.Create)
+                            'Dim encoder As New System.Windows.Media.Imaging.TiffBitmapEncoder()
+                            'encoder.Compression = Windows.Media.Imaging.TiffCompressOption.Zip
+                            'encoder.Frames.Add(Windows.Media.Imaging.BitmapFrame.Create(New System.IO.MemoryStream(cLockBitmap.CalculateOutputBitmap(.ImageData, LastStat.MonoStatistics.Max.Key).Pixels)))
+                            'encoder.Save(stream)
+                            SaveTIFF_Format16bppGrayScale(sfdMain.FileName, .ImageData)
                         Case 5
                             'JPG
                             Dim myEncoderParameters As New System.Drawing.Imaging.EncoderParameters(1)
@@ -982,6 +989,47 @@ Public Class Form1
             Plot_Y.Add(Val(AllStat(FileName).MonoStatistics.Max.Key))
         Next FileName
         Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Focus - MAX VALUE", Plot_X.ToArray, Plot_Y.ToArray)
+    End Sub
+
+    Private Sub SaveTIFF_Format16bppGrayScale(ByVal FileName As String, ByRef Data(,) As UInt16)
+
+        Running()
+
+        Using output As BitMiracle.LibTiff.Classic.Tiff = BitMiracle.LibTiff.Classic.Tiff.Open(fileName, "w")
+
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.IMAGEWIDTH, Data.GetUpperBound(0) + 1)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.IMAGELENGTH, Data.GetUpperBound(1) + 1)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.SAMPLESPERPIXEL, 1)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.BITSPERSAMPLE, 16)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.ROWSPERSTRIP, Height)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.XRESOLUTION, 88.0)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.YRESOLUTION, 88.0)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.RESOLUTIONUNIT, BitMiracle.LibTiff.Classic.ResUnit.INCH)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.PLANARCONFIG, BitMiracle.LibTiff.Classic.PlanarConfig.CONTIG)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.PHOTOMETRIC, BitMiracle.LibTiff.Classic.Photometric.MINISBLACK)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.COMPRESSION, BitMiracle.LibTiff.Classic.Compression.NONE)
+            output.SetField(BitMiracle.LibTiff.Classic.TiffTag.FILLORDER, BitMiracle.LibTiff.Classic.FillOrder.MSB2LSB)
+
+            Dim BitWidth As Integer = 2
+            For i As Integer = 0 To Data.GetUpperBound(1)
+                Dim Buffer((BitWidth * (Data.GetUpperBound(0) + 1)) - 1) As Byte
+                Dim BufferPtr As Integer = 0
+                For j As Integer = 0 To Data.GetUpperBound(0)
+                    Dim Pattern() As Byte = BitConverter.GetBytes(Data(j, i))
+                    Buffer(BufferPtr) = Pattern(0)
+                    Buffer(BufferPtr + 1) = Pattern(1)
+                    BufferPtr += 2
+                Next j
+                output.WriteScanline(Buffer, i)
+            Next i
+
+            output.WriteDirectory()
+
+        End Using
+
+        Idle()
+
     End Sub
 
 End Class
