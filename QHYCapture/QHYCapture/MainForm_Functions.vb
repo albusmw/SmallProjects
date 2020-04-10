@@ -4,6 +4,70 @@ Imports System.Windows.Forms
 
 Partial Public Class MainForm
 
+    '''<summary>Execute an XML file sequence.</summary>
+    Private Sub RunXMLSequence(ByVal SpecFile As String)
+        Dim BoolTrue As New List(Of String)({"TRUE", "YES", "1"})
+        Dim SpecDoc As New Xml.XmlDocument : SpecDoc.Load(SpecFile)
+        Dim BindFlagsSet As Reflection.BindingFlags = Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.SetProperty
+        'Reflect database
+        Dim DB_Type As Type = DB.GetType
+        Dim DB_props As New List(Of String)
+        For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
+            DB_props.Add(SingleProperty.Name)
+        Next SingleProperty
+        'Reflect meta database
+        Dim DB_meta_Type As Type = DB_meta.GetType
+        Dim DB_meta_props As New List(Of String)
+        For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
+            DB_meta_props.Add(SingleProperty.Name)
+        Next SingleProperty
+        'Move over all exposure specifications
+        For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
+            Dim CloseCam As Boolean = True                                      'close camera after series?
+            'Load all attributes from the file
+            For Each ExpAttrib As Xml.XmlAttribute In ExpNode.Attributes
+                Dim PropType As Type = Nothing
+                Dim PropValue As Object = Nothing
+                'Get property type and value
+                Try
+                    If DB_props.Contains(ExpAttrib.Name) Then PropType = DB_Type.GetProperty(ExpAttrib.Name).PropertyType
+                    If DB_meta_props.Contains(ExpAttrib.Name) Then PropType = DB_meta_Type.GetProperty(ExpAttrib.Name).PropertyType
+                    Select Case PropType
+                        Case GetType(Int32)
+                            PropValue = CType(ExpAttrib.Value, Int32)
+                        Case GetType(Double)
+                            PropValue = Val(ExpAttrib.Value.Replace(",", "."))
+                        Case GetType(String)
+                            PropValue = ExpAttrib.Value
+                        Case GetType(Boolean)
+                            If BoolTrue.Contains(ExpAttrib.Value.ToUpper) Then PropValue = True Else PropValue = False
+                        Case Else
+                            'Dim X As Type = Type.GetType(PropTypeName)
+                            PropValue = [Enum].Parse(PropType, ExpAttrib.Value)
+                    End Select
+                Catch ex As Exception
+                    'Do nothing ...
+                End Try
+                If IsNothing(PropValue) = False Then
+                    Try
+                        If DB_props.Contains(ExpAttrib.Name) Then DB_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, DB, New Object() {PropValue})
+                        If DB_meta_props.Contains(ExpAttrib.Name) Then DB_meta_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, DB_meta, New Object() {PropValue})
+                        If ExpAttrib.Name = "CloseCam" Then CloseCam = CBool(PropValue)                             'close camera at this exposure end?
+                    Catch ex As Exception
+                        Log("Failed for <" & ExpAttrib.Name & ">: " & ex.Message)
+                    End Try
+                End If
+            Next ExpAttrib
+            RefreshProperties()
+            'Start exposure if specified
+            If DB.CaptureCount > 0 Then
+                QHYCapture(True)
+                If CloseCam = True Then CloseCamera()
+            End If
+        Next ExpNode
+        CloseCamera()
+    End Sub
+
     '''<summary>Start the exposure.</summary>
     Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter, ByVal Chip_Pixel As sSize_UInt) As cSingleCaptureData
 

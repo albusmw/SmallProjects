@@ -28,6 +28,7 @@ Partial Class frmFITSGrep
         Me.tbOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tspbMain = New System.Windows.Forms.ToolStripProgressBar()
+        Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -76,7 +77,7 @@ Partial Class frmFITSGrep
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tspbMain})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tspbMain, Me.tsslMain})
         Me.ssMain.Location = New System.Drawing.Point(0, 693)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Size = New System.Drawing.Size(1029, 22)
@@ -88,6 +89,12 @@ Partial Class frmFITSGrep
         Me.tspbMain.Name = "tspbMain"
         Me.tspbMain.Size = New System.Drawing.Size(300, 16)
         Me.tspbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous
+        '
+        'tsslMain
+        '
+        Me.tsslMain.Name = "tsslMain"
+        Me.tsslMain.Size = New System.Drawing.Size(119, 17)
+        Me.tsslMain.Text = "ToolStripStatusLabel1"
         '
         'frmFITSGrep
         '
@@ -114,4 +121,5 @@ Partial Class frmFITSGrep
     Friend WithEvents tbOutput As TextBox
     Friend WithEvents ssMain As StatusStrip
     Friend WithEvents tspbMain As ToolStripProgressBar
+    Friend WithEvents tsslMain As ToolStripStatusLabel
 End Class

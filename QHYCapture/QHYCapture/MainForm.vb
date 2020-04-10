@@ -32,12 +32,12 @@ Partial Public Class MainForm
     Private LoopStatCount As Integer = 0
 
     '''<summary>Run a single capture.</summary>
-    Private Sub RunCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunCaptureToolStripMenuItem.Click
-        QHYCapture(DB.FileName, True)
+    Private Sub RunCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs)
+        QHYCapture(True)
     End Sub
 
     '''<summary>Command for a QHY capture run.</summary>
-    Public Sub QHYCapture(ByVal FITSFileStart As String, ByVal CloseAtEnd As Boolean)
+    Public Sub QHYCapture(ByVal CloseAtEnd As Boolean)
 
         Dim SDKVersion(3) As UInteger
         Dim Chip_Physical As sSize_Dbl      'chip physical size [mm]
@@ -80,7 +80,7 @@ Partial Public Class MainForm
                 Log("==============================================================================")
 
                 Log("ControlValues:")                                                                                           'Start reading all control values
-                LogControlValues
+                LogControlValues()
                 DB.Stopper.Stamp("GetQHYCCDParams")
 
                 Log("==============================================================================")
@@ -190,10 +190,10 @@ Partial Public Class MainForm
                     tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureIdx / TotalCaptureTime, "0.0") & " FPS"
                 End If
 
-                Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics
-                SingleStat.MonoStatistics.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics.Height = SingleCaptureData.NAXIS2
+                Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(SingleStat.DataMode)
+                SingleStat.MonoStatistics_Int.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics_Int.Height = SingleCaptureData.NAXIS2
 
-                LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat, LoopStat) : LoopStatCount += 1
+                LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat) : LoopStatCount += 1
                 DB.Stopper.Stamp("Statistics - calc")
 
                 'Display statistics
@@ -205,7 +205,7 @@ Partial Public Class MainForm
                 Dim TotaStat As List(Of String) = LoopStat.StatisticsReport
                 For Idx As Integer = 0 To SingStat.Count - 1
                     Dim Line As String = SingStat(Idx)
-                    If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics.ReportHeaderLength + 2)
+                    If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
                     RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
                 Next Idx
                 RTFGen.ForceRefresh()
@@ -222,30 +222,30 @@ Partial Public Class MainForm
                 DB.Plotter.Clear()
                 'Mean statistics
                 If DB.CaptureCount > 1 And LoopStatCount > 1 And DB.PlotMeanStatistics = True Then
-                    If IsNothing(LoopStat.BayerHistograms) = False Then
-                        DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
+                    If IsNothing(LoopStat.BayerHistograms_Int) = False Then
+                        DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms_Int(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
+                        DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms_Int(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
+                        DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms_Int(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
+                        DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms_Int(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
                     End If
-                    If IsNothing(LoopStat.MonochromHistogram) = False Then
-                        DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram, LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
+                    If IsNothing(LoopStat.MonochromHistogram_Int) = False Then
+                        DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram_Int, LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
                     End If
                 End If
                 'Current statistics
                 If DB.PlotSingleStatistics = True Then
-                    DB.Plotter.PlotXvsY("R", SingleStat.BayerHistograms(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("G1", SingleStat.BayerHistograms(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("G2", SingleStat.BayerHistograms(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("B", SingleStat.BayerHistograms(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("R[0,0]", SingleStat.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("G1[0,1]", SingleStat.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("G2[1,0]", SingleStat.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("B[1,1]", SingleStat.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
+                    DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
                 End If
                 Select Case DB.PlotLimitMode
-                    Case ePlotLimitMode.Auto
-                        DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics.Min.Key, LoopStat.MonoStatistics.Max.Key)
-                    Case ePlotLimitMode.MaxScale
+                    Case eXAxisScalingMode.Auto
+                        DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
+                    Case eXAxisScalingMode.MaxScale
                         DB.Plotter.ManuallyScaleXAxis(0, 65536)
-                    Case ePlotLimitMode.LeaveAsIs
+                    Case eXAxisScalingMode.LeaveAsIs
                         'Just do nothing ...
                 End Select
 
@@ -270,7 +270,7 @@ Partial Public Class MainForm
                         FocusWindow = New cImgForm
                         FocusWindow.Show("Focus Window <" & SizeInfo & ">")
                     End If
-                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics.Min.Key, SingleStat.MonoStatistics.Max.Key)
+                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
                     DB.Stopper.Stamp("Focus window")
                 End If
 
@@ -283,7 +283,7 @@ Partial Public Class MainForm
                     If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
 
                     'Compose all FITS keyword entries
-                    Dim FileNameToWrite As String = FITSFileStart
+                    Dim FileNameToWrite As String = DB.FileName
                     Dim CustomElement As List(Of String()) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
 
                     Dim FITSName As String = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
@@ -496,6 +496,7 @@ Partial Public Class MainForm
                 Exit For
             End If
         Next Entry
+
         Me.Text &= BuildDate
 
         'Load INI
@@ -560,19 +561,11 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsbCapture_Click(sender As Object, e As EventArgs) Handles tsbCapture.Click
-        If CType(sender, System.Windows.Forms.ToolStripButton).Enabled = True Then QHYCapture(DB.FileName, True)
+        If CType(sender, System.Windows.Forms.ToolStripButton).Enabled = True Then QHYCapture(True)
     End Sub
 
     Private Sub tsbStopCapture_Click(sender As Object, e As EventArgs) Handles tsbStopCapture.Click
         DB.StopFlag = True
-    End Sub
-
-    Private Sub BiasCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BiasCaptureToolStripMenuItem.Click
-        DB.ExposureTime = 0.000001
-        DB.Gain = 200
-        DB.Offset = 255
-        DB.TargetTemp = -300
-        RefreshProperties()
     End Sub
 
     Private Sub AllReadoutModesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AllReadoutModesToolStripMenuItem.Click
@@ -580,7 +573,7 @@ Partial Public Class MainForm
         For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
             DB.ReadOutMode = Mode
             RefreshProperties()
-            QHYCapture(DB.FileName, False)
+            QHYCapture(False)
             If DB.StopFlag = True Then Exit For
         Next Mode
         CloseCamera()
@@ -600,7 +593,7 @@ Partial Public Class MainForm
         For Each Exposure As Double In AllExposureTimes
             DB.ExposureTime = Exposure
             RefreshProperties()
-            QHYCapture(DB.FileName, False)
+            QHYCapture(False)
             If DB.StopFlag = True Then Exit For
         Next Exposure
         CloseCamera()
@@ -611,18 +604,10 @@ Partial Public Class MainForm
         For Gain As Double = 0 To 200 Step 5
             DB.Gain = Gain
             RefreshProperties()
-            QHYCapture(DB.FileName, False)
+            QHYCapture(False)
             If DB.StopFlag = True Then Exit For
         Next Gain
         CloseCamera()
-    End Sub
-
-    Private Sub NoRealObjectToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NoRealObjectToolStripMenuItem.Click
-        DB_meta.ObjectName = String.Empty
-        DB_meta.TelescopeRightAscension = String.Empty
-        DB_meta.TelescopeDeclination = String.Empty
-        DB_meta.Telescope = String.Empty
-        RefreshProperties()
     End Sub
 
     Private Sub TestWebInterfaceToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestWebInterfaceToolStripMenuItem.Click
@@ -674,8 +659,6 @@ Partial Public Class MainForm
         RefreshProperties()
     End Sub
 
-
-
     '''<summary>Refresh all property grid displays.</summary>
     Private Sub RefreshProperties()
         pgMain.SelectedObject = DB
@@ -711,7 +694,7 @@ Partial Public Class MainForm
         MsgBox(FoundPorts.Count.ToString.Trim & " ports found!")
     End Sub
 
-    Private Sub TestSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestSeriesToolStripMenuItem.Click
+    Private Sub TestSeriesToolStripMenuItem_Click(sender As Object, e As EventArgs)
         DB.StopFlag = False
         DB.StoreImage = True
         DB.AutoOpenImage = False
@@ -725,7 +708,7 @@ Partial Public Class MainForm
                         DB.Gain = Gain
                         Load10MicronData()
                         RefreshProperties()
-                        QHYCapture(DB.FileName, False)
+                        QHYCapture(False)
                         If DB.StopFlag = True Then Exit For
                     Next Gain
                     If DB.StopFlag = True Then Exit For
@@ -746,14 +729,6 @@ Partial Public Class MainForm
         LoopStatCount = 0
     End Sub
 
-    Private Sub LoadPositionFrom10MicronToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles tsmiLoad10MicronData.Click
-        Load10MicronData()
-    End Sub
-
-    Private Sub pgMain_Click(sender As Object, e As EventArgs) Handles pgMain.Click
-
-    End Sub
-
     Private Sub pgMain_PropertyValueChanged(s As Object, e As PropertyValueChangedEventArgs) Handles pgMain.PropertyValueChanged
         PropertyChanged = True
     End Sub
@@ -772,14 +747,14 @@ Partial Public Class MainForm
             '1.) Histogram
             If AddHisto = True Then
                 Dim XY As New List(Of Object())
-                For Each Key As Long In LoopStat.MonochromHistogram.Keys
+                For Each Key As Long In LoopStat.MonochromHistogram_Int.Keys
                     Dim Values As New List(Of Object)
                     Values.Add(Key)
-                    Values.Add(LoopStat.MonochromHistogram(Key))
-                    If LoopStat.BayerHistograms(0, 0).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms(0, 0)(Key)) Else Values.Add(String.Empty)
-                    If LoopStat.BayerHistograms(0, 1).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms(0, 1)(Key)) Else Values.Add(String.Empty)
-                    If LoopStat.BayerHistograms(1, 0).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms(1, 0)(Key)) Else Values.Add(String.Empty)
-                    If LoopStat.BayerHistograms(1, 1).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms(1, 1)(Key)) Else Values.Add(String.Empty)
+                    Values.Add(LoopStat.MonochromHistogram_Int(Key))
+                    If LoopStat.BayerHistograms_Int(0, 0).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms_Int(0, 0)(Key)) Else Values.Add(String.Empty)
+                    If LoopStat.BayerHistograms_Int(0, 1).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms_Int(0, 1)(Key)) Else Values.Add(String.Empty)
+                    If LoopStat.BayerHistograms_Int(1, 0).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms_Int(1, 0)(Key)) Else Values.Add(String.Empty)
+                    If LoopStat.BayerHistograms_Int(1, 1).ContainsKey(Key) Then Values.Add(LoopStat.BayerHistograms_Int(1, 1)(Key)) Else Values.Add(String.Empty)
                     XY.Add(Values.ToArray)
                 Next Key
                 Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
@@ -792,8 +767,8 @@ Partial Public Class MainForm
 
             '2.) Histo density
             Dim HistDens As New List(Of Object())
-            For Each Key As UInteger In LoopStat.MonoStatistics.HistXDist.Keys
-                HistDens.Add(New Object() {Key, LoopStat.MonoStatistics.HistXDist(Key)})
+            For Each Key As UInteger In LoopStat.MonoStatistics_Int.HistXDist.Keys
+                HistDens.Add(New Object() {Key, LoopStat.MonoStatistics_Int.HistXDist(Key)})
             Next Key
             Dim worksheet2 As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram Density")
             worksheet2.Cell(1, 1).InsertData(New List(Of String)({"Step size", "Count"}), True)
@@ -813,6 +788,19 @@ Partial Public Class MainForm
     Private Sub tsmiNewGUID_Click(sender As Object, e As EventArgs) Handles tsmiNewGUID.Click
         DB_meta.GUID = Format(Now, "yyyy_MM_dd_HH_mm_ss")
         RefreshProperties()
+    End Sub
+
+    Private Sub tsmiLoad10MicronData_Click(sender As Object, e As EventArgs) Handles tsmiLoad10MicronData.Click
+        Load10MicronData()
+    End Sub
+
+    Private Sub RunXMLSequenceToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunXMLSequenceToolStripMenuItem.Click
+        With ofdMain
+            .Filter = "XML definitions (*.qhycapture.xml)|*.qhycapture.xml"
+            .Multiselect = False
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+        RunXMLSequence(ofdMain.FileName)
     End Sub
 
 End Class

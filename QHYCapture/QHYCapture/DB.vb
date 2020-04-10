@@ -31,16 +31,19 @@ Public Class cSingleCaptureData
     Public NAXIS2 As UInteger = 0
 End Class
 
+'''<summary>Size description.</summary>
 Public Structure sSize_UInt
     Dim Width As UInteger
     Dim Height As UInteger
 End Structure
 
+'''<summary>Size description.</summary>
 Public Structure sSize_Dbl
     Dim Width As Double
     Dim Height As Double
 End Structure
 
+'''<summary>Rectangle description.</summary>
 Public Structure sRect_UInt
     Dim X As UInteger
     Dim Y As UInteger
@@ -48,12 +51,14 @@ Public Structure sRect_UInt
     Dim Height As UInteger
 End Structure
 
+'''<summary>Read-out resolution.</summary>
 Public Enum eReadResolution
     Res8Bit = 0
     Res16Bit = 16
 End Enum
 
-Public Enum ePlotLimitMode
+'''<summary>Mode for X axis scaling mode.</summary>
+Public Enum eXAxisScalingMode
     Auto
     MaxScale
     LeaveAsIs
@@ -126,53 +131,53 @@ Public Class cDB
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   1. Camera to search")>
+    <ComponentModel.DisplayName("   a) Camera to search")>
     <ComponentModel.Description("Search string for the camera - string must occure in the CameraID.")>
     <ComponentModel.DefaultValue("QHY600M")>
     Public Property CamToUse As String = "QHY600M"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   2. Read-out mode")>
+    <ComponentModel.DisplayName("   b) Read-out mode")>
     <ComponentModel.Description("Photographic, high-gain.")>
     <ComponentModel.DefaultValue(eReadOutMode.Photographic)>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   3. Stream mode")>
+    <ComponentModel.DisplayName("   c) Stream mode")>
     <ComponentModel.Description("Photo (0) or Video(1).")>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   4. Target Temp")>
+    <ComponentModel.DisplayName("   d) Target Temp")>
     <ComponentModel.Description("Enter <-100 for do-not-use")>
     <ComponentModel.DefaultValue(-300.0)>
     Public Property TargetTemp As Double = -300.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   5. Binning")>
+    <ComponentModel.DisplayName("   e) Binning")>
     <ComponentModel.Description("Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
     Public Property Binning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   6. Read resolution")>
+    <ComponentModel.DisplayName("   f) Read resolution")>
     <ComponentModel.Description("Read resolution")>
     <ComponentModel.DefaultValue(eReadResolution.Res16Bit)>
     Public Property ReadResolution As eReadResolution = eReadResolution.Res16Bit
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   7. ROI")>
+    <ComponentModel.DisplayName("   g) ROI")>
     <ComponentModel.Description("ROI (without binning)")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   9. USB traffic")>
+    <ComponentModel.DisplayName("   h) USB traffic")>
     <ComponentModel.Description("USB traffic - 0 ... <1> ... 60")>
     <ComponentModel.DefaultValue(0.0)>
     Public Property USBTraffic As Double = 0.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   10. DDR RAM")>
+    <ComponentModel.DisplayName("   i) DDR RAM")>
     <ComponentModel.Description("Use DDR RAM?")>
     <ComponentModel.DefaultValue(True)>
     Public Property DDR_RAM As Boolean = True
@@ -180,41 +185,41 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   1. # of captures")>
+    <ComponentModel.DisplayName("   a) # of captures")>
     <ComponentModel.DefaultValue(1)>
     Public Property CaptureCount As Int32 = 1
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   2. Filter slot")>
+    <ComponentModel.DisplayName("   b) Filter slot")>
     Public Property FilterSlot As eFilter = eFilter.H_alpha
 
     '''<summary>Exposure time [s].</summary>
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   3. Exposure time [s]")>
+    <ComponentModel.DisplayName("   c) Exposure time [s]")>
     <ComponentModel.Description("Exposure time [s]")>
     <ComponentModel.DefaultValue(1.0)>
     Public Property ExposureTime As Double = 1.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   4. Gain")>
+    <ComponentModel.DisplayName("   d) Gain")>
     <ComponentModel.Description("Gain to set - 0 ... <1> ... 200")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   5. Offset")>
+    <ComponentModel.DisplayName("   e) Offset")>
     <ComponentModel.Description("Offset to set - 0 ... <1> ... 255")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("   6. Remove overscan")>
+    <ComponentModel.DisplayName("   f) Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored file")>
     <ComponentModel.DefaultValue(False)>
     Public Property RemoveOverscan As Boolean = False
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName("  7. Config for each capture")>
+    <ComponentModel.DisplayName("  g) Config for each capture")>
     <ComponentModel.Description("Write all exposure data on each exposure start?")>
     <ComponentModel.DefaultValue(True)>
     Public Property ConfigAlways As Boolean = True
@@ -222,37 +227,37 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   1. Store captured image")>
+    <ComponentModel.DisplayName("   a) Store captured image")>
     <ComponentModel.Description("Store the captured image")>
     <ComponentModel.DefaultValue(True)>
     Public Property StoreImage As Boolean = True
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   2. Storage path")>
+    <ComponentModel.DisplayName("   b) Storage path")>
     <ComponentModel.Description("Root path to store images")>
     <ComponentModel.DefaultValue("C:\DATA_IO\QHYCapture")>
     Public Property StoragePath As String = "C:\DATA_IO\QHYCapture"
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   3. File name start")>
+    <ComponentModel.DisplayName("   c) File name start")>
     <ComponentModel.Description("File name start to use")>
     <ComponentModel.DefaultValue("QHY600_$FILT$_$EXP$_$GAIN$_$OFFS$_$IDX$_$CNT$_$RMODE$")>
     Public Property FileName As String = "QHY600_$FILT$_$EXP$_$GAIN$_$OFFS$_$IDX$_$CNT$_$RMODE$"
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   4. FITS extenstion")>
+    <ComponentModel.DisplayName("   d) FITS extenstion")>
     <ComponentModel.Description("Extension to use for FITS files")>
     <ComponentModel.DefaultValue("fits")>
     Public Property FITSExtension As String = "fits"
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   5. Open image automatically?")>
+    <ComponentModel.DisplayName("   e) Open image automatically?")>
     <ComponentModel.Description("Automaticall open a stored FITS file with the default editor")>
     <ComponentModel.DefaultValue(False)>
     Public Property AutoOpenImage As Boolean = False
 
     <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName("   6. Show live image")>
+    <ComponentModel.DisplayName("   f) Show live image")>
     <ComponentModel.Description("Show a live image?")>
     <ComponentModel.DefaultValue(False)>
     Public Property ShowLiveImage As Boolean = False
@@ -260,26 +265,26 @@ Public Class cDB
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   1. Single statistics log")>
+    <ComponentModel.DisplayName("   a) Single statistics log")>
     <ComponentModel.Description("Clear statistics log on every measurement")>
     <ComponentModel.DefaultValue(True)>
     Public Property Log_ClearStat As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   2. Plot single statistics")>
+    <ComponentModel.DisplayName("   b) Plot single statistics")>
     <ComponentModel.DefaultValue(True)>
     Public Property PlotSingleStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   3. Plot mean statistics")>
+    <ComponentModel.DisplayName("   c) Plot mean statistics")>
     <ComponentModel.DefaultValue(True)>
     Public Property PlotMeanStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   4. Plot limits fixed")>
+    <ComponentModel.DisplayName("   d) Plot limits fixed")>
     <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
     <ComponentModel.DefaultValue(False)>
-    Public Property PlotLimitMode As ePlotLimitMode = ePlotLimitMode.Auto
+    Public Property PlotLimitMode As eXAxisScalingMode = eXAxisScalingMode.Auto
 
     '===================================================================================================
 

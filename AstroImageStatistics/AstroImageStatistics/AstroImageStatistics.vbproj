@@ -161,6 +161,12 @@
     <Compile Include="..\..\..\src\atomics\ImageProcessing.vb">
       <Link>ImageProcessing.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\RecursiveDirScan.vb">
+      <Link>RecursiveDirScan.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\RTFTextBox.vb">
+      <Link>RTFTextBox.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\SignalProcessing.vb">
       <Link>SignalProcessing.vb</Link>
     </Compile>
@@ -219,6 +225,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\HelpContent.rtf">
+      <Link>HelpContent.rtf</Link>
+    </EmbeddedResource>
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -238,6 +247,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="FITSHeaderKeywords.txt" />
+    <Content Include="NotUsedCode.txt" />
     <Content Include="Statistics.ico" />
     <Content Include="ToDo.txt" />
   </ItemGroup>

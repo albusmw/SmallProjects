@@ -39,11 +39,11 @@ Partial Class Form1
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
         Me.ResetStackingToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveImageData = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ClearStatisticsMemoryToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ClearStatisticsMemoryToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PlotStatisticsVsGainToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -70,7 +70,6 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.TestTiffLIBToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -88,7 +87,7 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ExitToolStripMenuItem, Me.ToolStripMenuItem5, Me.ClearStatisticsMemoryToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -176,7 +175,13 @@ Partial Class Form1
         '
         Me.tsmiSaveImageData.Name = "tsmiSaveImageData"
         Me.tsmiSaveImageData.Size = New System.Drawing.Size(246, 22)
-        Me.tsmiSaveImageData.Text = "Save current image data"
+        Me.tsmiSaveImageData.Text = "Save current image"
+        '
+        'ClearStatisticsMemoryToolStripMenuItem
+        '
+        Me.ClearStatisticsMemoryToolStripMenuItem.Name = "ClearStatisticsMemoryToolStripMenuItem"
+        Me.ClearStatisticsMemoryToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.ClearStatisticsMemoryToolStripMenuItem.Text = "Clear statistics memory"
         '
         'ToolStripMenuItem1
         '
@@ -189,22 +194,16 @@ Partial Class Form1
         Me.OpenEXELocationToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
         Me.OpenEXELocationToolStripMenuItem.Text = "Open EXE location"
         '
-        'ExitToolStripMenuItem
-        '
-        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
-        Me.ExitToolStripMenuItem.Text = "Exit"
-        '
         'ToolStripMenuItem5
         '
         Me.ToolStripMenuItem5.Name = "ToolStripMenuItem5"
         Me.ToolStripMenuItem5.Size = New System.Drawing.Size(243, 6)
         '
-        'ClearStatisticsMemoryToolStripMenuItem
+        'ExitToolStripMenuItem
         '
-        Me.ClearStatisticsMemoryToolStripMenuItem.Name = "ClearStatisticsMemoryToolStripMenuItem"
-        Me.ClearStatisticsMemoryToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
-        Me.ClearStatisticsMemoryToolStripMenuItem.Text = "Clear statistics memory"
+        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'SpecialAnalysisToolStripMenuItem
         '
@@ -278,7 +277,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.TestTiffLIBToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -375,12 +374,6 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'TestTiffLIBToolStripMenuItem
-        '
-        Me.TestTiffLIBToolStripMenuItem.Name = "TestTiffLIBToolStripMenuItem"
-        Me.TestTiffLIBToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
-        Me.TestTiffLIBToolStripMenuItem.Text = "Test TiffLIB"
-        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -391,6 +384,7 @@ Partial Class Form1
         Me.Controls.Add(Me.tbLogOutput)
         Me.Controls.Add(Me.msMain)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.KeyPreview = True
         Me.MainMenuStrip = Me.msMain
         Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "Form1"
@@ -451,5 +445,4 @@ Partial Class Form1
     Friend WithEvents ClearStatisticsMemoryToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem6 As ToolStripSeparator
     Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents TestTiffLIBToolStripMenuItem As ToolStripMenuItem
 End Class

@@ -153,6 +153,7 @@
     <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="ZedGraph">
       <HintPath>..\..\..\src\bin\ZedGraph.dll</HintPath>
@@ -175,6 +176,22 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="BuildDate.txt" />
+    <Content Include="..\BiasCapture.qhycapture.xml">
+      <Link>XML Examples\BiasCapture.qhycapture.xml</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\CamOnly.qhycaptu.xml">
+      <Link>XML Examples\CamOnly.qhycaptu.xml</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Defaults.qhycapture.xml">
+      <Link>XML Examples\Defaults.qhycapture.xml</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\TestSequence.qhycapture.xml">
+      <Link>XML Examples\TestSequence.qhycapture.xml</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="FITS_header_keywords.txt" />
     <Content Include="Ideas.txt" />
     <Content Include="QHY600 Control Values.txt" />

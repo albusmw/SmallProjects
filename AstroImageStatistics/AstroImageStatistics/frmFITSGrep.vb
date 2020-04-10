@@ -6,17 +6,31 @@ Public Class frmFITSGrep
 
     Public FoundFiles As New List(Of String)
 
+    Private WithEvents DirScanner As Ato.RecursivDirScanner
+
     Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
+
+        tbOutput.Text = String.Empty
 
         'Init
         CType(sender, Button).Enabled = False : DE()
         Dim NL As String = System.Environment.NewLine
-        Dim FilePattern As String = "*.fit|*.fits"
         FoundFiles.Clear()
 
-        'Run search
-        Dim QueryResults As List(Of String) = Everything.GetSearchResult(Chr(34) & tbRootFolder.Text & Chr(34) & " " & FilePattern)
+        'Run search - everything
+        Dim QueryResults As New List(Of String)
+        QueryResults.AddRange(Everything.GetSearchResult(Chr(34) & tbRootFolder.Text & Chr(34) & " " & "*.fit|*.fits"))
+
+        'Run "normal" recursive search if no results
+        If QueryResults.Count = 0 Then
+            DirScanner = New Ato.RecursivDirScanner(tbRootFolder.Text)
+            DirScanner.Scan("*.fit?")
+            QueryResults.AddRange(DirScanner.AllFiles)
+            tsslMain.Text = String.Empty
+        End If
+
         tbOutput.Text &= QueryResults.Count.ToString.Trim & " files found" & NL
+
         tspbMain.Maximum = QueryResults.Count
         tspbMain.Value = 0
         QueryResults.Sort()
@@ -30,9 +44,11 @@ Public Class frmFITSGrep
         'Get all headers
         Dim AllHeaders As New Dictionary(Of String, Dictionary(Of String, String))
         For Each FileName As String In QueryResults
+            tsslMain.Text = FileName : tsslMain.Invalidate()
             AllHeaders.Add(FileName.Trim, (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName.Trim))).GetCardsAsDictionary)
             tspbMain.Value += 1
         Next FileName
+        tsslMain.Text = String.Empty
 
         'Output results
         Dim Output As New List(Of String)
@@ -59,6 +75,10 @@ Public Class frmFITSGrep
 
     Private Sub DE()
         System.Windows.Forms.Application.DoEvents()
+    End Sub
+
+    Private Sub DirScanner_CurrentlyScanning(DirectoryName As String) Handles DirScanner.CurrentlyScanning
+        tsslMain.Text = "Scan <" & DirectoryName & ">"
     End Sub
 
 End Class
