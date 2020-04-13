@@ -78,7 +78,7 @@ Public Class Form1
         'Perform the read operation
         Dim UBound0 As Integer = -1
         Dim UBound1 As Integer = -1
-        ResetAllProcessors
+        SingleStatCalc.ResetAllProcessors()
         Select Case LastFITSHeader.BitPix
             Case 8
                 SingleStatCalc.DataProcessor_UInt16.ImageData(0) = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
@@ -166,13 +166,6 @@ Public Class Form1
 
         Idle()
 
-    End Sub
-
-    Private Sub ResetAllProcessors()
-        SingleStatCalc.DataProcessor_UInt16.ImageData.Clear() : SingleStatCalc.DataProcessor_UInt16.ImageData.Add({{}})
-        SingleStatCalc.DataProcessor_UInt32.ImageData = {{}}
-        SingleStatCalc.DataProcessor_Int32.ImageData = {{}}
-        SingleStatCalc.DataProcessor_Float32.ImageData = {{}}
     End Sub
 
     Private Sub CalculateStatistics(ByVal DataMode As String)
@@ -846,6 +839,66 @@ Public Class Form1
         Output.Add("Converted to RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
 
         MsgBox(Join(Output.ToArray, System.Environment.NewLine))
+
+
+
+
+
+
+
+        '----------------------------------------------------------------------------------------------------
+        'Code taken from ASCOM_CamTest
+
+        'Dim Solver As New cPlateSolve
+        'Dim BasePath As String = "\\DS1819\astro\2019-12-05\IC405\23_57_38"
+
+        'Dim SolverRawOut As String() = {}
+
+        'Dim InitRA As Double = Double.NaN
+        'Dim InitDec As Double = Double.NaN
+
+        'For Each File As String In System.IO.Directory.GetFiles(BasePath, "*.fits")
+
+        '    Log(">>> " & File)
+
+        '    Dim Changer As New cFITSHeaderChanger
+        '    Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(File))
+
+        '    'On first run set assumed position, else set parameters of 1st run
+        '    If Double.IsNaN(InitRA) = True Then Solver.SetRA(5, 16, 12) Else Solver.RA = InitRA
+        '    If Double.IsNaN(InitDec) = True Then Solver.SetDec(34, 16, 0) Else Solver.Dec = InitDec
+
+        '    'Set X and Y dimensions
+        '    Solver.SetDimX(2541, 4.88, FITSHeader.Width)
+        '    Solver.SetDimY(2541, 4.88, FITSHeader.Height)
+        '    Solver.HoldOpenTime = 0
+
+        '    'Solve
+        '    Dim SolverStatus As String = Solver.Solve(File, SolverRawOut)
+        '    If Double.IsNaN(InitRA) = True Then InitRA = Solver.SolvedRA
+        '    If Double.IsNaN(InitDec) = True Then InitDec = Solver.SolvedDec
+        '    Log(Solver.ErrorRA.ValRegIndep & " : " & Solver.ErrorDec.ValRegIndep)
+
+        '    'Set keywords after solving as e.g. http://bf-astro.com/eXcalibrator/excalibrator.htm may need it
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CTYPE1, "'RA---SIN'"))
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CTYPE2, "'DEC--SIN'"))
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRPIX1, 0.5 * (FITSHeader.Width + 1)))                            'pixels
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRPIX2, 0.5 * (FITSHeader.Height + 1)))                           'pixels
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CDELT1, (Solver.DimX * Solver.RadToGrad) / FITSHeader.Width))     'degrees/pixel
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CDELT2, (Solver.DimY * Solver.RadToGrad) / FITSHeader.Height))    'degrees/pixel
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CROTA1, 0.0))                                                     'degrees
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CROTA2, 0.0))                                                     'degrees
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRVAL1, Solver.SolvedRA * Solver.RadToGrad))                      'Right Ascension [degrees]
+        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRVAL2, Solver.SolvedDec * Solver.RadToGrad))                     'Declination [degrees]
+
+        '    'Store new header elements
+        '    Changer.ChangeHeader(File, File & "_SOLVED.fits", FITSHeader.GetCardsAsDictionary)
+
+        'Next File
+
+
+
+
 
     End Sub
 

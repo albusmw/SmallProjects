@@ -401,9 +401,9 @@ Partial Public Class MainForm
     '''<summary>Calculate all entries from the FITS header.</summary>
     '''<param name="SingleCaptureData">Capture configuration.</param>
     '''<param name="FileNameToWrite">File name with replacement parameters to use.</param>
-    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureData, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As List(Of String())
+    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureData, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As Dictionary(Of eFITSKeywords, Object)
 
-        Dim CustomElement As New List(Of String())
+        Dim CustomElement As New Dictionary(Of eFITSKeywords, Object)
 
         'Precalculation
         Dim PLATESZ1 As Double = (Pixel_Size.Width * SingleCaptureData.NAXIS1) / 1000                           '[mm]
@@ -411,45 +411,45 @@ Partial Public Class MainForm
         Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
         Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.OBS_ID, cFITSKeywords.GetString(DB_meta.GUID))
+        CustomElement.Add(eFITSKeywords.OBS_ID, (DB_meta.GUID))
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.OBJECT, cFITSKeywords.GetString(DB_meta.ObjectName))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.RA, cFITSKeywords.GetString(DB_meta.TelescopeRightAscension))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.DEC, cFITSKeywords.GetString(DB_meta.TelescopeDeclination))
+        CustomElement.Add(eFITSKeywords.OBJECT, DB_meta.ObjectName)
+        CustomElement.Add(eFITSKeywords.RA, DB_meta.TelescopeRightAscension)
+        CustomElement.Add(eFITSKeywords.DEC, DB_meta.TelescopeDeclination)
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.AUTHOR, cFITSKeywords.GetString(DB_meta.Author))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.ORIGIN, cFITSKeywords.GetString(DB_meta.Origin))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.TELESCOP, cFITSKeywords.GetString(DB_meta.Telescope))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.TELAPER, cFITSKeywords.GetDouble(DB_meta.TelescopeAperture / 1000.0))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.TELFOC, cFITSKeywords.GetDouble(DB_meta.TelescopeFocalLength / 1000.0))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.INSTRUME, cFITSKeywords.GetString(UsedCameraId.ToString))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.PIXSIZE1, cFITSKeywords.GetDouble(Pixel_Size.Width))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.PIXSIZE2, cFITSKeywords.GetDouble(Pixel_Size.Height))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.PLATESZ1, cFITSKeywords.GetDouble(PLATESZ1 / 10))                        'calculated from the image data as ROI may be set ...
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.PLATESZ2, cFITSKeywords.GetDouble(PLATESZ2 / 10))                        'calculated from the image data as ROI may be set ...
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.FOV1, cFITSKeywords.GetDouble(FOV1))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.FOV2, cFITSKeywords.GetDouble(FOV2))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.COLORTYP, "0")                                                           '<- check
+        CustomElement.Add(eFITSKeywords.AUTHOR, DB_meta.Author)
+        CustomElement.Add(eFITSKeywords.ORIGIN, DB_meta.Origin)
+        CustomElement.Add(eFITSKeywords.TELESCOP, DB_meta.Telescope)
+        CustomElement.Add(eFITSKeywords.TELAPER, DB_meta.TelescopeAperture / 1000.0)
+        CustomElement.Add(eFITSKeywords.TELFOC, DB_meta.TelescopeFocalLength / 1000.0)
+        CustomElement.Add(eFITSKeywords.INSTRUME, UsedCameraId.ToString)
+        CustomElement.Add(eFITSKeywords.PIXSIZE1, Pixel_Size.Width)
+        CustomElement.Add(eFITSKeywords.PIXSIZE2, Pixel_Size.Height)
+        CustomElement.Add(eFITSKeywords.PLATESZ1, PLATESZ1 / 10)                        'calculated from the image data as ROI may be set ...
+        CustomElement.Add(eFITSKeywords.PLATESZ2, PLATESZ2 / 10)                        'calculated from the image data as ROI may be set ...
+        CustomElement.Add(eFITSKeywords.FOV1, FOV1)
+        CustomElement.Add(eFITSKeywords.FOV2, FOV2)
+        CustomElement.Add(eFITSKeywords.COLORTYP, "0")                                                           '<- check
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsStart))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsEnd))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(SingleCaptureData.ObsStart))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.TIME_END, cFITSKeywords.GetTime(SingleCaptureData.ObsEnd))
+        CustomElement.Add(eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsStart))
+        CustomElement.Add(eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsEnd))
+        CustomElement.Add(eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(SingleCaptureData.ObsStart))
+        CustomElement.Add(eFITSKeywords.TIME_END, cFITSKeywords.GetTime(SingleCaptureData.ObsEnd))
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.CRPIX1, cFITSKeywords.GetDouble(0.5 * (SingleCaptureData.NAXIS1 + 1)))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.CRPIX2, cFITSKeywords.GetDouble(0.5 * (SingleCaptureData.NAXIS2 + 1)))
+        CustomElement.Add(eFITSKeywords.CRPIX1, 0.5 * (SingleCaptureData.NAXIS1 + 1))
+        CustomElement.Add(eFITSKeywords.CRPIX2, 0.5 * (SingleCaptureData.NAXIS2 + 1))
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.IMAGETYP, cFITSKeywords.GetString(DB_meta.ExposureType))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.EXPTIME, cFITSKeywords.GetDouble(SingleCaptureData.ExpTime))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.GAIN, cFITSKeywords.GetDouble(SingleCaptureData.Gain))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.OFFSET, cFITSKeywords.GetDouble(SingleCaptureData.Offset))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.BRIGHTNESS, cFITSKeywords.GetDouble(SingleCaptureData.Brightness))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.SETTEMP, cFITSKeywords.GetDouble(DB.TargetTemp))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.CCDTEMP, cFITSKeywords.GetDouble(SingleCaptureData.ObsStartTemp))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.FOCUS, cFITSKeywords.GetDouble(SingleCaptureData.TelescopeFocus))
+        CustomElement.Add(eFITSKeywords.IMAGETYP, DB_meta.ExposureType)
+        CustomElement.Add(eFITSKeywords.EXPTIME, SingleCaptureData.ExpTime)
+        CustomElement.Add(eFITSKeywords.GAIN, SingleCaptureData.Gain)
+        CustomElement.Add(eFITSKeywords.OFFSET, SingleCaptureData.Offset)
+        CustomElement.Add(eFITSKeywords.BRIGHTNESS, SingleCaptureData.Brightness)
+        CustomElement.Add(eFITSKeywords.SETTEMP, DB.TargetTemp)
+        CustomElement.Add(eFITSKeywords.CCDTEMP, SingleCaptureData.ObsStartTemp)
+        CustomElement.Add(eFITSKeywords.FOCUS, SingleCaptureData.TelescopeFocus)
 
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.QHY_MODE, cFITSKeywords.GetString(SingleCaptureData.CamReadOutMode.ToString))
-        AddFITSHeaderCard(CustomElement, eFITSKeywords.PROGRAM, cFITSKeywords.GetString(Me.Text))
+        CustomElement.Add(eFITSKeywords.QHY_MODE, SingleCaptureData.CamReadOutMode.ToString)
+        CustomElement.Add(eFITSKeywords.PROGRAM, Me.Text)
 
         'Create FITS file name
         FileNameToWrite = FileNameToWrite.Replace("$IDX$", Format(SingleCaptureData.CaptureIdx, "000"))

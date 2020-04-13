@@ -52,6 +52,8 @@ Partial Class MainForm
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiASIZWO = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiActions = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiResetLoopStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiNewGUID = New System.Windows.Forms.ToolStripMenuItem()
@@ -74,6 +76,7 @@ Partial Class MainForm
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
+        Me.FITSWriterWithKeywordsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -215,7 +218,7 @@ Partial Class MainForm
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(104, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -263,7 +266,7 @@ Partial Class MainForm
         '
         'TESTToolStripMenuItem
         '
-        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.USBTreeReaderToolStripMenuItem})
+        Me.TESTToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.USBTreeReaderToolStripMenuItem, Me.ToolStripMenuItem2, Me.tsmiASIZWO, Me.FITSWriterWithKeywordsToolStripMenuItem})
         Me.TESTToolStripMenuItem.Name = "TESTToolStripMenuItem"
         Me.TESTToolStripMenuItem.Size = New System.Drawing.Size(73, 20)
         Me.TESTToolStripMenuItem.Text = "!!! TEST !!!!!"
@@ -271,8 +274,19 @@ Partial Class MainForm
         'USBTreeReaderToolStripMenuItem
         '
         Me.USBTreeReaderToolStripMenuItem.Name = "USBTreeReaderToolStripMenuItem"
-        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(151, 22)
+        Me.USBTreeReaderToolStripMenuItem.Size = New System.Drawing.Size(207, 22)
         Me.USBTreeReaderToolStripMenuItem.Text = "USBTree reader"
+        '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(204, 6)
+        '
+        'tsmiASIZWO
+        '
+        Me.tsmiASIZWO.Name = "tsmiASIZWO"
+        Me.tsmiASIZWO.Size = New System.Drawing.Size(207, 22)
+        Me.tsmiASIZWO.Text = "ASI ZWO Reader"
         '
         'tsmiActions
         '
@@ -483,6 +497,12 @@ Partial Class MainForm
         '
         Me.ofdMain.FileName = "OpenFileDialog1"
         '
+        'FITSWriterWithKeywordsToolStripMenuItem
+        '
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Name = "FITSWriterWithKeywordsToolStripMenuItem"
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Size = New System.Drawing.Size(207, 22)
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Text = "FITS writer with keywords"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -572,4 +592,7 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem5 As ToolStripSeparator
     Friend WithEvents tsmiLoad10MicronData As ToolStripMenuItem
     Friend WithEvents ofdMain As OpenFileDialog
+    Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
+    Friend WithEvents tsmiASIZWO As ToolStripMenuItem
+    Friend WithEvents FITSWriterWithKeywordsToolStripMenuItem As ToolStripMenuItem
 End Class
