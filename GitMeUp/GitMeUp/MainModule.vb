@@ -24,7 +24,7 @@ Module MainModule
                     Commands.Add("status -s")
                 Case ConsoleKey.C
                     Commands.Add("add *")
-                    Commands.Add("commit -m " & InputBox("Commit message:", "Commit message", "Updates"))
+                    Commands.Add("commit -m" & Chr(34) & InputBox("Commit message:", "Commit message", "Updates") & Chr(34))
                     Commands.Add("push")
                 Case ConsoleKey.X
                     Exit Do
@@ -36,7 +36,11 @@ Module MainModule
                 Dim GitRepo As String = Directory.Replace(GitRoot, String.Empty)
                 'Only enter directories that are GIT repos
                 If System.IO.Directory.Exists(System.IO.Path.Combine(Directory, ".git")) Then
+                    'Display current GIT folder
+                    Console.ForegroundColor = ConsoleColor.Blue
                     Console.WriteLine("   +++++ <" & GitRepo & "> +++++")
+                    Console.ForegroundColor = ConsoleColor.White
+                    'Run GIT commands
                     For Each GITCommand As String In Commands
                         Dim Answer As String = RunGitCommand(Directory, GITCommand).TrimEnd(New Char() {Chr(10), Chr(13)})
                         Select Case GITCommand
