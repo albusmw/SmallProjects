@@ -42,7 +42,7 @@ Public Class frmFITSGrep
         Next FileName
 
         'Get all headers
-        Dim AllHeaders As New Dictionary(Of String, Dictionary(Of String, String))
+        Dim AllHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
         For Each FileName As String In QueryResults
             tsslMain.Text = FileName : tsslMain.Invalidate()
             AllHeaders.Add(FileName.Trim, (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName.Trim))).GetCardsAsDictionary)
@@ -64,12 +64,11 @@ Public Class frmFITSGrep
 
     End Sub
 
-    Private Function GetCard(ByVal FITSHeader As Dictionary(Of String, String), ByVal Card As eFITSKeywords, ByVal EmptyString As String) As String
-        Dim Keyword As String = FITSKeyword.GetKeyword(Card)
-        If FITSHeader.ContainsKey(Keyword) Then
-            Return Keyword & "=" & FITSHeader(Keyword).Trim
+    Private Function GetCard(ByVal FITSHeader As Dictionary(Of eFITSKeywords, Object), ByVal Card As eFITSKeywords, ByVal EmptyString As String) As String
+        If FITSHeader.ContainsKey(Card) Then
+            Return FITSKeyword.GetKeyword(Card) & "=" & cFITSKeywords.AsString(FITSHeader(Card)).Trim
         Else
-            Return Keyword & "=" & EmptyString
+            Return FITSKeyword.GetKeyword(Card) & "=" & EmptyString
         End If
     End Function
 

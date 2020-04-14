@@ -3,6 +3,8 @@ Option Strict On
 
 Public Class Form1
 
+    Const UInt32One As UInt32 = 1
+
     Private LogContent As New System.Text.StringBuilder
 
     Private DB As New cDB
@@ -24,7 +26,7 @@ Public Class Form1
     '''<summary>Statistics of all processed files.</summary>
     Private AllStat As New Dictionary(Of String, AstroNET.Statistics.sStatistics)
     '''<summary>Statistics of all processed files.</summary>
-    Private AllHeaders As New Dictionary(Of String, Dictionary(Of String, String))
+    Private AllHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
 
     '''<summary>Statistics processor (for the last file).</summary>
     Dim SingleStatCalc As AstroNET.Statistics
@@ -56,7 +58,7 @@ Public Class Form1
 
         If DB.AutoClearLog = True Then
             LogContent.Clear()
-            UpdateLog
+            UpdateLog()
         End If
 
         '=========================================================================================================
@@ -66,10 +68,10 @@ Public Class Form1
         LastFile = FileName
         Log("FITS header:")
         LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
-        Dim FITSHeaderDict As Dictionary(Of String, String) = LastFITSHeader.GetCardsAsDictionary
+        Dim FITSHeaderDict As Dictionary(Of eFITSKeywords, Object) = LastFITSHeader.GetCardsAsDictionary
         Dim ContentToPrint As New List(Of String)
-        For Each Entry As String In FITSHeaderDict.Keys
-            ContentToPrint.Add("  " & Entry.PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
+        For Each Entry As eFITSKeywords In FITSHeaderDict.Keys
+            ContentToPrint.Add("  " & FITSKeyword.GetKeyword(Entry).PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
         Next Entry
         Log(ContentToPrint)
         Log(New String("-"c, 107))
@@ -81,19 +83,19 @@ Public Class Form1
         SingleStatCalc.ResetAllProcessors()
         Select Case LastFITSHeader.BitPix
             Case 8
-                SingleStatCalc.DataProcessor_UInt16.ImageData(0) = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
-                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(0)
-                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(1)
+                SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
+                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(0)
+                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1)
             Case 16
-                SingleStatCalc.DataProcessor_UInt16.ImageData(0) = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
+                SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
                 If LastFITSHeader.NAXIS3 > 1 Then
-                    For Idx As Integer = 2 To LastFITSHeader.NAXIS3
-                        Dim NewDataStartIdx As Integer = FITSReader.DataStartIdx + CInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).LongLength * 2)    'move to next plane
-                        SingleStatCalc.DataProcessor_UInt16.ImageData.Add(FITSReader.ReadInUInt16(FileName, NewDataStartIdx, DB.UseIPP))
+                    For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
+                        Dim NewDataStartIdx As Integer = FITSReader.DataStartIdx + CInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Length * 2)    'move to next plane
+                        SingleStatCalc.DataProcessor_UInt16.ImageData(Idx).Data = FITSReader.ReadInUInt16(FileName, NewDataStartIdx, DB.UseIPP)
                     Next Idx
                 End If
-                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(0)
-                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(1)
+                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(0)
+                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1)
             Case 32
                 SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, DB.UseIPP)
                 UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
@@ -143,7 +145,7 @@ Public Class Form1
                     Case 8, 16
                         For Idx1 As Integer = 0 To UBound0
                             For Idx2 As Integer = 0 To UBound1
-                                StackingStatistics(Idx1, Idx2).AddValue(SingleStatCalc.DataProcessor_UInt16.ImageData(0)(Idx1, Idx2))
+                                StackingStatistics(Idx1, Idx2).AddValue(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(Idx1, Idx2))
                             Next Idx2
                         Next Idx1
                     Case 32
@@ -508,14 +510,14 @@ Public Class Form1
         Select Case SingleStatCalc.DataMode
             Case "UInt16"
                 With SingleStatCalc.DataProcessor_UInt16
-                    ReDim StatPerRow(.ImageData(0).GetUpperBound(1)) : InitStat(StatPerRow)
-                    ReDim StatPerCol(.ImageData(0).GetUpperBound(0)) : InitStat(StatPerCol)
-                    Parallel.For(0, .ImageData(0).GetUpperBound(0) + 1, Sub(Idx1)
-                                                                            For Idx2 As Integer = 0 To .ImageData(0).GetUpperBound(1)
-                                                                                StatPerRow(Idx2).AddValue(.ImageData(0)(Idx1, Idx2))
-                                                                                StatPerCol(Idx1).AddValue(.ImageData(0)(Idx1, Idx2))
-                                                                            Next Idx2
-                                                                        End Sub)
+                    ReDim StatPerRow(.ImageData(0).Data.GetUpperBound(1)) : InitStat(StatPerRow)
+                    ReDim StatPerCol(.ImageData(0).Data.GetUpperBound(0)) : InitStat(StatPerCol)
+                    Parallel.For(0, .ImageData(0).Data.GetUpperBound(0) + 1, Sub(Idx1)
+                                                                                 For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
+                                                                                     StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                                                                                     StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                                                                                 Next Idx2
+                                                                             End Sub)
                     DataProcessed = True
                 End With
             Case "Int32"
@@ -650,7 +652,7 @@ Public Class Form1
         'Calculate the maximum modus (the most propable value in the channel) and normalize all channels to this channel
         Running()
         Dim ClipCount(1, 1) As Integer
-        If SingleStatCalc.DataProcessor_UInt16.ImageData(0).LongLength > 0 Then
+        If SingleStatCalc.DataProcessor_UInt16.ImageData(0).Length > 0 Then
             Dim ModusRef As Long = Long.MinValue
             For BayerIdx1 As Integer = 0 To 1
                 For BayerIdx2 As Integer = 0 To 1
@@ -662,14 +664,14 @@ Public Class Form1
                     ClipCount(BayerIdx1, BayerIdx2) = 0
                     Dim Norm As Double = ModusRef / LastStat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Modus.Key
                     If ModusRef <> LastStat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Modus.Key Then                                                        'skip channels that do not need a change
-                        For PixelIdx1 As Integer = BayerIdx1 To SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(0) Step 2
-                            For PixelIdx2 As Integer = BayerIdx2 To SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(1) Step 2
-                                Dim NewValue As Double = Math.Round(SingleStatCalc.DataProcessor_UInt16.ImageData(0)(PixelIdx1, PixelIdx2) * Norm)
+                        For PixelIdx1 As Integer = BayerIdx1 To SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(0) Step 2
+                            For PixelIdx2 As Integer = BayerIdx2 To SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1) Step 2
+                                Dim NewValue As Double = Math.Round(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(PixelIdx1, PixelIdx2) * Norm)
                                 If NewValue > UInt16.MaxValue Then
-                                    SingleStatCalc.DataProcessor_UInt16.ImageData(0)(PixelIdx1, PixelIdx2) = UInt16.MaxValue
+                                    SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(PixelIdx1, PixelIdx2) = UInt16.MaxValue
                                     ClipCount(BayerIdx1, BayerIdx2) += 1
                                 Else
-                                    SingleStatCalc.DataProcessor_UInt16.ImageData(0)(PixelIdx1, PixelIdx2) = CUShort(NewValue)
+                                    SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(PixelIdx1, PixelIdx2) = CUShort(NewValue)
                                 End If
                             Next PixelIdx2
                         Next PixelIdx1
@@ -700,17 +702,17 @@ Public Class Form1
                     Select Case sfdMain.FilterIndex
                         Case 1
                             'FITS 16 bit fixed
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0), cFITSWriter.eBitPix.Int16, LastFITSHeader.GetCardsAsList)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0).Data, cFITSWriter.eBitPix.Int16, LastFITSHeader.GetCardsAsList)
                         Case 2
                             'FITS 32 bit fixed
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0), cFITSWriter.eBitPix.Int32, LastFITSHeader.GetCardsAsList)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0).Data, cFITSWriter.eBitPix.Int32, LastFITSHeader.GetCardsAsList)
                         Case 3
                             'FITS 32 bit float
-                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0), cFITSWriter.eBitPix.Single, LastFITSHeader.GetCardsAsList)
+                            cFITSWriter.Write(sfdMain.FileName, .ImageData(0).Data, cFITSWriter.eBitPix.Single, LastFITSHeader.GetCardsAsList)
                         Case 4
                             'TIFF
                             If .ImageData.Count = 1 Then
-                                ImageFileFormatSpecific.SaveTIFF_Format16bppGrayScale(sfdMain.FileName, .ImageData(0))
+                                ImageFileFormatSpecific.SaveTIFF_Format16bppGrayScale(sfdMain.FileName, .ImageData(0).Data)
                             Else
                                 ImageFileFormatSpecific.SaveTIFF_Format48bppColor(sfdMain.FileName, .ImageData)
                             End If
@@ -718,13 +720,13 @@ Public Class Form1
                             'JPG
                             Dim myEncoderParameters As New System.Drawing.Imaging.EncoderParameters(1)
                             myEncoderParameters.Param(0) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, DB.ImageQuality)
-                            cLockBitmap.CalculateOutputBitmap(.ImageData(0), LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/jpeg"), myEncoderParameters)
+                            cLockBitmap.CalculateOutputBitmap(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/jpeg"), myEncoderParameters)
                         Case 6
                             'PNG - try to do 8bit but only get a palett with 256 values but still 24-bit ...
                             Dim myEncoderParameters As New System.Drawing.Imaging.EncoderParameters(2)
                             myEncoderParameters.Param(0) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, DB.ImageQuality)
                             myEncoderParameters.Param(1) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.ColorDepth, 8)
-                            cLockBitmap.CalculateOutputBitmap(.ImageData(0), LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/png"), myEncoderParameters)
+                            cLockBitmap.CalculateOutputBitmap(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/png"), myEncoderParameters)
 
                             Dim X As New System.Windows.Media.Imaging.PngBitmapEncoder
 
@@ -750,7 +752,7 @@ Public Class Form1
 
     Private Sub StretcherToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StretcherToolStripMenuItem.Click
         Running()
-        ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0))
+        ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
         CalculateStatistics(SingleStatCalc.DataMode)
         Idle()
     End Sub
@@ -798,10 +800,10 @@ Public Class Form1
         Dim File_FOV1 As String = String.Empty
         Dim File_FOV2 As String = String.Empty
         For Each Entry As cFITSHeaderParser.sHeaderElement In X
-            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.RA) Then File_RA_JNow = Entry.Value.Trim("'"c).Trim.Trim("'"c)
-            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.DEC) Then File_Dec_JNow = Entry.Value.Trim("'"c).Trim.Trim("'"c)
-            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.FOV1) Then File_FOV1 = Entry.Value.Trim
-            If Entry.Keyword.Trim.ToUpper = FITSKeyword.GetKeyword(eFITSKeywords.FOV2) Then File_FOV2 = Entry.Value.Trim
+            If Entry.Keyword = eFITSKeywords.RA Then File_RA_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
+            If Entry.Keyword = eFITSKeywords.DEC Then File_Dec_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
+            If Entry.Keyword = eFITSKeywords.FOV1 Then File_FOV1 = CStr(Entry.Value).Trim
+            If Entry.Keyword = eFITSKeywords.FOV2 Then File_FOV2 = CStr(Entry.Value).Trim
         Next Entry
 
         'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
@@ -931,14 +933,14 @@ Public Class Form1
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
                 Case "UInt32"
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
             End Select
         Else
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0), DB.VigResolution)
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
                 Case "UInt32"
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
             End Select
@@ -962,14 +964,14 @@ Public Class Form1
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0))
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
                 Case "UInt32"
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
             End Select
         Else
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0), DB.VigResolution)
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
                 Case "UInt32"
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
             End Select
@@ -999,7 +1001,7 @@ Public Class Form1
         'Correct the vignette
         Select Case SingleStatCalc.DataMode
             Case "UInt16"
-                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0), VignetteCorrection)
+                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, VignetteCorrection)
             Case "UInt32"
                 ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt32.ImageData, VignetteCorrection)
         End Select
@@ -1057,6 +1059,33 @@ Public Class Form1
         Else
             e.Handled = False
         End If
+    End Sub
+
+    Private Sub HotPixelToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HotPixelToolStripMenuItem.Click
+        Dim FixedPixelCount As UInt32 = 0
+        Dim HotPixelLimit As Double = 5
+        Running()
+        With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
+            For Idx1 As Integer = 1 To .NAXIS1 - 2
+                For Idx2 As Integer = 1 To .NAXIS2 - 2
+                    Dim SurSum As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : SurSum.StoreRawValues = True
+                    SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
+                    SurSum.AddValue(.Data(Idx1 - 1, Idx2))
+                    SurSum.AddValue(.Data(Idx1 - 1, Idx2 - +1))
+                    SurSum.AddValue(.Data(Idx1, Idx2 - 1))
+                    SurSum.AddValue(.Data(Idx1, Idx2 + 1))
+                    SurSum.AddValue(.Data(Idx1 + 1, Idx2 - 1))
+                    SurSum.AddValue(.Data(Idx1 + 1, Idx2))
+                    SurSum.AddValue(.Data(Idx1 + 1, Idx2 + 1))
+                    If .Data(Idx1, Idx2) > HotPixelLimit * SurSum.Percentile(50) Then
+                        .Data(Idx1, Idx2) = CUShort(SurSum.Percentile(50))
+                        FixedPixelCount += UInt32One
+                    End If
+                Next Idx2
+            Next Idx1
+        End With
+        Log("Fixed " & FixedPixelCount.ValRegIndep & " pixel")
+        Idle()
     End Sub
 
 End Class

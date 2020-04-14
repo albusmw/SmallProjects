@@ -70,6 +70,7 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
+        Me.HotPixelToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -207,7 +208,7 @@ Partial Class Form1
         '
         'SpecialAnalysisToolStripMenuItem
         '
-        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette})
+        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette, Me.HotPixelToolStripMenuItem})
         Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
         Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
         Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
@@ -374,6 +375,12 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
+        'HotPixelToolStripMenuItem
+        '
+        Me.HotPixelToolStripMenuItem.Name = "HotPixelToolStripMenuItem"
+        Me.HotPixelToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.HotPixelToolStripMenuItem.Text = "Hot pixel"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -445,4 +452,5 @@ Partial Class Form1
     Friend WithEvents ClearStatisticsMemoryToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem6 As ToolStripSeparator
     Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents HotPixelToolStripMenuItem As ToolStripMenuItem
 End Class
