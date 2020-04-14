@@ -30,6 +30,7 @@ Partial Class MainForm
         Me.tspbProgress = New System.Windows.Forms.ToolStripProgressBar()
         Me.tsslProgress = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsmiFPSIndicator = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslMemory = New System.Windows.Forms.ToolStripStatusLabel()
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RunXMLSequenceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -54,6 +55,7 @@ Partial Class MainForm
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiASIZWO = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FITSWriterWithKeywordsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiActions = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiResetLoopStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiNewGUID = New System.Windows.Forms.ToolStripMenuItem()
@@ -76,7 +78,7 @@ Partial Class MainForm
         Me.rtbStatistics = New System.Windows.Forms.RichTextBox()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
-        Me.FITSWriterWithKeywordsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -108,7 +110,7 @@ Partial Class MainForm
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress, Me.tsmiFPSIndicator})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress, Me.tsmiFPSIndicator, Me.tsslMemory})
         Me.ssMain.Location = New System.Drawing.Point(0, 598)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Size = New System.Drawing.Size(936, 22)
@@ -139,6 +141,12 @@ Partial Class MainForm
         Me.tsmiFPSIndicator.Name = "tsmiFPSIndicator"
         Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 17)
         Me.tsmiFPSIndicator.Text = "FPS: ???"
+        '
+        'tsslMemory
+        '
+        Me.tsslMemory.Name = "tsslMemory"
+        Me.tsslMemory.Size = New System.Drawing.Size(73, 17)
+        Me.tsslMemory.Text = "Memory: ???"
         '
         'msMain
         '
@@ -287,6 +295,12 @@ Partial Class MainForm
         Me.tsmiASIZWO.Name = "tsmiASIZWO"
         Me.tsmiASIZWO.Size = New System.Drawing.Size(207, 22)
         Me.tsmiASIZWO.Text = "ASI ZWO Reader"
+        '
+        'FITSWriterWithKeywordsToolStripMenuItem
+        '
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Name = "FITSWriterWithKeywordsToolStripMenuItem"
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Size = New System.Drawing.Size(207, 22)
+        Me.FITSWriterWithKeywordsToolStripMenuItem.Text = "FITS writer with keywords"
         '
         'tsmiActions
         '
@@ -497,11 +511,9 @@ Partial Class MainForm
         '
         Me.ofdMain.FileName = "OpenFileDialog1"
         '
-        'FITSWriterWithKeywordsToolStripMenuItem
+        'tStatusUpdate
         '
-        Me.FITSWriterWithKeywordsToolStripMenuItem.Name = "FITSWriterWithKeywordsToolStripMenuItem"
-        Me.FITSWriterWithKeywordsToolStripMenuItem.Size = New System.Drawing.Size(207, 22)
-        Me.FITSWriterWithKeywordsToolStripMenuItem.Text = "FITS writer with keywords"
+        Me.tStatusUpdate.Enabled = True
         '
         'MainForm
         '
@@ -595,4 +607,6 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
     Friend WithEvents tsmiASIZWO As ToolStripMenuItem
     Friend WithEvents FITSWriterWithKeywordsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsslMemory As ToolStripStatusLabel
+    Friend WithEvents tStatusUpdate As Timer
 End Class

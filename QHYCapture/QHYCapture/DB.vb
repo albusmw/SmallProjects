@@ -368,7 +368,7 @@ Public Class cDB_meta
     <ComponentModel.DisplayName("   6. Telescope used")>
     <ComponentModel.Description("Telescope name to add to the meta data.")>
     <ComponentModel.DefaultValue("Planewave CDK 12.5 with reducer")>
-    Public Property Telescope As String = "Planewave CDK 12.5 with reducer"
+    Public Property Telescope As String = "CDK 12.5 with reducer"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   7. Telescope aperture [mm]")>

@@ -159,17 +159,17 @@ Partial Public Class MainForm
 
                 'Remove overscan - do NOT run if an ROU is set
                 Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
-                SingleStatCalc.DataProcessor_UInt16.ImageData(0) = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
+                SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
                 If DB.RemoveOverscan = True And DB.ROISet = False Then
                     Dim NoOverscan(CInt(EffArea.Width - 1), CInt(EffArea.Height - 1)) As UInt16
-                    Dim Status_GetROI As cIntelIPP.IppStatus = DB.IPP.Copy(SingleStatCalc.DataProcessor_UInt16.ImageData(0), NoOverscan, CInt(EffArea.X), CInt(EffArea.Y), CInt(EffArea.Width), CInt(EffArea.Height))
-                    Dim Status_SetData As cIntelIPP.IppStatus = DB.IPP.Copy(NoOverscan, SingleStatCalc.DataProcessor_UInt16.ImageData(0), 0, 0, NoOverscan.GetUpperBound(0) + 1, NoOverscan.GetUpperBound(1) + 1)
+                    Dim Status_GetROI As cIntelIPP.IppStatus = DB.IPP.Copy(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, NoOverscan, CInt(EffArea.X), CInt(EffArea.Y), CInt(EffArea.Width), CInt(EffArea.Height))
+                    Dim Status_SetData As cIntelIPP.IppStatus = DB.IPP.Copy(NoOverscan, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, 0, 0, NoOverscan.GetUpperBound(0) + 1, NoOverscan.GetUpperBound(1) + 1)
                     If Status_GetROI <> cIntelIPP.IppStatus.NoErr Or Status_SetData <> cIntelIPP.IppStatus.NoErr Then
                         LogError("Overscan removal FAILED")
                     End If
                 End If
-                LastCaptureData.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(0) + 1)
-                LastCaptureData.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(1) + 1)
+                LastCaptureData.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1)
+                LastCaptureData.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2)
                 DB.Stopper.Stamp("ChangeAspect")
 
                 '================================================================================
@@ -260,8 +260,8 @@ Partial Public Class MainForm
                 'Display focus image if required
                 If DB.ShowLiveImage = True Then
                     Dim SizeInfo As String = String.Empty
-                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(0) + 1).ValRegIndep & "x"
-                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).GetUpperBound(1) + 1).ValRegIndep
+                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1).ValRegIndep & "x"
+                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2).ValRegIndep
                     Dim NewWindowRequired As Boolean = False
                     If IsNothing(FocusWindow) = True Then
                         NewWindowRequired = True
@@ -272,7 +272,7 @@ Partial Public Class MainForm
                         FocusWindow = New cImgForm
                         FocusWindow.Show("Focus Window <" & SizeInfo & ">")
                     End If
-                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData(0), SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
                     DB.Stopper.Stamp("Focus window")
                 End If
 
@@ -289,7 +289,7 @@ Partial Public Class MainForm
                     Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
 
                     Dim FITSName As String = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
-                    cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData(0), cFITSWriter.eBitPix.Int16, CustomElement)
+                    cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
                     If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
 
                 End If
@@ -476,10 +476,6 @@ Partial Public Class MainForm
         DE()
     End Sub
 
-    Private Function TimeStamp() As String
-        Return Format(Now, "HH.mm.ss:fff")
-    End Function
-
     Private Sub EndAction()
         Log("=========================================")
         tsslMain.Text = "--IDLE--"
@@ -612,10 +608,13 @@ Partial Public Class MainForm
 
     Private Sub GainVariationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GainVariationToolStripMenuItem.Click
         DB.StopFlag = False
-        For Gain As Double = 0 To 200 Step 5
+        For Gain As Double = 0 To 200 Step 1
             DB.Gain = Gain
-            RefreshProperties()
-            QHYCapture(False)
+            For Exp As Integer = 1 To 60 Step 1
+                DB.ExposureTime = Exp
+                RefreshProperties()
+                QHYCapture(False)
+            Next Exp
             If DB.StopFlag = True Then Exit For
         Next Gain
         CloseCamera()
@@ -1021,7 +1020,7 @@ Partial Public Class MainForm
                                         'Correct aspect and calculate statistics
                                         Log("Statistics ...")
                                         Ticker.Reset() : Ticker.Start()
-                                        SingleStatCalc.DataProcessor_UInt16.ImageData(0) = ChangeAspectIPP(DB.IPP, CamRawBuffer, CameraInfo.MaxWidth, CameraInfo.MaxHeight)
+                                        SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(DB.IPP, CamRawBuffer, CameraInfo.MaxWidth, CameraInfo.MaxHeight)
                                         Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(SingleStat.DataMode)
                                         LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat)
                                         Ticker.Stop()
@@ -1045,7 +1044,7 @@ Partial Public Class MainForm
                                             Log("Storing ...")
                                             Ticker.Reset() : Ticker.Start()
                                             Dim FITSName As String = System.IO.Path.Combine(Path, "EXP_" & Format(ExpCounter, "000000000").Trim & ".fits")
-                                            cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData(0), cFITSWriter.eBitPix.Int16)
+                                            cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
                                             Ticker.Stop()
                                             LogTiming("", Ticker)
                                             'Process.Start(FITSName)
@@ -1088,6 +1087,7 @@ Partial Public Class MainForm
             'Close camera
             Log("Closing camera ...")
             CallOK(ZWO.ASICameraDll.ASICloseCamera(CamHandle))
+            GC.Collect()
             Log("=======================================")
 
         End If
@@ -1101,5 +1101,14 @@ Partial Public Class MainForm
     Private Sub FITSWriterWithKeywordsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSWriterWithKeywordsToolStripMenuItem.Click
         cFITSWriter.WriteTestFile_Float32("C:\TEMP\FITSHeader.fits")
     End Sub
+
+    Private Sub tStatusUpdate_Tick(sender As Object, e As EventArgs) Handles tStatusUpdate.Tick
+        tsslMemory.Text = "Memory: " & Format(GetMyMemSize, "0.0") & " MByte"
+    End Sub
+
+    '''<summary>Get the memory consumption [MByte] of this EXE.</summary>
+    Private Function GetMyMemSize() As Double
+        Return Process.GetCurrentProcess.PrivateMemorySize64 / 1048576
+    End Function
 
 End Class
