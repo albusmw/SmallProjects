@@ -247,6 +247,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="FITSHeaderKeywords.txt" />
+    <Content Include="FromMyObservatory.txt" />
     <Content Include="NotUsedCode.txt" />
     <Content Include="Statistics.ico" />
     <Content Include="ToDo.txt" />

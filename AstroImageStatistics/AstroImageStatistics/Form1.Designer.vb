@@ -50,6 +50,7 @@ Partial Class Form1
         Me.ReplotStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ADUQuantizationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiCalcVignette = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HotPixelToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BasicProcessingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AdjustRGBChannelsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StretcherToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -70,7 +71,7 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.HotPixelToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FITSTestFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -245,6 +246,12 @@ Partial Class Form1
         Me.tsmiCalcVignette.Size = New System.Drawing.Size(212, 22)
         Me.tsmiCalcVignette.Text = "Vignette"
         '
+        'HotPixelToolStripMenuItem
+        '
+        Me.HotPixelToolStripMenuItem.Name = "HotPixelToolStripMenuItem"
+        Me.HotPixelToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.HotPixelToolStripMenuItem.Text = "Hot pixel"
+        '
         'BasicProcessingToolStripMenuItem
         '
         Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.tsmiPlateSolve, Me.tsmiCorrectVignette})
@@ -278,7 +285,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RemoveOverscanToolStripMenuItem, Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -375,11 +382,11 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'HotPixelToolStripMenuItem
+        'FITSTestFilesToolStripMenuItem
         '
-        Me.HotPixelToolStripMenuItem.Name = "HotPixelToolStripMenuItem"
-        Me.HotPixelToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.HotPixelToolStripMenuItem.Text = "Hot pixel"
+        Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
+        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
         '
         'Form1
         '
@@ -453,4 +460,5 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem6 As ToolStripSeparator
     Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents HotPixelToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents FITSTestFilesToolStripMenuItem As ToolStripMenuItem
 End Class

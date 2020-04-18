@@ -357,6 +357,15 @@ Public Class Form1
         DD = New Ato.DragDrop(tbLogOutput, False)
         pgMain.SelectedObject = DB
 
+        'Drop auswerten
+        With My.Application
+            If .CommandLineArgs.Count > 0 Then
+                Dim FileName As String = .CommandLineArgs.Item(0)
+                If System.IO.File.Exists(FileName) Then LoadFile(FileName)
+            End If
+        End With
+
+
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -1086,6 +1095,12 @@ Public Class Form1
         End With
         Log("Fixed " & FixedPixelCount.ValRegIndep & " pixel")
         Idle()
+    End Sub
+
+    Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSTestFilesToolStripMenuItem.Click
+        cFITSWriter.WriteTestFile_UInt16_Cross(System.IO.Path.Combine(MyPath, "UInt16_Cross_mono.fits"))
+        cFITSWriter.WriteTestFile_UInt16_Cross_RGB(System.IO.Path.Combine(MyPath, "UInt16_Cross_rgb.fits"))
+        Process.Start(MyPath)
     End Sub
 
 End Class
