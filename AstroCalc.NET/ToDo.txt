@@ -1,0 +1,16 @@
+﻿Minimum display:
+http://www.clearskyinstitute.com/ephem/index.html
+
+Bright-star catalog
+http://de.wikipedia.org/wiki/Bright-Star-Katalog
+
+Ephemerieden-Referenz:
+http://ssd.jpl.nasa.gov/horizons.cgi
+
+
+Epoch-Conversion:
+Dim Date_EPO2000 As sGeneric
+PyEphem.ConvertEpoche(DB.HenryDraper.Catalog(HenryDraper).Star, Date_EPO2000, 1900, 2000)
+Dim Ra_Cat As Double = Date_EPO2000.RightAscension
+Dim Dec_Cat As Double = Date_EPO2000.Declination
+Dim Pos As Double = 0

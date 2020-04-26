@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{991EFBCF-5596-4390-93AC-0A994143B3B9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>MainForm</StartupObject>
+    <RootNamespace>
+    </RootNamespace>
+    <AssemblyName>AstroCalc.NET</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>AstroCalc.NET.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>AstroCalc.NET.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DocumentationFile>AstroCalc.NET.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DocumentationFile>AstroCalc.NET.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Users\albusmw\Dropbox\Programmierung\atomics\AstroCalc_TEST.vb">
+      <Link>AstroCalc_TEST.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\astro catalogues\CatParser.vb">
+      <Link>CatParser.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\astro catalogues\cBayer.vb">
+      <Link>cBayer.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\astro catalogues\cConstLines.vb">
+      <Link>cConstLines.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\astro catalogues\cCrossIndexKostjuk.vb">
+      <Link>cCrossIndexKostjuk.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\astro catalogues\cHIP.vb">
+      <Link>cHIP.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\AstroCalc.vb">
+      <Link>AstroCalc.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cAstroParser.vb">
+      <Link>cAstroParser.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\cDownloader.vb">
+      <Link>cDownloader.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\Horizons_Loader.vb">
+      <Link>Horizons_Loader.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\INI_IO.vb">
+      <Link>INI_IO.vb</Link>
+    </Compile>
+    <Compile Include="..\..\src\atomics\Sun.vb">
+      <Link>Sun.vb</Link>
+    </Compile>
+    <Compile Include="Calculation\Coord.vb" />
+    <Compile Include="Calculation\Time.vb" />
+    <Compile Include="Catalogs\cConstellation.vb" />
+    <Compile Include="Catalogs\cNGC.vb" />
+    <Compile Include="Catalogs\cWIKI_Constellations.vb" />
+    <Compile Include="Catalogs\DB.vb" />
+    <Compile Include="Catalogs\IGenerics.vb" />
+    <Compile Include="DateAndTime.vb" />
+    <Compile Include="frmCoord.Designer.vb">
+      <DependentUpon>frmCoord.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCoord.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDSS.Designer.vb">
+      <DependentUpon>frmDSS.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmDSS.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmExternalCharts.Designer.vb">
+      <DependentUpon>frmExternalCharts.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmExternalCharts.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmInfo.Designer.vb">
+      <DependentUpon>frmInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLiveImage.Designer.vb">
+      <DependentUpon>frmLiveImage.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmLiveImage.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLog.Designer.vb">
+      <DependentUpon>frmLog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmLog.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSky.Designer.vb">
+      <DependentUpon>frmSky.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSky.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Globals.vb" />
+    <Compile Include="Catalogs\cHDE.vb" />
+    <Compile Include="GZIP.vb" />
+    <Compile Include="MainForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.vb">
+      <DependentUpon>MainForm.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.vb" />
+    <Compile Include="Objects\cSyncSecondTick.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PyEphem.vb" />
+    <Compile Include="Root.vb" />
+    <Compile Include="Util.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="frmCoord.resx">
+      <DependentUpon>frmCoord.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDSS.resx">
+      <DependentUpon>frmDSS.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmExternalCharts.resx">
+      <DependentUpon>frmExternalCharts.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmInfo.resx">
+      <DependentUpon>frmInfo.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLiveImage.resx">
+      <DependentUpon>frmLiveImage.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLog.resx">
+      <DependentUpon>frmLog.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSky.resx">
+      <DependentUpon>frmSky.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="My Project\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
