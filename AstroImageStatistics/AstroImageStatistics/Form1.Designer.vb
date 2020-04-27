@@ -64,6 +64,7 @@ Partial Class Form1
         Me.ASCOMDynamicallyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
         Me.FocusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FITSTestFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -71,7 +72,8 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.FITSTestFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem7 = New System.Windows.Forms.ToolStripSeparator()
+        Me.MultifileAreaCompareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -209,7 +211,7 @@ Partial Class Form1
         '
         'SpecialAnalysisToolStripMenuItem
         '
-        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette, Me.HotPixelToolStripMenuItem})
+        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette, Me.HotPixelToolStripMenuItem, Me.ToolStripMenuItem7, Me.MultifileAreaCompareToolStripMenuItem})
         Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
         Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
         Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
@@ -331,6 +333,12 @@ Partial Class Form1
         Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
         Me.FocusToolStripMenuItem.Text = "Focus"
         '
+        'FITSTestFilesToolStripMenuItem
+        '
+        Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
+        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
+        '
         'ofdMain
         '
         Me.ofdMain.Multiselect = True
@@ -382,11 +390,16 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'FITSTestFilesToolStripMenuItem
+        'ToolStripMenuItem7
         '
-        Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
-        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
-        Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
+        Me.ToolStripMenuItem7.Name = "ToolStripMenuItem7"
+        Me.ToolStripMenuItem7.Size = New System.Drawing.Size(209, 6)
+        '
+        'MultifileAreaCompareToolStripMenuItem
+        '
+        Me.MultifileAreaCompareToolStripMenuItem.Name = "MultifileAreaCompareToolStripMenuItem"
+        Me.MultifileAreaCompareToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.MultifileAreaCompareToolStripMenuItem.Text = "Multi-file area compare"
         '
         'Form1
         '
@@ -461,4 +474,6 @@ Partial Class Form1
     Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents HotPixelToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents FITSTestFilesToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem7 As ToolStripSeparator
+    Friend WithEvents MultifileAreaCompareToolStripMenuItem As ToolStripMenuItem
 End Class

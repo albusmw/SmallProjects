@@ -1100,7 +1100,48 @@ Public Class Form1
     Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSTestFilesToolStripMenuItem.Click
         cFITSWriter.WriteTestFile_UInt16_Cross(System.IO.Path.Combine(MyPath, "UInt16_Cross_mono.fits"))
         cFITSWriter.WriteTestFile_UInt16_Cross_RGB(System.IO.Path.Combine(MyPath, "UInt16_Cross_rgb.fits"))
+        cFITSWriter.WriteTestFile_UInt16_XYIdent(System.IO.Path.Combine(MyPath, "UInt16_XYIdent.fits"))
         Process.Start(MyPath)
+    End Sub
+
+    Private Sub MultifileAreaCompareToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MultifileAreaCompareToolStripMenuItem.Click
+
+        'Read the same segment from all files and compose a new combined image
+
+        Dim TileSize As Integer = 100                       'size for 1 tile
+        Dim OffsetX As Integer = 9029 - (TileSize \ 2)      'X offset start position
+        Dim OffsetY As Integer = 2943 - (TileSize \ 2)      'Y offset start position
+
+        Dim BaseDirectory As String = System.IO.Path.GetDirectoryName(LastFile)
+        Dim FITSReader As New cFITSReader
+
+        Dim AllFiles As New List(Of String)(System.IO.Directory.GetFiles(BaseDirectory, "QHY600_L*.fits"))
+
+        Dim MosaikWidth As Integer = CInt(Math.Ceiling(Math.Sqrt(AllFiles.Count)))              'Number of tiles in X direction
+        Dim MosaikHeight As Integer = CInt(Math.Ceiling(AllFiles.Count / MosaikWidth))          'Number of tiles in Y direction
+        Dim Mosaik(MosaikWidth * TileSize + (MosaikWidth - 1) - 1, MosaikHeight * TileSize + (MosaikHeight - 1) - 1) As UInt16
+
+        Dim WidthPtr As Integer = 0 : Dim WidthIdx As Integer = 0
+        Dim HeightPtr As Integer = 0
+        For Each File As String In AllFiles
+            Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, DB.UseIPP, OffsetX, TileSize, OffsetY, TileSize)
+            For X As Integer = 0 To TileSize - 1
+                For Y As Integer = 0 To TileSize - 1
+                    Mosaik(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
+                Next Y
+            Next X
+            WidthPtr += TileSize + 1 : WidthIdx += 1
+            If WidthIdx >= MosaikWidth Then
+                HeightPtr += TileSize + 1
+                WidthPtr = 0
+                WidthIdx = 0
+            End If
+        Next File
+
+        Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Mosaik.fits")
+        cFITSWriter.Write(FileToGenerate, Mosaik, cFITSWriter.eBitPix.Int16)
+        Process.Start(FileToGenerate)
+
     End Sub
 
 End Class
