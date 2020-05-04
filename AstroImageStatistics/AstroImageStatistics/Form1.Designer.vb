@@ -51,6 +51,8 @@ Partial Class Form1
         Me.ADUQuantizationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiCalcVignette = New System.Windows.Forms.ToolStripMenuItem()
         Me.HotPixelToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem7 = New System.Windows.Forms.ToolStripSeparator()
+        Me.MultifileAreaCompareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BasicProcessingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AdjustRGBChannelsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StretcherToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -72,8 +74,7 @@ Partial Class Form1
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.ToolStripMenuItem7 = New System.Windows.Forms.ToolStripSeparator()
-        Me.MultifileAreaCompareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tspbMain = New System.Windows.Forms.ToolStripProgressBar()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -254,6 +255,17 @@ Partial Class Form1
         Me.HotPixelToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.HotPixelToolStripMenuItem.Text = "Hot pixel"
         '
+        'ToolStripMenuItem7
+        '
+        Me.ToolStripMenuItem7.Name = "ToolStripMenuItem7"
+        Me.ToolStripMenuItem7.Size = New System.Drawing.Size(209, 6)
+        '
+        'MultifileAreaCompareToolStripMenuItem
+        '
+        Me.MultifileAreaCompareToolStripMenuItem.Name = "MultifileAreaCompareToolStripMenuItem"
+        Me.MultifileAreaCompareToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
+        Me.MultifileAreaCompareToolStripMenuItem.Text = "Multi-file area compare"
+        '
         'BasicProcessingToolStripMenuItem
         '
         Me.BasicProcessingToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AdjustRGBChannelsToolStripMenuItem, Me.StretcherToolStripMenuItem, Me.tsmiPlateSolve, Me.tsmiCorrectVignette})
@@ -361,7 +373,7 @@ Partial Class Form1
         'ssMain
         '
         Me.ssMain.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslRunning, Me.tsslMain})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslRunning, Me.tsslMain, Me.tspbMain})
         Me.ssMain.Location = New System.Drawing.Point(0, 1049)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Padding = New System.Windows.Forms.Padding(1, 0, 9, 0)
@@ -390,16 +402,12 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'ToolStripMenuItem7
+        'tspbMain
         '
-        Me.ToolStripMenuItem7.Name = "ToolStripMenuItem7"
-        Me.ToolStripMenuItem7.Size = New System.Drawing.Size(209, 6)
-        '
-        'MultifileAreaCompareToolStripMenuItem
-        '
-        Me.MultifileAreaCompareToolStripMenuItem.Name = "MultifileAreaCompareToolStripMenuItem"
-        Me.MultifileAreaCompareToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.MultifileAreaCompareToolStripMenuItem.Text = "Multi-file area compare"
+        Me.tspbMain.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.tspbMain.Name = "tspbMain"
+        Me.tspbMain.Size = New System.Drawing.Size(100, 16)
+        Me.tspbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         '
         'Form1
         '
@@ -476,4 +484,5 @@ Partial Class Form1
     Friend WithEvents FITSTestFilesToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem7 As ToolStripSeparator
     Friend WithEvents MultifileAreaCompareToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tspbMain As ToolStripProgressBar
 End Class

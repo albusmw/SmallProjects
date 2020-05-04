@@ -272,7 +272,7 @@ Partial Public Class MainForm
                         FocusWindow = New cImgForm
                         FocusWindow.Show("Focus Window <" & SizeInfo & ">")
                     End If
-                    UpdateFocusWindow(FocusWindow, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                    FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
                     DB.Stopper.Stamp("Focus window")
                 End If
 

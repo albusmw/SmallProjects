@@ -357,38 +357,11 @@ Partial Public Class MainForm
         End If
     End Sub
 
-    '''<summary>Update the content of the focus window.</summary>
-    '''<param name="Form">Focus window.</param>
-    '''<param name="Data">Data to display.</param>
-    '''<param name="MaxData">Maximum in the data in order to normalize correct.</param>
-    Private Sub UpdateFocusWindow(ByRef Form As cImgForm, ByRef Data(,) As UInt16, ByVal MinData As Long, ByVal MaxData As Long)
-        Dim OutputImage As New cLockBitmap(Data.GetUpperBound(0), Data.GetUpperBound(1))
-        If MaxData = 0 Then MaxData = 1
-        OutputImage.LockBits()
-        Dim Stride As Integer = OutputImage.BitmapData.Stride
-        Dim BytePerPixel As Integer = OutputImage.ColorBytesPerPixel
-        Dim YOffset As Integer = 0
-        For Y As Integer = 0 To OutputImage.Height - 1
-            Dim BaseOffset As Integer = YOffset
-            For X As Integer = 0 To OutputImage.Width - 1
-                Dim DispVal As Integer = CInt((Data(X, Y) - MinData) * (255 / (MaxData - MinData)))
-                Dim Coloring As Drawing.Color = cColorMaps.Bone(DispVal)
-                OutputImage.Pixels(BaseOffset) = Coloring.R
-                OutputImage.Pixels(BaseOffset + 1) = Coloring.G
-                OutputImage.Pixels(BaseOffset + 2) = Coloring.B
-                BaseOffset += BytePerPixel
-            Next X
-            YOffset += Stride
-        Next Y
-        OutputImage.UnlockBits()
-        Form.Image.Image = OutputImage.BitmapToProcess
-    End Sub
-
     '''<summary>Load the data from the 10Micron mount.</summary>
     Private Sub Load10MicronData()
         Dim Client10Micron As New Net.Sockets.TcpClient(DB_meta.IP_10Micron, 3490)
         Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
-        c10Micron.SendQuery(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
+        c10Micron.SendCommand(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
         DB_meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
         DB_meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
         DB_meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
