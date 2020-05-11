@@ -47,7 +47,7 @@ Public Class cDB
     <ComponentModel.Category(Cat_basics)>
     <ComponentModel.DisplayName("h.) Sum image FITS file name")>
     <ComponentModel.DefaultValue("SUM.fits")>
-    Public Property FITSSumFile As String = String.Empty
+    Public Property FITSSumFile As String = "SUM.fits"
 
     <ComponentModel.Category(Cat_tracking)>
     <ComponentModel.DisplayName("a.) Tracking?")>
@@ -63,6 +63,14 @@ Public Class cDB
     <ComponentModel.DisplayName("a.) Use IPP?")>
     <ComponentModel.DefaultValue(True)>
     Public Property UseIPP As Boolean = True
+
+    <ComponentModel.Category(Cat_misc)>
+    <ComponentModel.DisplayName("b.) IPP path")>
+    <ComponentModel.DefaultValue("")>
+    Public Property IPPPath As String = String.Empty
+
+    <Browsable(False)>
+    Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly.Location)
 
     '''<summary>Property indicating if the FITS sum file shall be calculated.</summary>
     <Browsable(False)>

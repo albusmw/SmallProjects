@@ -3,12 +3,33 @@ Option Strict On
 
 Public Class MainForm
 
+    '''<summary>Handle to Intel IPP functions.</summary>
+    Private IntelIPP As cIntelIPP
+
     Dim DB As New cDB
     Dim Logger As New cLogging
 
+    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
+        pgMain.SelectedObject = DB
+        'IPP laden
+        DB.IPPPath = String.Empty
+        TestIPPPath(DB.IPPPath, System.IO.Path.Combine(DB.MyPath, "ipp"))
+        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\redist\intel64_win\ipp")
+        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64_win\ipp")
+        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
+        IntelIPP = New cIntelIPP(DB.IPPPath)
+    End Sub
+
+    '''<summary>Take an IPP path if there is not yet one set.</summary>
+    Private Sub TestIPPPath(ByRef CurrentPath As String, ByVal Path As String)
+        If System.IO.Directory.Exists(Path) Then
+            If String.IsNullOrEmpty(CurrentPath) = True Then CurrentPath = Path
+        End If
+    End Sub
+
     Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
-        CType(sender, System.Windows.Forms.Button).Enabled = False : DE
+        CType(sender, System.Windows.Forms.Button).Enabled = False : DE()
 
         'Define input file and open
         Dim FileIO As New System.IO.FileStream(DB.InputFile, IO.FileMode.Open, IO.FileAccess.Read)
@@ -41,10 +62,10 @@ Public Class MainForm
                 If Header.BytePerPixel = 2 Then
 
                     'Init sum image
-                    Dim SumImage(Header.FrameWidth - 1, Header.FrameHeight - 1) As Integer
+                    Dim SumImage(Header.FrameWidth - 1, Header.FrameHeight - 1) As UInt32
                     For IdxY As Integer = 0 To Header.FrameWidth - 1
                         For IdxX As Integer = 0 To Header.FrameHeight - 1
-                            SumImage(IdxY, IdxX) = Integer.MinValue
+                            SumImage(IdxY, IdxX) = UInt32.MinValue
                         Next IdxX
                     Next IdxY
 
@@ -55,26 +76,23 @@ Public Class MainForm
 
                         '1.) Read in 1 frame and convert to 2-byte data type
                         Dim FrameSize As Integer = CInt(Header.FrameWidth * Header.FrameHeight * Header.BytePerPixel)
-                        Dim FrameVector As Byte() = BinaryIN.ReadBytes(FrameSize)
+                        Dim Frame(Header.FrameWidth - 1, Header.FrameHeight - 1) As UInt16
+                        IntelIPP.Transpose(BinaryIN.ReadBytes(FrameSize), Frame)
 
                         'The SER file has a different row-column order compared to the FITS file, so we have to swap ...
-                        Dim Frame(Header.FrameHeight - 1, Header.FrameWidth - 1) As UInt16
-                        Dim ReadPtr As Integer = 0
-                        Dim PtrX As Integer = 0
-                        Dim PtrY As Integer = 0
-                        For Idx As Long = 1 To Frame.LongLength
-                            Frame(PtrY, PtrX) = BitConverter.ToUInt16(New Byte() {FrameVector(ReadPtr + 1), FrameVector(ReadPtr)}, 0)
-                            PtrX += 1
-                            If PtrX > Frame.GetUpperBound(1) Then
-                                PtrX = 0
-                                PtrY += 1
-                            End If
-                            ReadPtr += 2
-                        Next Idx
 
-                        Logger.Tic("Convert to Int16")
-                        System.Buffer.BlockCopy(FrameVector, 0, Frame, 0, FrameVector.Count)                            'Direct copy 1-to-1 byte in memory to generate 16-bit from 2 8-bit
-                        Logger.Toc()
+                        'Dim ReadPtr As Integer = 0
+                        'Dim PtrX As Integer = 0
+                        'Dim PtrY As Integer = 0
+                        'For Idx As Long = 1 To Frame.LongLength
+                        '    Frame(PtrY, PtrX) = BitConverter.ToUInt16(New Byte() {FrameVector(ReadPtr + 1), FrameVector(ReadPtr)}, 0)
+                        '    PtrX += 1
+                        '    If PtrX > Frame.GetUpperBound(1) Then
+                        '        PtrX = 0
+                        '        PtrY += 1
+                        '    End If
+                        '    ReadPtr += 2
+                        'Next Idx
 
                         '2.) For the first image, detect mean X and Y summing statistics
                         If FrameCountIdx >= -1 Then
@@ -137,11 +155,11 @@ Public Class MainForm
                         End If
 
                         'Debug - save 1st frame
-                        If FrameCountIdx = 1 Then
-                            Dim FITSFirstName As String = System.IO.Path.Combine(InputPath, "DEBUG_FITS_0001.fits")
-                            cFITSWriter.Write(FITSFirstName, Frame, cFITSWriter.eBitPix.Int16)
-                            Exit For
-                        End If
+                        'If FrameCountIdx = 1 Then
+                        '    Dim FITSFirstName As String = System.IO.Path.Combine(InputPath, "DEBUG_FITS_0001.fits")
+                        '    cFITSWriter.Write(FITSFirstName, Frame, cFITSWriter.eBitPix.Int16)
+                        '    Exit For
+                        'End If
 
                         tspbMain.Value = FrameCountIdx
                         tsslMain.Text = "Frame " & Format(FrameCountIdx, "0000").Trim & "/" & Format(tspbMain.Maximum, "0000").Trim
@@ -157,7 +175,7 @@ Public Class MainForm
                     'Store total peak image
                     If DB.CalcFITSSumFile Then
                         Dim FITSSumFileName As String = System.IO.Path.Combine(InputPath, DB.FITSSumFile)
-                        cFITSWriter.Write(FITSSumFileName, SumImage, cFITSWriter.eBitPix.Int16)
+                        cFITSWriter.Write(FITSSumFileName, SumImage, cFITSWriter.eBitPix.Int32)
                     End If
 
                 End If
@@ -175,10 +193,6 @@ Public Class MainForm
 
         CType(sender, System.Windows.Forms.Button).Enabled = True : DE()
 
-    End Sub
-
-    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
-        pgMain.SelectedObject = DB
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
