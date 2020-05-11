@@ -1,4 +1,7 @@
-﻿Solver testing:
+﻿- ReadHeader gibt es doppelt
+
+
+Solver testing:
 	QHY600_H_alpha_60_40_50_001_001_Photographic.fits
 	FITS:				RA      =      '06:32:57.33'					":GR#"
 						DEC     =      '+04:55:58.0'					":GD#"

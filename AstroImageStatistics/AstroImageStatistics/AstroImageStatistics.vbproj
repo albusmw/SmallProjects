@@ -204,6 +204,12 @@
     <Compile Include="frmFITSGrep.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmLastOpenedFiles.Designer.vb">
+      <DependentUpon>frmLastOpenedFiles.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmLastOpenedFiles.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmNavigator.Designer.vb">
       <DependentUpon>frmNavigator.vb</DependentUpon>
     </Compile>
@@ -232,6 +238,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmFITSGrep.resx">
       <DependentUpon>frmFITSGrep.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLastOpenedFiles.resx">
+      <DependentUpon>frmLastOpenedFiles.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmNavigator.resx">
       <DependentUpon>frmNavigator.vb</DependentUpon>

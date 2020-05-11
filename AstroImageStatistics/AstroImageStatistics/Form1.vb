@@ -3,6 +3,8 @@ Option Strict On
 
 Public Class Form1
 
+    Private LastOpenedFiles As New frmLastOpenedFiles
+
     Const UInt32One As UInt32 = 1
 
     Private LogContent As New System.Text.StringBuilder
@@ -40,7 +42,7 @@ Public Class Form1
     Private StackingStatistics(,) As Ato.cSingleValueStatistics
 
     Private Sub OpenFileToAnalyseToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenFileToAnalyseToolStripMenuItem.Click
-        ofdMain.Filter = "FIT(s) files (*.fit?)|*.fit?"
+        ofdMain.Filter = "FIT(s) files (FIT/FITS/FTS)|*.FIT;*.FITS;*.FTS"
         If ofdMain.ShowDialog <> DialogResult.OK Then Exit Sub
         For Each File As String In ofdMain.FileNames
             LoadFile(File)
@@ -52,6 +54,8 @@ Public Class Form1
         Dim FileNameOnly As String = System.IO.Path.GetFileName(FileName)
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
+        Dim DataStartPos As Integer = 0
+
         SingleStatCalc = New AstroNET.Statistics(IPP)
 
         Running()
@@ -67,11 +71,11 @@ Public Class Form1
         Log("  -> <" & System.IO.Path.GetFileNameWithoutExtension(FileName) & ">")
         LastFile = FileName
         Log("FITS header:")
-        LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName))
+        LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName, DataStartPos))
         Dim FITSHeaderDict As Dictionary(Of eFITSKeywords, Object) = LastFITSHeader.GetCardsAsDictionary
         Dim ContentToPrint As New List(Of String)
         For Each Entry As eFITSKeywords In FITSHeaderDict.Keys
-            ContentToPrint.Add("  " & FITSKeyword.GetKeyword(Entry).PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
+            ContentToPrint.Add("  " & FITSKeyword.GetKeyword(Entry)(0).PadRight(10) & "=" & CStr(FITSHeaderDict(Entry)).Trim.PadLeft(40))
         Next Entry
         Log(ContentToPrint)
         Log(New String("-"c, 107))
@@ -87,23 +91,33 @@ Public Class Form1
                 UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1)
             Case 16
-                SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
-                If LastFITSHeader.NAXIS3 > 1 Then
-                    For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
-                        Dim NewDataStartIdx As Integer = FITSReader.DataStartIdx + CInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Length * 2)    'move to next plane
-                        SingleStatCalc.DataProcessor_UInt16.ImageData(Idx).Data = FITSReader.ReadInUInt16(FileName, NewDataStartIdx, DB.UseIPP)
-                    Next Idx
-                End If
-                UBound0 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(0)
-                UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1)
+                With SingleStatCalc.DataProcessor_UInt16
+                    .ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
+                    If LastFITSHeader.NAXIS3 > 1 Then
+                        For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
+                            DataStartPos += CInt(.ImageData(Idx - 1).Length * LastFITSHeader.BytesPerSample)        'move to next plane
+                            .ImageData(Idx).Data = FITSReader.ReadInUInt16(FileName, DataStartPos, DB.UseIPP)
+                        Next Idx
+                    End If
+                    UBound0 = .ImageData(0).Data.GetUpperBound(0)
+                    UBound1 = .ImageData(0).Data.GetUpperBound(1)
+                End With
             Case 32
                 SingleStatCalc.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, DB.UseIPP)
                 UBound0 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(0)
                 UBound1 = SingleStatCalc.DataProcessor_Int32.ImageData.GetUpperBound(1)
             Case -32
-                SingleStatCalc.DataProcessor_Float32.ImageData = FITSReader.ReadInFloat32(FileName, DB.UseIPP)
-                UBound0 = SingleStatCalc.DataProcessor_Float32.ImageData.GetUpperBound(0)
-                UBound1 = SingleStatCalc.DataProcessor_Float32.ImageData.GetUpperBound(1)
+                With SingleStatCalc.DataProcessor_Float32
+                    .ImageData(0).Data = FITSReader.ReadInFloat32(FileName, DB.UseIPP)
+                    If LastFITSHeader.NAXIS3 > 1 Then
+                        For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
+                            DataStartPos += CInt(.ImageData(Idx - 1).Length * LastFITSHeader.BytesPerSample)        'move to next plane
+                            .ImageData(Idx).Data = FITSReader.ReadInFloat32(FileName, DB.UseIPP)
+                        Next Idx
+                    End If
+                    UBound0 = .ImageData(0).Data.GetUpperBound(0)
+                    UBound1 = .ImageData(0).Data.GetUpperBound(1)
+                End With
             Case Else
                 Log("!!! File format <" & LastFITSHeader.BitPix.ToString.Trim & "> not yet supported!")
                 Exit Sub
@@ -444,7 +458,13 @@ Public Class Form1
     End Sub
 
     Private Sub tsmiOpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiOpenLastFile.Click
-        If System.IO.File.Exists(LastFile) = True Then Process.Start(LastFile)
+        If System.IO.File.Exists(LastFile) = True Then
+            Try
+                Process.Start(LastFile)
+            Catch ex As Exception
+                'Do nothing ...
+            End Try
+        End If
     End Sub
 
     Private Sub tsmiSaveMeanFile_Click(sender As Object, e As EventArgs) Handles tsmiSaveMeanFile.Click
@@ -803,16 +823,17 @@ Public Class Form1
         Dim Binning As Integer = 1
 
         'Get the FITS header information
-        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun)
-        Dim File_RA_JNow As String = String.Empty
-        Dim File_Dec_JNow As String = String.Empty
-        Dim File_FOV1 As String = String.Empty
-        Dim File_FOV2 As String = String.Empty
+        Dim DataStartPos As Integer = -1
+        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun, DataStartPos)
+        Dim File_RA_JNow As String = Nothing
+        Dim File_Dec_JNow As String = Nothing
+        Dim File_FOV1 As Object = Nothing
+        Dim File_FOV2 As Object = Nothing
         For Each Entry As cFITSHeaderParser.sHeaderElement In X
             If Entry.Keyword = eFITSKeywords.RA Then File_RA_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
             If Entry.Keyword = eFITSKeywords.DEC Then File_Dec_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
-            If Entry.Keyword = eFITSKeywords.FOV1 Then File_FOV1 = CStr(Entry.Value).Trim
-            If Entry.Keyword = eFITSKeywords.FOV2 Then File_FOV2 = CStr(Entry.Value).Trim
+            If Entry.Keyword = eFITSKeywords.FOV1 Then File_FOV1 = Entry.Value
+            If Entry.Keyword = eFITSKeywords.FOV2 Then File_FOV2 = Entry.Value
         Next Entry
 
         'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
@@ -829,8 +850,8 @@ Public Class Form1
         With Solver
             .SetRA(CInt(SolverIn_RA(0)), CInt(SolverIn_RA(1)), Val(SolverIn_RA(2)))                     'theoretical position (Wikipedia, J2000.0)
             .SetDec(CInt(SolverIn_Dec(0)), CInt(SolverIn_Dec(1)), Val(SolverIn_Dec(2)))                 'theoretical position (Wikipedia, J2000.0)
-            .SetDimX(Val(File_FOV1) * 60)                                                   'constant for system [telescope-camera]
-            .SetDimY(Val(File_FOV2) * 60)                                                   'constant for system [telescope-camera]
+            .SetDimX(Val(File_FOV1) * 60)                                                               'constant for system [telescope-camera]
+            .SetDimY(Val(File_FOV2) * 60)                                                               'constant for system [telescope-camera]
             .HoldOpenTime = 100
             Dim RawOut As String() = {}
             ErrorCode1 = .Solve(LastFile, RawOut)
@@ -1080,7 +1101,7 @@ Public Class Form1
                     Dim SurSum As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : SurSum.StoreRawValues = True
                     SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
                     SurSum.AddValue(.Data(Idx1 - 1, Idx2))
-                    SurSum.AddValue(.Data(Idx1 - 1, Idx2 - +1))
+                    SurSum.AddValue(.Data(Idx1 - 1, Idx2 + 1))
                     SurSum.AddValue(.Data(Idx1, Idx2 - 1))
                     SurSum.AddValue(.Data(Idx1, Idx2 + 1))
                     SurSum.AddValue(.Data(Idx1 + 1, Idx2 - 1))
@@ -1106,11 +1127,73 @@ Public Class Form1
 
     Private Sub MultifileAreaCompareToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MultifileAreaCompareToolStripMenuItem.Click
 
+        'Find top 1% of values and create a dictionary for the values and all pixel with this value
+        Dim TopVal As New Dictionary(Of UInt16, List(Of Point))
+        Dim ValueAbove As UInt16 = CUShort(LastStat.MonoStatistics_Int.Percentile(99))
+        With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
+            For Idx1 As Integer = 0 To .NAXIS1 - 1
+                For Idx2 As Integer = 0 To .NAXIS2 - 1
+                    If .Data(Idx1, Idx2) >= ValueAbove Then
+                        If TopVal.ContainsKey(.Data(Idx1, Idx2)) = False Then
+                            TopVal.Add(.Data(Idx1, Idx2), New List(Of Point)({New Point(Idx1, Idx2)}))
+                        Else
+                            TopVal(.Data(Idx1, Idx2)).Add(New Point(Idx1, Idx2))
+                        End If
+                    End If
+                Next Idx2
+            Next Idx1
+        End With
+        TopVal = TopVal.SortDictionaryInverse
+
+        'Filter values that have a high surrounding
+        Dim TopValFiltered As New Dictionary(Of UInt16, List(Of Point))
+        With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
+            For Each Value As UInt16 In TopVal.Keys
+                For Each Pixel As Point In TopVal(Value)
+                    Dim Idx1 As Integer = Pixel.X
+                    Dim Idx2 As Integer = Pixel.Y
+                    Dim SurSum As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : SurSum.StoreRawValues = True
+                    SurSum.AddValue(.Data(Idx1, Idx2))
+                    If Idx1 > 0 And Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
+                    If Idx1 > 0 Then SurSum.AddValue(.Data(Idx1 - 1, Idx2))
+                    If Idx1 > 0 And Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 + 1))
+                    If Idx2 > 0 Then SurSum.AddValue(.Data(Idx1, Idx2 - 1))
+                    If Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1, Idx2 + 1))
+                    If Idx1 < .Data.GetUpperBound(0) And Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 - 1))
+                    If Idx1 < .Data.GetUpperBound(0) Then SurSum.AddValue(.Data(Idx1 + 1, Idx2))
+                    If Idx1 < .Data.GetUpperBound(0) And Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 + 1))
+                    Dim Mean As UInt16 = CType(SurSum.Mean, UInt16)
+                    If TopValFiltered.ContainsKey(Mean) = False Then
+                        TopValFiltered.Add(Mean, New List(Of Point)({Pixel}))
+                    Else
+                        TopValFiltered(Mean).Add(Pixel)
+                    End If
+                Next Pixel
+            Next Value
+        End With
+        TopValFiltered = TopValFiltered.SortDictionaryInverse
+
         Dim Navigator As New frmNavigator
+        Navigator.IPP = IPP
         Navigator.tbRootFile.Text = LastFile
+        Navigator.lbPixel.Items.Clear()
+        For Each Pixel As Point In TopValFiltered(TopValFiltered.KeyList(0))
+            Navigator.lbPixel.Items.Add(Pixel.X.ToString.Trim & ":" & Pixel.Y.ToString.Trim)
+        Next Pixel
         Navigator.Show()
         Navigator.ShowMosaik()
 
+    End Sub
+
+    Private Sub OpenLastFilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastFilesToolStripMenuItem.Click
+        With LastOpenedFiles
+            .Files.Clear()
+            .Files.Add("C:\Users\albusmw\Dropbox\Astro\!Bilder\Test-Daten\Debayer\Stack_16bits_936frames_152s_Own.fits")
+            .Files.Add("C:\!Work\Astro\FOCUS_PW\FLAT\FOCUS_11298_00010.fits")
+            If .ShowDialog = DialogResult.OK Then
+                LoadFile(.SelectedFile)
+            End If
+        End With
     End Sub
 
 End Class

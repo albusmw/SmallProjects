@@ -33,6 +33,7 @@ Partial Class frmNavigator
         Me.Label3 = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.lbPixel = New System.Windows.Forms.ListBox()
         Me.SuspendLayout()
         '
         'tbRootFile
@@ -41,7 +42,7 @@ Partial Class frmNavigator
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.tbRootFile.Location = New System.Drawing.Point(55, 12)
         Me.tbRootFile.Name = "tbRootFile"
-        Me.tbRootFile.Size = New System.Drawing.Size(353, 20)
+        Me.tbRootFile.Size = New System.Drawing.Size(411, 20)
         Me.tbRootFile.TabIndex = 0
         '
         'tbFilterString
@@ -50,7 +51,7 @@ Partial Class frmNavigator
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.tbFilterString.Location = New System.Drawing.Point(55, 38)
         Me.tbFilterString.Name = "tbFilterString"
-        Me.tbFilterString.Size = New System.Drawing.Size(353, 20)
+        Me.tbFilterString.Size = New System.Drawing.Size(411, 20)
         Me.tbFilterString.TabIndex = 1
         Me.tbFilterString.Text = "QHY600_L_*.*"
         '
@@ -60,7 +61,7 @@ Partial Class frmNavigator
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.pbMain.Location = New System.Drawing.Point(55, 121)
         Me.pbMain.Name = "pbMain"
-        Me.pbMain.Size = New System.Drawing.Size(353, 21)
+        Me.pbMain.Size = New System.Drawing.Size(411, 21)
         Me.pbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.pbMain.TabIndex = 2
         '
@@ -133,11 +134,25 @@ Partial Class frmNavigator
         Me.Label5.TabIndex = 10
         Me.Label5.Text = "Tile size"
         '
+        'lbPixel
+        '
+        Me.lbPixel.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lbPixel.FormattingEnabled = True
+        Me.lbPixel.IntegralHeight = False
+        Me.lbPixel.Location = New System.Drawing.Point(55, 148)
+        Me.lbPixel.Name = "lbPixel"
+        Me.lbPixel.ScrollAlwaysVisible = True
+        Me.lbPixel.Size = New System.Drawing.Size(411, 576)
+        Me.lbPixel.TabIndex = 11
+        '
         'frmNavigator
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(420, 156)
+        Me.ClientSize = New System.Drawing.Size(478, 734)
+        Me.Controls.Add(Me.lbPixel)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.Label3)
@@ -168,4 +183,5 @@ Partial Class frmNavigator
     Friend WithEvents Label3 As Label
     Friend WithEvents Label4 As Label
     Friend WithEvents Label5 As Label
+    Friend WithEvents lbPixel As ListBox
 End Class

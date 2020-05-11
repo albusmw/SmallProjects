@@ -72,9 +72,10 @@ Partial Class Form1
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslRunning = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tspbMain = New System.Windows.Forms.ToolStripProgressBar()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.tspbMain = New System.Windows.Forms.ToolStripProgressBar()
+        Me.OpenLastFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
@@ -92,7 +93,7 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FITSGrepToolStripMenuItem, Me.OpenFileToAnalyseToolStripMenuItem, Me.OpenLastFilesToolStripMenuItem, Me.tsmiOpenLastFile, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -395,6 +396,13 @@ Partial Class Form1
         Me.tsslMain.Size = New System.Drawing.Size(22, 17)
         Me.tsslMain.Text = "---"
         '
+        'tspbMain
+        '
+        Me.tspbMain.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.tspbMain.Name = "tspbMain"
+        Me.tspbMain.Size = New System.Drawing.Size(100, 16)
+        Me.tspbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous
+        '
         'pgMain
         '
         Me.pgMain.Location = New System.Drawing.Point(12, 27)
@@ -402,12 +410,11 @@ Partial Class Form1
         Me.pgMain.Size = New System.Drawing.Size(248, 641)
         Me.pgMain.TabIndex = 5
         '
-        'tspbMain
+        'OpenLastFilesToolStripMenuItem
         '
-        Me.tspbMain.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.tspbMain.Name = "tspbMain"
-        Me.tspbMain.Size = New System.Drawing.Size(100, 16)
-        Me.tspbMain.Style = System.Windows.Forms.ProgressBarStyle.Continuous
+        Me.OpenLastFilesToolStripMenuItem.Name = "OpenLastFilesToolStripMenuItem"
+        Me.OpenLastFilesToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.OpenLastFilesToolStripMenuItem.Text = "Open last files ..."
         '
         'Form1
         '
@@ -485,4 +492,5 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem7 As ToolStripSeparator
     Friend WithEvents MultifileAreaCompareToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tspbMain As ToolStripProgressBar
+    Friend WithEvents OpenLastFilesToolStripMenuItem As ToolStripMenuItem
 End Class

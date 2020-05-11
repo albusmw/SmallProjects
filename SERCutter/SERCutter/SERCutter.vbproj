@@ -95,6 +95,18 @@
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\cFITSHeaderKeywords.vb">
+      <Link>cFITSHeaderKeywords.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cIntelIPP.vb">
+      <Link>cIntelIPP.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cSERFormat.vb">
+      <Link>cSERFormat.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\cStatMultiThread.vb">
+      <Link>cStatMultiThread.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\Extensions.vb">
       <Link>Extensions.vb</Link>
     </Compile>
@@ -104,6 +116,7 @@
     <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
       <Link>ZedGraphService.vb</Link>
     </Compile>
+    <Compile Include="cDB.vb" />
     <Compile Include="ForCommonCode.vb" />
     <Compile Include="MainForm.Designer.vb">
       <DependentUpon>MainForm.vb</DependentUpon>
