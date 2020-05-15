@@ -48,7 +48,7 @@ Partial Class MainForm
         Me.ExposureTimeSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GainVariationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.BiasCaptureToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSpeedTest = New System.Windows.Forms.ToolStripMenuItem()
         Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -79,6 +79,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.OpenLastStoredFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -104,16 +105,16 @@ Partial Class MainForm
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(3, 3)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(224, 387)
+        Me.pgMain.Size = New System.Drawing.Size(380, 692)
         Me.pgMain.TabIndex = 0
         Me.pgMain.ToolbarVisible = False
         '
         'ssMain
         '
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress, Me.tsmiFPSIndicator, Me.tsslMemory})
-        Me.ssMain.Location = New System.Drawing.Point(0, 598)
+        Me.ssMain.Location = New System.Drawing.Point(0, 984)
         Me.ssMain.Name = "ssMain"
-        Me.ssMain.Size = New System.Drawing.Size(936, 22)
+        Me.ssMain.Size = New System.Drawing.Size(1551, 22)
         Me.ssMain.TabIndex = 1
         Me.ssMain.Text = "StatusStrip1"
         '
@@ -153,13 +154,13 @@ Partial Class MainForm
         Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.TESTToolStripMenuItem, Me.tsmiActions})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
-        Me.msMain.Size = New System.Drawing.Size(936, 24)
+        Me.msMain.Size = New System.Drawing.Size(1551, 24)
         Me.msMain.TabIndex = 2
         Me.msMain.Text = "MenuStrip1"
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.OpenLastStoredFileToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -249,16 +250,16 @@ Partial Class MainForm
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.BiasCaptureToolStripMenuItem, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
         '
-        'BiasCaptureToolStripMenuItem
+        'tsmiSpeedTest
         '
-        Me.BiasCaptureToolStripMenuItem.Name = "BiasCaptureToolStripMenuItem"
-        Me.BiasCaptureToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
-        Me.BiasCaptureToolStripMenuItem.Text = "Bias capture"
+        Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(150, 22)
+        Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
@@ -339,7 +340,7 @@ Partial Class MainForm
         Me.zgcMain.ScrollMinX = 0R
         Me.zgcMain.ScrollMinY = 0R
         Me.zgcMain.ScrollMinY2 = 0R
-        Me.zgcMain.Size = New System.Drawing.Size(694, 261)
+        Me.zgcMain.Size = New System.Drawing.Size(1153, 450)
         Me.zgcMain.TabIndex = 0
         '
         'tSetTemp
@@ -352,7 +353,7 @@ Partial Class MainForm
         Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture, Me.ToolStripSeparator1})
         Me.tsMain.Location = New System.Drawing.Point(0, 24)
         Me.tsMain.Name = "tsMain"
-        Me.tsMain.Size = New System.Drawing.Size(936, 38)
+        Me.tsMain.Size = New System.Drawing.Size(1551, 38)
         Me.tsMain.TabIndex = 5
         Me.tsMain.Text = "ToolStrip1"
         '
@@ -394,7 +395,7 @@ Partial Class MainForm
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(238, 107)
+        Me.tbLogOutput.Size = New System.Drawing.Size(394, 188)
         Me.tbLogOutput.TabIndex = 4
         Me.tbLogOutput.WordWrap = False
         '
@@ -406,7 +407,7 @@ Partial Class MainForm
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
         Me.tcMain.SelectedIndex = 0
-        Me.tcMain.Size = New System.Drawing.Size(238, 419)
+        Me.tcMain.Size = New System.Drawing.Size(394, 724)
         Me.tcMain.TabIndex = 6
         '
         'TabPage1
@@ -415,7 +416,7 @@ Partial Class MainForm
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(230, 393)
+        Me.TabPage1.Size = New System.Drawing.Size(386, 698)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Exposure"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -426,7 +427,7 @@ Partial Class MainForm
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(230, 393)
+        Me.TabPage2.Size = New System.Drawing.Size(386, 698)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Meta data"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -436,7 +437,7 @@ Partial Class MainForm
         Me.pgMeta.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMeta.Location = New System.Drawing.Point(3, 3)
         Me.pgMeta.Name = "pgMeta"
-        Me.pgMeta.Size = New System.Drawing.Size(224, 387)
+        Me.pgMeta.Size = New System.Drawing.Size(380, 692)
         Me.pgMeta.TabIndex = 1
         Me.pgMeta.ToolbarVisible = False
         '
@@ -455,8 +456,8 @@ Partial Class MainForm
         'scMain.Panel2
         '
         Me.scMain.Panel2.Controls.Add(Me.SplitContainer3)
-        Me.scMain.Size = New System.Drawing.Size(936, 530)
-        Me.scMain.SplitterDistance = 238
+        Me.scMain.Size = New System.Drawing.Size(1551, 916)
+        Me.scMain.SplitterDistance = 394
         Me.scMain.TabIndex = 7
         '
         'SplitContainer2
@@ -473,8 +474,8 @@ Partial Class MainForm
         'SplitContainer2.Panel2
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.tbLogOutput)
-        Me.SplitContainer2.Size = New System.Drawing.Size(238, 530)
-        Me.SplitContainer2.SplitterDistance = 419
+        Me.SplitContainer2.Size = New System.Drawing.Size(394, 916)
+        Me.SplitContainer2.SplitterDistance = 724
         Me.SplitContainer2.TabIndex = 0
         '
         'SplitContainer3
@@ -491,8 +492,8 @@ Partial Class MainForm
         'SplitContainer3.Panel2
         '
         Me.SplitContainer3.Panel2.Controls.Add(Me.rtbStatistics)
-        Me.SplitContainer3.Size = New System.Drawing.Size(694, 530)
-        Me.SplitContainer3.SplitterDistance = 261
+        Me.SplitContainer3.Size = New System.Drawing.Size(1153, 916)
+        Me.SplitContainer3.SplitterDistance = 450
         Me.SplitContainer3.TabIndex = 0
         '
         'rtbStatistics
@@ -502,7 +503,7 @@ Partial Class MainForm
         Me.rtbStatistics.Font = New System.Drawing.Font("Lucida Console", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.rtbStatistics.Location = New System.Drawing.Point(0, 0)
         Me.rtbStatistics.Name = "rtbStatistics"
-        Me.rtbStatistics.Size = New System.Drawing.Size(694, 265)
+        Me.rtbStatistics.Size = New System.Drawing.Size(1153, 462)
         Me.rtbStatistics.TabIndex = 0
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
@@ -514,16 +515,24 @@ Partial Class MainForm
         'tStatusUpdate
         '
         Me.tStatusUpdate.Enabled = True
+        Me.tStatusUpdate.Interval = 250
+        '
+        'OpenLastStoredFileToolStripMenuItem
+        '
+        Me.OpenLastStoredFileToolStripMenuItem.Name = "OpenLastStoredFileToolStripMenuItem"
+        Me.OpenLastStoredFileToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
+        Me.OpenLastStoredFileToolStripMenuItem.Text = "Open last stored file"
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(936, 620)
+        Me.ClientSize = New System.Drawing.Size(1551, 1006)
         Me.Controls.Add(Me.scMain)
         Me.Controls.Add(Me.tsMain)
         Me.Controls.Add(Me.ssMain)
         Me.Controls.Add(Me.msMain)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.msMain
         Me.Name = "MainForm"
         Me.Text = "QHY Capture"
@@ -571,7 +580,7 @@ Partial Class MainForm
     Friend WithEvents tsbCapture As Windows.Forms.ToolStripButton
     Friend WithEvents tsbStopCapture As Windows.Forms.ToolStripButton
     Friend WithEvents PresetsToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-    Friend WithEvents BiasCaptureToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tsmiSpeedTest As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ilMain As Windows.Forms.ImageList
     Friend WithEvents SeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents AllReadoutModesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
@@ -609,4 +618,5 @@ Partial Class MainForm
     Friend WithEvents FITSWriterWithKeywordsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsslMemory As ToolStripStatusLabel
     Friend WithEvents tStatusUpdate As Timer
+    Friend WithEvents OpenLastStoredFileToolStripMenuItem As ToolStripMenuItem
 End Class

@@ -1,5 +1,6 @@
 ﻿Option Explicit On
 Option Strict On
+Imports System.Runtime.InteropServices
 
 '''<summary>Characteristics data of one single capture.</summary>
 Public Class cSingleCaptureData
@@ -53,44 +54,75 @@ End Structure
 
 '''<summary>Read-out resolution.</summary>
 Public Enum eReadResolution
+    <ComponentModel.Description("8-bit")>
     Res8Bit = 0
+    <ComponentModel.Description("16-bit")>
     Res16Bit = 16
 End Enum
 
 '''<summary>Mode for X axis scaling mode.</summary>
 Public Enum eXAxisScalingMode
+    <ComponentModel.Description("Automatic")>
     Auto
-    MaxScale
+    <ComponentModel.Description("Full 16 bit range")>
+    FullRange16Bit
+    <ComponentModel.Description("Leave as is")>
     LeaveAsIs
 End Enum
 
 '''<summary>Filter as to be send as ASCII string.</summary>
 Public Enum eFilter As Byte
+    <ComponentModel.Description("Don't care")>
     Invalid = 0
+    <ComponentModel.Description("Light")>
     L = 1
+    <ComponentModel.Description("Red")>
     R = 2
+    <ComponentModel.Description("Green")>
     G = 3
+    <ComponentModel.Description("Blue")>
     B = 4
+    <ComponentModel.Description("H alpha ")>
     H_alpha = 5
 End Enum
 
 '''<summary>Available stream modes.</summary>
 Public Enum eStreamMode As UInteger
+    <ComponentModel.Description("Single frame")>
     SingleFrame = 0
+    <ComponentModel.Description("Live")>
     LiveFrame = 1
+    <ComponentModel.Description("--INVALID--")>
     Invalid = UInteger.MaxValue
 End Enum
 
 '''<summary>Available readout modes.</summary>
 Public Enum eReadOutMode As UInteger
+    <ComponentModel.Description("Photographic")>
     Photographic = 0
+    <ComponentModel.Description("High Gain")>
     HighGain = 1
+    <ComponentModel.Description("Extend Fullwell")>
     ExtendFullwell = 2
+    <ComponentModel.Description("--INVALID--")>
     Invalid = UInteger.MaxValue
 End Enum
 
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
+
+    '''<summary>Handle to the camera.</summary>
+    Public CamHandle As IntPtr = IntPtr.Zero
+    '''<summary>Currently used camera ID.</summary>
+    Public UsedCameraId As System.Text.StringBuilder
+    '''<summary>Currently used read-out mode.</summary>
+    Public UsedReadMode As eReadOutMode = eReadOutMode.Invalid
+    '''<summary>Currently used stream mode.</summary>
+    Public UsedStreamMode As eStreamMode = eStreamMode.Invalid
+    '''<summary>Used to call BeginQHYLiveMode only once.</summary>
+    Public LiveModeInitiated As Boolean = False
+    '''<summary>Used to call BeginQHYLiveMode only once.</summary>
+    Public LastStoredFile As String = String.Empty
 
     Public Stopper As New cStopper
 
@@ -118,7 +150,7 @@ Public Class cDB
     Public SetupWCF As ServiceModel.Web.WebServiceHost
     Public serviceBehavior As ServiceModel.Description.ServiceDebugBehavior
 
-    Public IPPRoots As String() = {"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64\ipp", "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp\"}
+    '''<summary>Intel IPP access.</summary>
     Public IPP As cIntelIPP
 
     Public Plotter As cZEDGraphService
@@ -127,109 +159,136 @@ Public Class cDB
     Const Cat2 As String = "2. Exposure"
     Const Cat3 As String = "3. Image storage"
     Const Cat4 As String = "4. Plot and statistics"
-    Const Cat5 As String = "4. Debug and logging"
+    Const Cat5 As String = "5. Debug and logging"
+    Const CatX As String = "9. Misc and special settings"
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   a) Camera to search")>
-    <ComponentModel.Description("Search string for the camera - string must occure in the CameraID.")>
-    <ComponentModel.DefaultValue("QHY600M")>
-    Public Property CamToUse As String = "QHY600M"
+    <ComponentModel.Description("Search string for the camera - string must occure in the CameraID. Use * to use first found camera.")>
+    <ComponentModel.DefaultValue("*")>
+    Public Property CamToUse As String = "*"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   b) Read-out mode")>
-    <ComponentModel.Description("Photographic, high-gain.")>
+    <ComponentModel.Description("Photographic or high-gain.")>
     <ComponentModel.DefaultValue(eReadOutMode.Photographic)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   c) Stream mode")>
-    <ComponentModel.Description("Photo (0) or Video(1).")>
+    <ComponentModel.Description("Photo or Video.")>
+    <ComponentModel.DefaultValue(eStreamMode.SingleFrame)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   d) Target Temp")>
-    <ComponentModel.Description("Enter <-100 for do-not-use")>
+    <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
     <ComponentModel.DefaultValue(-300.0)>
     Public Property TargetTemp As Double = -300.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   e) Binning")>
-    <ComponentModel.Description("Binning (NxN)")>
+    <ComponentModel.DisplayName("   e) Binning - Hardware")>
+    <ComponentModel.Description("Hardware Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
-    Public Property Binning As Integer = 1
+    Public Property HardwareBinning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   f) Read resolution")>
+    <ComponentModel.DisplayName("   f) Binning - Software")>
+    <ComponentModel.Description("Software Binning (NxN)")>
+    <ComponentModel.DefaultValue(1)>
+    Public Property SoftwareBinning As Integer = 1
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   g) Read resolution")>
     <ComponentModel.Description("Read resolution")>
     <ComponentModel.DefaultValue(eReadResolution.Res16Bit)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property ReadResolution As eReadResolution = eReadResolution.Res16Bit
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   g) ROI")>
+    <ComponentModel.DisplayName("   h) ROI")>
     <ComponentModel.Description("ROI (without binning)")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   h) USB traffic")>
-    <ComponentModel.Description("USB traffic - 0 ... <1> ... 60")>
+    <ComponentModel.DisplayName("   i) USB traffic")>
+    <ComponentModel.Description("USB traffic - 0 is fastest, maximum value depends on the camera")>
     <ComponentModel.DefaultValue(0.0)>
     Public Property USBTraffic As Double = 0.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   i) DDR RAM")>
+    <ComponentModel.DisplayName("   j) DDR RAM")>
     <ComponentModel.Description("Use DDR RAM?")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property DDR_RAM As Boolean = True
 
     '===================================================================================================
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   a) # of captures")>
+    <ComponentModel.Description("Number of exposured to take with identical settings.")>
     <ComponentModel.DefaultValue(1)>
     Public Property CaptureCount As Int32 = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   b) Filter slot")>
-    Public Property FilterSlot As eFilter = eFilter.H_alpha
+    <ComponentModel.Description("Filter slot to select.")>
+    <ComponentModel.DefaultValue(eFilter.Invalid)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
+    Public Property FilterSlot As eFilter = eFilter.Invalid
+
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("   b) Filter wheel")>
+    <ComponentModel.Description("Configure if a real filter wheel should be controlled or if filter is just used in meta data, ....")>
+    <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property UseFilterWheel As Boolean = True
 
     '''<summary>Exposure time [s].</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   c) Exposure time [s]")>
-    <ComponentModel.Description("Exposure time [s]")>
+    <ComponentModel.Description("Exposure time [s] for each exposure")>
     <ComponentModel.DefaultValue(1.0)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
     Public Property ExposureTime As Double = 1.0
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   d) Gain")>
-    <ComponentModel.Description("Gain to set - 0 ... <1> ... 200")>
+    <ComponentModel.Description("Gain to set")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   e) Offset")>
-    <ComponentModel.Description("Offset to set - 0 ... <1> ... 255")>
+    <ComponentModel.Description("Offset to set")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   f) Remove overscan")>
-    <ComponentModel.Description("Remove the overscan area in the stored file")>
+    <ComponentModel.Description("Remove the overscan area in the stored data and file")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property RemoveOverscan As Boolean = False
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("  g) Config for each capture")>
-    <ComponentModel.Description("Write all exposure data on each exposure start?")>
+    <ComponentModel.Description("Write all exposure data to the camera on each exposure start (takes some ms ...)")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ConfigAlways As Boolean = True
 
     '===================================================================================================
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   a) Store captured image")>
-    <ComponentModel.Description("Store the captured image")>
+    <ComponentModel.Description("Store the captured image on harddisc")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property StoreImage As Boolean = True
 
     <ComponentModel.Category(Cat3)>
@@ -254,56 +313,101 @@ Public Class cDB
     <ComponentModel.DisplayName("   e) Open image automatically?")>
     <ComponentModel.Description("Automaticall open a stored FITS file with the default editor")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property AutoOpenImage As Boolean = False
 
     <ComponentModel.Category(Cat3)>
     <ComponentModel.DisplayName("   f) Show live image")>
     <ComponentModel.Description("Show a live image?")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ShowLiveImage As Boolean = False
 
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   a) Single statistics log")>
+    <ComponentModel.DisplayName("   a) Calculate statistics")>
     <ComponentModel.Description("Clear statistics log on every measurement")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property CalcStatistics As Boolean = True
+
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   b) Single statistics log")>
+    <ComponentModel.Description("Clear statistics log on every measurement")>
+    <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_ClearStat As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   b) Plot single statistics")>
+    <ComponentModel.DisplayName("   c) Plot single statistics")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property PlotSingleStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   c) Plot mean statistics")>
+    <ComponentModel.DisplayName("   d) Plot mean statistics")>
     <ComponentModel.DefaultValue(True)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property PlotMeanStatistics As Boolean = True
 
     <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   d) Plot limits fixed")>
+    <ComponentModel.DisplayName("   e) Plot limits fixed")>
     <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
-    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.DefaultValue(eXAxisScalingMode.Auto)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property PlotLimitMode As eXAxisScalingMode = eXAxisScalingMode.Auto
 
     '===================================================================================================
 
     <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("   1. Log camera properties")>
+    <ComponentModel.DisplayName("   a) Log camera properties")>
+    <ComponentModel.Description("Log all supported camera properties with name and range in the begin - usedful e.g. to see the value range for certain settings")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_CamProp As Boolean = False
 
     <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("   2. Log timing")>
+    <ComponentModel.DisplayName("   b) Log timing")>
+    <ComponentModel.Description("Display a detailed timing log in the end")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_Timing As Boolean = False
 
     <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("   3. Log verbose")>
+    <ComponentModel.DisplayName("   c) Log verbose")>
+    <ComponentModel.Description("Log special settings")>
     <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_Verbose As Boolean = False
 
+    <ComponentModel.Category(Cat5)>
+    <ComponentModel.DisplayName("   d) Intel IPP path")>
+    <ComponentModel.Description("This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes")>
+    <ComponentModel.DefaultValue(False)>
+    Public ReadOnly Property Log_IntelIPPPath As String
+        Get
+            If IsNothing(IPP) = True Then
+                Return "--- (nothing)"
+            Else
+                Return IPP.IPPPath
+            End If
+        End Get
+    End Property
 
+    <ComponentModel.Category(CatX)>
+    <ComponentModel.DisplayName("   a) Cooling time-out")>
+    <ComponentModel.Description("Time [s] after which the cooling is finished even if the target temperature is NOT reached")>
+    <ComponentModel.DefaultValue(60.0)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
+    Public Property CoolingTimeOut As Double = 60.0
+
+    <ComponentModel.Category(CatX)>
+    <ComponentModel.DisplayName("   a) Cooling time-out")>
+    <ComponentModel.Description("Time [s] after which the filter wheel movement is stoped and the software goes on even if the filter is NOT in place")>
+    <ComponentModel.DefaultValue(15.0)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
+    Public Property FilterWheelTimeOut As Double = 15.0
 
     '===================================================================================================
 

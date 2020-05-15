@@ -191,19 +191,12 @@ Public Class Form1
         Log(New String("="c, 109))
     End Sub
 
-    '''<summary>Take an IPP path if there is not yet one set.</summary>
-    Private Sub TestIPPPath(ByRef CurrentPath As String, ByVal Path As String)
-        If System.IO.Directory.Exists(Path) Then
-            If String.IsNullOrEmpty(CurrentPath) = True Then CurrentPath = Path
-        End If
-    End Sub
-
     '''<summary>Open a simple form with a ZEDGraph on it and plots the statistical data.</summary>
     '''<param name="FileName">Filename that is plotted (indicated in the header).</param>
     '''<param name="Stats">Statistics data to plot.</param>
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As AstroNET.Statistics.sStatistics)
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         Select Case Stats.DataMode
             Case "Int"
                 'Plot histogram
@@ -251,7 +244,7 @@ Public Class Form1
 
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats() As Ato.cSingleValueStatistics)
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         'Plot data
         Dim XAxis() As Double = Ato.cSingleValueStatistics.GetAspectVectorXAxis(Stats)
         Disp.Plotter.Clear()
@@ -276,7 +269,7 @@ Public Class Form1
 
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As Dictionary(Of Double, AstroImageStatistics.AstroNET.Statistics.sSingleChannelStatistics_Int))
         Dim Disp As New cZEDGraphForm
-        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         'Plot data
         Dim XAxis As New List(Of Double)
         Dim YAxis As New List(Of Double)
@@ -360,14 +353,18 @@ Public Class Form1
         Next Entry
         Me.Text &= BuildDate
 
-        'IPP laden
-        DB.MyIPPPath = String.Empty
-        TestIPPPath(DB.MyIPPPath, System.IO.Path.Combine(MyPath, "ipp"))
-        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\redist\intel64_win\ipp")
-        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64_win\ipp")
-        TestIPPPath(DB.MyIPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
-        IPP = New cIntelIPP(DB.MyIPPPath)
-        cFITSReader.IPPPath = DB.MyIPPPath
+        'Load IPP
+        Dim IPPLoadError As String = String.Empty
+        Dim IPPPathToUse As String = cIntelIPP.SearchDLLToUse(cIntelIPP.PossiblePaths(MyPath).ToArray, IPPLoadError)
+        If String.IsNullOrEmpty(IPPLoadError) = True Then
+            IPP = New cIntelIPP(IPPPathToUse)
+            cFITSWriter.UseIPPForWriting = True
+        Else
+            cFITSWriter.UseIPPForWriting = False
+        End If
+        cFITSWriter.IPPPath = IPP.IPPPath
+        cFITSReader.IPPPath = IPP.IPPPath
+
         DD = New Ato.DragDrop(tbLogOutput, False)
         pgMain.SelectedObject = DB
 
@@ -802,7 +799,7 @@ Public Class Form1
         Dim Disp As New cZEDGraphForm
         Dim PlotData As Generic.Dictionary(Of Long, UInt64) = AstroNET.Statistics.GetQuantizationHisto(LastStat.MonochromHistogram_Int)
         Dim XAxis As Double() = PlotData.KeyList.ToDouble
-        Disp.PlotData("Test", New Double() {1, 2, 3, 4})
+        Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         'Plot data
         Disp.Plotter.Clear()
         Disp.Plotter.PlotXvsY("Mono", XAxis, PlotData.ValueList.ToArray.ToDouble, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -979,7 +976,7 @@ Public Class Form1
         Log(Stopper.Stamp("Vignette"))
 
         'Display the vignette
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", Vignette)
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", Vignette, Color.Red)
 
     End Sub
 
@@ -990,33 +987,42 @@ Public Class Form1
         'Calculate the vignette
         Dim Stopper As New cStopper
         Stopper.Start()
-        Dim Vignette As New Dictionary(Of Double, Double)
+        Dim FullVignette As New Dictionary(Of Double, Double)
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
                 Case "UInt32"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
             End Select
         Else
             Select Case SingleStatCalc.DataMode
                 Case "UInt16"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
                 Case "UInt32"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
             End Select
         End If
-        Vignette = Vignette.SortDictionary
+
+        FullVignette = FullVignette.SortDictionary
         Log(Stopper.Stamp("Vignette"))
 
-        'Display the vignette
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", Vignette)
+        'Display the vignette graph
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Vignette", FullVignette, Color.Red)
+
+        'Get only relevant data - ring around the center
+        Dim Vignette As New Dictionary(Of Double, Double)
+        For Each Entry As Double In FullVignette.Keys
+            If Entry >= DB.VigStartDistance And Entry <= DB.VigStopDistance Then
+                Vignette.Add(Entry, FullVignette(Entry))
+            End If
+        Next Entry
 
         'Calculate the fitting
         Dim Polynomial() As Double = {}
-        SignalProcessing.RegressPoly(Vignette.KeyList.ToArray, Vignette.ValueList.ToArray, 8, Polynomial)
+        SignalProcessing.RegressPoly(Vignette, DB.VigPolyOrder, Polynomial)
         Dim Vignette_Y_Fit As Double() = SignalProcessing.ApplyPoly(Vignette.KeyList.ToArray, Polynomial)
-        Disp1.PlotData("Fitting", Vignette.KeyList.ToArray, Vignette_Y_Fit)
+        Disp1.PlotData("Fitting", Vignette.KeyList.ToArray, Vignette_Y_Fit, Color.Green)
         IPP.DivC(Vignette_Y_Fit, IPP.Max(Vignette_Y_Fit))                                                       'Norm to maximum
         Dim NormMin As Double = IPP.Min(Vignette_Y_Fit)
         IPP.DivC(Vignette_Y_Fit, NormMin)
@@ -1072,7 +1078,7 @@ Public Class Form1
             Plot_X.Add(Val(FocusPos))
             Plot_Y.Add(Val(AllStat(FileName).MonoStatistics_Int.Max.Key))
         Next FileName
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Focus - MAX VALUE", Plot_X.ToArray, Plot_Y.ToArray)
+        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Focus - MAX VALUE", Plot_X.ToArray, Plot_Y.ToArray, Color.Red)
     End Sub
 
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles Me.KeyUp

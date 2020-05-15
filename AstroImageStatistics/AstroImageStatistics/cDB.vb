@@ -5,8 +5,10 @@ Public Class cDB
 
     Private Const Cat_analysis As String = "1.) Analysis"
     Private Const Cat_log As String = "2.) Logging"
-    Private Const Cat_plot As String = "3.) Plotting"
-    Private Const Cat_save As String = "4.) Saving"
+    Private Const Cat_Proc_Vignette As String = "3.1) Processing - vignette"
+    Private Const Cat_plot As String = "9.) Plotting"
+    Private Const Cat_save As String = "10.) Saving"
+    Private Const Cat_misc As String = "99.) Misc"
 
     <ComponentModel.Category(Cat_analysis)>
     <ComponentModel.DisplayName("a.) Use IPP?")>
@@ -53,6 +55,24 @@ Public Class cDB
     <ComponentModel.Description("Image quality parameter to use")>
     <ComponentModel.DefaultValue(80L)>
     Public Property ImageQuality As Int64 = 80L
+
+    <ComponentModel.Category(Cat_Proc_Vignette)>
+    <ComponentModel.DisplayName("a.) Vignette polynomial order")>
+    <ComponentModel.Description("Order of the fitting vignette")>
+    <ComponentModel.DefaultValue(19)>
+    Public Property VigPolyOrder As Integer = 19
+
+    <ComponentModel.Category(Cat_Proc_Vignette)>
+    <ComponentModel.DisplayName("b.) Vignette correction start distance")>
+    <ComponentModel.Description("Distance below are ignored for correction")>
+    <ComponentModel.DefaultValue(-1)>
+    Public Property VigStartDistance As Integer = -1
+
+    <ComponentModel.Category(Cat_Proc_Vignette)>
+    <ComponentModel.DisplayName("c.) Vignette correction stop distance")>
+    <ComponentModel.Description("Distance below are ignored for correction")>
+    <ComponentModel.DefaultValue(-1)>
+    Public Property VigStopDistance As Integer = -1
 
     <ComponentModel.DisplayName("Used IPP path")>
     Public ReadOnly Property IPPPath As String

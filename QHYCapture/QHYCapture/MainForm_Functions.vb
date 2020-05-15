@@ -23,7 +23,7 @@ Partial Public Class MainForm
         Next SingleProperty
         'Move over all exposure specifications
         For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
-            Dim CloseCam As Boolean = True                                      'close camera after series?
+            Dim CloseCam As Boolean = True                                                      'close camera after series?
             'Load all attributes from the file
             For Each ExpAttrib As Xml.XmlAttribute In ExpNode.Attributes
                 Dim PropType As Type = Nothing
@@ -78,12 +78,14 @@ Partial Public Class MainForm
         DB.Stopper.Stamp("Set exposure parameters")
 
         'Cancel any running exposure
-        CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(CamHandle))
-        CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle))
-        DB.Stopper.Stamp("Cancel exposure")
+        If DB.StreamMode = eStreamMode.SingleFrame Then
+            CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(DB.CamHandle))
+            CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(DB.CamHandle))
+            DB.Stopper.Stamp("Cancel exposure")
+        End If
 
         'Temperature
-        SetTemperature(DB.TargetTemp, 60)
+        SetTemperature(DB.TargetTemp, DB.CoolingTimeOut)
 
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
@@ -93,25 +95,28 @@ Partial Public Class MainForm
         With SingleCaptureData
             .CaptureIdx = CaptureIdx
             .FilterActive = FilterActive
-            .CamReadOutMode = New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, DB.ReadOutMode, .CamReadOutMode)
-            .ExpTime = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000
-            .Gain = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN)
-            .Offset = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET)
-            .Brightness = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS)
-            .ObsStartTemp = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+            .CamReadOutMode = New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(DB.CamHandle, DB.ReadOutMode, .CamReadOutMode)
+            .ExpTime = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000
+            .Gain = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN)
+            .Offset = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET)
+            .Brightness = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS)
+            .ObsStartTemp = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
         End With
 
         'Start expose (single or live frame mode)
         DB.Stopper.Start()
         If DB.StreamMode = eStreamMode.SingleFrame Then
-            CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(CamHandle))
+            CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(DB.CamHandle))
             DB.Stopper.Stamp("ExpQHYCCDSingleFrame")
         Else
-            CallOK("BeginQHYCCDLive", QHY.QHYCamera.BeginQHYCCDLive(CamHandle))
+            If DB.LiveModeInitiated = False Then
+                CallOK("BeginQHYCCDLive", QHY.QHYCamera.BeginQHYCCDLive(DB.CamHandle))
+                DB.LiveModeInitiated = True
+            End If
             DB.Stopper.Stamp("BeginQHYCCDLive")
-        End If
+            End If
 
-        Return SingleCaptureData
+            Return SingleCaptureData
 
     End Function
 
@@ -120,14 +125,14 @@ Partial Public Class MainForm
 
         'Display all properties available
         For Each CONTROL_ID As QHY.QHYCamera.CONTROL_ID In [Enum].GetValues(GetType(QHY.QHYCamera.CONTROL_ID))                   'Move over all Control ID's
-            If QHY.QHYCamera.IsQHYCCDControlAvailable(CamHandle, CONTROL_ID) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then    'If control is available
+            If QHY.QHYCamera.IsQHYCCDControlAvailable(DB.CamHandle, CONTROL_ID) <> QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then    'If control is available
                 Log("  " & CONTROL_ID.ToString.Trim.PadRight(40) & ": NOT AVAILABLE")
             Else
                 Dim Min As Double = Double.NaN
                 Dim Max As Double = Double.NaN
                 Dim Stepping As Double = Double.NaN
-                Dim CurrentValue As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, CONTROL_ID)
-                If QHY.QHYCamera.GetQHYCCDParamMinMaxStep(CamHandle, CONTROL_ID, Min, Max, Stepping) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
+                Dim CurrentValue As Double = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, CONTROL_ID)
+                If QHY.QHYCamera.GetQHYCCDParamMinMaxStep(DB.CamHandle, CONTROL_ID, Min, Max, Stepping) = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS Then
                     Log("  " & CONTROL_ID.ToString.Trim.PadRight(40) & ": " & Min.ValRegIndep & " ... <" & Stepping.ValRegIndep & "> ... " & Max.ValRegIndep & ", current: " & CurrentValue.ValRegIndep)
                 Else
                     Select Case CurrentValue
@@ -148,7 +153,7 @@ Partial Public Class MainForm
     Private Function InitQHY(ByVal CamID As String) As Boolean
 
         'Init if not yet done
-        If CamHandle = IntPtr.Zero Or UsedReadMode = eReadOutMode.Invalid Or UsedStreamMode = UInteger.MaxValue Then
+        If DB.CamHandle = IntPtr.Zero Or DB.UsedReadMode = eReadOutMode.Invalid Or DB.UsedStreamMode = eStreamMode.Invalid Then
 
             If CallOK(QHY.QHYCamera.InitQHYCCDResource) = True Then                                                                         'Init DLL itself
                 DB.Stopper.Stamp("InitQHYCCDResource")
@@ -172,35 +177,35 @@ Partial Public Class MainForm
                     Next Idx
 
                     'Find correct camera
-                    UsedCameraId = New System.Text.StringBuilder
+                    DB.UsedCameraId = New System.Text.StringBuilder
                     For Each CamIdx As Integer In AllCameras.Keys
-                        If AllCameras(CamIdx).ToString.Contains(CamID) = True Then
-                            UsedCameraId = New System.Text.StringBuilder(AllCameras(CamIdx).ToString)
+                        If AllCameras(CamIdx).ToString.Contains(CamID) = True Or CamID = "*" Then
+                            DB.UsedCameraId = New System.Text.StringBuilder(AllCameras(CamIdx).ToString)
                             Exit For
                         End If
                     Next CamIdx
 
                     'Exit if camera is not correct
-                    If UsedCameraId.Length = 0 Then
+                    If DB.UsedCameraId.Length = 0 Then
                         Log(CamScanReport)
                         Return False
                     Else
                         LogVerbose(CamScanReport)
                     End If
 
-                    LogVerbose("Found QHY camera to use: <" & UsedCameraId.ToString & ">")              'Display fetched camera ID
-                    CamHandle = QHY.QHYCamera.OpenQHYCCD(UsedCameraId)                                  'Open the camera
-                    If CamHandle <> IntPtr.Zero Then
+                    LogVerbose("Found QHY camera to use: <" & DB.UsedCameraId.ToString & ">")              'Display fetched camera ID
+                    DB.CamHandle = QHY.QHYCamera.OpenQHYCCD(DB.UsedCameraId)                                  'Open the camera
+                    If DB.CamHandle <> IntPtr.Zero Then
 
                         'NEW SDK READOUT MODE
                         Dim ReadoutModesCount As UInteger = 0
-                        CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(CamHandle, ReadoutModesCount))
+                        CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(DB.CamHandle, ReadoutModesCount))
                         Dim AllReadOutModes As New List(Of String)
                         For ReadoutMode As UInteger = 0 To CUInt(ReadoutModesCount - 1)
                             Dim ReadoutModeName As New Text.StringBuilder
                             Dim ResX As UInteger = 0 : Dim ResY As UInteger = 0
-                            CallOK(QHY.QHYCamera.GetQHYCCDReadModeName(CamHandle, ReadoutMode, ReadoutModeName))
-                            CallOK(QHY.QHYCamera.GetQHYCCDReadModeResolution(CamHandle, ReadoutMode, ResX, ResY))
+                            CallOK(QHY.QHYCamera.GetQHYCCDReadModeName(DB.CamHandle, ReadoutMode, ReadoutModeName))
+                            CallOK(QHY.QHYCamera.GetQHYCCDReadModeResolution(DB.CamHandle, ReadoutMode, ResX, ResY))
                             AllReadOutModes.Add(ReadoutMode.ValRegIndep & ": " & ReadoutModeName.ToString & " (" & ResX.ValRegIndep & "x" & ResY.ValRegIndep & ")")
                         Next ReadoutMode
                         If DB.Log_CamProp Then
@@ -209,32 +214,33 @@ Partial Public Class MainForm
                         End If
 
                         'Run the start-up init sequence
-                        Log("Init QHY camera  <" & UsedCameraId.ToString & "> ...")
-                        If CallOK(QHY.QHYCamera.SetQHYCCDReadMode(CamHandle, DB.ReadOutMode)) = True Then
-                            If CallOK(QHY.QHYCamera.SetQHYCCDStreamMode(CamHandle, DB.StreamMode)) = True Then                                      'Set single capture mode
-                                If CallOK(QHY.QHYCamera.InitQHYCCD(CamHandle)) = True Then                                                          'Init the camera with the selected mode, ...
-                                    'Camera is open
-                                    UsedReadMode = DB.ReadOutMode
-                                    UsedStreamMode = DB.StreamMode
+                        Log("Init QHY camera  <" & DB.UsedCameraId.ToString & "> ...")
+                        If CallOK(QHY.QHYCamera.SetQHYCCDReadMode(DB.CamHandle, DB.ReadOutMode)) = True Then
+                            If CallOK(QHY.QHYCamera.SetQHYCCDStreamMode(DB.CamHandle, DB.StreamMode)) = True Then                                      'Set single capture mode
+                                If CallOK(QHY.QHYCamera.InitQHYCCD(DB.CamHandle)) = True Then                                                          'Init the camera with the selected mode, ...
+                                    'Camera was opened correct
+                                    DB.UsedReadMode = DB.ReadOutMode
+                                    DB.UsedStreamMode = DB.StreamMode
+                                    DB.LiveModeInitiated = False
                                 Else
                                     LogError("InitQHYCCD FAILED!")
-                                    CamHandle = IntPtr.Zero
+                                    DB.CamHandle = IntPtr.Zero
                                 End If
                             Else
                                 LogError("SetQHYCCDStreamMode FAILED!")
-                                CamHandle = IntPtr.Zero
+                                DB.CamHandle = IntPtr.Zero
                             End If
                         Else
                             LogError("SetQHYCCDReadMode to <" & DB.ReadOutMode & "> FAILED!")
                         End If
                     Else
                         LogError("OpenQHYCCD FAILED!")
-                        CamHandle = IntPtr.Zero
+                        DB.CamHandle = IntPtr.Zero
                         Return False
                     End If
                 Else
                     LogError("Init DLL OK but no camera found!")
-                    CamHandle = IntPtr.Zero
+                    DB.CamHandle = IntPtr.Zero
                     Return False
                 End If
             Else
@@ -249,13 +255,15 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Set the requested temperature.</summary>
-    Private Function SetTemperature(ByVal TempToSet As Double, ByVal TimeOut As Integer) As Double
+    '''<param name="TempToSet">Target temperature [C] for cooling.</param>
+    '''<param name="TimeOut">Time-out [s] for the complete cooling process</param>
+    Private Function SetTemperature(ByVal TempToSet As Double, ByVal TimeOut As Double) As Double
         Dim CurrentTemp As Double = Double.NaN
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
         If TempToSet > -100 Then
             Do
-                CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
-                Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
+                CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+                Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
                 tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & TempToSet.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
                 If CurrentTemp <= TempToSet Then Exit Do
                 System.Threading.Thread.Sleep(500)
@@ -270,7 +278,7 @@ Partial Public Class MainForm
     '''<param name="CamHandle">Handle to the camera.</param>
     '''<param name="FilterToSelect">Filter to select.</param>
     '''<param name="TimeOut">Time [s] to complete the operation.</param>
-    Private Function ActiveFilter(ByRef CamHandle As IntPtr, ByVal FilterToSelect As eFilter, ByVal TimeOut As Integer) As eFilter
+    Private Function ActiveFilter(ByRef CamHandle As IntPtr, ByVal FilterToSelect As eFilter, ByVal TimeOut As Double) As eFilter
         Dim RetVal As eFilter = eFilter.Invalid
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
         Dim NumberOfSlots As Double = QHY.QHYCamera.GetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CFWSLOTSNUM)
@@ -335,25 +343,25 @@ Partial Public Class MainForm
 
     ''<summary>Set the exposure parameters</summary>
     Private Sub SetExpParameters(ByVal ROIForCapture As System.Drawing.Rectangle)
-        CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(CamHandle, CUInt(DB.Binning), CUInt(DB.Binning)))
-        CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(CamHandle, CUInt(ROIForCapture.X), CUInt(ROIForCapture.Y), CUInt(ROIForCapture.Width \ DB.Binning), CUInt(ROIForCapture.Height \ DB.Binning)))
-        CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, DB.ReadResolution))
-        CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
-        CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
-        CallOK("CONTROL_USBTRAFFIC", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_USBTRAFFIC, DB.USBTraffic))
-        CallOK("CONTROL_DDR", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_DDR, CInt(IIf(DB.DDR_RAM = True, 1.0, 0.0))))
-        CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
+        CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(DB.CamHandle, CUInt(DB.HardwareBinning), CUInt(DB.HardwareBinning)))
+        CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(DB.CamHandle, CUInt(ROIForCapture.X), CUInt(ROIForCapture.Y), CUInt(ROIForCapture.Width \ DB.HardwareBinning), CUInt(ROIForCapture.Height \ DB.HardwareBinning)))
+        CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, DB.ReadResolution))
+        CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, DB.Gain))
+        CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, DB.Offset))
+        CallOK("CONTROL_USBTRAFFIC", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_USBTRAFFIC, DB.USBTraffic))
+        CallOK("CONTROL_DDR", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_DDR, CInt(IIf(DB.DDR_RAM = True, 1.0, 0.0))))
+        CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
         PropertyChanged = False
     End Sub
 
     '''<summary>Close the camera connection.</summary>
     Private Sub CloseCamera()
-        If CamHandle <> IntPtr.Zero Then
+        If DB.CamHandle <> IntPtr.Zero Then
             Log("Closing camera ...")
-            QHY.QHYCamera.CancelQHYCCDExposingAndReadout(CamHandle)
-            QHY.QHYCamera.CloseQHYCCD(CamHandle)
+            QHY.QHYCamera.CancelQHYCCDExposingAndReadout(DB.CamHandle)
+            QHY.QHYCamera.CloseQHYCCD(DB.CamHandle)
             QHY.QHYCamera.ReleaseQHYCCDResource()
-            CamHandle = IntPtr.Zero
+            DB.CamHandle = IntPtr.Zero
         End If
     End Sub
 
@@ -395,7 +403,7 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.TELESCOP, DB_meta.Telescope)
         CustomElement.Add(eFITSKeywords.TELAPER, DB_meta.TelescopeAperture / 1000.0)
         CustomElement.Add(eFITSKeywords.TELFOC, DB_meta.TelescopeFocalLength / 1000.0)
-        CustomElement.Add(eFITSKeywords.INSTRUME, UsedCameraId.ToString)
+        CustomElement.Add(eFITSKeywords.INSTRUME, DB.UsedCameraId.ToString)
         CustomElement.Add(eFITSKeywords.PIXSIZE1, Pixel_Size.Width)
         CustomElement.Add(eFITSKeywords.PIXSIZE2, Pixel_Size.Height)
         CustomElement.Add(eFITSKeywords.PLATESZ1, PLATESZ1 / 10)                        'calculated from the image data as ROI may be set ...
@@ -441,7 +449,7 @@ Partial Public Class MainForm
     Private Sub AddFITSHeaderCard(ByRef Container As List(Of String()), ByVal Keyword As eFITSKeywords, ByVal VAlue As String)
         If String.IsNullOrEmpty(VAlue) = False Then
             Dim FITSKey As New cFITSKey
-            Container.Add(New String() {FITSKey(Keyword), VAlue, FITSKey.Comment(Keyword)})
+            Container.Add(New String() {FITSKey(Keyword)(0), VAlue, FITSKey.Comment(Keyword)})
         End If
     End Sub
 

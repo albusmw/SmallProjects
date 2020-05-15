@@ -4,34 +4,24 @@ Imports System.Windows.Forms
 
 Partial Public Class MainForm
 
-    Const BitsPerByte As Integer = 8
-
     '''<summary>DB that holds all relevant information.</summary>
     Private DB As New cDB
     '''<summary>DB that holds meta information.</summary>
     Private DB_meta As New cDB_meta
     '''<summary>WCF interface.</summary>
     Private WithEvents DB_ServiceContract As cDB_ServiceContract
-
-    Private WithEvents ZWOASI As New cZWOASI
-
     '''<summary>Indicate that a property was changed and parameters need to be updated in the camera.</summary>
     Private PropertyChanged As Boolean = False
-
-    '''<summary>Handle to the camera.</summary>
-    Private CamHandle As IntPtr = IntPtr.Zero
-
-    Private UsedReadMode As eReadOutMode = eReadOutMode.Invalid
-    Private UsedCameraId As System.Text.StringBuilder
-    Private UsedStreamMode As eStreamMode = eStreamMode.Invalid
-
+    '''<summary>RTF report generator.</summary>
     Private RTFGen As New Atomic.cRTFGenerator
+    '''<summary>Focus window.</summary>
     Private FocusWindow As cImgForm = Nothing
-
     '''<summary>Accumulated statistics.</summary>
     Private LoopStat As AstroNET.Statistics.sStatistics
     '''<summary>Number of single statistics in the accumulated statistics.</summary>
     Private LoopStatCount As Integer = 0
+
+    Private WithEvents ZWOASI As New cZWOASI
 
     '''<summary>Run a single capture.</summary>
     Private Sub RunCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs)
@@ -41,6 +31,7 @@ Partial Public Class MainForm
     '''<summary>Command for a QHY capture run.</summary>
     Public Sub QHYCapture(ByVal CloseAtEnd As Boolean)
 
+        Const BitsPerByte As Integer = 8
         Dim SDKVersion(3) As UInteger
         Dim Chip_Physical As sSize_Dbl      'chip physical size [mm]
         Dim Chip_Pixel As sSize_UInt        'chip size [pixel]
@@ -56,12 +47,12 @@ Partial Public Class MainForm
 
         'Try to get a suitable camera and continue if found
         If InitQHY(DB.CamToUse) = False Then Log("No suitable camera found!")
-        If CamHandle <> IntPtr.Zero Then
+        If DB.CamHandle <> IntPtr.Zero Then
 
             'Get chip properties
-            QHY.QHYCamera.GetQHYCCDChipInfo(CamHandle, Chip_Physical.Width, Chip_Physical.Height, Chip_Pixel.Width, Chip_Pixel.Height, Pixel_Size.Width, Pixel_Size.Height, bpp)
-            QHY.QHYCamera.GetQHYCCDEffectiveArea(CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
-            QHY.QHYCamera.GetQHYCCDOverScanArea(CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
+            QHY.QHYCamera.GetQHYCCDChipInfo(DB.CamHandle, Chip_Physical.Width, Chip_Physical.Height, Chip_Pixel.Width, Chip_Pixel.Height, Pixel_Size.Width, Pixel_Size.Height, bpp)
+            QHY.QHYCamera.GetQHYCCDEffectiveArea(DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
+            QHY.QHYCamera.GetQHYCCDOverScanArea(DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
             DB.Stopper.Stamp("Get chip properties")
 
             'Log chip properties
@@ -88,7 +79,6 @@ Partial Public Class MainForm
                 Log("==============================================================================")
             End If
 
-            Dim ReadResolution As UInteger = 16
             Dim ChannelToRead As UInteger = 0
 
             'Prepare buffers
@@ -100,8 +90,8 @@ Partial Public Class MainForm
 
             'Select filter
             Dim FilterActive As eFilter = eFilter.Invalid
-            If DB.FilterSlot <> eFilter.Invalid Then
-                FilterActive = ActiveFilter(CamHandle, DB.FilterSlot, 15)
+            If DB.FilterSlot <> eFilter.Invalid And DB.UseFilterWheel = True Then
+                FilterActive = ActiveFilter(DB.CamHandle, DB.FilterSlot, DB.FilterWheelTimeOut)
             End If
             DB.Stopper.Stamp("Select filter")
 
@@ -110,7 +100,7 @@ Partial Public Class MainForm
             Dim TotalCaptureTime As Double = 0
             Dim LastCaptureData As New cSingleCaptureData
 
-            For CaptureIdx As UInt32 = 1 To CUInt(DB.CaptureCount)
+            For CaptureIdx As UInt32 = 1 To CUInt(DB.CaptureCount + 1)                              '1 extra round for async
 
                 '================================================================================
                 ' START EXPOSURE ON FIRST ENTRY
@@ -127,7 +117,7 @@ Partial Public Class MainForm
                 IdleExposureTime(DB.ExposureTime)
 
                 'Get the buffer size from the DLL - typically too big but does not care ...
-                Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(CamHandle)
+                Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(DB.CamHandle)
                 LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 If CamRawBuffer.Length <> BytesToTransfer_reported Then
                     PinHandler = New cIntelIPP.cPinHandler
@@ -138,13 +128,13 @@ Partial Public Class MainForm
 
                 'Read image data from camera - ALWAYS WITH OVERSCAN
                 Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
+                Dim LiveModePollCount As Integer = 0
                 If DB.StreamMode = eStreamMode.SingleFrame Then
-                    CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                    CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
                 Else
-                    Dim LiveModeReady As UInteger = 123456
-                    Dim LiveModePollCount As Integer = 0
+                    Dim LiveModeReady As UInteger = UInteger.MaxValue
                     Do
-                        LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
+                        LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
                         LiveModePollCount += 1
                         DE()
                     Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or DB.StopFlag = True
@@ -155,7 +145,7 @@ Partial Public Class MainForm
                 Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
-                DB.Stopper.Stamp("GetQHYCCDSingleFrame")
+                DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & ")")
 
                 'Remove overscan - do NOT run if an ROU is set
                 Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
@@ -172,12 +162,18 @@ Partial Public Class MainForm
                 LastCaptureData.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2)
                 DB.Stopper.Stamp("ChangeAspect")
 
+                'Software binning - if > 1 data type is moved from UInt16 to UInt32
+                If DB.SoftwareBinning > 1 Then
+                    SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data = ImageProcessing.Binning(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.SoftwareBinning)
+                    SingleStatCalc.Reset_UInt16()
+                End If
+
                 '================================================================================
-                'STORE AND RETRIGGER CAPTURE
+                'RETRIGGER CAPTURE
                 '================================================================================
 
                 Dim SingleCaptureData As cSingleCaptureData = LastCaptureData
-                If (CaptureIdx < DB.CaptureCount) And (DB.StopFlag = False) Then
+                If (CaptureIdx <= DB.CaptureCount) And (DB.StopFlag = False) Then
                     LastCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
                 End If
 
@@ -192,7 +188,9 @@ Partial Public Class MainForm
                     tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureIdx / TotalCaptureTime, "0.0") & " FPS"
                 End If
 
-                Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(SingleStat.DataMode)
+                'Calculate statistics
+                Dim SingleStat As AstroNET.Statistics.sStatistics
+                If DB.CalcStatistics = True Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataModeType)
                 SingleStat.MonoStatistics_Int.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics_Int.Height = SingleCaptureData.NAXIS2
 
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat) : LoopStatCount += 1
@@ -202,16 +200,18 @@ Partial Public Class MainForm
                 Dim DisplaySumStat As Boolean = False
                 If DB.Log_ClearStat = True Then RTFGen.Clear()
                 If DB.CaptureCount > 1 And DB.Log_ClearStat = True Then DisplaySumStat = True
-                RTFGen.AddEntry("Capture #" & CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
                 Dim SingStat As List(Of String) = SingleStat.StatisticsReport
                 Dim TotaStat As List(Of String) = LoopStat.StatisticsReport
-                For Idx As Integer = 0 To SingStat.Count - 1
-                    Dim Line As String = SingStat(Idx)
-                    If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
-                    RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
-                Next Idx
-                RTFGen.ForceRefresh()
-                DE()
+                If IsNothing(SingStat) = False Then
+                    RTFGen.AddEntry("Capture #" & CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
+                    For Idx As Integer = 0 To SingStat.Count - 1
+                        Dim Line As String = SingStat(Idx)
+                        If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
+                        RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
+                    Next Idx
+                    RTFGen.ForceRefresh()
+                    DE()
+                End If
                 DB.Stopper.Stamp("Statistics - text")
 
                 '================================================================================
@@ -222,46 +222,45 @@ Partial Public Class MainForm
                 Dim MeanCurveWidth As Integer = 2
                 If IsNothing(DB.Plotter) = True Then DB.Plotter = New cZEDGraphService(zgcMain)
                 DB.Plotter.Clear()
-                'Mean statistics
-                If DB.CaptureCount > 1 And LoopStatCount > 1 And DB.PlotMeanStatistics = True Then
-                    If IsNothing(LoopStat.BayerHistograms_Int) = False Then
-                        DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms_Int(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms_Int(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms_Int(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
-                        DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms_Int(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
+                If DB.PlotMeanStatistics = True Or DB.PlotSingleStatistics = True Then
+                    'Mean statistics
+                    If DB.CaptureCount > 1 And LoopStatCount > 1 And DB.PlotMeanStatistics = True Then
+                        If IsNothing(LoopStat.BayerHistograms_Int) = False Then
+                            DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms_Int(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms_Int(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms_Int(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms_Int(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
+                        End If
+                        If IsNothing(LoopStat.MonochromHistogram_Int) = False Then
+                            DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram_Int, LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
+                        End If
                     End If
-                    If IsNothing(LoopStat.MonochromHistogram_Int) = False Then
-                        DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram_Int, LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
+                    'Current statistics
+                    If DB.PlotSingleStatistics = True And IsNothing(SingleStat.BayerHistograms_Int) = False Then
+                        DB.Plotter.PlotXvsY("R[0,0]", SingleStat.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY("G1[0,1]", SingleStat.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY("G2[1,0]", SingleStat.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY("B[1,1]", SingleStat.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
                     End If
-                End If
-                'Current statistics
-                If DB.PlotSingleStatistics = True Then
-                    DB.Plotter.PlotXvsY("R[0,0]", SingleStat.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("G1[0,1]", SingleStat.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("G2[1,0]", SingleStat.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("B[1,1]", SingleStat.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
-                    DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
-                End If
-                Select Case DB.PlotLimitMode
-                    Case eXAxisScalingMode.Auto
-                        DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
-                    Case eXAxisScalingMode.MaxScale
-                        DB.Plotter.ManuallyScaleXAxis(0, 65536)
-                    Case eXAxisScalingMode.LeaveAsIs
-                        'Just do nothing ...
-                End Select
+                    Select Case DB.PlotLimitMode
+                        Case eXAxisScalingMode.Auto
+                            DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
+                        Case eXAxisScalingMode.FullRange16Bit
+                            DB.Plotter.ManuallyScaleXAxis(0, 65536)
+                        Case eXAxisScalingMode.LeaveAsIs
+                            'Just do nothing ...
+                    End Select
 
-                DB.Plotter.AutoScaleYAxisLog()
-                DB.Plotter.GridOnOff(True, True)
-                DB.Plotter.ForceUpdate()
+                    DB.Plotter.AutoScaleYAxisLog()
+                    DB.Plotter.GridOnOff(True, True)
+                    DB.Plotter.ForceUpdate()
+                End If
                 DB.Stopper.Stamp("Statistics - plot")
 
                 '================================================================================
                 'Display focus image if required
                 If DB.ShowLiveImage = True Then
-                    Dim SizeInfo As String = String.Empty
-                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1).ValRegIndep & "x"
-                    SizeInfo &= (SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2).ValRegIndep
                     Dim NewWindowRequired As Boolean = False
                     If IsNothing(FocusWindow) = True Then
                         NewWindowRequired = True
@@ -270,9 +269,16 @@ Partial Public Class MainForm
                     End If
                     If NewWindowRequired = True Then
                         FocusWindow = New cImgForm
-                        FocusWindow.Show("Focus Window <" & SizeInfo & ">")
+                        FocusWindow.Show("Focus Window <" & SingleStatCalc.Dimensions & ">")
                     End If
-                    FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                    Select Case SingleStatCalc.DataMode
+                        Case AstroNET.Statistics.eDataMode.UInt16
+                            FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                        Case AstroNET.Statistics.eDataMode.UInt32
+                            FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                    End Select
+
+
                     DB.Stopper.Stamp("Focus window")
                 End If
 
@@ -288,9 +294,14 @@ Partial Public Class MainForm
                     Dim FileNameToWrite As String = DB.FileName
                     Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
 
-                    Dim FITSName As String = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
-                    cFITSWriter.Write(FITSName, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
-                    If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(FITSName)
+                    DB.LastStoredFile = System.IO.Path.Combine(Path, FileNameToWrite & "." & DB.FITSExtension)
+                    Select Case SingleStatCalc.DataMode
+                        Case AstroNET.Statistics.eDataMode.UInt16
+                            cFITSWriter.Write(DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
+                        Case AstroNET.Statistics.eDataMode.UInt32
+                            cFITSWriter.Write(DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, cFITSWriter.eBitPix.Int32, CustomElement)
+                    End Select
+                    If DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(DB.LastStoredFile)
 
                 End If
                 DB.Stopper.Stamp("Store image")
@@ -303,7 +314,7 @@ Partial Public Class MainForm
             'Stop live mode if used
 
             If DB.StreamMode = eStreamMode.LiveFrame Then
-                CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(CamHandle))
+                CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(DB.CamHandle))
             End If
 
             'Release buffer handles
@@ -321,7 +332,7 @@ Partial Public Class MainForm
         If DB.Log_Timing = True Then
             Log("--------------------------------------------------------------")
             Log("TIMING:")
-            Log(DB.Stopper.GetLog)
+            LogNoTime(DB.Stopper.GetLog)
             Log("--------------------------------------------------------------")
         End If
 
@@ -366,8 +377,6 @@ Partial Public Class MainForm
         End With
         Return ROIForCapture
     End Function
-
-    '
 
     '===============================================================================================
     ' Image and signal processing
@@ -452,6 +461,19 @@ Partial Public Class MainForm
         DisplayLog()
     End Sub
 
+    '''<summary>Append list of text but do not add time (e.g. as this is a time-stamp log).</summary>
+    '''<param name="Text"></param>
+    Private Sub LogNoTime(ByVal Text As List(Of String))
+        For Each Line As String In Text
+            If DB.Log_Generic.Length = 0 Then
+                DB.Log_Generic.Append(Text)
+            Else
+                DB.Log_Generic.Append(System.Environment.NewLine & Line)
+            End If
+        Next Line
+        DisplayLog()
+    End Sub
+
     Private Sub LogStart(ByVal Text As String)
         Log(Text)
     End Sub
@@ -510,25 +532,15 @@ Partial Public Class MainForm
         If System.IO.File.Exists(DB.MyINI) Then DB.INI.Load(DB.MyINI)
 
         'Load IPP
-        Try
-            For Each IPPRoot As String In DB.IPPRoots
-                If System.IO.Directory.Exists(IPPRoot) = True Then
-                    Try
-                        DB.IPP = New cIntelIPP(IPPRoot)
-                        If DB.IPP.DLLHandleValid = True Then Exit For
-                    Catch ex As Exception
-                        MsgBox("IPP <" & IPPRoot & "> not found!")
-                    End Try
-                End If
-            Next IPPRoot
-            If DB.IPP.DLLHandleValid = False Then
-                MsgBox("IPP not found!")
-            End If
-        Catch ex As Exception
-            MsgBox("Generic error on loading IPP: <" & ex.Message & ">")
-        End Try
+        Dim IPPLoadError As String = String.Empty
+        Dim IPPPathToUse As String = cIntelIPP.SearchDLLToUse(cIntelIPP.PossiblePaths(DB.EXEPath).ToArray, IPPLoadError)
+        If String.IsNullOrEmpty(IPPLoadError) = True Then
+            DB.IPP = New cIntelIPP(IPPPathToUse)
+            cFITSWriter.UseIPPForWriting = True
+        Else
+            cFITSWriter.UseIPPForWriting = False
+        End If
         cFITSWriter.IPPPath = DB.IPP.IPPPath
-        cFITSWriter.UseIPPForWriting = True
 
         'Start WCF
         'netsh http add urlacl url=http://+:1250/ user=DESKTOP-I7\albusmw
@@ -555,6 +567,9 @@ Partial Public Class MainForm
         RTFGen.AttachToControl(rtbStatistics)
         RTFGen.RTFInit("Courier New", 8)
 
+        'Show DB
+        pgMain.SelectedObject = DB
+
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -562,8 +577,8 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tSetTemp_Tick(sender As Object, e As EventArgs) Handles tSetTemp.Tick
-        If CamHandle <> IntPtr.Zero Then
-            QHY.QHYCamera.ControlQHYCCDTemp(CamHandle, DB.TargetTemp)
+        If DB.CamHandle <> IntPtr.Zero Then
+            QHY.QHYCamera.ControlQHYCCDTemp(DB.CamHandle, DB.TargetTemp)
         End If
     End Sub
 
@@ -1107,8 +1122,31 @@ Partial Public Class MainForm
     End Sub
 
     '''<summary>Get the memory consumption [MByte] of this EXE.</summary>
+    '''<remarks>This functions needs a significant time !!!!!</remarks>
     Private Function GetMyMemSize() As Double
         Return Process.GetCurrentProcess.PrivateMemorySize64 / 1048576
     End Function
 
+    Private Sub BiasCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiSpeedTest.Click
+        With DB
+            .StreamMode = eStreamMode.LiveFrame
+            .ExposureTime = 0.0001
+            .Gain = 0
+            .CaptureCount = 50
+            .StoreImage = False
+            .Log_ClearStat = True
+            .DDR_RAM = False
+            .ConfigAlways = False
+            .FilterSlot = eFilter.Invalid
+            .CalcStatistics = False
+            .PlotSingleStatistics = False
+            .PlotMeanStatistics = False
+            .RemoveOverscan = False
+        End With
+        RefreshProperties()
+    End Sub
+
+    Private Sub OpenLastStoredFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastStoredFileToolStripMenuItem.Click
+        If System.IO.File.Exists(DB.LastStoredFile) Then Process.Start(DB.LastStoredFile)
+    End Sub
 End Class

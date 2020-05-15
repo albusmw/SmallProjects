@@ -6,18 +6,29 @@ Public Class MainForm
     '''<summary>Handle to Intel IPP functions.</summary>
     Private IntelIPP As cIntelIPP
 
+    '''<summary>Statistics processor (for the last file).</summary>
+    Private SingleStatCalc As AstroNET.Statistics
+
+    '''<summary>Statistics of the last frame.</summary>
+    Private LastStat As AstroNET.Statistics.sStatistics
+
     Dim DB As New cDB
     Dim Logger As New cLogging
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
         pgMain.SelectedObject = DB
         'IPP laden
-        DB.IPPPath = String.Empty
-        TestIPPPath(DB.IPPPath, System.IO.Path.Combine(DB.MyPath, "ipp"))
-        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\redist\intel64_win\ipp")
-        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.5.281\windows\redist\intel64_win\ipp")
-        TestIPPPath(DB.IPPPath, "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\redist\intel64_win\ipp")
-        IntelIPP = New cIntelIPP(DB.IPPPath)
+        'Load IPP
+        Dim IPPLoadError As String = String.Empty
+        Dim IPPPathToUse As String = cIntelIPP.SearchDLLToUse(cIntelIPP.PossiblePaths(DB.MyPath).ToArray, IPPLoadError)
+        If String.IsNullOrEmpty(IPPLoadError) = True Then
+            IntelIPP = New cIntelIPP(IPPPathToUse)
+            cFITSWriter.UseIPPForWriting = True
+        Else
+            cFITSWriter.UseIPPForWriting = False
+        End If
+        cFITSWriter.IPPPath = IntelIPP.IPPPath
+        SingleStatCalc = New AstroNET.Statistics(IntelIPP)
     End Sub
 
     '''<summary>Take an IPP path if there is not yet one set.</summary>
@@ -30,6 +41,8 @@ Public Class MainForm
     Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
 
         CType(sender, System.Windows.Forms.Button).Enabled = False : DE()
+
+        SingleStatCalc.ResetAllProcessors()
 
         'Define input file and open
         Dim FileIO As New System.IO.FileStream(DB.InputFile, IO.FileMode.Open, IO.FileAccess.Read)
@@ -62,10 +75,16 @@ Public Class MainForm
                 If Header.BytePerPixel = 2 Then
 
                     'Init sum image
-                    Dim SumImage(Header.FrameWidth - 1, Header.FrameHeight - 1) As UInt32
+                    Dim MaxImage(Header.FrameWidth - 1, Header.FrameHeight - 1) As UInt16
                     For IdxY As Integer = 0 To Header.FrameWidth - 1
                         For IdxX As Integer = 0 To Header.FrameHeight - 1
-                            SumImage(IdxY, IdxX) = UInt32.MinValue
+                            MaxImage(IdxY, IdxX) = UInt16.MinValue
+                        Next IdxX
+                    Next IdxY
+                    Dim CenterSumImage(DB.CutOutWidth - 1, DB.CutOutHeight - 1) As UInt32
+                    For IdxY As Integer = 0 To CenterSumImage.GetUpperBound(0)
+                        For IdxX As Integer = 0 To CenterSumImage.GetUpperBound(1)
+                            CenterSumImage(IdxY, IdxX) = 0
                         Next IdxX
                     Next IdxY
 
@@ -76,23 +95,54 @@ Public Class MainForm
 
                         '1.) Read in 1 frame and convert to 2-byte data type
                         Dim FrameSize As Integer = CInt(Header.FrameWidth * Header.FrameHeight * Header.BytePerPixel)
-                        Dim Frame(Header.FrameWidth - 1, Header.FrameHeight - 1) As UInt16
-                        IntelIPP.Transpose(BinaryIN.ReadBytes(FrameSize), Frame)
+                        ReDim SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(Header.FrameWidth - 1, Header.FrameHeight - 1)
+                        IntelIPP.Transpose(BinaryIN.ReadBytes(FrameSize), SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
 
-                        'The SER file has a different row-column order compared to the FITS file, so we have to swap ...
+                        'Statistics
+                        LastStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataMode)
 
-                        'Dim ReadPtr As Integer = 0
-                        'Dim PtrX As Integer = 0
-                        'Dim PtrY As Integer = 0
-                        'For Idx As Long = 1 To Frame.LongLength
-                        '    Frame(PtrY, PtrX) = BitConverter.ToUInt16(New Byte() {FrameVector(ReadPtr + 1), FrameVector(ReadPtr)}, 0)
-                        '    PtrX += 1
-                        '    If PtrX > Frame.GetUpperBound(1) Then
-                        '        PtrX = 0
-                        '        PtrY += 1
-                        '    End If
-                        '    ReadPtr += 2
-                        'Next Idx
+                        'Statistics for frame count
+                        If DB.SunCenterTracking = True Then
+
+                            'Calculate center-of-mass for sun
+                            Dim UsedSample As Integer = 0       'total number of used samples
+                            Dim UsedSampleSum As Double = 0     'sum of all used samples
+                            Dim Mid_X As Double = 0
+                            Dim Mid_Y As Double = 0
+                            With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
+                                If DB.SunCenterTracking_weighted = True Then
+                                    'Weight each used sample with its ADU value
+                                    For Idx_X As Integer = 0 To .Data.GetUpperBound(0)
+                                        For Idx_Y As Integer = 0 To .Data.GetUpperBound(1)
+                                            If .Data(Idx_X, Idx_Y) >= DB.SunCenterTracking_threshold Then
+                                                UsedSample += 1
+                                                UsedSampleSum += .Data(Idx_X, Idx_Y)
+                                                Mid_X += Idx_X * .Data(Idx_X, Idx_Y)
+                                                Mid_Y += Idx_Y * .Data(Idx_X, Idx_Y)
+                                            End If
+                                        Next Idx_Y
+                                    Next Idx_X
+                                Else
+                                    'Weight each used sample with 1
+                                    For Idx_X As Integer = 0 To .Data.GetUpperBound(0)
+                                        For Idx_Y As Integer = 0 To .Data.GetUpperBound(1)
+                                            If .Data(Idx_X, Idx_Y) >= DB.SunCenterTracking_threshold Then
+                                                UsedSample += 1
+                                                UsedSampleSum += 1
+                                                Mid_X += Idx_X
+                                                Mid_Y += Idx_Y
+                                            End If
+                                        Next Idx_Y
+                                    Next Idx_X
+                                End If
+                            End With
+                            Dim Mid_X_float As Double = Mid_X / UsedSampleSum
+                            Dim Mid_Y_float As Double = Mid_Y / UsedSampleSum
+                            DB.CenterX = CInt(Mid_X_float)
+                            DB.CenterY = CInt(Mid_Y_float)
+                            pgMain.Refresh()
+                            'Logger.Add("Used samples: " & UsedSample.ValRegIndep)
+                        End If
 
                         '2.) For the first image, detect mean X and Y summing statistics
                         If FrameCountIdx >= -1 Then
@@ -104,8 +154,8 @@ Public Class MainForm
                                 Dim HeightStat(Header.FrameHeight - 1) As Long
                                 Parallel.For(0, Header.FrameWidth - 1, Sub(IdxY)
                                                                            For IdxX As Integer = 0 To Header.FrameHeight - 1
-                                                                               WidthStat(IdxY) += Frame(IdxY, IdxX)
-                                                                               HeightStat(IdxX) += Frame(IdxY, IdxX)
+                                                                               WidthStat(IdxY) += SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(IdxY, IdxX)
+                                                                               HeightStat(IdxX) += SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(IdxY, IdxX)
                                                                            Next IdxX
                                                                        End Sub
                         )
@@ -121,7 +171,8 @@ Public Class MainForm
                             Dim Ptr2 As Integer = 0
                             For Idx_X As Integer = CenterX - (DB.CutOutWidth \ 2) To CenterX + (DB.CutOutWidth \ 2) - 1
                                 For Idx_Y As Integer = CenterY - (DB.CutOutHeight \ 2) To CenterY + (DB.CutOutHeight \ 2) - 1
-                                    CenterImage(Ptr1, Ptr2) = Frame(Idx_X, Idx_Y)
+                                    CenterImage(Ptr1, Ptr2) = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(Idx_X, Idx_Y)
+                                    CenterSumImage(Ptr1, Ptr2) += SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(Idx_X, Idx_Y)
                                     Ptr2 += 1
                                 Next Idx_Y
                                 Ptr1 += 1 : Ptr2 = 0
@@ -134,32 +185,29 @@ Public Class MainForm
                         End If
 
                         '3.) Get global MAX image
-                        If DB.CalcFITSSumFile Then
-                            Logger.Tic("Global sum")
-                            Dim DoParallel As Boolean = True
-                            If DoParallel Then
-                                Parallel.For(0, Header.FrameWidth - 1, Sub(IdxY)
-                                                                           For IdxX As Integer = 0 To Header.FrameHeight - 1
-                                                                               If Frame(IdxY, IdxX) > SumImage(IdxY, IdxX) Then
-                                                                                   SumImage(IdxY, IdxX) = Frame(IdxY, IdxX)
-                                                                               End If
-                                                                           Next IdxX
-                                                                       End Sub
+                        Logger.Tic("Global max")
+                        Dim DoParallel As Boolean = True
+                        If DoParallel Then
+                            Parallel.For(0, Header.FrameWidth - 1, Sub(IdxY)
+                                                                       For IdxX As Integer = 0 To Header.FrameHeight - 1
+                                                                           If SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(IdxY, IdxX) > MaxImage(IdxY, IdxX) Then
+                                                                               MaxImage(IdxY, IdxX) = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(IdxY, IdxX)
+                                                                           End If
+                                                                       Next IdxX
+                                                                   End Sub
                             )
-                            Else
-                                For IdxY As Integer = 0 To Header.FrameWidth - 1
+                        Else
+                            For IdxY As Integer = 0 To Header.FrameWidth - 1
 
-                                Next IdxY
-                            End If
-                            Logger.Toc()
+                            Next IdxY
                         End If
+                        Logger.Toc()
 
                         'Debug - save 1st frame
-                        'If FrameCountIdx = 1 Then
-                        '    Dim FITSFirstName As String = System.IO.Path.Combine(InputPath, "DEBUG_FITS_0001.fits")
-                        '    cFITSWriter.Write(FITSFirstName, Frame, cFITSWriter.eBitPix.Int16)
-                        '    Exit For
-                        'End If
+                        If FrameCountIdx = 1 And String.IsNullOrEmpty(DB.FirstFITSFile) = False Then
+                            Dim FITSFirstName As String = System.IO.Path.Combine(InputPath, DB.FirstFITSFile)
+                            cFITSWriter.Write(FITSFirstName, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
+                        End If
 
                         tspbMain.Value = FrameCountIdx
                         tsslMain.Text = "Frame " & Format(FrameCountIdx, "0000").Trim & "/" & Format(tspbMain.Maximum, "0000").Trim
@@ -172,11 +220,20 @@ Public Class MainForm
                     'Finish SER file
                     SEROut.CloseSerFile()
 
+                    'Get CenterSumImage as UInt16
+                    Dim MaxData As UInt32 = UInt32.MinValue
+                    Dim MinData As UInt32 = UInt32.MaxValue
+                    IntelIPP.MinMax(CenterSumImage, MinData, MaxData)
+                    Dim CenterSumImage_UInt16(CenterSumImage.GetUpperBound(0), CenterSumImage.GetUpperBound(1)) As UInt16
+                    For Idx1 As Integer = 0 To CenterSumImage.GetUpperBound(0)
+                        For Idx2 As Integer = 0 To CenterSumImage.GetUpperBound(1)
+                            CenterSumImage_UInt16(Idx1, Idx2) = CType(((CenterSumImage(Idx1, Idx2) - MinData) / (MaxData - MinData)) * UInt16.MaxValue, UInt16)
+                        Next Idx2
+                    Next Idx1
+
                     'Store total peak image
-                    If DB.CalcFITSSumFile Then
-                        Dim FITSSumFileName As String = System.IO.Path.Combine(InputPath, DB.FITSSumFile)
-                        cFITSWriter.Write(FITSSumFileName, SumImage, cFITSWriter.eBitPix.Int32)
-                    End If
+                    cFITSWriter.Write(System.IO.Path.Combine(InputPath, DB.FITSMaxHoldFile), MaxImage, cFITSWriter.eBitPix.Int16)
+                    cFITSWriter.Write(System.IO.Path.Combine(InputPath, DB.FITSCenterSumFile), CenterSumImage_UInt16, cFITSWriter.eBitPix.Int16)
 
                 End If
 
@@ -191,6 +248,7 @@ Public Class MainForm
         BinaryIN.Close()
         FileIO.Close()
 
+        tspbMain.Value = 0
         CType(sender, System.Windows.Forms.Button).Enabled = True : DE()
 
     End Sub
