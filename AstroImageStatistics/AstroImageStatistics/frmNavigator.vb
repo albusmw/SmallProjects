@@ -63,7 +63,7 @@ Public Class frmNavigator
         Next FileIdx
 
         'Run mosaik statistics
-        Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics("UInt16")
+        Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(AstroNET.Statistics.sStatistics.eDataMode.Fixed)
 
         ShowDataForm(MosaikForm, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, Stat.MonoStatistics_Int.Min.Key, Stat.MonoStatistics_Int.Max.Key)
         pbMain.Value = 0

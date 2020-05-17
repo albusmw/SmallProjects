@@ -126,7 +126,7 @@ Public Class Form1
 
         '=========================================================================================================
         'Calculate the statistics
-        CalculateStatistics(SingleStatCalc.DataMode)
+        CalculateStatistics(SingleStatCalc.DataModeType)
         Stopper.Stamp(FileNameOnly & ": Statistics")
 
         'Record statistics
@@ -184,7 +184,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub CalculateStatistics(ByVal DataMode As String)
+    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode)
         LastStat = SingleStatCalc.ImageStatistics(DataMode)
         Log("Statistics:")
         Log("  ", LastStat.StatisticsReport.ToArray())
@@ -198,7 +198,7 @@ Public Class Form1
         Dim Disp As New cZEDGraphForm
         Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         Select Case Stats.DataMode
-            Case "Int"
+            Case AstroNET.Statistics.sStatistics.eDataMode.Fixed
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Int) = False Then
@@ -211,7 +211,7 @@ Public Class Form1
                     Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
                 End If
                 Disp.Plotter.ManuallyScaleXAxis(Stats.MonoStatistics_Int.Min.Key, Stats.MonoStatistics_Int.Max.Key)
-            Case "Single"
+            Case AstroNET.Statistics.sStatistics.eDataMode.Float
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Float32) = False Then
@@ -534,7 +534,7 @@ Public Class Form1
 
         '1. Load data
         Select Case SingleStatCalc.DataMode
-            Case "UInt16"
+            Case AstroNET.Statistics.eDataMode.UInt16
                 With SingleStatCalc.DataProcessor_UInt16
                     ReDim StatPerRow(.ImageData(0).Data.GetUpperBound(1)) : InitStat(StatPerRow)
                     ReDim StatPerCol(.ImageData(0).Data.GetUpperBound(0)) : InitStat(StatPerCol)
@@ -546,7 +546,19 @@ Public Class Form1
                                                                              End Sub)
                     DataProcessed = True
                 End With
-            Case "Int32"
+            Case AstroNET.Statistics.eDataMode.UInt32
+                With SingleStatCalc.DataProcessor_UInt32
+                    ReDim StatPerRow(.ImageData(0).Data.GetUpperBound(1)) : InitStat(StatPerRow)
+                    ReDim StatPerCol(.ImageData(0).Data.GetUpperBound(0)) : InitStat(StatPerCol)
+                    Parallel.For(0, .ImageData(0).Data.GetUpperBound(0) + 1, Sub(Idx1)
+                                                                                 For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
+                                                                                     StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                                                                                     StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                                                                                 Next Idx2
+                                                                             End Sub)
+                    DataProcessed = True
+                End With
+            Case AstroNET.Statistics.eDataMode.Int32
                 With SingleStatCalc.DataProcessor_Int32
                     ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
                     ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
@@ -713,7 +725,7 @@ Public Class Form1
             Next BayerIdx2
         Next BayerIdx1
 
-        CalculateStatistics(SingleStatCalc.DataMode)
+        CalculateStatistics(SingleStatCalc.DataModeType)
         Idle()
 
     End Sub
@@ -779,7 +791,7 @@ Public Class Form1
     Private Sub StretcherToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StretcherToolStripMenuItem.Click
         Running()
         ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(SingleStatCalc.DataMode)
+        CalculateStatistics(SingleStatCalc.DataModeType)
         Idle()
     End Sub
 
@@ -959,17 +971,17 @@ Public Class Form1
         Dim Vignette As New Dictionary(Of Double, Double)
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataMode
-                Case "UInt16"
+                Case AstroNET.Statistics.eDataMode.UInt16
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-                Case "UInt32"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
+                Case AstroNET.Statistics.eDataMode.UInt32
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data)
             End Select
         Else
             Select Case SingleStatCalc.DataMode
-                Case "UInt16"
+                Case AstroNET.Statistics.eDataMode.UInt16
                     Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
-                Case "UInt32"
-                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
+                Case AstroNET.Statistics.eDataMode.UInt32
+                    Vignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, DB.VigResolution)
             End Select
         End If
         Vignette = Vignette.SortDictionary
@@ -990,17 +1002,17 @@ Public Class Form1
         Dim FullVignette As New Dictionary(Of Double, Double)
         If DB.VigResolution = 0 Then
             Select Case SingleStatCalc.DataMode
-                Case "UInt16"
+                Case AstroNET.Statistics.eDataMode.UInt16
                     FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-                Case "UInt32"
-                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData)
+                Case AstroNET.Statistics.eDataMode.UInt32
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data)
             End Select
         Else
             Select Case SingleStatCalc.DataMode
-                Case "UInt16"
+                Case AstroNET.Statistics.eDataMode.UInt16
                     FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, DB.VigResolution)
-                Case "UInt32"
-                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData, DB.VigResolution)
+                Case AstroNET.Statistics.eDataMode.UInt32
+                    FullVignette = ImageProcessing.Vignette(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, DB.VigResolution)
             End Select
         End If
 
@@ -1036,15 +1048,15 @@ Public Class Form1
 
         'Correct the vignette
         Select Case SingleStatCalc.DataMode
-            Case "UInt16"
+            Case AstroNET.Statistics.eDataMode.UInt16
                 ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, VignetteCorrection)
-            Case "UInt32"
-                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt32.ImageData, VignetteCorrection)
+            Case AstroNET.Statistics.eDataMode.UInt32
+                ImageProcessing.CorrectVignette(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, VignetteCorrection)
         End Select
 
         Stopper.Stamp("Vignette correction")
 
-        CalculateStatistics(SingleStatCalc.DataMode)
+        CalculateStatistics(SingleStatCalc.DataModeType)
         Idle()
 
     End Sub
