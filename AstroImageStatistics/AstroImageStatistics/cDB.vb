@@ -3,30 +3,38 @@ Option Strict On
 
 Public Class cDB
 
-    Private Const Cat_analysis As String = "1.) Analysis"
+    Private Const Cat_load As String = "1.) Loading"
+    Private Const Cat_analysis As String = "2.) Analysis"
     Private Const Cat_log As String = "2.) Logging"
     Private Const Cat_Proc_Vignette As String = "3.1) Processing - vignette"
     Private Const Cat_plot As String = "9.) Plotting"
     Private Const Cat_save As String = "10.) Saving"
     Private Const Cat_misc As String = "99.) Misc"
 
-    <ComponentModel.Category(Cat_analysis)>
+    <ComponentModel.Category(Cat_load)>
     <ComponentModel.DisplayName("a.) Use IPP?")>
+    <ComponentModel.Description("Use the Intel IPP for loading and other steps (recommended - speed-up)")>
     <ComponentModel.DefaultValue(True)>
     Public Property UseIPP As Boolean = True
 
+    <ComponentModel.Category(Cat_load)>
+    <ComponentModel.DisplayName("b.) Force direct read-in")>
+    <ComponentModel.Description("Do not apply BZERO or BSCALE - this may help on problems with incorrect scaling coefficients")>
+    <ComponentModel.DefaultValue(False)>
+    Public Property ForceDirect As Boolean = False
+
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("b.) Stacking")>
+    <ComponentModel.DisplayName("a.) Stacking")>
     <ComponentModel.DefaultValue(False)>
     Public Property Stacking As Boolean = False
 
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("c.) Vignette resolution")>
+    <ComponentModel.DisplayName("b.) Vignette resolution")>
     <ComponentModel.DefaultValue(1000)>
     Public Property VigResolution As Integer = 1000
 
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("d.) PlateSolve2 Path")>
+    <ComponentModel.DisplayName("c.) PlateSolve2 Path")>
     <ComponentModel.DefaultValue("C:\Bin\PlateSolve2\PlateSolve2.exe")>
     Public Property PlateSolve2Path As String = "C:\Bin\PlateSolve2\PlateSolve2.exe"
 
@@ -73,6 +81,8 @@ Public Class cDB
     <ComponentModel.Description("Distance below are ignored for correction")>
     <ComponentModel.DefaultValue(-1)>
     Public Property VigStopDistance As Integer = -1
+
+
 
     <ComponentModel.DisplayName("Used IPP path")>
     Public ReadOnly Property IPPPath As String

@@ -12,7 +12,7 @@ Public Class IntelIPP_NewCode
         Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName, DataStartPos))
         Dim FITSHeaderDict As Dictionary(Of eFITSKeywords, Object) = FITSHeader.GetCardsAsDictionary
         Dim FITSReader As New cFITSReader
-        Dim ImageData(,) As UInt16 = FITSReader.ReadInUInt16(FileName, True)
+        Dim ImageData(,) As UInt16 = FITSReader.ReadInUInt16(FileName, True, False)
 
         Dim StatusRecord As New List(Of cIntelIPP.IppStatus)
 

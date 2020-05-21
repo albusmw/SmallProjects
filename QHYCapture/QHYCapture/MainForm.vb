@@ -189,7 +189,7 @@ Partial Public Class MainForm
                 End If
 
                 'Calculate statistics
-                Dim SingleStat As AstroNET.Statistics.sStatistics
+                Dim SingleStat As New AstroNET.Statistics.sStatistics
                 If DB.CalcStatistics = True Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataModeType)
                 SingleStat.MonoStatistics_Int.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics_Int.Height = SingleCaptureData.NAXIS2
 
@@ -1036,7 +1036,8 @@ Partial Public Class MainForm
                                         Log("Statistics ...")
                                         Ticker.Reset() : Ticker.Start()
                                         SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(DB.IPP, CamRawBuffer, CameraInfo.MaxWidth, CameraInfo.MaxHeight)
-                                        Dim SingleStat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(SingleStat.DataMode)
+                                        Dim SingleStat As New AstroNET.Statistics.sStatistics
+                                        SingleStat = SingleStatCalc.ImageStatistics(SingleStat.DataMode)
                                         LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat)
                                         Ticker.Stop()
                                         LogTiming("", Ticker)
