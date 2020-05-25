@@ -123,6 +123,8 @@ Public Class cDB
     Public LiveModeInitiated As Boolean = False
     '''<summary>Used to call BeginQHYLiveMode only once.</summary>
     Public LastStoredFile As String = String.Empty
+    '''<summary>Monitor for the MIDI events.</summary>
+    Private WithEvents MIDI As cMIDIMonitor
 
     Public Stopper As New cStopper
 
@@ -160,7 +162,14 @@ Public Class cDB
     Const Cat3 As String = "3. Image storage"
     Const Cat4 As String = "4. Plot and statistics"
     Const Cat5 As String = "5. Debug and logging"
+    Const Cat6 As String = "6. Exposure - Advanced"
     Const CatX As String = "9. Misc and special settings"
+
+    Public Sub New()
+        'MIDI monitor
+        MIDI = New cMIDIMonitor
+        If MIDI.MIDIDeviceCount > 0 Then MIDI.SelectMidiDevice(0)
+    End Sub
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
@@ -232,7 +241,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   a) # of captures")>
     <ComponentModel.Description("Number of exposured to take with identical settings.")>
     <ComponentModel.DefaultValue(1)>
-    Public Property CaptureCount As Int32 = 1
+    Public Property CaptureCount As UInt32 = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   b) Filter slot")>
@@ -358,6 +367,58 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property PlotLimitMode As eXAxisScalingMode = eXAxisScalingMode.Auto
 
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName("   f) Bayer pattern")>
+    <ComponentModel.Description("Bayer pattern")>
+    <ComponentModel.DefaultValue("RGGB")>
+    Public Property BayerPattern As String = "RGGB"
+
+    '''<summary>Get the channel name of the bayer pattern index.</summary>
+    '''<param name="Idx">0-based index.</param>
+    '''<returns>Channel name - if there are more channels with the same letter a number is added beginning with the 2nd channel.</returns>
+    Public Function BayerPatternName(ByVal PatIdx As Integer) As String
+        If PatIdx > BayerPattern.Length - 1 Then Return "?"
+        Dim Dict As New Dictionary(Of String, Integer)
+        Dim ColorName As String = String.Empty
+        For Idx As Integer = 0 To PatIdx
+            ColorName = BayerPattern.Substring(Idx, 1)
+            If Dict.ContainsKey(ColorName) = False Then
+                Dict.Add(ColorName, 0)
+            Else
+                Dict(ColorName) += 1
+            End If
+        Next Idx
+        If Dict(ColorName) > 0 Then
+            Return ColorName & Dict(ColorName).ValRegIndep
+        Else
+            Return ColorName
+        End If
+    End Function
+
+    '''<summary>Get the channel name of all bayer pattern index.</summary>
+    '''<param name="Idx">0-based index.</param>
+    '''<returns>Channel name.</returns>
+    Public Function BayerPatternNames() As List(Of String)
+        Dim RetVal As New List(Of String)
+        For Idx As Integer = 0 To BayerPattern.Length - 1
+            RetVal.Add(BayerPatternName(Idx))
+        Next Idx
+        Return RetVal
+    End Function
+
+    Private Sub MIDI_NewData(Channel As Integer, Value As Integer) Handles MIDI.NewData
+        Select Case Channel
+            Case 1
+                Gain = Value
+            Case 2
+                WhiteBalance_Red = Value
+            Case 3
+                WhiteBalance_Green = Value
+            Case 4
+                WhiteBalance_Blue = Value
+        End Select
+    End Sub
+
     '===================================================================================================
 
     <ComponentModel.Category(Cat5)>
@@ -394,6 +455,40 @@ Public Class cDB
             End If
         End Get
     End Property
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   a) Brightness")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Brightness As Double = 0.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   b) Contrast")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Contrast As Double = 0.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   c) Gamma")>
+    <ComponentModel.DefaultValue(1.0)>
+    Public Property Gamma As Double = 1.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.1) White balance - Red")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Red As Double = 128.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.2) White balance - Green")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Green As Double = 128.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.3) White balance - Blue")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Blue As Double = 128.0
+
+    '===================================================================================================
 
     <ComponentModel.Category(CatX)>
     <ComponentModel.DisplayName("   a) Cooling time-out")>

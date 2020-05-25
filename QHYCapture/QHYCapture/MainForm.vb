@@ -5,7 +5,7 @@ Imports System.Windows.Forms
 Partial Public Class MainForm
 
     '''<summary>DB that holds all relevant information.</summary>
-    Private DB As New cDB
+    Private WithEvents DB As New cDB
     '''<summary>DB that holds meta information.</summary>
     Private DB_meta As New cDB_meta
     '''<summary>WCF interface.</summary>
@@ -200,13 +200,13 @@ Partial Public Class MainForm
                 Dim DisplaySumStat As Boolean = False
                 If DB.Log_ClearStat = True Then RTFGen.Clear()
                 If DB.CaptureCount > 1 And DB.Log_ClearStat = True Then DisplaySumStat = True
-                Dim SingStat As List(Of String) = SingleStat.StatisticsReport
-                Dim TotaStat As List(Of String) = LoopStat.StatisticsReport
-                If IsNothing(SingStat) = False Then
+                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(DB.BayerPatternNames)
+                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(DB.BayerPatternNames)
+                If IsNothing(SingleStatReport) = False Then
                     RTFGen.AddEntry("Capture #" & CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
-                    For Idx As Integer = 0 To SingStat.Count - 1
-                        Dim Line As String = SingStat(Idx)
-                        If DisplaySumStat = True Then Line &= "#" & TotaStat(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
+                    For Idx As Integer = 0 To SingleStatReport.Count - 1
+                        Dim Line As String = SingleStatReport(Idx)
+                        If DisplaySumStat = True Then Line &= "#" & LoopStatReport(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
                         RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
                     Next Idx
                     RTFGen.ForceRefresh()
@@ -226,10 +226,10 @@ Partial Public Class MainForm
                     'Mean statistics
                     If DB.CaptureCount > 1 And LoopStatCount > 1 And DB.PlotMeanStatistics = True Then
                         If IsNothing(LoopStat.BayerHistograms_Int) = False Then
-                            DB.Plotter.PlotXvsY("R mean", LoopStat.BayerHistograms_Int(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
-                            DB.Plotter.PlotXvsY("G1 mean", LoopStat.BayerHistograms_Int(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
-                            DB.Plotter.PlotXvsY("G2 mean", LoopStat.BayerHistograms_Int(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
-                            DB.Plotter.PlotXvsY("B mean", LoopStat.BayerHistograms_Int(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0] mean", LoopStat.BayerHistograms_Int(0, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,1] mean", LoopStat.BayerHistograms_Int(0, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[1,0] mean", LoopStat.BayerHistograms_Int(1, 0), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, MeanCurveWidth))
+                            DB.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[1,1] mean", LoopStat.BayerHistograms_Int(1, 1), LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, MeanCurveWidth))
                         End If
                         If IsNothing(LoopStat.MonochromHistogram_Int) = False Then
                             DB.Plotter.PlotXvsY("Mono mean", LoopStat.MonochromHistogram_Int, LoopStatCount, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, MeanCurveWidth))
@@ -237,10 +237,10 @@ Partial Public Class MainForm
                     End If
                     'Current statistics
                     If DB.PlotSingleStatistics = True And IsNothing(SingleStat.BayerHistograms_Int) = False Then
-                        DB.Plotter.PlotXvsY("R[0,0]", SingleStat.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
-                        DB.Plotter.PlotXvsY("G1[0,1]", SingleStat.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
-                        DB.Plotter.PlotXvsY("G2[1,0]", SingleStat.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
-                        DB.Plotter.PlotXvsY("B[1,1]", SingleStat.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0]", SingleStat.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Red, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY(DB.BayerPatternName(1) & "[0,1]", SingleStat.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.LightGreen, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY(DB.BayerPatternName(2) & "[1,0]", SingleStat.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.DarkGreen, CurveMode, CurrentCurveWidth))
+                        DB.Plotter.PlotXvsY(DB.BayerPatternName(3) & "[1,1]", SingleStat.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Blue, CurveMode, CurrentCurveWidth))
                         DB.Plotter.PlotXvsY("Mono", SingleStat.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(System.Drawing.Color.Black, CurveMode, CurrentCurveWidth))
                     End If
                     Select Case DB.PlotLimitMode
@@ -277,8 +277,6 @@ Partial Public Class MainForm
                         Case AstroNET.Statistics.eDataMode.UInt32
                             FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
                     End Select
-
-
                     DB.Stopper.Stamp("Focus window")
                 End If
 
@@ -785,7 +783,7 @@ Partial Public Class MainForm
                 Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
                 worksheet.Cell(1, 1).InsertData(New List(Of String)({"Pixel value", "Count Mono", "Count Bayer_0_0", "Count Bayer_0_1", "Count Bayer_1_0", "Count Bayer_1_1"}), True)
                 worksheet.Cell(2, 1).InsertData(XY)
-                For Each col In worksheet.ColumnsUsed
+                For Each col As ClosedXML.Excel.IXLColumn In worksheet.ColumnsUsed
                     col.AdjustToContents()
                 Next col
             End If
@@ -798,7 +796,7 @@ Partial Public Class MainForm
             Dim worksheet2 As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram Density")
             worksheet2.Cell(1, 1).InsertData(New List(Of String)({"Step size", "Count"}), True)
             worksheet2.Cell(2, 1).InsertData(HistDens)
-            For Each col In worksheet2.ColumnsUsed
+            For Each col As ClosedXML.Excel.IXLColumn In worksheet2.ColumnsUsed
                 col.AdjustToContents()
             Next col
 
@@ -1044,10 +1042,10 @@ Partial Public Class MainForm
 
                                         'Plot histogram
                                         DB.Plotter.Clear()
-                                        DB.Plotter.PlotXvsY("R", LoopStat.BayerHistograms_Int(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
-                                        DB.Plotter.PlotXvsY("G1", LoopStat.BayerHistograms_Int(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
-                                        DB.Plotter.PlotXvsY("G2", LoopStat.BayerHistograms_Int(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
-                                        DB.Plotter.PlotXvsY("B", LoopStat.BayerHistograms_Int(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
+                                        DB.Plotter.PlotXvsY(DB.BayerPattern(0), LoopStat.BayerHistograms_Int(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
+                                        DB.Plotter.PlotXvsY(DB.BayerPattern(1), LoopStat.BayerHistograms_Int(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
+                                        DB.Plotter.PlotXvsY(DB.BayerPattern(2), LoopStat.BayerHistograms_Int(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
+                                        DB.Plotter.PlotXvsY(DB.BayerPattern(3), LoopStat.BayerHistograms_Int(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
                                         DB.Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram_Int, New cZEDGraphService.sGraphStyle(Color.Black, 1))
                                         DB.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
 
@@ -1150,4 +1148,5 @@ Partial Public Class MainForm
     Private Sub OpenLastStoredFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastStoredFileToolStripMenuItem.Click
         If System.IO.File.Exists(DB.LastStoredFile) Then Process.Start(DB.LastStoredFile)
     End Sub
+
 End Class

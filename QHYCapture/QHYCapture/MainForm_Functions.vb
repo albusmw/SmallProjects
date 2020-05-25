@@ -351,6 +351,12 @@ Partial Public Class MainForm
         CallOK("CONTROL_USBTRAFFIC", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_USBTRAFFIC, DB.USBTraffic))
         CallOK("CONTROL_DDR", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_DDR, CInt(IIf(DB.DDR_RAM = True, 1.0, 0.0))))
         CallOK("CONTROL_EXPOSURE", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE, DB.ExposureTime * 1000000))
+        CallOK("CONTROL_BRIGHTNESS", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_BRIGHTNESS, DB.Brightness))
+        CallOK("CONTROL_CONTRAST", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CONTRAST, DB.Contrast))
+        CallOK("CONTROL_WBR", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_WBR, DB.WhiteBalance_Red))
+        CallOK("CONTROL_WBG", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_WBG, DB.WhiteBalance_Green))
+        CallOK("CONTROL_WBB", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_WBB, DB.WhiteBalance_Blue))
+        CallOK("CONTROL_GAMMA", QHY.QHYCamera.SetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAMMA, DB.Gamma))
         PropertyChanged = False
     End Sub
 

@@ -82,6 +82,45 @@ Public Class cDB
     <ComponentModel.DefaultValue(-1)>
     Public Property VigStopDistance As Integer = -1
 
+    <ComponentModel.Category(Cat_misc)>
+    <ComponentModel.DisplayName("   a) Bayer pattern")>
+    <ComponentModel.Description("Bayer pattern")>
+    <ComponentModel.DefaultValue("RGGB")>
+    Public Property BayerPattern As String = "RGGB"
+
+    '''<summary>Get the channel name of the bayer pattern index.</summary>
+    '''<param name="Idx">0-based index.</param>
+    '''<returns>Channel name - if there are more channels with the same letter a number is added beginning with the 2nd channel.</returns>
+    Public Function BayerPatternName(ByVal PatIdx As Integer) As String
+        If PatIdx > BayerPattern.Length - 1 Then Return "?"
+        Dim Dict As New Dictionary(Of String, Integer)
+        Dim ColorName As String = String.Empty
+        For Idx As Integer = 0 To PatIdx
+            ColorName = BayerPattern.Substring(Idx, 1)
+            If Dict.ContainsKey(ColorName) = False Then
+                Dict.Add(ColorName, 0)
+            Else
+                Dict(ColorName) += 1
+            End If
+        Next Idx
+        If Dict(ColorName) > 0 Then
+            Return ColorName & Dict(ColorName).ValRegIndep
+        Else
+            Return ColorName
+        End If
+    End Function
+
+    '''<summary>Get the channel name of all bayer pattern index.</summary>
+    '''<param name="Idx">0-based index.</param>
+    '''<returns>Channel name.</returns>
+    Public Function BayerPatternNames() As List(Of String)
+        Dim RetVal As New List(Of String)
+        For Idx As Integer = 0 To BayerPattern.Length - 1
+            RetVal.Add(BayerPatternName(Idx))
+        Next Idx
+        Return RetVal
+    End Function
+
 
 
     <ComponentModel.DisplayName("Used IPP path")>

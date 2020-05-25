@@ -126,7 +126,7 @@ Public Class Form1
 
         '=========================================================================================================
         'Calculate the statistics
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Stopper.Stamp(FileNameOnly & ": Statistics")
 
         'Record statistics
@@ -184,10 +184,10 @@ Public Class Form1
 
     End Sub
 
-    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode)
+    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode, ByVal ChannelNames As List(Of String))
         LastStat = SingleStatCalc.ImageStatistics(DataMode)
         Log("Statistics:")
-        Log("  ", LastStat.StatisticsReport.ToArray())
+        Log("  ", LastStat.StatisticsReport(ChannelNames).ToArray())
         Log(New String("="c, 109))
     End Sub
 
@@ -248,10 +248,10 @@ Public Class Form1
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Int) = False Then
-                    Disp.Plotter.PlotXvsY("R[0,0]", Stats.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G1[0,1]", Stats.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G2[1,0]", Stats.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("B[1,1]", Stats.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0]", Stats.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(1) & "[0,1]", Stats.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(2) & "[1,0]", Stats.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(3) & "[1,1]", Stats.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
                 End If
                 If IsNothing(Stats.MonochromHistogram_Int) = False Then
                     Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -261,10 +261,10 @@ Public Class Form1
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Float32) = False Then
-                    Disp.Plotter.PlotXvsY("R[0,0]", Stats.BayerHistograms_Float32(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G1[0,1]", Stats.BayerHistograms_Float32(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G2[1,0]", Stats.BayerHistograms_Float32(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("B[1,1]", Stats.BayerHistograms_Float32(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0]", Stats.BayerHistograms_Float32(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(1) & "[0,1]", Stats.BayerHistograms_Float32(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(2) & "[1,0]", Stats.BayerHistograms_Float32(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(3) & "[1,1]", Stats.BayerHistograms_Float32(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
                 End If
                 If IsNothing(Stats.MonochromHistogram_Float32) = False Then
                     Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram_Float32, 1, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -724,7 +724,7 @@ Public Class Form1
             Next BayerIdx2
         Next BayerIdx1
 
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
 
     End Sub
@@ -790,7 +790,7 @@ Public Class Form1
     Private Sub tsmiStretch_Click(sender As Object, e As EventArgs) Handles tsmiStretch.Click
         Running()
         ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
     End Sub
 
@@ -1055,7 +1055,7 @@ Public Class Form1
 
         Stopper.Stamp("Vignette correction")
 
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
 
     End Sub

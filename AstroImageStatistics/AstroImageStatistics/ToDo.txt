@@ -1,5 +1,5 @@
 ﻿- ReadHeader gibt es doppelt
-
+- Move over Histo stürzt ab bei Float
 
 Solver testing:
 	QHY600_H_alpha_60_40_50_001_001_Photographic.fits

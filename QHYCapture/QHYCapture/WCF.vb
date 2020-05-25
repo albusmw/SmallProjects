@@ -99,7 +99,7 @@ Public Class cDB_ServiceContract : Implements IDB
                 Select Case SingleProperty.PropertyType.Name.ToUpper
                     Case "Double".ToUpper
                         Dim NewProp As Double
-                        If Double.TryParse(Value, NewProp) = True Then SingleProperty.SetValue(DB, NewProp)
+                        If Double.TryParse(Value, NewProp) = True Then SingleProperty.SetValue(DB, NewProp, Nothing)
                 End Select
                 RaiseEvent ValueChanged()
                 Return SingleProperty.GetValue(DB, Nothing)
@@ -110,7 +110,7 @@ Public Class cDB_ServiceContract : Implements IDB
                 Select Case SingleProperty.PropertyType.Name.ToUpper
                     Case "Double".ToUpper
                         Dim NewProp As Double
-                        If Double.TryParse(Value, NewProp) = True Then SingleProperty.SetValue(DB_meta, NewProp)
+                        If Double.TryParse(Value, NewProp) = True Then SingleProperty.SetValue(DB_meta, NewProp, Nothing)
                 End Select
                 RaiseEvent ValueChanged()
                 Return SingleProperty.GetValue(DB_meta, Nothing)
