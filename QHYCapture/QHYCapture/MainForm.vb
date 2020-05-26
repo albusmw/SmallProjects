@@ -754,6 +754,7 @@ Partial Public Class MainForm
 
     Private Sub pgMain_PropertyValueChanged(s As Object, e As PropertyValueChangedEventArgs) Handles pgMain.PropertyValueChanged
         PropertyChanged = True
+        pgMain.SelectedObject = DB
     End Sub
 
     Private Sub StoreStatisticsAsEXCELFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StoreStatisticsAsEXCELFileToolStripMenuItem.Click
@@ -1149,4 +1150,22 @@ Partial Public Class MainForm
         If System.IO.File.Exists(DB.LastStoredFile) Then Process.Start(DB.LastStoredFile)
     End Sub
 
+    Private Sub DB_PropertyChanged() Handles DB.PropertyChanged
+        pgMain.SelectedObject = DB
+    End Sub
+
+    Private Sub SaveTransmissionToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveTransmissionToolStripMenuItem.Click
+        With DB
+            .StreamMode = eStreamMode.LiveFrame
+            .CaptureCount = 1000000
+            .USBTraffic = 10
+            .ExposureTime = 0.001
+            .PlotSingleStatistics = True
+            .PlotMeanStatistics = True
+            .CalcStatistics = True
+            .ShowLiveImage = False
+            .StoreImage = False
+            .ConfigAlways = True
+        End With
+    End Sub
 End Class

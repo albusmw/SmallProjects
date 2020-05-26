@@ -37,6 +37,7 @@ Partial Class MainForm
         Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenLastStoredFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.TestWebInterfaceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreStatisticsAsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -79,7 +80,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.OpenLastStoredFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -188,6 +189,12 @@ Partial Class MainForm
         Me.ExploreCurrentCampaignToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
         Me.ExploreCurrentCampaignToolStripMenuItem.Text = "Explore current campaign"
         '
+        'OpenLastStoredFileToolStripMenuItem
+        '
+        Me.OpenLastStoredFileToolStripMenuItem.Name = "OpenLastStoredFileToolStripMenuItem"
+        Me.OpenLastStoredFileToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
+        Me.OpenLastStoredFileToolStripMenuItem.Text = "Open last stored file"
+        '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
@@ -250,7 +257,7 @@ Partial Class MainForm
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -258,19 +265,19 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(150, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'TESTToolStripMenuItem
@@ -517,11 +524,11 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'OpenLastStoredFileToolStripMenuItem
+        'SaveTransmissionToolStripMenuItem
         '
-        Me.OpenLastStoredFileToolStripMenuItem.Name = "OpenLastStoredFileToolStripMenuItem"
-        Me.OpenLastStoredFileToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
-        Me.OpenLastStoredFileToolStripMenuItem.Text = "Open last stored file"
+        Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'MainForm
         '
@@ -619,4 +626,5 @@ Partial Class MainForm
     Friend WithEvents tsslMemory As ToolStripStatusLabel
     Friend WithEvents tStatusUpdate As Timer
     Friend WithEvents OpenLastStoredFileToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents SaveTransmissionToolStripMenuItem As ToolStripMenuItem
 End Class

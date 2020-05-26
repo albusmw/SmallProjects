@@ -111,6 +111,8 @@ End Enum
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
+    Public Event PropertyChanged()
+
     '''<summary>Handle to the camera.</summary>
     Public CamHandle As IntPtr = IntPtr.Zero
     '''<summary>Currently used camera ID.</summary>
@@ -406,17 +408,19 @@ Public Class cDB
         Return RetVal
     End Function
 
-    Private Sub MIDI_NewData(Channel As Integer, Value As Integer) Handles MIDI.NewData
+    '''<summary>Handle data entered via a MIDI input device.</summary>
+    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
         Select Case Channel
             Case 1
-                Gain = Value
+                Gain += Value
             Case 2
-                WhiteBalance_Red = Value
+                WhiteBalance_Red += Value
             Case 3
-                WhiteBalance_Green = Value
+                WhiteBalance_Green += Value
             Case 4
-                WhiteBalance_Blue = Value
+                WhiteBalance_Blue += Value
         End Select
+        RaiseEvent PropertyChanged()
     End Sub
 
     '===================================================================================================
