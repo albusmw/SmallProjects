@@ -126,6 +126,9 @@
     <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
       <Link>ZedGraphService.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\cAstroStatDisp.vb">
+      <Link>cAstroStatDisp.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\cZWOASI.vb">
       <Link>cZWOASI.vb</Link>
     </Compile>

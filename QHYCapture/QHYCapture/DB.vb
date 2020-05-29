@@ -157,8 +157,6 @@ Public Class cDB
     '''<summary>Intel IPP access.</summary>
     Public IPP As cIntelIPP
 
-    Public Plotter As cZEDGraphService
-
     Const Cat1 As String = "1. Imaging hardware"
     Const Cat2 As String = "2. Exposure"
     Const Cat3 As String = "3. Image storage"
@@ -343,71 +341,6 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property CalcStatistics As Boolean = True
 
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   b) Single statistics log")>
-    <ComponentModel.Description("Clear statistics log on every measurement")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property Log_ClearStat As Boolean = True
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   c) Plot single statistics")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property PlotSingleStatistics As Boolean = True
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   d) Plot mean statistics")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property PlotMeanStatistics As Boolean = True
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   e) Plot limits fixed")>
-    <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
-    <ComponentModel.DefaultValue(eXAxisScalingMode.Auto)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
-    Public Property PlotLimitMode As eXAxisScalingMode = eXAxisScalingMode.Auto
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   f) Bayer pattern")>
-    <ComponentModel.Description("Bayer pattern")>
-    <ComponentModel.DefaultValue("RGGB")>
-    Public Property BayerPattern As String = "RGGB"
-
-    '''<summary>Get the channel name of the bayer pattern index.</summary>
-    '''<param name="Idx">0-based index.</param>
-    '''<returns>Channel name - if there are more channels with the same letter a number is added beginning with the 2nd channel.</returns>
-    Public Function BayerPatternName(ByVal PatIdx As Integer) As String
-        If PatIdx > BayerPattern.Length - 1 Then Return "?"
-        Dim Dict As New Dictionary(Of String, Integer)
-        Dim ColorName As String = String.Empty
-        For Idx As Integer = 0 To PatIdx
-            ColorName = BayerPattern.Substring(Idx, 1)
-            If Dict.ContainsKey(ColorName) = False Then
-                Dict.Add(ColorName, 0)
-            Else
-                Dict(ColorName) += 1
-            End If
-        Next Idx
-        If Dict(ColorName) > 0 Then
-            Return ColorName & Dict(ColorName).ValRegIndep
-        Else
-            Return ColorName
-        End If
-    End Function
-
-    '''<summary>Get the channel name of all bayer pattern index.</summary>
-    '''<param name="Idx">0-based index.</param>
-    '''<returns>Channel name.</returns>
-    Public Function BayerPatternNames() As List(Of String)
-        Dim RetVal As New List(Of String)
-        For Idx As Integer = 0 To BayerPattern.Length - 1
-            RetVal.Add(BayerPatternName(Idx))
-        Next Idx
-        Return RetVal
-    End Function
-
     '''<summary>Handle data entered via a MIDI input device.</summary>
     Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
         Select Case Channel
@@ -419,6 +352,28 @@ Public Class cDB
                 WhiteBalance_Green += Value
             Case 4
                 WhiteBalance_Blue += Value
+            Case 5
+                Contrast += Value / 100
+            Case 6
+                Brightness += Value / 100
+        End Select
+        RaiseEvent PropertyChanged()
+    End Sub
+
+    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
+        Select Case Channel
+            Case 1
+                Gain = 0
+            Case 2
+                WhiteBalance_Red = 128
+            Case 3
+                WhiteBalance_Green = 128
+            Case 4
+                WhiteBalance_Blue = 128
+            Case 5
+                Contrast = 0.0
+            Case 6
+                Brightness = 0.0
         End Select
         RaiseEvent PropertyChanged()
     End Sub

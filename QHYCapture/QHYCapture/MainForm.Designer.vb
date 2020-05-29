@@ -52,6 +52,7 @@ Partial Class MainForm
         Me.tsmiSpeedTest = New System.Windows.Forms.ToolStripMenuItem()
         Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
@@ -80,7 +81,8 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.pgPlotAndText = New System.Windows.Forms.PropertyGrid()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -99,6 +101,7 @@ Partial Class MainForm
         Me.SplitContainer3.Panel1.SuspendLayout()
         Me.SplitContainer3.Panel2.SuspendLayout()
         Me.SplitContainer3.SuspendLayout()
+        Me.TabPage3.SuspendLayout()
         Me.SuspendLayout()
         '
         'pgMain
@@ -265,20 +268,26 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
+        '
+        'SaveTransmissionToolStripMenuItem
+        '
+        Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
         '
@@ -410,6 +419,7 @@ Partial Class MainForm
         '
         Me.tcMain.Controls.Add(Me.TabPage1)
         Me.tcMain.Controls.Add(Me.TabPage2)
+        Me.tcMain.Controls.Add(Me.TabPage3)
         Me.tcMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
@@ -524,11 +534,25 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'SaveTransmissionToolStripMenuItem
+        'TabPage3
         '
-        Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
+        Me.TabPage3.Controls.Add(Me.pgPlotAndText)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(386, 698)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "Plot & text"
+        Me.TabPage3.UseVisualStyleBackColor = True
+        '
+        'pgPlotAndText
+        '
+        Me.pgPlotAndText.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgPlotAndText.Location = New System.Drawing.Point(3, 3)
+        Me.pgPlotAndText.Name = "pgPlotAndText"
+        Me.pgPlotAndText.Size = New System.Drawing.Size(380, 692)
+        Me.pgPlotAndText.TabIndex = 2
+        Me.pgPlotAndText.ToolbarVisible = False
         '
         'MainForm
         '
@@ -565,6 +589,7 @@ Partial Class MainForm
         Me.SplitContainer3.Panel2.ResumeLayout(False)
         CType(Me.SplitContainer3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.SplitContainer3.ResumeLayout(False)
+        Me.TabPage3.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -627,4 +652,6 @@ Partial Class MainForm
     Friend WithEvents tStatusUpdate As Timer
     Friend WithEvents OpenLastStoredFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents SaveTransmissionToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents TabPage3 As TabPage
+    Friend WithEvents pgPlotAndText As PropertyGrid
 End Class
