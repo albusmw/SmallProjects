@@ -37,6 +37,7 @@ Partial Class MainForm
         Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenLastStoredFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.TestWebInterfaceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreStatisticsAsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -79,7 +80,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.OpenLastStoredFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiClearLog = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -187,6 +188,12 @@ Partial Class MainForm
         Me.ExploreCurrentCampaignToolStripMenuItem.Name = "ExploreCurrentCampaignToolStripMenuItem"
         Me.ExploreCurrentCampaignToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
         Me.ExploreCurrentCampaignToolStripMenuItem.Text = "Explore current campaign"
+        '
+        'OpenLastStoredFileToolStripMenuItem
+        '
+        Me.OpenLastStoredFileToolStripMenuItem.Name = "OpenLastStoredFileToolStripMenuItem"
+        Me.OpenLastStoredFileToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
+        Me.OpenLastStoredFileToolStripMenuItem.Text = "Open last stored file"
         '
         'ToolStripMenuItem1
         '
@@ -305,7 +312,7 @@ Partial Class MainForm
         '
         'tsmiActions
         '
-        Me.tsmiActions.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiResetLoopStat, Me.tsmiNewGUID, Me.tsmiLoad10MicronData})
+        Me.tsmiActions.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiResetLoopStat, Me.tsmiNewGUID, Me.tsmiLoad10MicronData, Me.tsmiClearLog})
         Me.tsmiActions.Name = "tsmiActions"
         Me.tsmiActions.Size = New System.Drawing.Size(59, 20)
         Me.tsmiActions.Text = "Actions"
@@ -313,19 +320,19 @@ Partial Class MainForm
         'tsmiResetLoopStat
         '
         Me.tsmiResetLoopStat.Name = "tsmiResetLoopStat"
-        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(180, 22)
         Me.tsmiResetLoopStat.Text = "Reset loop statistics"
         '
         'tsmiNewGUID
         '
         Me.tsmiNewGUID.Name = "tsmiNewGUID"
-        Me.tsmiNewGUID.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiNewGUID.Size = New System.Drawing.Size(180, 22)
         Me.tsmiNewGUID.Text = "New GUID"
         '
         'tsmiLoad10MicronData
         '
         Me.tsmiLoad10MicronData.Name = "tsmiLoad10MicronData"
-        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(180, 22)
         Me.tsmiLoad10MicronData.Text = "Load 10Micron data"
         '
         'zgcMain
@@ -517,11 +524,11 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'OpenLastStoredFileToolStripMenuItem
+        'tsmiClearLog
         '
-        Me.OpenLastStoredFileToolStripMenuItem.Name = "OpenLastStoredFileToolStripMenuItem"
-        Me.OpenLastStoredFileToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
-        Me.OpenLastStoredFileToolStripMenuItem.Text = "Open last stored file"
+        Me.tsmiClearLog.Name = "tsmiClearLog"
+        Me.tsmiClearLog.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiClearLog.Text = "Clear log"
         '
         'MainForm
         '
@@ -619,4 +626,5 @@ Partial Class MainForm
     Friend WithEvents tsslMemory As ToolStripStatusLabel
     Friend WithEvents tStatusUpdate As Timer
     Friend WithEvents OpenLastStoredFileToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiClearLog As ToolStripMenuItem
 End Class

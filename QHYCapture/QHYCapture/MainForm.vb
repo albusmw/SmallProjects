@@ -100,7 +100,7 @@ Partial Public Class MainForm
             Dim TotalCaptureTime As Double = 0
             Dim LastCaptureData As New cSingleCaptureData
 
-            For CaptureIdx As UInt32 = 1 To CUInt(DB.CaptureCount + 1)                              '1 extra round for async
+            For CaptureIdx As UInt32 = 1 To CUInt(DB.CaptureCount)                              '1 extra round for async
 
                 '================================================================================
                 ' START EXPOSURE ON FIRST ENTRY
@@ -145,7 +145,7 @@ Partial Public Class MainForm
                 Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
-                DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & ")")
+                DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & " x)")
 
                 'Remove overscan - do NOT run if an ROU is set
                 Dim SingleStatCalc As New AstroNET.Statistics(DB.IPP)
@@ -491,8 +491,10 @@ Partial Public Class MainForm
     Private Sub DisplayLog()
         With tbLogOutput
             .Text = DB.Log_Generic.ToString
-            .SelectionStart = .Text.Length - 1
-            .SelectionLength = 0
+            If tbLogOutput.Text.Length > 0 Then
+                .SelectionStart = .Text.Length - 1
+                .SelectionLength = 0
+            End If
             .ScrollToCaret()
         End With
         DE()
@@ -653,7 +655,7 @@ Partial Public Class MainForm
             .StreamMode = eStreamMode.LiveFrame
             .ExposureTime = 0.01
             .Gain = 20
-            .ROI = New Drawing.Rectangle(.ROI.X, .ROI.Y, 100, 100)
+            .ROI = New Drawing.Rectangle(100, 100, 100, 100)
             .CaptureCount = Int32.MaxValue
             .StoreImage = False
             .Log_ClearStat = True
@@ -1149,4 +1151,10 @@ Partial Public Class MainForm
     Private Sub OpenLastStoredFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastStoredFileToolStripMenuItem.Click
         If System.IO.File.Exists(DB.LastStoredFile) Then Process.Start(DB.LastStoredFile)
     End Sub
+
+    Private Sub tsmiClearLog_Click(sender As Object, e As EventArgs) Handles tsmiClearLog.Click
+        DB.Log_Generic.Clear()
+        DisplayLog()
+    End Sub
+
 End Class
