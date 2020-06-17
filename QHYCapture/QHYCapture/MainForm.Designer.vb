@@ -26,9 +26,13 @@ Partial Class MainForm
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
-        Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslLED_capture = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslLED_reading = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tspbProgress = New System.Windows.Forms.ToolStripProgressBar()
         Me.tsslProgress = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSplit1 = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSplit2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsmiFPSIndicator = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslMemory = New System.Windows.Forms.ToolStripStatusLabel()
         Me.msMain = New System.Windows.Forms.MenuStrip()
@@ -82,10 +86,8 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.tsslLED_capture = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.tsslLED_reading = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.tsslSplit1 = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.tsslSplit2 = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.pgPlotAndText = New System.Windows.Forms.PropertyGrid()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -104,6 +106,7 @@ Partial Class MainForm
         Me.SplitContainer3.Panel1.SuspendLayout()
         Me.SplitContainer3.Panel2.SuspendLayout()
         Me.SplitContainer3.SuspendLayout()
+        Me.TabPage3.SuspendLayout()
         Me.SuspendLayout()
         '
         'pgMain
@@ -124,11 +127,25 @@ Partial Class MainForm
         Me.ssMain.TabIndex = 1
         Me.ssMain.Text = "StatusStrip1"
         '
-        'tsslMain
+        'tsslLED_capture
         '
-        Me.tsslMain.Name = "tsslMain"
-        Me.tsslMain.Size = New System.Drawing.Size(50, 19)
-        Me.tsslMain.Text = "--IDLE--"
+        Me.tsslLED_capture.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
+        Me.tsslLED_capture.Enabled = False
+        Me.tsslLED_capture.Name = "tsslLED_capture"
+        Me.tsslLED_capture.Size = New System.Drawing.Size(53, 19)
+        Me.tsslLED_capture.Text = "Capture"
+        '
+        'tsslLED_reading
+        '
+        Me.tsslLED_reading.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
+        Me.tsslLED_reading.Enabled = False
+        Me.tsslLED_reading.Name = "tsslLED_reading"
+        Me.tsslLED_reading.Size = New System.Drawing.Size(63, 19)
+        Me.tsslLED_reading.Text = "Read data"
         '
         'tspbProgress
         '
@@ -142,6 +159,24 @@ Partial Class MainForm
         Me.tsslProgress.Name = "tsslProgress"
         Me.tsslProgress.Size = New System.Drawing.Size(22, 19)
         Me.tsslProgress.Text = "---"
+        '
+        'tsslSplit1
+        '
+        Me.tsslSplit1.Name = "tsslSplit1"
+        Me.tsslSplit1.Size = New System.Drawing.Size(10, 19)
+        Me.tsslSplit1.Text = "|"
+        '
+        'tsslMain
+        '
+        Me.tsslMain.Name = "tsslMain"
+        Me.tsslMain.Size = New System.Drawing.Size(50, 19)
+        Me.tsslMain.Text = "--IDLE--"
+        '
+        'tsslSplit2
+        '
+        Me.tsslSplit2.Name = "tsslSplit2"
+        Me.tsslSplit2.Size = New System.Drawing.Size(10, 19)
+        Me.tsslSplit2.Text = "|"
         '
         'tsmiFPSIndicator
         '
@@ -270,25 +305,25 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
@@ -452,7 +487,7 @@ Partial Class MainForm
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(386, 698)
+        Me.TabPage2.Size = New System.Drawing.Size(231, 309)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Meta data"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -462,7 +497,7 @@ Partial Class MainForm
         Me.pgMeta.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMeta.Location = New System.Drawing.Point(3, 3)
         Me.pgMeta.Name = "pgMeta"
-        Me.pgMeta.Size = New System.Drawing.Size(380, 692)
+        Me.pgMeta.Size = New System.Drawing.Size(225, 303)
         Me.pgMeta.TabIndex = 1
         Me.pgMeta.ToolbarVisible = False
         '
@@ -542,37 +577,25 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'tsslLED_capture
+        'TabPage3
         '
-        Me.tsslLED_capture.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
-            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
-            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
-        Me.tsslLED_capture.Enabled = False
-        Me.tsslLED_capture.Name = "tsslLED_capture"
-        Me.tsslLED_capture.Size = New System.Drawing.Size(53, 19)
-        Me.tsslLED_capture.Text = "Capture"
+        Me.TabPage3.Controls.Add(Me.pgPlotAndText)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(231, 309)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "Plot and text"
+        Me.TabPage3.UseVisualStyleBackColor = True
         '
-        'tsslLED_reading
+        'pgPlotAndText
         '
-        Me.tsslLED_reading.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
-            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
-            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
-        Me.tsslLED_reading.Enabled = False
-        Me.tsslLED_reading.Name = "tsslLED_reading"
-        Me.tsslLED_reading.Size = New System.Drawing.Size(63, 19)
-        Me.tsslLED_reading.Text = "Read data"
-        '
-        'tsslSplit1
-        '
-        Me.tsslSplit1.Name = "tsslSplit1"
-        Me.tsslSplit1.Size = New System.Drawing.Size(10, 19)
-        Me.tsslSplit1.Text = "|"
-        '
-        'tsslSplit2
-        '
-        Me.tsslSplit2.Name = "tsslSplit2"
-        Me.tsslSplit2.Size = New System.Drawing.Size(10, 19)
-        Me.tsslSplit2.Text = "|"
+        Me.pgPlotAndText.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgPlotAndText.Location = New System.Drawing.Point(3, 3)
+        Me.pgPlotAndText.Name = "pgPlotAndText"
+        Me.pgPlotAndText.Size = New System.Drawing.Size(225, 303)
+        Me.pgPlotAndText.TabIndex = 2
+        Me.pgPlotAndText.ToolbarVisible = False
         '
         'MainForm
         '
@@ -676,4 +699,7 @@ Partial Class MainForm
     Friend WithEvents tsslLED_reading As ToolStripStatusLabel
     Friend WithEvents tsslSplit1 As ToolStripStatusLabel
     Friend WithEvents tsslSplit2 As ToolStripStatusLabel
+    Friend WithEvents SaveTransmissionToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents TabPage3 As TabPage
+    Friend WithEvents pgPlotAndText As PropertyGrid
 End Class

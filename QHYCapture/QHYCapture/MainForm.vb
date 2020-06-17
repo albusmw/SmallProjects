@@ -227,7 +227,7 @@ Partial Public Class MainForm
                 PlotTitle.Add("Gain " & LastCaptureData.Gain.ToString.Trim)
                 PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), LastCaptureData.FilterActive))
                 PlotTitle.Add("Temperature " & LastCaptureData.ObsStartTemp.ToString.Trim & " °C")
-                DB.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
+                DB_PlotAndText.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
 
                 DB.Stopper.Stamp("Statistics - plot")
 
