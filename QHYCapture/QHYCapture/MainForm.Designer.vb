@@ -61,6 +61,7 @@ Partial Class MainForm
         Me.tsmiResetLoopStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiNewGUID = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiLoad10MicronData = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiClearLog = New System.Windows.Forms.ToolStripMenuItem()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
@@ -80,7 +81,10 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.tsmiClearLog = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsslLED_capture = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslLED_reading = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSplit1 = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSplit2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -106,48 +110,48 @@ Partial Class MainForm
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(3, 3)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(380, 692)
+        Me.pgMain.Size = New System.Drawing.Size(225, 303)
         Me.pgMain.TabIndex = 0
         Me.pgMain.ToolbarVisible = False
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslMain, Me.tspbProgress, Me.tsslProgress, Me.tsmiFPSIndicator, Me.tsslMemory})
-        Me.ssMain.Location = New System.Drawing.Point(0, 984)
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslLED_capture, Me.tsslLED_reading, Me.tspbProgress, Me.tsslProgress, Me.tsslSplit1, Me.tsslMain, Me.tsslSplit2, Me.tsmiFPSIndicator, Me.tsslMemory})
+        Me.ssMain.Location = New System.Drawing.Point(0, 490)
         Me.ssMain.Name = "ssMain"
-        Me.ssMain.Size = New System.Drawing.Size(1551, 22)
+        Me.ssMain.Size = New System.Drawing.Size(943, 24)
         Me.ssMain.TabIndex = 1
         Me.ssMain.Text = "StatusStrip1"
         '
         'tsslMain
         '
         Me.tsslMain.Name = "tsslMain"
-        Me.tsslMain.Size = New System.Drawing.Size(50, 17)
+        Me.tsslMain.Size = New System.Drawing.Size(50, 19)
         Me.tsslMain.Text = "--IDLE--"
         '
         'tspbProgress
         '
         Me.tspbProgress.ForeColor = System.Drawing.Color.Lime
         Me.tspbProgress.Name = "tspbProgress"
-        Me.tspbProgress.Size = New System.Drawing.Size(300, 16)
+        Me.tspbProgress.Size = New System.Drawing.Size(300, 18)
         Me.tspbProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         '
         'tsslProgress
         '
         Me.tsslProgress.Name = "tsslProgress"
-        Me.tsslProgress.Size = New System.Drawing.Size(22, 17)
+        Me.tsslProgress.Size = New System.Drawing.Size(22, 19)
         Me.tsslProgress.Text = "---"
         '
         'tsmiFPSIndicator
         '
         Me.tsmiFPSIndicator.Name = "tsmiFPSIndicator"
-        Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 17)
+        Me.tsmiFPSIndicator.Size = New System.Drawing.Size(47, 19)
         Me.tsmiFPSIndicator.Text = "FPS: ???"
         '
         'tsslMemory
         '
         Me.tsslMemory.Name = "tsslMemory"
-        Me.tsslMemory.Size = New System.Drawing.Size(73, 17)
+        Me.tsslMemory.Size = New System.Drawing.Size(73, 19)
         Me.tsslMemory.Text = "Memory: ???"
         '
         'msMain
@@ -155,7 +159,7 @@ Partial Class MainForm
         Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.TESTToolStripMenuItem, Me.tsmiActions})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
-        Me.msMain.Size = New System.Drawing.Size(1551, 24)
+        Me.msMain.Size = New System.Drawing.Size(943, 24)
         Me.msMain.TabIndex = 2
         Me.msMain.Text = "MenuStrip1"
         '
@@ -320,20 +324,26 @@ Partial Class MainForm
         'tsmiResetLoopStat
         '
         Me.tsmiResetLoopStat.Name = "tsmiResetLoopStat"
-        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(179, 22)
         Me.tsmiResetLoopStat.Text = "Reset loop statistics"
         '
         'tsmiNewGUID
         '
         Me.tsmiNewGUID.Name = "tsmiNewGUID"
-        Me.tsmiNewGUID.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiNewGUID.Size = New System.Drawing.Size(179, 22)
         Me.tsmiNewGUID.Text = "New GUID"
         '
         'tsmiLoad10MicronData
         '
         Me.tsmiLoad10MicronData.Name = "tsmiLoad10MicronData"
-        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(179, 22)
         Me.tsmiLoad10MicronData.Text = "Load 10Micron data"
+        '
+        'tsmiClearLog
+        '
+        Me.tsmiClearLog.Name = "tsmiClearLog"
+        Me.tsmiClearLog.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiClearLog.Text = "Clear log"
         '
         'zgcMain
         '
@@ -347,7 +357,7 @@ Partial Class MainForm
         Me.zgcMain.ScrollMinX = 0R
         Me.zgcMain.ScrollMinY = 0R
         Me.zgcMain.ScrollMinY2 = 0R
-        Me.zgcMain.Size = New System.Drawing.Size(1153, 450)
+        Me.zgcMain.Size = New System.Drawing.Size(700, 208)
         Me.zgcMain.TabIndex = 0
         '
         'tSetTemp
@@ -360,7 +370,7 @@ Partial Class MainForm
         Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture, Me.ToolStripSeparator1})
         Me.tsMain.Location = New System.Drawing.Point(0, 24)
         Me.tsMain.Name = "tsMain"
-        Me.tsMain.Size = New System.Drawing.Size(1551, 38)
+        Me.tsMain.Size = New System.Drawing.Size(943, 38)
         Me.tsMain.TabIndex = 5
         Me.tsMain.Text = "ToolStrip1"
         '
@@ -402,7 +412,7 @@ Partial Class MainForm
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(394, 188)
+        Me.tbLogOutput.Size = New System.Drawing.Size(239, 85)
         Me.tbLogOutput.TabIndex = 4
         Me.tbLogOutput.WordWrap = False
         '
@@ -414,7 +424,7 @@ Partial Class MainForm
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
         Me.tcMain.SelectedIndex = 0
-        Me.tcMain.Size = New System.Drawing.Size(394, 724)
+        Me.tcMain.Size = New System.Drawing.Size(239, 335)
         Me.tcMain.TabIndex = 6
         '
         'TabPage1
@@ -423,7 +433,7 @@ Partial Class MainForm
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(386, 698)
+        Me.TabPage1.Size = New System.Drawing.Size(231, 309)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Exposure"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -463,8 +473,8 @@ Partial Class MainForm
         'scMain.Panel2
         '
         Me.scMain.Panel2.Controls.Add(Me.SplitContainer3)
-        Me.scMain.Size = New System.Drawing.Size(1551, 916)
-        Me.scMain.SplitterDistance = 394
+        Me.scMain.Size = New System.Drawing.Size(943, 424)
+        Me.scMain.SplitterDistance = 239
         Me.scMain.TabIndex = 7
         '
         'SplitContainer2
@@ -481,8 +491,8 @@ Partial Class MainForm
         'SplitContainer2.Panel2
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.tbLogOutput)
-        Me.SplitContainer2.Size = New System.Drawing.Size(394, 916)
-        Me.SplitContainer2.SplitterDistance = 724
+        Me.SplitContainer2.Size = New System.Drawing.Size(239, 424)
+        Me.SplitContainer2.SplitterDistance = 335
         Me.SplitContainer2.TabIndex = 0
         '
         'SplitContainer3
@@ -499,8 +509,8 @@ Partial Class MainForm
         'SplitContainer3.Panel2
         '
         Me.SplitContainer3.Panel2.Controls.Add(Me.rtbStatistics)
-        Me.SplitContainer3.Size = New System.Drawing.Size(1153, 916)
-        Me.SplitContainer3.SplitterDistance = 450
+        Me.SplitContainer3.Size = New System.Drawing.Size(700, 424)
+        Me.SplitContainer3.SplitterDistance = 208
         Me.SplitContainer3.TabIndex = 0
         '
         'rtbStatistics
@@ -510,7 +520,7 @@ Partial Class MainForm
         Me.rtbStatistics.Font = New System.Drawing.Font("Lucida Console", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.rtbStatistics.Location = New System.Drawing.Point(0, 0)
         Me.rtbStatistics.Name = "rtbStatistics"
-        Me.rtbStatistics.Size = New System.Drawing.Size(1153, 462)
+        Me.rtbStatistics.Size = New System.Drawing.Size(700, 212)
         Me.rtbStatistics.TabIndex = 0
         Me.rtbStatistics.Text = ""
         Me.rtbStatistics.WordWrap = False
@@ -524,17 +534,43 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'tsmiClearLog
+        'tsslLED_capture
         '
-        Me.tsmiClearLog.Name = "tsmiClearLog"
-        Me.tsmiClearLog.Size = New System.Drawing.Size(180, 22)
-        Me.tsmiClearLog.Text = "Clear log"
+        Me.tsslLED_capture.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
+        Me.tsslLED_capture.Enabled = False
+        Me.tsslLED_capture.Name = "tsslLED_capture"
+        Me.tsslLED_capture.Size = New System.Drawing.Size(53, 19)
+        Me.tsslLED_capture.Text = "Capture"
+        '
+        'tsslLED_reading
+        '
+        Me.tsslLED_reading.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
+        Me.tsslLED_reading.Enabled = False
+        Me.tsslLED_reading.Name = "tsslLED_reading"
+        Me.tsslLED_reading.Size = New System.Drawing.Size(63, 19)
+        Me.tsslLED_reading.Text = "Read data"
+        '
+        'tsslSplit1
+        '
+        Me.tsslSplit1.Name = "tsslSplit1"
+        Me.tsslSplit1.Size = New System.Drawing.Size(10, 19)
+        Me.tsslSplit1.Text = "|"
+        '
+        'tsslSplit2
+        '
+        Me.tsslSplit2.Name = "tsslSplit2"
+        Me.tsslSplit2.Size = New System.Drawing.Size(10, 19)
+        Me.tsslSplit2.Text = "|"
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1551, 1006)
+        Me.ClientSize = New System.Drawing.Size(943, 514)
         Me.Controls.Add(Me.scMain)
         Me.Controls.Add(Me.tsMain)
         Me.Controls.Add(Me.ssMain)
@@ -627,4 +663,8 @@ Partial Class MainForm
     Friend WithEvents tStatusUpdate As Timer
     Friend WithEvents OpenLastStoredFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiClearLog As ToolStripMenuItem
+    Friend WithEvents tsslLED_capture As ToolStripStatusLabel
+    Friend WithEvents tsslLED_reading As ToolStripStatusLabel
+    Friend WithEvents tsslSplit1 As ToolStripStatusLabel
+    Friend WithEvents tsslSplit2 As ToolStripStatusLabel
 End Class

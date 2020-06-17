@@ -4,6 +4,8 @@ Imports System.Windows.Forms
 
 Partial Public Class MainForm
 
+    Private Delegate Sub InvokeDelegate()
+
     '''<summary>Execute an XML file sequence.</summary>
     Private Sub RunXMLSequence(ByVal SpecFile As String)
         Dim BoolTrue As New List(Of String)({"TRUE", "YES", "1"})
@@ -85,7 +87,7 @@ Partial Public Class MainForm
         End If
 
         'Temperature
-        SetTemperature(DB.TargetTemp, DB.CoolingTimeOut)
+        SetTemperature(DB.CoolingTimeOut)
 
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & DB.CaptureCount.ValRegIndep
@@ -104,6 +106,7 @@ Partial Public Class MainForm
         End With
 
         'Start expose (single or live frame mode)
+        LED_capture(True)
         DB.Stopper.Start()
         If DB.StreamMode = eStreamMode.SingleFrame Then
             CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(DB.CamHandle))
@@ -114,9 +117,9 @@ Partial Public Class MainForm
                 DB.LiveModeInitiated = True
             End If
             DB.Stopper.Stamp("BeginQHYCCDLive")
-            End If
+        End If
 
-            Return SingleCaptureData
+        Return SingleCaptureData
 
     End Function
 
@@ -255,17 +258,16 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Set the requested temperature.</summary>
-    '''<param name="TempToSet">Target temperature [C] for cooling.</param>
     '''<param name="TimeOut">Time-out [s] for the complete cooling process</param>
-    Private Function SetTemperature(ByVal TempToSet As Double, ByVal TimeOut As Double) As Double
+    Private Function SetTemperature(ByVal TimeOut As Double) As Double
         Dim CurrentTemp As Double = Double.NaN
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
-        If TempToSet > -100 Then
+        If DB.TargetTemp > -100 Then
             Do
                 CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                 Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
-                tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & TempToSet.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
-                If CurrentTemp <= TempToSet Then Exit Do
+                tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
+                If CurrentTemp <= DB.TargetTemp Then Exit Do
                 System.Threading.Thread.Sleep(500)
                 DE()
             Loop Until TimeOutT.ElapsedMilliseconds > TimeOut * 1000
@@ -363,6 +365,8 @@ Partial Public Class MainForm
             QHY.QHYCamera.ReleaseQHYCCDResource()
             DB.CamHandle = IntPtr.Zero
         End If
+        LED_capture(False)
+        LED_reading(False)
     End Sub
 
     '''<summary>Load the data from the 10Micron mount.</summary>
@@ -451,6 +455,32 @@ Partial Public Class MainForm
             Dim FITSKey As New cFITSKey
             Container.Add(New String() {FITSKey(Keyword)(0), VAlue, FITSKey.Comment(Keyword)})
         End If
+    End Sub
+
+    '''<summary>Active or deactive the capture LED.</summary>
+    Private Sub LED_capture(ByVal Capturing As Boolean)
+        LED_update(tsslLED_capture, Capturing)
+    End Sub
+
+    '''<summary>Active or deactive the reading LED.</summary>
+    Private Sub LED_reading(ByVal Capturing As Boolean)
+        LED_update(tsslLED_reading, Capturing)
+    End Sub
+
+    '''<summary>Active or deactive the capture LED.</summary>
+    Private Sub LED_update(ByRef LED As ToolStripStatusLabel, ByVal Status As Boolean)
+        LED.Enabled = Status
+        LED.BackColor = CType(IIf(Status, Color.Red, System.Drawing.SystemColors.Control), Color)
+        LED.Invalidate()
+        ssMain.Update()
+        System.Windows.Forms.Application.DoEvents()
+        'ssMain.BeginInvoke(New InvokeDelegate(AddressOf InvokeMethod))
+    End Sub
+
+    Public Sub InvokeMethod()
+        tsslLED_capture.Invalidate()
+        ssMain.Update()
+        System.Windows.Forms.Application.DoEvents()
     End Sub
 
 End Class

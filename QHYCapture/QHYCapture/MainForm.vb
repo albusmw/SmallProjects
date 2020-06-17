@@ -129,8 +129,10 @@ Partial Public Class MainForm
                 'Read image data from camera - ALWAYS WITH OVERSCAN
                 Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
                 Dim LiveModePollCount As Integer = 0
+                LED_reading(True)
                 If DB.StreamMode = eStreamMode.SingleFrame Then
                     CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                    LED_capture(False)
                 Else
                     Dim LiveModeReady As UInteger = UInteger.MaxValue
                     Do
@@ -139,6 +141,7 @@ Partial Public Class MainForm
                         DE()
                     Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or DB.StopFlag = True
                 End If
+                LED_reading(False)
                 LastCaptureData.ObsEnd = Now
                 EndTimeStamps.Add(LastCaptureData.ObsEnd)
 
@@ -216,6 +219,15 @@ Partial Public Class MainForm
 
                 '================================================================================
                 'Plot histogram
+
+                'Set caption
+                Dim PlotTitle As New List(Of String)
+                PlotTitle.Add(DB.UsedCameraId.ToString)
+                PlotTitle.Add(LastCaptureData.ExpTime.ToString.Trim & " s")
+                PlotTitle.Add("Gain " & LastCaptureData.Gain.ToString.Trim)
+                PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), LastCaptureData.FilterActive))
+                PlotTitle.Add("Temperature " & LastCaptureData.ObsStartTemp.ToString.Trim & " °C")
+                DB.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
 
                 Dim CurveMode As cZEDGraphService.eCurveMode = cZEDGraphService.eCurveMode.LinesAndPoints
                 Dim CurrentCurveWidth As Integer = 1
@@ -344,22 +356,23 @@ Partial Public Class MainForm
     '''<summary>Keep the GUI alive during exposure.</summary>
     '''<param name="ExposureTime">Expected time for the display.</param>
     Private Sub IdleExposureTime(ByVal ExposureTime As Double)
-        If ExposureTime > 1 Then
+        If ExposureTime > 0.1 Then
             Dim ExpStart As DateTime = Now
-            tspbProgress.Maximum = CInt(ExposureTime)
+            Dim TimePassed As Double = Double.NaN
+            tspbProgress.Maximum = CInt(ExposureTime * 10)
             Do
                 System.Threading.Thread.Sleep(100)
-                Dim TimePassed As Double = (Now - ExpStart).TotalSeconds
-                If TimePassed < tspbProgress.Maximum Then
-                    tspbProgress.Value = CInt(TimePassed)
-                    tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & tspbProgress.Maximum.ToString.Trim & " seconds exposed"
+                TimePassed = (Now - ExpStart).TotalSeconds
+                If TimePassed < ExposureTime Then
+                    Dim ProgBarVal As Integer = CInt(TimePassed * 10)
+                    If ProgBarVal <= tspbProgress.Maximum Then tspbProgress.Value = ProgBarVal
+                    tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & ExposureTime.ToString.Trim & " seconds exposed"
                 Else
                     tspbProgress.Value = 0
                     tsslProgress.Text = "---"
-                    Exit Do
                 End If
                 DE()
-            Loop Until 1 = 0
+            Loop Until TimePassed >= ExposureTime
         End If
     End Sub
 
