@@ -20,7 +20,7 @@ Public Class frmLastOpenedFiles
             Dim Key As Integer = 1
             For Each Entry As String In Files
                 If System.IO.File.Exists(Entry) = True Then
-                    lbFiles.Items.Add("[" & Key.ToString.Trim & "]: " & Entry)
+                    lbFiles.Items.Add("[" & Key.ToString.Trim & "]:" & Entry)
                     Key += 1
                 End If
                 If Key = 10 Then Exit For

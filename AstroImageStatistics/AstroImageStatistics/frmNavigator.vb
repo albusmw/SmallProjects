@@ -48,7 +48,7 @@ Public Class frmNavigator
         For FileIdx As Integer = 0 To AllFiles.Count - 1
             Dim File As String = AllFiles(FileIdx)
             pbMain.Value = FileIdx : DE()
-            Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize)
+            Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize, False)
             For X As Integer = 0 To TileSize - 1
                 For Y As Integer = 0 To TileSize - 1
                     SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)

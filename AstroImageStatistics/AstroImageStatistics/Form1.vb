@@ -92,11 +92,11 @@ Public Class Form1
                 UBound1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.GetUpperBound(1)
             Case 16
                 With SingleStatCalc.DataProcessor_UInt16
-                    .ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP)
+                    .ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP, DB.ForceDirect)
                     If LastFITSHeader.NAXIS3 > 1 Then
                         For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
                             DataStartPos += CInt(.ImageData(Idx - 1).Length * LastFITSHeader.BytesPerSample)        'move to next plane
-                            .ImageData(Idx).Data = FITSReader.ReadInUInt16(FileName, DataStartPos, DB.UseIPP)
+                            .ImageData(Idx).Data = FITSReader.ReadInUInt16(FileName, DataStartPos, DB.UseIPP, DB.ForceDirect)
                         Next Idx
                     End If
                     UBound0 = .ImageData(0).Data.GetUpperBound(0)
@@ -126,7 +126,7 @@ Public Class Form1
 
         '=========================================================================================================
         'Calculate the statistics
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Stopper.Stamp(FileNameOnly & ": Statistics")
 
         'Record statistics
@@ -184,28 +184,74 @@ Public Class Form1
 
     End Sub
 
-    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode)
+    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode, ByVal ChannelNames As List(Of String))
         LastStat = SingleStatCalc.ImageStatistics(DataMode)
         Log("Statistics:")
-        Log("  ", LastStat.StatisticsReport.ToArray())
+        Log("  ", LastStat.StatisticsReport(ChannelNames).ToArray())
         Log(New String("="c, 109))
     End Sub
+
+    '''<summary>A point of the graph was selected - give information.</summary>
+    Public Function PointValueHandler(ByVal Curve As String, ByVal X As Double, ByVal Y As Double) As String
+        Dim Text As New List(Of String)
+        Dim Indent As String = "   "
+        Text.Add("Curve <" & Curve & ">")
+        Text.Add("X <" & X.ValRegIndep & ">")
+        Text.Add("Y <" & Y.ValRegIndep & ">")
+        Dim HistKey As Long = CLng(X)
+        If Curve.Contains("[") = True Then
+            Dim HIdx0 As Integer = CInt(Curve.Substring(Curve.IndexOf("[") + 1, 1))
+            Dim HIdx1 As Integer = CInt(Curve.Substring(Curve.IndexOf("[") + 3, 1))
+        End If
+        With LastStat
+            'Get the histogram data from mono histo
+            Text.Add("MONO:")
+            If .MonochromHistogram_Int.ContainsKey(HistKey) Then
+                Dim ValuesAbove As UInt64 = .MonochromHistogram_Int_ValuesAbove(HistKey)
+                Text.Add(Indent & (100 * (X / .MonoStatistics_Int.Max.Key)).ValRegIndep("0.00") & " % of MAX")
+                Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")
+                Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
+                Text.Add(Indent & (100 * (ValuesAbove / .MonoStatistics_Int.Samples)).ValRegIndep("0.00") & " % are greater")
+            End If
+            'Get the histogram data from Text "G1[1,0]"
+            For HIdx0 As Integer = 0 To 1
+                For HIdx1 As Integer = 0 To 1
+                    Text.Add("BAYER[" & HIdx0.ValRegIndep & ":" & HIdx1.ValRegIndep & "]:")
+                    If .BayerHistograms_Int_Present(HIdx0, HIdx1, HistKey) Then
+                        Dim ValuesAbove As UInt64 = .BayerHistograms_Int_ValuesAbove(HIdx0, HIdx1, HistKey)
+                        Text.Add(Indent & (100 * (X / .BayerStatistics_Int(HIdx0, HIdx1).Max.Key)).ValRegIndep("0.00") & " % of MAX")                'percentage of maximum value
+                        Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")                                        'percentage of UInt16 range
+                        Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
+                        Text.Add(Indent & (100 * (ValuesAbove / .BayerStatistics_Int(HIdx0, HIdx1).Samples)).ValRegIndep("0.00") & " % are greater")
+                    Else
+                        Text.Add(Indent & "-----")
+                        Text.Add(Indent & "-----")
+                        Text.Add(Indent & "-----")
+                        Text.Add(Indent & "-----")
+                    End If
+                Next HIdx1
+            Next HIdx0
+        End With
+        tbDetails.Text = Join(Text.ToArray, System.Environment.NewLine)
+        Return Curve
+    End Function
 
     '''<summary>Open a simple form with a ZEDGraph on it and plots the statistical data.</summary>
     '''<param name="FileName">Filename that is plotted (indicated in the header).</param>
     '''<param name="Stats">Statistics data to plot.</param>
     Private Sub PlotStatistics(ByVal FileName As String, ByRef Stats As AstroNET.Statistics.sStatistics)
         Dim Disp As New cZEDGraphForm
+        AddHandler Disp.PointValueHandler, AddressOf PointValueHandler
         Disp.PlotData("Test", New Double() {1, 2, 3, 4}, Color.Red)
         Select Case Stats.DataMode
             Case AstroNET.Statistics.sStatistics.eDataMode.Fixed
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Int) = False Then
-                    Disp.Plotter.PlotXvsY("R[0,0]", Stats.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G1[0,1]", Stats.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G2[1,0]", Stats.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("B[1,1]", Stats.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0]", Stats.BayerHistograms_Int(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(1) & "[0,1]", Stats.BayerHistograms_Int(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(2) & "[1,0]", Stats.BayerHistograms_Int(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(3) & "[1,1]", Stats.BayerHistograms_Int(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
                 End If
                 If IsNothing(Stats.MonochromHistogram_Int) = False Then
                     Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram_Int, 1, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -215,10 +261,10 @@ Public Class Form1
                 'Plot histogram
                 Disp.Plotter.Clear()
                 If IsNothing(Stats.BayerHistograms_Float32) = False Then
-                    Disp.Plotter.PlotXvsY("R[0,0]", Stats.BayerHistograms_Float32(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G1[0,1]", Stats.BayerHistograms_Float32(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("G2[1,0]", Stats.BayerHistograms_Float32(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
-                    Disp.Plotter.PlotXvsY("B[1,1]", Stats.BayerHistograms_Float32(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(0) & "[0,0]", Stats.BayerHistograms_Float32(0, 0), 1, New cZEDGraphService.sGraphStyle(Color.Red, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(1) & "[0,1]", Stats.BayerHistograms_Float32(0, 1), 1, New cZEDGraphService.sGraphStyle(Color.LightGreen, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(2) & "[1,0]", Stats.BayerHistograms_Float32(1, 0), 1, New cZEDGraphService.sGraphStyle(Color.Green, DB.PlotStyle, 1))
+                    Disp.Plotter.PlotXvsY(DB.BayerPatternName(3) & "[1,1]", Stats.BayerHistograms_Float32(1, 1), 1, New cZEDGraphService.sGraphStyle(Color.Blue, DB.PlotStyle, 1))
                 End If
                 If IsNothing(Stats.MonochromHistogram_Float32) = False Then
                     Disp.Plotter.PlotXvsY("Mono histo", Stats.MonochromHistogram_Float32, 1, New cZEDGraphService.sGraphStyle(Color.Black, DB.PlotStyle, 1))
@@ -291,53 +337,6 @@ Public Class Form1
         Disp.Hoster.Top = Me.Top + Me.Height
         Disp.Hoster.Height = Me.Height
         Disp.Hoster.Width = Me.Width
-    End Sub
-
-    Private Sub RemoveOverscanToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RemoveOverscanToolStripMenuItem.Click
-
-        Dim Capture_W As Integer = 6000
-        Dim Capture_H As Integer = 4000
-        Dim ROI_X As Integer = 24
-        Dim ROI_Y As Integer = 36
-        Dim ROI_Width As Integer = Capture_W - ROI_X - 55
-        Dim ROI_Height As Integer = Capture_H - ROI_Y - 66
-
-        Dim CapturePixel As Integer = Capture_W * Capture_H
-        Dim CaptureBytes As Integer = CapturePixel * 2
-
-        Dim Stopp As New cStopper
-
-        'Create test data
-        'Dim CamRawBuffer(CaptureBytes - 1) As Byte : ImgArrayFunction.FillImageWhiteRightDown(CamRawBuffer)
-        'Dim FullImage(,) As UInt16 = ImgArrayFunction.ChangeAspectIPP(IPP, CamRawBuffer, CInt(Capture_W), CInt(Capture_H))                        'convert flat to UInt16 matrix in a temporary buffer
-        Stopp.Start()
-        Dim FullImage(Capture_W - 1, Capture_H - 1) As UInt16
-        ImgArrayFunction.FillImageWhiteRightDown(FullImage)
-        Log(Stopp.Stamp("Test image"))
-
-        'Log some basic info
-        Log("Full image has dimension <" & (FullImage.GetUpperBound(0) + 1).ValRegIndep & "x" & (FullImage.GetUpperBound(1) + 1).ValRegIndep & ">")
-        Log("0:0 is " & FullImage(0, 0).ValRegIndep)
-        Log(ROI_X.ValRegIndep & ":" & ROI_Y.ValRegIndep & " is " & FullImage(ROI_X, ROI_Y).ValRegIndep)
-
-        Stopp.Start()
-        Dim ROI(ROI_Width - 1, ROI_Height - 1) As UInt16
-        Dim Status As cIntelIPP.IppStatus = IPP.Copy(FullImage, ROI, ROI_X, ROI_Y, ROI_Width, ROI_Height)
-        Log(Stopp.Stamp("Get ROI"))
-        Log("ROI has dimension <" & (ROI.GetUpperBound(0) + 1).ValRegIndep & "x" & (ROI.GetUpperBound(1) + 1).ValRegIndep & ">")
-        Log("0:0 is " & ROI(0, 0).ValRegIndep)
-
-        cFITSWriter.Write(System.IO.Path.Combine(MyPath, "IPPCopy_1.fits"), FullImage, cFITSWriter.eBitPix.Int16)
-        cFITSWriter.Write(System.IO.Path.Combine(MyPath, "IPPCopy_2.fits"), ROI, cFITSWriter.eBitPix.Int16)
-
-        'Check with direct (show) VB code
-        Dim ROI_OK As String = ImgArrayFunction.CheckROICorrect(FullImage, ROI, ROI_X, ROI_Y, ROI_Width, ROI_Height)
-        If String.IsNullOrEmpty(ROI_OK) = True Then
-            Log("ROI correct.")
-        Else
-            Log("!!! ROI ERROR: <" & ROI_OK & ">")
-        End If
-
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -459,7 +458,7 @@ Public Class Form1
             Try
                 Process.Start(LastFile)
             Catch ex As Exception
-                'Do nothing ...
+                Log("Error opening <" & LastFile & ">: <" & ex.Message & ">")
             End Try
         End If
     End Sub
@@ -685,7 +684,7 @@ Public Class Form1
         StackingStatistics = Nothing
     End Sub
 
-    Private Sub AdjustRGBChannelsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AdjustRGBChannelsToolStripMenuItem.Click
+    Private Sub tsmiAdjustRGB_Click(sender As Object, e As EventArgs) Handles tsmiAdjustRGB.Click
 
         'Calculate the maximum modus (the most propable value in the channel) and normalize all channels to this channel
         Running()
@@ -725,7 +724,7 @@ Public Class Form1
             Next BayerIdx2
         Next BayerIdx1
 
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
 
     End Sub
@@ -788,10 +787,10 @@ Public Class Form1
         Return RetVal
     End Function
 
-    Private Sub StretcherToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StretcherToolStripMenuItem.Click
+    Private Sub tsmiStretch_Click(sender As Object, e As EventArgs) Handles tsmiStretch.Click
         Running()
         ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
     End Sub
 
@@ -955,13 +954,13 @@ Public Class Form1
 
     '''<summary>Convert J2000 to JNow epoch.</summary>
     '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
-    Public Shared Function J2000ToJNow(ByVal J2000RA As Double, ByVal J2000Dec As Double, ByRef JNowRA As Double, ByRef JNowDec As Double) As Short
+    Public Shared Sub J2000ToJNow(ByVal J2000RA As Double, ByVal J2000Dec As Double, ByRef JNowRA As Double, ByRef JNowDec As Double)
         Dim X As New ASCOM.Astrometry.Transform.Transform
         X.JulianDateUTC = (New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)
         X.SetJ2000(J2000RA, J2000Dec)
         JNowRA = X.RAApparent
         JNowDec = X.DECApparent
-    End Function
+    End Sub
 
     Private Sub tsmiCalcVignette_Click(sender As Object, e As EventArgs) Handles tsmiCalcVignette.Click
 
@@ -1056,7 +1055,7 @@ Public Class Form1
 
         Stopper.Stamp("Vignette correction")
 
-        CalculateStatistics(SingleStatCalc.DataModeType)
+        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
         Idle()
 
     End Sub
@@ -1203,7 +1202,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub OpenLastFilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastFilesToolStripMenuItem.Click
+    Private Sub tsmiOpenRecentFiles_Click(sender As Object, e As EventArgs) Handles tsmiOpenRecentFiles.Click
         With LastOpenedFiles
             .Files.Clear()
             .Files.Add("C:\Users\albusmw\Dropbox\Astro\!Bilder\Test-Daten\Debayer\Stack_16bits_936frames_152s_Own.fits")
@@ -1212,6 +1211,20 @@ Public Class Form1
                 LoadFile(.SelectedFile)
             End If
         End With
+    End Sub
+
+    Private Sub MaxImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MaxImageToolStripMenuItem.Click
+        If StackedStatPresent() = True Then
+            Dim ImageData(StackingStatistics.GetUpperBound(0), StackingStatistics.GetUpperBound(1)) As Integer
+            For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
+                For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
+                    ImageData(Idx1, Idx2) = CInt(StackingStatistics(Idx1, Idx2).Maximum)
+                Next Idx2
+            Next Idx1
+            Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Stacking_Mean.fits")
+            cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
+            Process.Start(FileToGenerate)
+        End If
     End Sub
 
 End Class

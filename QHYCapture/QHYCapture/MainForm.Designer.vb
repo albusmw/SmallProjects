@@ -52,6 +52,7 @@ Partial Class MainForm
         Me.tsmiSpeedTest = New System.Windows.Forms.ToolStripMenuItem()
         Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
@@ -261,7 +262,7 @@ Partial Class MainForm
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -269,20 +270,26 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(150, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
+        '
+        'SaveTransmissionToolStripMenuItem
+        '
+        Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
         '
@@ -420,6 +427,7 @@ Partial Class MainForm
         '
         Me.tcMain.Controls.Add(Me.TabPage1)
         Me.tcMain.Controls.Add(Me.TabPage2)
+        Me.tcMain.Controls.Add(Me.TabPage3)
         Me.tcMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
@@ -601,6 +609,7 @@ Partial Class MainForm
         Me.SplitContainer3.Panel2.ResumeLayout(False)
         CType(Me.SplitContainer3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.SplitContainer3.ResumeLayout(False)
+        Me.TabPage3.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 

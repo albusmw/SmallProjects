@@ -111,6 +111,8 @@ End Enum
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
+    Public Event PropertyChanged()
+
     '''<summary>Handle to the camera.</summary>
     Public CamHandle As IntPtr = IntPtr.Zero
     '''<summary>Currently used camera ID.</summary>
@@ -123,6 +125,8 @@ Public Class cDB
     Public LiveModeInitiated As Boolean = False
     '''<summary>Used to call BeginQHYLiveMode only once.</summary>
     Public LastStoredFile As String = String.Empty
+    '''<summary>Monitor for the MIDI events.</summary>
+    Private WithEvents MIDI As cMIDIMonitor
 
     Public Stopper As New cStopper
 
@@ -153,14 +157,19 @@ Public Class cDB
     '''<summary>Intel IPP access.</summary>
     Public IPP As cIntelIPP
 
-    Public Plotter As cZEDGraphService
-
     Const Cat1 As String = "1. Imaging hardware"
     Const Cat2 As String = "2. Exposure"
     Const Cat3 As String = "3. Image storage"
     Const Cat4 As String = "4. Plot and statistics"
     Const Cat5 As String = "5. Debug and logging"
+    Const Cat6 As String = "6. Exposure - Advanced"
     Const CatX As String = "9. Misc and special settings"
+
+    Public Sub New()
+        'MIDI monitor
+        MIDI = New cMIDIMonitor
+        If MIDI.MIDIDeviceCount > 0 Then MIDI.SelectMidiDevice(0)
+    End Sub
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
@@ -232,7 +241,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   a) # of captures")>
     <ComponentModel.Description("Number of exposured to take with identical settings.")>
     <ComponentModel.DefaultValue(1)>
-    Public Property CaptureCount As Int32 = 1
+    Public Property CaptureCount As UInt32 = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   b) Filter slot")>
@@ -332,31 +341,42 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property CalcStatistics As Boolean = True
 
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   b) Single statistics log")>
-    <ComponentModel.Description("Clear statistics log on every measurement")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property Log_ClearStat As Boolean = True
+    '''<summary>Handle data entered via a MIDI input device.</summary>
+    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
+        Select Case Channel
+            Case 1
+                Gain += Value
+            Case 2
+                WhiteBalance_Red += Value
+            Case 3
+                WhiteBalance_Green += Value
+            Case 4
+                WhiteBalance_Blue += Value
+            Case 5
+                Contrast += Value / 100
+            Case 6
+                Brightness += Value / 100
+        End Select
+        RaiseEvent PropertyChanged()
+    End Sub
 
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   c) Plot single statistics")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property PlotSingleStatistics As Boolean = True
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   d) Plot mean statistics")>
-    <ComponentModel.DefaultValue(True)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property PlotMeanStatistics As Boolean = True
-
-    <ComponentModel.Category(Cat4)>
-    <ComponentModel.DisplayName("   e) Plot limits fixed")>
-    <ComponentModel.Description("True to auto-scale on min and max ADU, false to scale on data min and max")>
-    <ComponentModel.DefaultValue(eXAxisScalingMode.Auto)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
-    Public Property PlotLimitMode As eXAxisScalingMode = eXAxisScalingMode.Auto
+    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
+        Select Case Channel
+            Case 1
+                Gain = 0
+            Case 2
+                WhiteBalance_Red = 128
+            Case 3
+                WhiteBalance_Green = 128
+            Case 4
+                WhiteBalance_Blue = 128
+            Case 5
+                Contrast = 0.0
+            Case 6
+                Brightness = 0.0
+        End Select
+        RaiseEvent PropertyChanged()
+    End Sub
 
     '===================================================================================================
 
@@ -394,6 +414,40 @@ Public Class cDB
             End If
         End Get
     End Property
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   a) Brightness")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Brightness As Double = 0.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   b) Contrast")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Contrast As Double = 0.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   c) Gamma")>
+    <ComponentModel.DefaultValue(1.0)>
+    Public Property Gamma As Double = 1.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.1) White balance - Red")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Red As Double = 128.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.2) White balance - Green")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Green As Double = 128.0
+
+    <ComponentModel.Category(Cat6)>
+    <ComponentModel.DisplayName("   d.3) White balance - Blue")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Blue As Double = 128.0
+
+    '===================================================================================================
 
     <ComponentModel.Category(CatX)>
     <ComponentModel.DisplayName("   a) Cooling time-out")>
