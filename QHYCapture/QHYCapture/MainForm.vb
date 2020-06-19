@@ -228,6 +228,7 @@ Partial Public Class MainForm
                 PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), LastCaptureData.FilterActive))
                 PlotTitle.Add("Temperature " & LastCaptureData.ObsStartTemp.ToString.Trim & " °C")
                 DB_PlotAndText.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
+                DB_PlotAndText.Plot(DB.CaptureCount, SingleStat, LoopStat)
 
                 DB.Stopper.Stamp("Statistics - plot")
 
@@ -1152,6 +1153,7 @@ Partial Public Class MainForm
             .PlotSingleStatistics = True
             .PlotMeanStatistics = True
         End With
+        RefreshProperties()
     End Sub
 
     Private Sub tsmiClearLog_Click(sender As Object, e As EventArgs) Handles tsmiClearLog.Click
