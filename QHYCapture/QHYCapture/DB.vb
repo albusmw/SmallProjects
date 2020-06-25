@@ -2,6 +2,11 @@
 Option Strict On
 Imports System.Runtime.InteropServices
 
+Public Class M
+    '''<summary>DB that holds all relevant information.</summary>
+    Public Shared WithEvents DB As New cDB
+End Class
+
 '''<summary>Characteristics data of one single capture.</summary>
 Public Class cSingleCaptureData
     '''<summary>Running capture index.</summary>
@@ -195,8 +200,8 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   d) Target Temp")>
     <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
-    <ComponentModel.DefaultValue(-300.0)>
-    Public Property TargetTemp As Double = -300.0
+    <ComponentModel.DefaultValue(300.0)>
+    Public Property TargetTemp As Double = 300.0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   e) Binning - Hardware")>

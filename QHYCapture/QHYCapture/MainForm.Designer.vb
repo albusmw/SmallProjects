@@ -79,6 +79,8 @@ Partial Class MainForm
         Me.TabPage1 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.pgMeta = New System.Windows.Forms.PropertyGrid()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.pgPlotAndText = New System.Windows.Forms.PropertyGrid()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
@@ -86,14 +88,14 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.TabPage3 = New System.Windows.Forms.TabPage()
-        Me.pgPlotAndText = New System.Windows.Forms.PropertyGrid()
+        Me.tsbCooling = New System.Windows.Forms.ToolStripButton()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
         Me.tcMain.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
+        Me.TabPage3.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
@@ -106,7 +108,6 @@ Partial Class MainForm
         Me.SplitContainer3.Panel1.SuspendLayout()
         Me.SplitContainer3.Panel2.SuspendLayout()
         Me.SplitContainer3.SuspendLayout()
-        Me.TabPage3.SuspendLayout()
         Me.SuspendLayout()
         '
         'pgMain
@@ -305,25 +306,25 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
@@ -409,7 +410,7 @@ Partial Class MainForm
         '
         'tsMain
         '
-        Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture, Me.ToolStripSeparator1})
+        Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsbCapture, Me.tsbStopCapture, Me.ToolStripSeparator1, Me.tsbCooling})
         Me.tsMain.Location = New System.Drawing.Point(0, 24)
         Me.tsMain.Name = "tsMain"
         Me.tsMain.Size = New System.Drawing.Size(943, 38)
@@ -501,6 +502,26 @@ Partial Class MainForm
         Me.pgMeta.TabIndex = 1
         Me.pgMeta.ToolbarVisible = False
         '
+        'TabPage3
+        '
+        Me.TabPage3.Controls.Add(Me.pgPlotAndText)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(231, 309)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "Plot and text"
+        Me.TabPage3.UseVisualStyleBackColor = True
+        '
+        'pgPlotAndText
+        '
+        Me.pgPlotAndText.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgPlotAndText.Location = New System.Drawing.Point(3, 3)
+        Me.pgPlotAndText.Name = "pgPlotAndText"
+        Me.pgPlotAndText.Size = New System.Drawing.Size(225, 303)
+        Me.pgPlotAndText.TabIndex = 2
+        Me.pgPlotAndText.ToolbarVisible = False
+        '
         'scMain
         '
         Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -577,25 +598,16 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'TabPage3
+        'tsbCooling
         '
-        Me.TabPage3.Controls.Add(Me.pgPlotAndText)
-        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
-        Me.TabPage3.Name = "TabPage3"
-        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage3.Size = New System.Drawing.Size(231, 309)
-        Me.TabPage3.TabIndex = 2
-        Me.TabPage3.Text = "Plot and text"
-        Me.TabPage3.UseVisualStyleBackColor = True
-        '
-        'pgPlotAndText
-        '
-        Me.pgPlotAndText.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pgPlotAndText.Location = New System.Drawing.Point(3, 3)
-        Me.pgPlotAndText.Name = "pgPlotAndText"
-        Me.pgPlotAndText.Size = New System.Drawing.Size(225, 303)
-        Me.pgPlotAndText.TabIndex = 2
-        Me.pgPlotAndText.ToolbarVisible = False
+        Me.tsbCooling.Image = CType(resources.GetObject("tsbCooling.Image"), System.Drawing.Image)
+        Me.tsbCooling.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.tsbCooling.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsbCooling.Name = "tsbCooling"
+        Me.tsbCooling.Size = New System.Drawing.Size(53, 35)
+        Me.tsbCooling.Text = "Cooling"
+        Me.tsbCooling.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.tsbCooling.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
         '
         'MainForm
         '
@@ -619,6 +631,7 @@ Partial Class MainForm
         Me.tcMain.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage2.ResumeLayout(False)
+        Me.TabPage3.ResumeLayout(False)
         Me.scMain.Panel1.ResumeLayout(False)
         Me.scMain.Panel2.ResumeLayout(False)
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
@@ -632,7 +645,6 @@ Partial Class MainForm
         Me.SplitContainer3.Panel2.ResumeLayout(False)
         CType(Me.SplitContainer3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.SplitContainer3.ResumeLayout(False)
-        Me.TabPage3.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -702,4 +714,5 @@ Partial Class MainForm
     Friend WithEvents SaveTransmissionToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents TabPage3 As TabPage
     Friend WithEvents pgPlotAndText As PropertyGrid
+    Friend WithEvents tsbCooling As ToolStripButton
 End Class

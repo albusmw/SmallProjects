@@ -67,7 +67,7 @@ Public Class cDB_ServiceContract : Implements IDB
     '''<summary>Get a list of all available parameters.</summary>
     Public Function GetParameterList() As List(Of String) Implements IDB.GetParameterList
         Dim RetVal As New List(Of String)
-        For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
+        For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
             RetVal.Add(SingleProperty.Name)
         Next SingleProperty
         For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
@@ -79,7 +79,7 @@ Public Class cDB_ServiceContract : Implements IDB
 
     '''<summary>Get value of a certain parameter.</summary>
     Public Function GetParameter(Key As String) As Object Implements IDB.GetParameter
-        For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
+        For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
             If Key.ToUpper = SingleProperty.Name.ToUpper Then
                 Return SingleProperty.GetValue(DB, Nothing)
             End If
@@ -94,7 +94,7 @@ Public Class cDB_ServiceContract : Implements IDB
 
     '''<summary>Set value of a certain parameter.</summary>
     Public Function SetParameter(Key As String, Value As String) As Object Implements IDB.SetParameter
-        For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
+        For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
             If Key.ToUpper = SingleProperty.Name.ToUpper Then
                 Select Case SingleProperty.PropertyType.Name.ToUpper
                     Case "Double".ToUpper
@@ -124,7 +124,7 @@ Public Class cDB_ServiceContract : Implements IDB
     End Function
 
     Public Function GetLog() As String() Implements IDB.GetLog
-        Return Split(DB.Log_Generic.ToString, System.Environment.NewLine)
+        Return Split(M.DB.Log_Generic.ToString, System.Environment.NewLine)
     End Function
 
 End Class

@@ -137,6 +137,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DB.vb" />
+    <Compile Include="frmCooling.Designer.vb">
+      <DependentUpon>frmCooling.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCooling.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.Designer.vb">
       <DependentUpon>MainForm.vb</DependentUpon>
     </Compile>
@@ -168,6 +174,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmCooling.resx">
+      <DependentUpon>frmCooling.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
