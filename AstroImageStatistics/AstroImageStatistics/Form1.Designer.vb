@@ -25,10 +25,11 @@ Partial Class Form1
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenFileToAnalyseToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenRecentFiles = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenLastFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem8 = New System.Windows.Forms.ToolStripSeparator()
+        Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.StoreStatisticsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
@@ -80,7 +81,7 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
-        Me.ToolStripMenuItem8 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiSaveAllFilesStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -107,16 +108,10 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenRecentFiles, Me.tsmiOpenLastFile, Me.ToolStripMenuItem8, Me.FITSGrepToolStripMenuItem, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenFileToAnalyseToolStripMenuItem, Me.tsmiOpenRecentFiles, Me.tsmiOpenLastFile, Me.ToolStripMenuItem8, Me.FITSGrepToolStripMenuItem, Me.ToolStripMenuItem2, Me.StoreStatisticsEXCELFileToolStripMenuItem, Me.tsmiSaveAllFilesStat, Me.ToolStripMenuItem4, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
-        '
-        'FITSGrepToolStripMenuItem
-        '
-        Me.FITSGrepToolStripMenuItem.Name = "FITSGrepToolStripMenuItem"
-        Me.FITSGrepToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
-        Me.FITSGrepToolStripMenuItem.Text = "FITS Grep"
         '
         'OpenFileToAnalyseToolStripMenuItem
         '
@@ -137,6 +132,17 @@ Partial Class Form1
         Me.tsmiOpenLastFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.R), System.Windows.Forms.Keys)
         Me.tsmiOpenLastFile.Size = New System.Drawing.Size(246, 22)
         Me.tsmiOpenLastFile.Text = "Open last file processed"
+        '
+        'ToolStripMenuItem8
+        '
+        Me.ToolStripMenuItem8.Name = "ToolStripMenuItem8"
+        Me.ToolStripMenuItem8.Size = New System.Drawing.Size(243, 6)
+        '
+        'FITSGrepToolStripMenuItem
+        '
+        Me.FITSGrepToolStripMenuItem.Name = "FITSGrepToolStripMenuItem"
+        Me.FITSGrepToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
+        Me.FITSGrepToolStripMenuItem.Text = "FITS Grep"
         '
         'ToolStripMenuItem2
         '
@@ -499,10 +505,11 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
-        'ToolStripMenuItem8
+        'tsmiSaveAllFilesStat
         '
-        Me.ToolStripMenuItem8.Name = "ToolStripMenuItem8"
-        Me.ToolStripMenuItem8.Size = New System.Drawing.Size(243, 6)
+        Me.tsmiSaveAllFilesStat.Name = "tsmiSaveAllFilesStat"
+        Me.tsmiSaveAllFilesStat.Size = New System.Drawing.Size(246, 22)
+        Me.tsmiSaveAllFilesStat.Text = "Save all-files statistics"
         '
         'Form1
         '
@@ -596,4 +603,5 @@ Partial Class Form1
     Friend WithEvents scLeft As SplitContainer
     Friend WithEvents MaxImageToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem8 As ToolStripSeparator
+    Friend WithEvents tsmiSaveAllFilesStat As ToolStripMenuItem
 End Class

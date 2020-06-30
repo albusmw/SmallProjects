@@ -1,5 +1,6 @@
 ﻿Option Explicit On
 Option Strict On
+Imports DocumentFormat.OpenXml.Office2013.PowerPoint.Roaming
 
 Public Class Form1
 
@@ -1225,6 +1226,55 @@ Public Class Form1
             cFITSWriter.Write(FileToGenerate, ImageData, cFITSWriter.eBitPix.Int32)
             Process.Start(FileToGenerate)
         End If
+    End Sub
+
+    Private Sub SaveAllfilesStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiSaveAllFilesStat.Click
+
+        Dim AddHisto As Boolean = True
+
+        With sfdMain
+            .Filter = "EXCEL file (*.xlsx)|*.xlsx"
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+
+        'Get combined hist mono X axis (INT only)
+        Dim AllADUValues As New List(Of Long)
+        Dim AllFiles As New List(Of String)
+        AllFiles.Add("ADU value")
+        For Each SingleFile As String In AllStat.Keys
+            AllFiles.Add(System.IO.Path.GetFileNameWithoutExtension(SingleFile))
+            For Each ADUValue As Long In AllStat(SingleFile).MonochromHistogram_Int.Keys
+                If AllADUValues.Contains(ADUValue) = False Then AllADUValues.Add(ADUValue)
+            Next ADUValue
+        Next SingleFile
+        AllADUValues.Sort()
+
+        Using workbook As New ClosedXML.Excel.XLWorkbook
+
+            'Generate data
+            Dim XY As New List(Of Object())
+            For Each ADUValue As Long In AllADUValues
+                Dim Values As New List(Of Object)
+                Values.Add(ADUValue)
+                For Each SingleFile As String In AllStat.Keys
+                    If AllStat(SingleFile).MonochromHistogram_Int.ContainsKey(ADUValue) Then Values.Add(AllStat(SingleFile).MonochromHistogram_Int(ADUValue)) Else Values.Add(String.Empty)
+                Next SingleFile
+                XY.Add(Values.ToArray)
+            Next ADUValue
+            Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
+            worksheet.Cell(1, 1).InsertData(AllFiles, True)
+            worksheet.Cell(2, 1).InsertData(XY)
+            For Each col In worksheet.ColumnsUsed
+                col.AdjustToContents()
+            Next col
+
+            'Save and open
+            Dim FileToGenerate As String = IO.Path.Combine(MyPath, sfdMain.FileName)
+            workbook.SaveAs(FileToGenerate)
+            Process.Start(FileToGenerate)
+
+        End Using
+
     End Sub
 
 End Class
