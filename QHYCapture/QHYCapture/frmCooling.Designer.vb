@@ -31,7 +31,30 @@ Partial Class frmCooling
         Me.btnSetTemp = New System.Windows.Forms.Button()
         Me.tbCoolerPWM = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.pbDelta = New System.Windows.Forms.ProgressBar()
+        Me.gbTimedControl = New System.Windows.Forms.GroupBox()
+        Me.cbStartTime = New System.Windows.Forms.CheckBox()
+        Me.tbStartTime = New System.Windows.Forms.TextBox()
+        Me.Label4 = New System.Windows.Forms.Label()
+        Me.tbTimedCool = New System.Windows.Forms.TextBox()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.cbStartTime2 = New System.Windows.Forms.CheckBox()
+        Me.tbStartTime2 = New System.Windows.Forms.TextBox()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.tbTimedCool2 = New System.Windows.Forms.TextBox()
+        Me.Label7 = New System.Windows.Forms.Label()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.tbTimedCoolSpeed2 = New System.Windows.Forms.TextBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.ssMain = New System.Windows.Forms.StatusStrip()
+        Me.pbDelta = New System.Windows.Forms.ToolStripProgressBar()
+        Me.tsslMain = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tbTimedCoolSpeed = New System.Windows.Forms.TextBox()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.lbTimings = New System.Windows.Forms.Label()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.gbTimedControl.SuspendLayout()
+        Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
         '
         'tQuery
@@ -102,21 +125,230 @@ Partial Class frmCooling
         Me.Label3.TabIndex = 6
         Me.Label3.Text = "Cooler @"
         '
+        'gbTimedControl
+        '
+        Me.gbTimedControl.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.gbTimedControl.Controls.Add(Me.Label12)
+        Me.gbTimedControl.Controls.Add(Me.lbTimings)
+        Me.gbTimedControl.Controls.Add(Me.Label11)
+        Me.gbTimedControl.Controls.Add(Me.Label10)
+        Me.gbTimedControl.Controls.Add(Me.tbTimedCoolSpeed)
+        Me.gbTimedControl.Controls.Add(Me.Label9)
+        Me.gbTimedControl.Controls.Add(Me.tbTimedCoolSpeed2)
+        Me.gbTimedControl.Controls.Add(Me.Label8)
+        Me.gbTimedControl.Controls.Add(Me.Label7)
+        Me.gbTimedControl.Controls.Add(Me.tbTimedCool2)
+        Me.gbTimedControl.Controls.Add(Me.Label6)
+        Me.gbTimedControl.Controls.Add(Me.tbStartTime2)
+        Me.gbTimedControl.Controls.Add(Me.cbStartTime2)
+        Me.gbTimedControl.Controls.Add(Me.Label5)
+        Me.gbTimedControl.Controls.Add(Me.tbTimedCool)
+        Me.gbTimedControl.Controls.Add(Me.Label4)
+        Me.gbTimedControl.Controls.Add(Me.tbStartTime)
+        Me.gbTimedControl.Controls.Add(Me.cbStartTime)
+        Me.gbTimedControl.Location = New System.Drawing.Point(15, 95)
+        Me.gbTimedControl.Name = "gbTimedControl"
+        Me.gbTimedControl.Size = New System.Drawing.Size(441, 127)
+        Me.gbTimedControl.TabIndex = 9
+        Me.gbTimedControl.TabStop = False
+        Me.gbTimedControl.Text = "Timed control"
+        '
+        'cbStartTime
+        '
+        Me.cbStartTime.AutoSize = True
+        Me.cbStartTime.Location = New System.Drawing.Point(12, 18)
+        Me.cbStartTime.Name = "cbStartTime"
+        Me.cbStartTime.Size = New System.Drawing.Size(36, 17)
+        Me.cbStartTime.TabIndex = 0
+        Me.cbStartTime.Text = "At"
+        Me.cbStartTime.UseVisualStyleBackColor = True
+        '
+        'tbStartTime
+        '
+        Me.tbStartTime.Location = New System.Drawing.Point(67, 15)
+        Me.tbStartTime.Name = "tbStartTime"
+        Me.tbStartTime.Size = New System.Drawing.Size(47, 20)
+        Me.tbStartTime.TabIndex = 1
+        Me.tbStartTime.Text = "22:00"
+        Me.tbStartTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(139, 18)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(39, 13)
+        Me.Label4.TabIndex = 3
+        Me.Label4.Text = "cool to"
+        '
+        'tbTimedCool
+        '
+        Me.tbTimedCool.Location = New System.Drawing.Point(184, 15)
+        Me.tbTimedCool.Name = "tbTimedCool"
+        Me.tbTimedCool.Size = New System.Drawing.Size(43, 20)
+        Me.tbTimedCool.TabIndex = 4
+        Me.tbTimedCool.Text = "0"
+        Me.tbTimedCool.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(233, 18)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(21, 13)
+        Me.Label5.TabIndex = 5
+        Me.Label5.Text = "° C"
+        '
+        'cbStartTime2
+        '
+        Me.cbStartTime2.AutoSize = True
+        Me.cbStartTime2.Location = New System.Drawing.Point(12, 43)
+        Me.cbStartTime2.Name = "cbStartTime2"
+        Me.cbStartTime2.Size = New System.Drawing.Size(48, 17)
+        Me.cbStartTime2.TabIndex = 6
+        Me.cbStartTime2.Text = "After"
+        Me.cbStartTime2.UseVisualStyleBackColor = True
+        '
+        'tbStartTime2
+        '
+        Me.tbStartTime2.Location = New System.Drawing.Point(67, 41)
+        Me.tbStartTime2.Name = "tbStartTime2"
+        Me.tbStartTime2.Size = New System.Drawing.Size(47, 20)
+        Me.tbStartTime2.TabIndex = 7
+        Me.tbStartTime2.Text = "10"
+        Me.tbStartTime2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(120, 44)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(58, 13)
+        Me.Label6.TabIndex = 8
+        Me.Label6.Text = "min cool to"
+        '
+        'tbTimedCool2
+        '
+        Me.tbTimedCool2.Location = New System.Drawing.Point(184, 41)
+        Me.tbTimedCool2.Name = "tbTimedCool2"
+        Me.tbTimedCool2.Size = New System.Drawing.Size(43, 20)
+        Me.tbTimedCool2.TabIndex = 9
+        Me.tbTimedCool2.Text = "-10"
+        Me.tbTimedCool2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(233, 44)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(21, 13)
+        Me.Label7.TabIndex = 10
+        Me.Label7.Text = "° C"
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(260, 44)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(34, 13)
+        Me.Label8.TabIndex = 11
+        Me.Label8.Text = "within"
+        '
+        'tbTimedCoolSpeed2
+        '
+        Me.tbTimedCoolSpeed2.Enabled = False
+        Me.tbTimedCoolSpeed2.Location = New System.Drawing.Point(300, 40)
+        Me.tbTimedCoolSpeed2.Name = "tbTimedCoolSpeed2"
+        Me.tbTimedCoolSpeed2.Size = New System.Drawing.Size(43, 20)
+        Me.tbTimedCoolSpeed2.TabIndex = 12
+        Me.tbTimedCoolSpeed2.Text = "0"
+        Me.tbTimedCoolSpeed2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Location = New System.Drawing.Point(349, 44)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(23, 13)
+        Me.Label9.TabIndex = 13
+        Me.Label9.Text = "min"
+        '
+        'ssMain
+        '
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.pbDelta, Me.tsslMain})
+        Me.ssMain.Location = New System.Drawing.Point(0, 235)
+        Me.ssMain.Name = "ssMain"
+        Me.ssMain.Size = New System.Drawing.Size(468, 22)
+        Me.ssMain.TabIndex = 10
+        Me.ssMain.Text = "StatusStrip1"
+        '
         'pbDelta
         '
-        Me.pbDelta.ForeColor = System.Drawing.Color.Red
-        Me.pbDelta.Location = New System.Drawing.Point(15, 95)
         Me.pbDelta.Name = "pbDelta"
-        Me.pbDelta.Size = New System.Drawing.Size(140, 20)
+        Me.pbDelta.Size = New System.Drawing.Size(100, 16)
         Me.pbDelta.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.pbDelta.TabIndex = 8
+        '
+        'tsslMain
+        '
+        Me.tsslMain.Name = "tsslMain"
+        Me.tsslMain.Size = New System.Drawing.Size(22, 17)
+        Me.tsslMain.Text = "---"
+        '
+        'tbTimedCoolSpeed
+        '
+        Me.tbTimedCoolSpeed.Enabled = False
+        Me.tbTimedCoolSpeed.Location = New System.Drawing.Point(300, 16)
+        Me.tbTimedCoolSpeed.Name = "tbTimedCoolSpeed"
+        Me.tbTimedCoolSpeed.Size = New System.Drawing.Size(43, 20)
+        Me.tbTimedCoolSpeed.TabIndex = 14
+        Me.tbTimedCoolSpeed.Text = "0"
+        Me.tbTimedCoolSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(260, 19)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(34, 13)
+        Me.Label10.TabIndex = 15
+        Me.Label10.Text = "within"
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(349, 19)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(23, 13)
+        Me.Label11.TabIndex = 16
+        Me.Label11.Text = "min"
+        '
+        'lbTimings
+        '
+        Me.lbTimings.AutoSize = True
+        Me.lbTimings.Location = New System.Drawing.Point(32, 96)
+        Me.lbTimings.Name = "lbTimings"
+        Me.lbTimings.Size = New System.Drawing.Size(16, 13)
+        Me.lbTimings.TabIndex = 17
+        Me.lbTimings.Text = "---"
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(9, 72)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(91, 13)
+        Me.Label12.TabIndex = 18
+        Me.Label12.Text = "Timing sequence:"
         '
         'frmCooling
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(589, 160)
-        Me.Controls.Add(Me.pbDelta)
+        Me.ClientSize = New System.Drawing.Size(468, 257)
+        Me.Controls.Add(Me.ssMain)
+        Me.Controls.Add(Me.gbTimedControl)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.tbCoolerPWM)
         Me.Controls.Add(Me.btnSetTemp)
@@ -126,6 +358,10 @@ Partial Class frmCooling
         Me.Controls.Add(Me.Label1)
         Me.Name = "frmCooling"
         Me.Text = "Cooling"
+        Me.gbTimedControl.ResumeLayout(False)
+        Me.gbTimedControl.PerformLayout()
+        Me.ssMain.ResumeLayout(False)
+        Me.ssMain.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -139,5 +375,26 @@ Partial Class frmCooling
     Friend WithEvents btnSetTemp As Button
     Friend WithEvents tbCoolerPWM As TextBox
     Friend WithEvents Label3 As Label
-    Friend WithEvents pbDelta As ProgressBar
+    Friend WithEvents gbTimedControl As GroupBox
+    Friend WithEvents Label9 As Label
+    Friend WithEvents tbTimedCoolSpeed2 As TextBox
+    Friend WithEvents Label8 As Label
+    Friend WithEvents Label7 As Label
+    Friend WithEvents tbTimedCool2 As TextBox
+    Friend WithEvents Label6 As Label
+    Friend WithEvents tbStartTime2 As TextBox
+    Friend WithEvents cbStartTime2 As CheckBox
+    Friend WithEvents Label5 As Label
+    Friend WithEvents tbTimedCool As TextBox
+    Friend WithEvents Label4 As Label
+    Friend WithEvents tbStartTime As TextBox
+    Friend WithEvents cbStartTime As CheckBox
+    Friend WithEvents ssMain As StatusStrip
+    Friend WithEvents pbDelta As ToolStripProgressBar
+    Friend WithEvents tsslMain As ToolStripStatusLabel
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label10 As Label
+    Friend WithEvents tbTimedCoolSpeed As TextBox
+    Friend WithEvents lbTimings As Label
+    Friend WithEvents Label12 As Label
 End Class
