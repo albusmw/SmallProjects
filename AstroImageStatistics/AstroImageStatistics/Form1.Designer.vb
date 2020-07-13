@@ -32,6 +32,7 @@ Partial Class Form1
         Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.StoreStatisticsEXCELFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSaveAllFilesStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
         Me.StoreStackingResultToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveMeanFile = New System.Windows.Forms.ToolStripMenuItem()
@@ -81,7 +82,6 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
-        Me.tsmiSaveAllFilesStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -155,6 +155,12 @@ Partial Class Form1
         Me.StoreStatisticsEXCELFileToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.StoreStatisticsEXCELFileToolStripMenuItem.Size = New System.Drawing.Size(246, 22)
         Me.StoreStatisticsEXCELFileToolStripMenuItem.Text = "Store statistics EXCEL file"
+        '
+        'tsmiSaveAllFilesStat
+        '
+        Me.tsmiSaveAllFilesStat.Name = "tsmiSaveAllFilesStat"
+        Me.tsmiSaveAllFilesStat.Size = New System.Drawing.Size(246, 22)
+        Me.tsmiSaveAllFilesStat.Text = "Save all-files statistics"
         '
         'ToolStripMenuItem4
         '
@@ -505,12 +511,6 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
-        'tsmiSaveAllFilesStat
-        '
-        Me.tsmiSaveAllFilesStat.Name = "tsmiSaveAllFilesStat"
-        Me.tsmiSaveAllFilesStat.Size = New System.Drawing.Size(246, 22)
-        Me.tsmiSaveAllFilesStat.Text = "Save all-files statistics"
-        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -524,7 +524,7 @@ Partial Class Form1
         Me.MainMenuStrip = Me.msMain
         Me.Margin = New System.Windows.Forms.Padding(2)
         Me.Name = "Form1"
-        Me.Text = "Astro Image Statistics Version 0.2"
+        Me.Text = "Astro Image Statistics Version 0.3"
         Me.msMain.ResumeLayout(False)
         Me.msMain.PerformLayout()
         Me.ssMain.ResumeLayout(False)

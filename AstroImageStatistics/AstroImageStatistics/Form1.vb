@@ -538,36 +538,36 @@ Public Class Form1
                 With SingleStatCalc.DataProcessor_UInt16
                     ReDim StatPerRow(.ImageData(0).Data.GetUpperBound(1)) : InitStat(StatPerRow)
                     ReDim StatPerCol(.ImageData(0).Data.GetUpperBound(0)) : InitStat(StatPerCol)
-                    Parallel.For(0, .ImageData(0).Data.GetUpperBound(0) + 1, Sub(Idx1)
-                                                                                 For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
-                                                                                     StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
-                                                                                     StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
-                                                                                 Next Idx2
-                                                                             End Sub)
+                    For Idx1 As Integer = 0 To .ImageData(0).Data.GetUpperBound(0)
+                        For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
+                            StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                            StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                        Next Idx2
+                    Next Idx1
                     DataProcessed = True
                 End With
             Case AstroNET.Statistics.eDataMode.UInt32
                 With SingleStatCalc.DataProcessor_UInt32
                     ReDim StatPerRow(.ImageData(0).Data.GetUpperBound(1)) : InitStat(StatPerRow)
                     ReDim StatPerCol(.ImageData(0).Data.GetUpperBound(0)) : InitStat(StatPerCol)
-                    Parallel.For(0, .ImageData(0).Data.GetUpperBound(0) + 1, Sub(Idx1)
-                                                                                 For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
-                                                                                     StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
-                                                                                     StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
-                                                                                 Next Idx2
-                                                                             End Sub)
+                    For Idx1 As Integer = 0 To .ImageData(0).Data.GetUpperBound(0)
+                        For Idx2 As Integer = 0 To .ImageData(0).Data.GetUpperBound(1)
+                            StatPerRow(Idx2).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                            StatPerCol(Idx1).AddValue(.ImageData(0).Data(Idx1, Idx2))
+                        Next Idx2
+                    Next Idx1
                     DataProcessed = True
                 End With
             Case AstroNET.Statistics.eDataMode.Int32
                 With SingleStatCalc.DataProcessor_Int32
                     ReDim StatPerRow(.ImageData.GetUpperBound(1)) : InitStat(StatPerRow)
                     ReDim StatPerCol(.ImageData.GetUpperBound(0)) : InitStat(StatPerCol)
-                    Parallel.For(0, .ImageData.GetUpperBound(0) + 1, Sub(Idx1)
-                                                                         For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
-                                                                             StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
-                                                                             StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
-                                                                         Next Idx2
-                                                                     End Sub)
+                    For Idx1 As Integer = 0 To .ImageData.GetUpperBound(0)
+                        For Idx2 As Integer = 0 To .ImageData.GetUpperBound(1)
+                            StatPerRow(Idx2).AddValue(.ImageData(Idx1, Idx2))
+                            StatPerCol(Idx1).AddValue(.ImageData(Idx1, Idx2))
+                        Next Idx2
+                    Next Idx1
                     DataProcessed = True
                 End With
         End Select
@@ -648,6 +648,9 @@ Public Class Form1
                 For Idx As Integer = 0 To StatPerRow.GetUpperBound(0)
                     With StatPerRow(Idx)
                         XY.Add(New Object() {Idx + 1, .Minimum, .Mean, .Maximum, .Sigma})
+                        If Idx = 492 Then
+                            Console.WriteLine("!!!")
+                        End If
                     End With
                 Next Idx
                 Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Row Statistics")
