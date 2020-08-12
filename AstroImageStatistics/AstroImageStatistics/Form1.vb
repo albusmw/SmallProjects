@@ -1280,4 +1280,11 @@ Public Class Form1
 
     End Sub
 
+    Private Sub NEFReadingToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NEFReadingToolStripMenuItem.Click
+
+        Dim Reader As New cNEFReader
+        Reader.Read("\\DS1819\astro\2020_07_20\DSC_0286.NEF")
+
+    End Sub
+
 End Class

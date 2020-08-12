@@ -82,6 +82,7 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
+        Me.NEFReadingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -340,7 +341,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -511,6 +512,12 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
+        'NEFReadingToolStripMenuItem
+        '
+        Me.NEFReadingToolStripMenuItem.Name = "NEFReadingToolStripMenuItem"
+        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.NEFReadingToolStripMenuItem.Text = "NEF reading"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -604,4 +611,5 @@ Partial Class Form1
     Friend WithEvents MaxImageToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem8 As ToolStripSeparator
     Friend WithEvents tsmiSaveAllFilesStat As ToolStripMenuItem
+    Friend WithEvents NEFReadingToolStripMenuItem As ToolStripMenuItem
 End Class

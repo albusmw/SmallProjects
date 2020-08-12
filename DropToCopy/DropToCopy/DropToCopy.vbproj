@@ -76,8 +76,17 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\src\atomics\cRTFGeneration.vb">
+      <Link>cRTFGeneration.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\DragDrop.vb">
       <Link>DragDrop.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\RecursiveDirScan.vb">
+      <Link>RecursiveDirScan.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\RTFTextBox.vb">
+      <Link>RTFTextBox.vb</Link>
     </Compile>
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>

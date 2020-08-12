@@ -137,6 +137,9 @@
     <Compile Include="..\..\..\src\atomics\cLockBitmap.vb">
       <Link>cLockBitmap.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\cNEFReader.vb">
+      <Link>cNEFReader.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cSingleValueStatistics.vb">
       <Link>cSingleValueStatistics.vb</Link>
     </Compile>
