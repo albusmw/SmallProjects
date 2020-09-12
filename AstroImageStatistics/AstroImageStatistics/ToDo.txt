@@ -1,4 +1,5 @@
 ﻿- ReadHeader gibt es doppelt
+- On 16bit fixed: If BZero and BScale project data outside value range, use "force direct" to avoid overflow
 - Move over Histo stürzt ab bei Float
 
 Solver testing:
