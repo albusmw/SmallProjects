@@ -62,6 +62,7 @@ Partial Class Form1
         Me.tsmiStretch = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPlateSolve = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiCorrectVignette = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSetPixelToValue = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.AfiineTranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -70,6 +71,8 @@ Partial Class Form1
         Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
         Me.FocusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FITSTestFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NEFReadingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SetPixelAboveCertainValueToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -82,7 +85,6 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
-        Me.NEFReadingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -310,7 +312,7 @@ Partial Class Form1
         '
         'tsmiProcessing
         '
-        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiCorrectVignette})
+        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiCorrectVignette, Me.tsmiSetPixelToValue})
         Me.tsmiProcessing.Name = "tsmiProcessing"
         Me.tsmiProcessing.Size = New System.Drawing.Size(76, 22)
         Me.tsmiProcessing.Text = "Processing"
@@ -318,30 +320,36 @@ Partial Class Form1
         'tsmiAdjustRGB
         '
         Me.tsmiAdjustRGB.Name = "tsmiAdjustRGB"
-        Me.tsmiAdjustRGB.Size = New System.Drawing.Size(263, 22)
+        Me.tsmiAdjustRGB.Size = New System.Drawing.Size(301, 22)
         Me.tsmiAdjustRGB.Text = "Adjust RGB channels (using modus)"
         '
         'tsmiStretch
         '
         Me.tsmiStretch.Name = "tsmiStretch"
-        Me.tsmiStretch.Size = New System.Drawing.Size(263, 22)
-        Me.tsmiStretch.Text = "Stretcher"
+        Me.tsmiStretch.Size = New System.Drawing.Size(301, 22)
+        Me.tsmiStretch.Text = "Stretcher histogramm over complete range"
         '
         'tsmiPlateSolve
         '
         Me.tsmiPlateSolve.Name = "tsmiPlateSolve"
-        Me.tsmiPlateSolve.Size = New System.Drawing.Size(263, 22)
+        Me.tsmiPlateSolve.Size = New System.Drawing.Size(301, 22)
         Me.tsmiPlateSolve.Text = "Plate solve image"
         '
         'tsmiCorrectVignette
         '
         Me.tsmiCorrectVignette.Name = "tsmiCorrectVignette"
-        Me.tsmiCorrectVignette.Size = New System.Drawing.Size(263, 22)
+        Me.tsmiCorrectVignette.Size = New System.Drawing.Size(301, 22)
         Me.tsmiCorrectVignette.Text = "Correct vignette"
+        '
+        'tsmiSetPixelToValue
+        '
+        Me.tsmiSetPixelToValue.Name = "tsmiSetPixelToValue"
+        Me.tsmiSetPixelToValue.Size = New System.Drawing.Size(301, 22)
+        Me.tsmiSetPixelToValue.Text = "Set pixel above to certain value"
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem, Me.SetPixelAboveCertainValueToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -386,6 +394,18 @@ Partial Class Form1
         Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
         Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
         Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
+        '
+        'NEFReadingToolStripMenuItem
+        '
+        Me.NEFReadingToolStripMenuItem.Name = "NEFReadingToolStripMenuItem"
+        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.NEFReadingToolStripMenuItem.Text = "NEF reading"
+        '
+        'SetPixelAboveCertainValueToolStripMenuItem
+        '
+        Me.SetPixelAboveCertainValueToolStripMenuItem.Name = "SetPixelAboveCertainValueToolStripMenuItem"
+        Me.SetPixelAboveCertainValueToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.SetPixelAboveCertainValueToolStripMenuItem.Text = "Set pixel above certain value"
         '
         'ofdMain
         '
@@ -512,12 +532,6 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
-        'NEFReadingToolStripMenuItem
-        '
-        Me.NEFReadingToolStripMenuItem.Name = "NEFReadingToolStripMenuItem"
-        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
-        Me.NEFReadingToolStripMenuItem.Text = "NEF reading"
-        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -612,4 +626,6 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem8 As ToolStripSeparator
     Friend WithEvents tsmiSaveAllFilesStat As ToolStripMenuItem
     Friend WithEvents NEFReadingToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents SetPixelAboveCertainValueToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiSetPixelToValue As ToolStripMenuItem
 End Class

@@ -5,11 +5,11 @@ Public Class cDB
 
     Private Const Cat_load As String = "1.) Loading"
     Private Const Cat_analysis As String = "2.) Analysis"
-    Private Const Cat_log As String = "2.) Logging"
-    Private Const Cat_Proc_Vignette As String = "3.1) Processing - vignette"
-    Private Const Cat_plot As String = "9.) Plotting"
-    Private Const Cat_save As String = "10.) Saving"
-    Private Const Cat_misc As String = "99.) Misc"
+    Private Const Cat_Proc_Vignette As String = "3) Processing - vignette"
+    Private Const Cat_log As String = "5.) Logging"
+    Private Const Cat_plot As String = "6.) Plotting"
+    Private Const Cat_save As String = "7.) Saving"
+    Private Const Cat_misc As String = "9.) Misc"
 
     <ComponentModel.Category(Cat_load)>
     <ComponentModel.DisplayName("a.) Use IPP?")>
@@ -88,6 +88,15 @@ Public Class cDB
     <ComponentModel.DefaultValue("RGGB")>
     Public Property BayerPattern As String = "RGGB"
 
+    <ComponentModel.Category(Cat_misc)>
+    <ComponentModel.DisplayName("Used IPP path")>
+    Public ReadOnly Property IPPPath As String
+        Get
+            Return MyIPPPath
+        End Get
+    End Property
+    Public MyIPPPath As String = String.Empty
+
     '''<summary>Get the channel name of the bayer pattern index.</summary>
     '''<param name="Idx">0-based index.</param>
     '''<returns>Channel name - if there are more channels with the same letter a number is added beginning with the 2nd channel.</returns>
@@ -123,12 +132,6 @@ Public Class cDB
 
 
 
-    <ComponentModel.DisplayName("Used IPP path")>
-    Public ReadOnly Property IPPPath As String
-        Get
-            Return MyIPPPath
-        End Get
-    End Property
-    Public MyIPPPath As String = String.Empty
+
 
 End Class

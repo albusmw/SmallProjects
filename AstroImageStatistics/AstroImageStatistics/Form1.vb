@@ -127,7 +127,7 @@ Public Class Form1
 
         '=========================================================================================================
         'Calculate the statistics
-        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
+        CalculateStatistics(SingleStatCalc.DataFixFloat, DB.BayerPatternNames)
         Stopper.Stamp(FileNameOnly & ": Statistics")
 
         'Record statistics
@@ -188,7 +188,7 @@ Public Class Form1
     Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode, ByVal ChannelNames As List(Of String))
         LastStat = SingleStatCalc.ImageStatistics(DataMode)
         Log("Statistics:")
-        Log("  ", LastStat.StatisticsReport(ChannelNames).ToArray())
+        Log("  ", LastStat.StatisticsReport(False, ChannelNames).ToArray())
         Log(New String("="c, 109))
     End Sub
 
@@ -728,7 +728,7 @@ Public Class Form1
             Next BayerIdx2
         Next BayerIdx1
 
-        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
+        CalculateStatistics(SingleStatCalc.DataFixFloat, DB.BayerPatternNames)
         Idle()
 
     End Sub
@@ -794,7 +794,7 @@ Public Class Form1
     Private Sub tsmiStretch_Click(sender As Object, e As EventArgs) Handles tsmiStretch.Click
         Running()
         ImageProcessing.MakeHistoStraight(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
+        CalculateStatistics(SingleStatCalc.DataFixFloat, DB.BayerPatternNames)
         Idle()
     End Sub
 
@@ -1059,7 +1059,7 @@ Public Class Form1
 
         Stopper.Stamp("Vignette correction")
 
-        CalculateStatistics(SingleStatCalc.DataModeType, DB.BayerPatternNames)
+        CalculateStatistics(SingleStatCalc.DataFixFloat, DB.BayerPatternNames)
         Idle()
 
     End Sub
@@ -1113,6 +1113,7 @@ Public Class Form1
     End Sub
 
     Private Sub HotPixelToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HotPixelToolStripMenuItem.Click
+        'For each pixel take the area around and check if the value is significantly too high
         Dim FixedPixelCount As UInt32 = 0
         Dim HotPixelLimit As Double = 5
         Running()
@@ -1198,9 +1199,11 @@ Public Class Form1
         Navigator.IPP = IPP
         Navigator.tbRootFile.Text = LastFile
         Navigator.lbPixel.Items.Clear()
-        For Each Pixel As Point In TopValFiltered(TopValFiltered.KeyList(0))
-            Navigator.lbPixel.Items.Add(Pixel.X.ToString.Trim & ":" & Pixel.Y.ToString.Trim)
-        Next Pixel
+        If TopValFiltered.Count > 0 Then
+            For Each Pixel As Point In TopValFiltered(TopValFiltered.KeyList(0))
+                Navigator.lbPixel.Items.Add(Pixel.X.ToString.Trim & ":" & Pixel.Y.ToString.Trim)
+            Next Pixel
+        End If
         Navigator.Show()
         Navigator.ShowMosaik()
 
@@ -1284,6 +1287,32 @@ Public Class Form1
 
         Dim Reader As New cNEFReader
         Reader.Read("\\DS1819\astro\2020_07_20\DSC_0286.NEF")
+
+    End Sub
+
+    Private Sub tsmiSetPixelToValue_Click(sender As Object, e As EventArgs) Handles tsmiSetPixelToValue.Click
+
+        Dim FixedPixelCount As UInt32 = 0
+        Dim Limit As UShort = CUShort(InputBox("Upper limit (included)", "65536"))
+        Dim SetTo As UShort = CUShort(InputBox("Set to", "0"))
+        Running()
+        Select Case SingleStatCalc.DataMode
+            Case AstroNET.Statistics.eDataMode.UInt16
+                With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
+                    For Idx1 As Integer = 0 To .NAXIS1 - 1
+                        For Idx2 As Integer = 0 To .NAXIS2 - 1
+                            If .Data(Idx1, Idx2) >= Limit Then
+                                FixedPixelCount += UInt32One
+                                .Data(Idx1, Idx2) = SetTo
+                            End If
+                        Next Idx2
+                    Next Idx1
+                End With
+            Case Else
+
+        End Select
+        Log("Fixed " & FixedPixelCount.ValRegIndep & " pixel changed")
+        Idle()
 
     End Sub
 

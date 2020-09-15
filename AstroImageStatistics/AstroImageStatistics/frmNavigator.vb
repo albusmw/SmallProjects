@@ -1,6 +1,9 @@
 ﻿Option Explicit On
 Option Strict On
 
+'The navigator form allows to select and display certain SAME areas in different files
+'This is usefull to e.g. detect hot pixel, see alignment problems, ...
+
 Public Class frmNavigator
 
     Public IPP As cIntelIPP
@@ -18,24 +21,26 @@ Public Class frmNavigator
 
         'Plaubility check
         Try
-            TileSize = CInt(tbTileSize.Text) : If TileSize < 1 Then Exit Sub
-            OffsetX = CInt(tbOffsetX.Text) - (TileSize \ 2) : If OffsetX < TileSize \ 2 Then Exit Sub
-            OffsetY = CInt(tbOffsetY.Text) - (TileSize \ 2) : If OffsetY < TileSize \ 2 Then Exit Sub
+            TileSize = CInt(tbTileSize.Text) : If TileSize < 1 Then Throw New Exception("TileSize < 1")
+            OffsetX = CInt(tbOffsetX.Text) - (TileSize \ 2) : If OffsetX < TileSize \ 2 Then Throw New Exception("ROI left edge < 1")
+            OffsetY = CInt(tbOffsetY.Text) - (TileSize \ 2) : If OffsetY < TileSize \ 2 Then Throw New Exception("ROI top edge < 1")
         Catch ex As Exception
+            ErrorStatus(Text)
             Exit Sub
         End Try
         If System.IO.File.Exists(tbRootFile.Text) = False Then
-            tbRootFile.BackColor = Color.Red
+            ErrorStatus("Root folder <" & tbRootFile.Text & "> does not exist.")
             Exit Sub
-        Else
-            tbRootFile.BackColor = Color.White
         End If
 
         Dim BaseDirectory As String = System.IO.Path.GetDirectoryName(tbRootFile.Text)
         Dim FITSReader As New cFITSReader
 
         Dim AllFiles As New List(Of String)(System.IO.Directory.GetFiles(BaseDirectory, tbFilterString.Text))
-        If AllFiles.Count = 0 Then Exit Sub
+        If AllFiles.Count = 0 Then
+            ErrorStatus("No files match the filter criteria.")
+            Exit Sub
+        End If
 
         Dim MosaikWidth As Integer = CInt(Math.Ceiling(Math.Sqrt(AllFiles.Count)))              'Number of tiles in X direction
         Dim MosaikHeight As Integer = CInt(Math.Ceiling(AllFiles.Count / MosaikWidth))          'Number of tiles in Y direction
@@ -49,11 +54,15 @@ Public Class frmNavigator
             Dim File As String = AllFiles(FileIdx)
             pbMain.Value = FileIdx : DE()
             Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize, False)
-            For X As Integer = 0 To TileSize - 1
-                For Y As Integer = 0 To TileSize - 1
-                    SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
-                Next Y
-            Next X
+            Try
+                For X As Integer = 0 To TileSize - 1
+                    For Y As Integer = 0 To TileSize - 1
+                        SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
+                    Next Y
+                Next X
+            Catch ex As Exception
+                'Log this error ...
+            End Try
             WidthPtr += TileSize + 1 : WidthIdx += 1
             If WidthIdx >= MosaikWidth Then
                 HeightPtr += TileSize + 1
@@ -64,14 +73,25 @@ Public Class frmNavigator
 
         'Run mosaik statistics
         Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(AstroNET.Statistics.sStatistics.eDataMode.Fixed)
+        tbStatResult.Text = Join(Stat.StatisticsReport(True).ToArray, System.Environment.NewLine)
 
         ShowDataForm(MosaikForm, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, Stat.MonoStatistics_Int.Min.Key, Stat.MonoStatistics_Int.Max.Key)
         pbMain.Value = 0
 
-        'Dim FileToGenerate As String = System.IO.Path.Combine(MyPath, "Mosaik.fits")
-        'cFITSWriter.Write(FileToGenerate, Mosaik, cFITSWriter.eBitPix.Int16)
-        'Process.Start(FileToGenerate)
+        If cbSaveFITS.Checked Then
+            Dim FileToGenerate As String = System.IO.Path.Combine(BaseDirectory, "Mosaik.fits")
+            cFITSWriter.Write(FileToGenerate, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
+            Process.Start(FileToGenerate)
+        End If
 
+        tsslStatus.Text = AllFiles.Count.ToString.Trim & " files filtered and displayed."
+        tsslStatus.BackColor = Color.Green
+
+    End Sub
+
+    Private Sub ErrorStatus(ByVal Text As String)
+        tsslStatus.Text = Text
+        tsslStatus.BackColor = Color.Red
     End Sub
 
     Private Sub ShowDataForm(ByRef FormToShow As cImgForm, ByRef Data(,) As UInt16, ByVal Min As Long, ByVal Max As Long)
@@ -86,6 +106,7 @@ Public Class frmNavigator
             FormToShow = New cImgForm
         End If
         FormToShow.Show("MosaikForm <" & tbRootFile.Text & ">")
+        FormToShow.ColorMap = CType(cbColorModes.SelectedIndex, cColorMaps.eMaps)
         FormToShow.ShowData(Data, Min, Max)
 
     End Sub
@@ -134,14 +155,21 @@ Public Class frmNavigator
         End Select
     End Sub
 
-    Private Sub tbOffsetX_TextChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged
+    Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged
         ShowMosaik()
     End Sub
 
     Private Sub lbPixel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lbPixel.SelectedIndexChanged
-        Dim Splitted As String() = Split(CStr(lbPixel.SelectedItem), ":")
+        Dim SelectedText As String = CStr(lbPixel.SelectedItem)
+        If IsNothing(SelectedText) Then Exit Sub
+        Dim Splitted As String() = Split(SelectedText, ":")
+        If Splitted.Length < 2 Then Exit Sub
         tbOffsetX.Text = Splitted(0)
         tbOffsetY.Text = Splitted(1)
+    End Sub
+
+    Private Sub frmNavigator_Load(sender As Object, e As EventArgs) Handles Me.Load
+        cbColorModes.SelectedIndex = 2
     End Sub
 
 End Class
