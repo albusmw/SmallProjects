@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AllSkyCapture", "AllSkyCapture.vbproj", "{BC3A0411-7AA9-47A9-9FAE-A1BF6EADA2DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC3A0411-7AA9-47A9-9FAE-A1BF6EADA2DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC3A0411-7AA9-47A9-9FAE-A1BF6EADA2DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC3A0411-7AA9-47A9-9FAE-A1BF6EADA2DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC3A0411-7AA9-47A9-9FAE-A1BF6EADA2DE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {43F1302A-6006-4C3D-9F10-C016A934D03E}
+	EndGlobalSection
+EndGlobal
