@@ -3,30 +3,35 @@ Option Strict On
 
 Public Class Form1
 
-    Const GainNotSet As Short = Short.MinValue + 1
+    Private DB As New cDB
 
-    Dim SelectedCamera As String = "ASCOM.ASICamera2.Camera"
-    Dim FileName As String
+    Private NeverStarted As New DateTime(0)
+    Private Never As New DateTime(DateTime.MaxValue.Ticks)
+
+    Private LastTaken As DateTime = NeverStarted
+
+    '''<summary>Name of the last saved JPG file.</summary>
+    Private LastJPG As String = String.Empty
+    '''<summary>Name of the last saved PNG file.</summary>
+    Private LastPNG As String = String.Empty
+
     Dim LastLoggedDate As New DateTime(0)
-    Dim SelectedGain As Short = GainNotSet
-    Dim CurrentImageName As String = "AllSkyImage"
-
-    Private Sub btnAscomCamera_Click(sender As Object, e As EventArgs) Handles btnAscomCamera.Click
-        tbSelectedCam.Text = Chooser_Camera()
-        Log("Selected: " & tbSelectedCam.Text)
-    End Sub
 
     Private Function Chooser_Camera() As String
         Dim Chooser As New ASCOM.Utilities.Chooser
         Chooser.DeviceType = "Camera"
-        SelectedCamera = Chooser.Choose(SelectedCamera)
-        Return SelectedCamera
+        DB.ASCOMCam = Chooser.Choose(DB.ASCOMCam)
+        Return DB.ASCOMCam
     End Function
 
     Private Sub btnTakeImage_Click(sender As Object, e As EventArgs) Handles btnTakeImage.Click
+        TakeImage(Never)
+    End Sub
+
+    Private Sub TakeImage(ByVal TimeStamp As DateTime)
 
         Log("Connecting camera")
-        Dim Camera As New ASCOM.DriverAccess.Camera(SelectedCamera)
+        Dim Camera As New ASCOM.DriverAccess.Camera(DB.ASCOMCam)
         Camera.Connected = True
         Log("    DONE (" & Camera.Description & ")")
         Log("    Gain range    : " & Camera.GainMin.ToString.Trim & " ... " & Camera.GainMax.ToString.Trim)
@@ -36,16 +41,16 @@ Public Class Form1
         Camera.BinY = 1
 
         'Set gain
-        If SelectedGain <> GainNotSet Then
-            If SelectedGain > Camera.GainMax Then SelectedGain = Camera.GainMax
-            If SelectedGain < Camera.GainMin Then SelectedGain = Camera.GainMin
-            Camera.Gain = SelectedGain
+        If DB.SelectedGain <> DB.GainNotSet Then
+            If DB.SelectedGain > Camera.GainMax Then DB.SelectedGain = Camera.GainMax
+            If DB.SelectedGain < Camera.GainMin Then DB.SelectedGain = Camera.GainMin
+            Camera.Gain = DB.SelectedGain
         End If
         Log("    Gain selected: " & Camera.Gain.ToString.Trim)
 
-        StartLog("Starting exposure with " & tbExposeTime.Text.ToString.Trim & " seconds")
+        StartLog("Starting exposure with " & DB.ExposureTime.ToString.Trim & " seconds")
         btnTakeImage.Enabled = False : System.Windows.Forms.Application.DoEvents()
-        Camera.StartExposure(Val(tbExposeTime.Text.Replace(",", ".")), False)
+        Camera.StartExposure(DB.ExposureTime, False)
         Do
             If Camera.ImageReady Then Exit Do
         Loop Until 1 = 0
@@ -136,12 +141,27 @@ Public Class Form1
         pbLastImage.Image = BitmapToCreate
 
         'Save image
-        Dim BaseFileName As String = CurrentImageName
-        FileName = tbStorageRoot.Text & "\" & BaseFileName
-        StartLog("Saving image to <" & BaseFileName & ".png" & ">")
-        BitmapToCreate.Save(FileName & ".png", System.Drawing.Imaging.ImageFormat.Png)
-        StartLog("Saving image to <" & BaseFileName & ".jpg" & ">")
-        BitmapToCreate.Save(FileName & ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg)
+        Dim BaseFileName As String = DB.CurrentImageName
+        Dim FullPathName = IO.Path.Combine(DB.StorageRoot, BaseFileName)
+        If DB.SaveAsJPG = True Then
+            LastJPG = FullPathName & ".jpg"
+            StartLog("Saving image to <" & LastJPG & ">")
+            BitmapToCreate.Save(LastJPG, System.Drawing.Imaging.ImageFormat.Jpeg)
+        End If
+        If DB.SaveAsPNG = True Then
+            LastPNG = FullPathName & ".png"
+            StartLog("Saving image to <" & LastPNG & ">")
+            BitmapToCreate.Save(LastPNG, System.Drawing.Imaging.ImageFormat.Png)
+        End If
+
+        'Copy to timeline
+        If TimeStamp <> Never Then
+            Dim TimeFormat As String = Format(TimeStamp, "dd.MM.yyyy_HH.mm.ss")
+            If DB.SaveAsJPG = True Then
+                System.IO.File.Copy(LastJPG, IO.Path.Combine(DB.StorageRoot, BaseFileName) & TimeFormat & ".jpg")
+            End If
+        End If
+
         FinishLog("    DONE.")
 
         StartLog("Disconnecting camera")
@@ -187,40 +207,24 @@ Public Class Form1
         End If
     End Function
 
-    Private Sub btnOpenImage_Click(sender As Object, e As EventArgs) Handles btnOpenImage.Click
-        If MsgBox("YES for JPEG, NO for PNG", MsgBoxStyle.YesNo Or MsgBoxStyle.Question) = MsgBoxResult.Yes Then
-            Process.Start(FileName & ".jpg")
-        Else
-            Process.Start(FileName & ".png")
-        End If
-    End Sub
-
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        tbStorageRoot.Text = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+        pgMain.SelectedObject = DB
     End Sub
 
     Private Sub btnUp10_Click(sender As Object, e As EventArgs) Handles btnUp10.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) * 10).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime * 10
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) / 10).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime / 10
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) / 2).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime / 2
     End Sub
 
     Private Sub btnUp2_Click(sender As Object, e As EventArgs) Handles btnUp2.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) * 2).Trim.Replace(",", ".")
-    End Sub
-
-    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        SelectedGain = Short.MaxValue
-    End Sub
-
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-        SelectedGain = Short.MinValue
+        DB.ExposureTime = DB.ExposureTime * 2
     End Sub
 
     Private Sub UploadFile(ByVal File As String)
@@ -232,7 +236,7 @@ Public Class Form1
         Dim FTP_Pwd As String = "qbZHD57224"
 
         'Get the object used to communicate with the server.  
-        Dim RemoteFilename As String = "ftp://www.albusmw.de/" & CurrentImageName & ".jpg"
+        Dim RemoteFilename As String = "ftp://www.albusmw.de/" & DB.CurrentImageName & ".jpg"
         Dim request As Net.FtpWebRequest = CType(Net.WebRequest.Create(RemoteFilename), Net.FtpWebRequest)
         request.Method = Net.WebRequestMethods.Ftp.UploadFile
 
@@ -255,10 +259,65 @@ Public Class Form1
 
         response.Close()
 
-
     End Sub
 
-    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        UploadFile(CurrentImageName & ".jpg")
+    Private Function ValRegIndep(ByVal Text As String) As Double
+        Return Val(Text.Replace(",", "."))
+    End Function
+
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        End
+    End Sub
+
+    Private Sub SelectCameraToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SelectCameraToolStripMenuItem.Click
+        DB.ASCOMCam = Chooser_Camera()
+        Log("Selected: " & DB.ASCOMCam)
+    End Sub
+
+    Private Sub OpenLastImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastImageToolStripMenuItem.Click
+        If System.IO.File.Exists(LastJPG) = True And System.IO.File.Exists(LastPNG) = False Then Process.Start(LastJPG)
+        If System.IO.File.Exists(LastJPG) = False And System.IO.File.Exists(LastPNG) = True Then Process.Start(LastPNG)
+        If System.IO.File.Exists(LastJPG) = True And System.IO.File.Exists(LastPNG) = True Then
+            If MsgBox("YES for JPG, NO for PNG", MsgBoxStyle.YesNo Or MsgBoxStyle.Question) = MsgBoxResult.Yes Then
+                Process.Start(LastJPG)
+            Else
+                Process.Start(LastPNG)
+            End If
+        End If
+    End Sub
+
+    Private Sub FTPUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FTPUploadToolStripMenuItem.Click
+        UploadFile(IO.Path.Combine(DB.StorageRoot, DB.CurrentImageName & ".jpg"))
+    End Sub
+
+    Private Sub GAINToMAXToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMAXToolStripMenuItem.Click
+        DB.SelectedGain = Short.MaxValue
+    End Sub
+
+    Private Sub GAINToMINToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMINToolStripMenuItem.Click
+        DB.SelectedGain = Short.MinValue
+    End Sub
+
+    Private Sub tCheckExpState_Tick(sender As Object, e As EventArgs) Handles tCheckExpState.Tick
+        'Initial start
+        If LastTaken = NeverStarted And DB.AutoExpInterval > 0.0 Then
+            LastTaken = Now
+            TakeImage(LastTaken)
+        End If
+        'Next Shot
+        If DB.AutoExpInterval > 0.0 Then
+            If Now >= LastTaken.AddSeconds(DB.AutoExpInterval) Then
+                LastTaken = LastTaken.AddSeconds(DB.AutoExpInterval)
+                TakeImage(Now)
+            End If
+        End If
+        'Stop
+        If DB.AutoExpInterval = 0 Then
+            LastTaken = NeverStarted
+        End If
+    End Sub
+
+    Private Sub OpenStoragePathToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenStoragePathToolStripMenuItem.Click
+        If System.IO.Directory.Exists(DB.StorageRoot) Then Process.Start(DB.StorageRoot)
     End Sub
 End Class
