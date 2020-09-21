@@ -37,7 +37,9 @@ Partial Class Form1
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SelectCameraToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.OpenLastImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenStoragePathToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -46,8 +48,7 @@ Partial Class Form1
         Me.GAINToMAXToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GAINToMINToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tCheckExpState = New System.Windows.Forms.Timer(Me.components)
-        Me.OpenStoragePathToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.JoinToVideoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbLastImage, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -200,7 +201,7 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SelectCameraToolStripMenuItem, Me.ToolStripMenuItem2, Me.OpenLastImageToolStripMenuItem, Me.OpenStoragePathToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SelectCameraToolStripMenuItem, Me.ToolStripMenuItem2, Me.OpenLastImageToolStripMenuItem, Me.OpenStoragePathToolStripMenuItem, Me.JoinToVideoToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -208,24 +209,35 @@ Partial Class Form1
         'SelectCameraToolStripMenuItem
         '
         Me.SelectCameraToolStripMenuItem.Name = "SelectCameraToolStripMenuItem"
-        Me.SelectCameraToolStripMenuItem.Size = New System.Drawing.Size(160, 22)
+        Me.SelectCameraToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SelectCameraToolStripMenuItem.Text = "Select camera"
+        '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(177, 6)
         '
         'OpenLastImageToolStripMenuItem
         '
         Me.OpenLastImageToolStripMenuItem.Name = "OpenLastImageToolStripMenuItem"
-        Me.OpenLastImageToolStripMenuItem.Size = New System.Drawing.Size(160, 22)
+        Me.OpenLastImageToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.OpenLastImageToolStripMenuItem.Text = "Open last image"
+        '
+        'OpenStoragePathToolStripMenuItem
+        '
+        Me.OpenStoragePathToolStripMenuItem.Name = "OpenStoragePathToolStripMenuItem"
+        Me.OpenStoragePathToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.OpenStoragePathToolStripMenuItem.Text = "Open storage path"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(157, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(177, 6)
         '
         'ExitToolStripMenuItem
         '
         Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(160, 22)
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'TestToolStripMenuItem
@@ -238,7 +250,7 @@ Partial Class Form1
         'FTPUploadToolStripMenuItem
         '
         Me.FTPUploadToolStripMenuItem.Name = "FTPUploadToolStripMenuItem"
-        Me.FTPUploadToolStripMenuItem.Size = New System.Drawing.Size(133, 22)
+        Me.FTPUploadToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FTPUploadToolStripMenuItem.Text = "FTP upload"
         '
         'HardwareToolStripMenuItem
@@ -251,29 +263,24 @@ Partial Class Form1
         'GAINToMAXToolStripMenuItem
         '
         Me.GAINToMAXToolStripMenuItem.Name = "GAINToMAXToolStripMenuItem"
-        Me.GAINToMAXToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.GAINToMAXToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
         Me.GAINToMAXToolStripMenuItem.Text = "GAIN to MAX"
         '
         'GAINToMINToolStripMenuItem
         '
         Me.GAINToMINToolStripMenuItem.Name = "GAINToMINToolStripMenuItem"
-        Me.GAINToMINToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.GAINToMINToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
         Me.GAINToMINToolStripMenuItem.Text = "GAIN to MIN"
         '
         'tCheckExpState
         '
         Me.tCheckExpState.Enabled = True
         '
-        'OpenStoragePathToolStripMenuItem
+        'JoinToVideoToolStripMenuItem
         '
-        Me.OpenStoragePathToolStripMenuItem.Name = "OpenStoragePathToolStripMenuItem"
-        Me.OpenStoragePathToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.OpenStoragePathToolStripMenuItem.Text = "Open storage path"
-        '
-        'ToolStripMenuItem2
-        '
-        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
-        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(177, 6)
+        Me.JoinToVideoToolStripMenuItem.Name = "JoinToVideoToolStripMenuItem"
+        Me.JoinToVideoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.JoinToVideoToolStripMenuItem.Text = "Join to video"
         '
         'Form1
         '
@@ -329,4 +336,5 @@ Partial Class Form1
     Friend WithEvents tCheckExpState As Timer
     Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
     Friend WithEvents OpenStoragePathToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents JoinToVideoToolStripMenuItem As ToolStripMenuItem
 End Class
