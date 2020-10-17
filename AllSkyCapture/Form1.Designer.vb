@@ -22,48 +22,53 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.btnAscomCamera = New System.Windows.Forms.Button()
+        Me.components = New System.ComponentModel.Container()
         Me.btnTakeImage = New System.Windows.Forms.Button()
         Me.pbLastImage = New System.Windows.Forms.PictureBox()
         Me.tbLog = New System.Windows.Forms.TextBox()
-        Me.tbSelectedCam = New System.Windows.Forms.TextBox()
-        Me.tbExposeTime = New System.Windows.Forms.TextBox()
-        Me.btnOpenImage = New System.Windows.Forms.Button()
         Me.scMain = New System.Windows.Forms.SplitContainer()
-        Me.tbStorageRoot = New System.Windows.Forms.TextBox()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.scLeftPanel = New System.Windows.Forms.SplitContainer()
+        Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.btnUp2 = New System.Windows.Forms.Button()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.btnUp10 = New System.Windows.Forms.Button()
-        Me.Button3 = New System.Windows.Forms.Button()
-        Me.Button4 = New System.Windows.Forms.Button()
-        Me.Button5 = New System.Windows.Forms.Button()
+        Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SelectCameraToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.OpenLastImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenStoragePathToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FTPUploadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HardwareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GAINToMAXToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GAINToMINToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tCheckExpState = New System.Windows.Forms.Timer(Me.components)
+        Me.JoinToVideoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbLastImage, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
         Me.scMain.SuspendLayout()
+        CType(Me.scLeftPanel, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scLeftPanel.Panel1.SuspendLayout()
+        Me.scLeftPanel.Panel2.SuspendLayout()
+        Me.scLeftPanel.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
-        '
-        'btnAscomCamera
-        '
-        Me.btnAscomCamera.Location = New System.Drawing.Point(12, 12)
-        Me.btnAscomCamera.Name = "btnAscomCamera"
-        Me.btnAscomCamera.Size = New System.Drawing.Size(114, 20)
-        Me.btnAscomCamera.TabIndex = 0
-        Me.btnAscomCamera.Text = "ASCOM Selector"
-        Me.btnAscomCamera.UseVisualStyleBackColor = True
         '
         'btnTakeImage
         '
-        Me.btnTakeImage.Location = New System.Drawing.Point(298, 12)
+        Me.btnTakeImage.Location = New System.Drawing.Point(206, 27)
         Me.btnTakeImage.Name = "btnTakeImage"
-        Me.btnTakeImage.Size = New System.Drawing.Size(94, 20)
+        Me.btnTakeImage.Size = New System.Drawing.Size(94, 46)
         Me.btnTakeImage.TabIndex = 1
-        Me.btnTakeImage.Text = "Take image"
+        Me.btnTakeImage.Text = "Take test image"
         Me.btnTakeImage.UseVisualStyleBackColor = True
         '
         'pbLastImage
@@ -72,7 +77,7 @@ Partial Class Form1
         Me.pbLastImage.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pbLastImage.Location = New System.Drawing.Point(0, 0)
         Me.pbLastImage.Name = "pbLastImage"
-        Me.pbLastImage.Size = New System.Drawing.Size(606, 627)
+        Me.pbLastImage.Size = New System.Drawing.Size(606, 642)
         Me.pbLastImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.pbLastImage.TabIndex = 2
         Me.pbLastImage.TabStop = False
@@ -86,70 +91,55 @@ Partial Class Form1
         Me.tbLog.Name = "tbLog"
         Me.tbLog.ReadOnly = True
         Me.tbLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLog.Size = New System.Drawing.Size(475, 627)
+        Me.tbLog.Size = New System.Drawing.Size(470, 318)
         Me.tbLog.TabIndex = 3
-        '
-        'tbSelectedCam
-        '
-        Me.tbSelectedCam.Location = New System.Drawing.Point(132, 12)
-        Me.tbSelectedCam.Name = "tbSelectedCam"
-        Me.tbSelectedCam.Size = New System.Drawing.Size(160, 20)
-        Me.tbSelectedCam.TabIndex = 4
-        Me.tbSelectedCam.Text = "ASCOM.ASICamera2.Camera"
-        '
-        'tbExposeTime
-        '
-        Me.tbExposeTime.Location = New System.Drawing.Point(6, 19)
-        Me.tbExposeTime.Name = "tbExposeTime"
-        Me.tbExposeTime.Size = New System.Drawing.Size(63, 20)
-        Me.tbExposeTime.TabIndex = 5
-        Me.tbExposeTime.Text = "0.01"
-        Me.tbExposeTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        '
-        'btnOpenImage
-        '
-        Me.btnOpenImage.Location = New System.Drawing.Point(298, 38)
-        Me.btnOpenImage.Name = "btnOpenImage"
-        Me.btnOpenImage.Size = New System.Drawing.Size(94, 20)
-        Me.btnOpenImage.TabIndex = 6
-        Me.btnOpenImage.Text = "Open image"
-        Me.btnOpenImage.UseVisualStyleBackColor = True
         '
         'scMain
         '
         Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.scMain.Location = New System.Drawing.Point(12, 94)
+        Me.scMain.Location = New System.Drawing.Point(12, 79)
         Me.scMain.Name = "scMain"
         '
         'scMain.Panel1
         '
-        Me.scMain.Panel1.Controls.Add(Me.tbLog)
+        Me.scMain.Panel1.Controls.Add(Me.scLeftPanel)
         '
         'scMain.Panel2
         '
         Me.scMain.Panel2.Controls.Add(Me.pbLastImage)
-        Me.scMain.Size = New System.Drawing.Size(1085, 627)
+        Me.scMain.Size = New System.Drawing.Size(1085, 642)
         Me.scMain.SplitterDistance = 475
         Me.scMain.TabIndex = 7
         '
-        'tbStorageRoot
+        'scLeftPanel
         '
-        Me.tbStorageRoot.Location = New System.Drawing.Point(132, 38)
-        Me.tbStorageRoot.Name = "tbStorageRoot"
-        Me.tbStorageRoot.Size = New System.Drawing.Size(160, 20)
-        Me.tbStorageRoot.TabIndex = 10
-        Me.tbStorageRoot.Text = "" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
+        Me.scLeftPanel.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.scLeftPanel.Location = New System.Drawing.Point(3, 3)
+        Me.scLeftPanel.Name = "scLeftPanel"
+        Me.scLeftPanel.Orientation = System.Windows.Forms.Orientation.Horizontal
         '
-        'Label2
+        'scLeftPanel.Panel1
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(12, 41)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(65, 13)
-        Me.Label2.TabIndex = 11
-        Me.Label2.Text = "Storage root"
+        Me.scLeftPanel.Panel1.Controls.Add(Me.pgMain)
+        '
+        'scLeftPanel.Panel2
+        '
+        Me.scLeftPanel.Panel2.Controls.Add(Me.tbLog)
+        Me.scLeftPanel.Size = New System.Drawing.Size(470, 636)
+        Me.scLeftPanel.SplitterDistance = 314
+        Me.scLeftPanel.TabIndex = 4
+        '
+        'pgMain
+        '
+        Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgMain.Location = New System.Drawing.Point(0, 0)
+        Me.pgMain.Name = "pgMain"
+        Me.pgMain.Size = New System.Drawing.Size(470, 314)
+        Me.pgMain.TabIndex = 16
         '
         'GroupBox1
         '
@@ -157,17 +147,16 @@ Partial Class Form1
         Me.GroupBox1.Controls.Add(Me.btnUp2)
         Me.GroupBox1.Controls.Add(Me.Button1)
         Me.GroupBox1.Controls.Add(Me.btnUp10)
-        Me.GroupBox1.Controls.Add(Me.tbExposeTime)
-        Me.GroupBox1.Location = New System.Drawing.Point(398, 12)
+        Me.GroupBox1.Location = New System.Drawing.Point(12, 27)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(254, 46)
+        Me.GroupBox1.Size = New System.Drawing.Size(188, 46)
         Me.GroupBox1.TabIndex = 12
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Exposure [s]"
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(119, 17)
+        Me.Button2.Location = New System.Drawing.Point(50, 15)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(38, 22)
         Me.Button2.TabIndex = 9
@@ -176,7 +165,7 @@ Partial Class Form1
         '
         'btnUp2
         '
-        Me.btnUp2.Location = New System.Drawing.Point(161, 17)
+        Me.btnUp2.Location = New System.Drawing.Point(94, 15)
         Me.btnUp2.Name = "btnUp2"
         Me.btnUp2.Size = New System.Drawing.Size(38, 22)
         Me.btnUp2.TabIndex = 8
@@ -185,7 +174,7 @@ Partial Class Form1
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(75, 17)
+        Me.Button1.Location = New System.Drawing.Point(6, 15)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(38, 22)
         Me.Button1.TabIndex = 7
@@ -194,86 +183,158 @@ Partial Class Form1
         '
         'btnUp10
         '
-        Me.btnUp10.Location = New System.Drawing.Point(205, 17)
+        Me.btnUp10.Location = New System.Drawing.Point(138, 15)
         Me.btnUp10.Name = "btnUp10"
         Me.btnUp10.Size = New System.Drawing.Size(38, 22)
         Me.btnUp10.TabIndex = 6
         Me.btnUp10.Text = "x 10"
         Me.btnUp10.UseVisualStyleBackColor = True
         '
-        'Button3
+        'MenuStrip1
         '
-        Me.Button3.Location = New System.Drawing.Point(658, 11)
-        Me.Button3.Name = "Button3"
-        Me.Button3.Size = New System.Drawing.Size(69, 47)
-        Me.Button3.TabIndex = 13
-        Me.Button3.Text = "Gain MAX"
-        Me.Button3.UseVisualStyleBackColor = True
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.TestToolStripMenuItem, Me.HardwareToolStripMenuItem})
+        Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
+        Me.MenuStrip1.Name = "MenuStrip1"
+        Me.MenuStrip1.Size = New System.Drawing.Size(1109, 24)
+        Me.MenuStrip1.TabIndex = 16
+        Me.MenuStrip1.Text = "MenuStrip1"
         '
-        'Button4
+        'FileToolStripMenuItem
         '
-        Me.Button4.Location = New System.Drawing.Point(733, 11)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(69, 47)
-        Me.Button4.TabIndex = 14
-        Me.Button4.Text = "Gain MIN"
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SelectCameraToolStripMenuItem, Me.ToolStripMenuItem2, Me.OpenLastImageToolStripMenuItem, Me.OpenStoragePathToolStripMenuItem, Me.JoinToVideoToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
+        Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
+        Me.FileToolStripMenuItem.Text = "File"
         '
-        'Button5
+        'SelectCameraToolStripMenuItem
         '
-        Me.Button5.Location = New System.Drawing.Point(808, 12)
-        Me.Button5.Name = "Button5"
-        Me.Button5.Size = New System.Drawing.Size(94, 46)
-        Me.Button5.TabIndex = 15
-        Me.Button5.Text = "Test FTP"
-        Me.Button5.UseVisualStyleBackColor = True
+        Me.SelectCameraToolStripMenuItem.Name = "SelectCameraToolStripMenuItem"
+        Me.SelectCameraToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SelectCameraToolStripMenuItem.Text = "Select camera"
+        '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(177, 6)
+        '
+        'OpenLastImageToolStripMenuItem
+        '
+        Me.OpenLastImageToolStripMenuItem.Name = "OpenLastImageToolStripMenuItem"
+        Me.OpenLastImageToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.OpenLastImageToolStripMenuItem.Text = "Open last image"
+        '
+        'OpenStoragePathToolStripMenuItem
+        '
+        Me.OpenStoragePathToolStripMenuItem.Name = "OpenStoragePathToolStripMenuItem"
+        Me.OpenStoragePathToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.OpenStoragePathToolStripMenuItem.Text = "Open storage path"
+        '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(177, 6)
+        '
+        'ExitToolStripMenuItem
+        '
+        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ExitToolStripMenuItem.Text = "Exit"
+        '
+        'TestToolStripMenuItem
+        '
+        Me.TestToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FTPUploadToolStripMenuItem})
+        Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
+        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(39, 20)
+        Me.TestToolStripMenuItem.Text = "Test"
+        '
+        'FTPUploadToolStripMenuItem
+        '
+        Me.FTPUploadToolStripMenuItem.Name = "FTPUploadToolStripMenuItem"
+        Me.FTPUploadToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FTPUploadToolStripMenuItem.Text = "FTP upload"
+        '
+        'HardwareToolStripMenuItem
+        '
+        Me.HardwareToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.GAINToMAXToolStripMenuItem, Me.GAINToMINToolStripMenuItem})
+        Me.HardwareToolStripMenuItem.Name = "HardwareToolStripMenuItem"
+        Me.HardwareToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
+        Me.HardwareToolStripMenuItem.Text = "Hardware"
+        '
+        'GAINToMAXToolStripMenuItem
+        '
+        Me.GAINToMAXToolStripMenuItem.Name = "GAINToMAXToolStripMenuItem"
+        Me.GAINToMAXToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
+        Me.GAINToMAXToolStripMenuItem.Text = "GAIN to MAX"
+        '
+        'GAINToMINToolStripMenuItem
+        '
+        Me.GAINToMINToolStripMenuItem.Name = "GAINToMINToolStripMenuItem"
+        Me.GAINToMINToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
+        Me.GAINToMINToolStripMenuItem.Text = "GAIN to MIN"
+        '
+        'tCheckExpState
+        '
+        Me.tCheckExpState.Enabled = True
+        '
+        'JoinToVideoToolStripMenuItem
+        '
+        Me.JoinToVideoToolStripMenuItem.Name = "JoinToVideoToolStripMenuItem"
+        Me.JoinToVideoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.JoinToVideoToolStripMenuItem.Text = "Join to video"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1109, 733)
-        Me.Controls.Add(Me.Button5)
-        Me.Controls.Add(Me.Button4)
-        Me.Controls.Add(Me.Button3)
         Me.Controls.Add(Me.GroupBox1)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.tbStorageRoot)
         Me.Controls.Add(Me.scMain)
-        Me.Controls.Add(Me.btnOpenImage)
-        Me.Controls.Add(Me.tbSelectedCam)
         Me.Controls.Add(Me.btnTakeImage)
-        Me.Controls.Add(Me.btnAscomCamera)
+        Me.Controls.Add(Me.MenuStrip1)
+        Me.MainMenuStrip = Me.MenuStrip1
         Me.Name = "Form1"
         Me.Text = "AllSkyCapture Version 1.1 (21.11.2017)"
         CType(Me.pbLastImage, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.Panel1.ResumeLayout(False)
-        Me.scMain.Panel1.PerformLayout()
         Me.scMain.Panel2.ResumeLayout(False)
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
+        Me.scLeftPanel.Panel1.ResumeLayout(False)
+        Me.scLeftPanel.Panel2.ResumeLayout(False)
+        Me.scLeftPanel.Panel2.PerformLayout()
+        CType(Me.scLeftPanel, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scLeftPanel.ResumeLayout(False)
         Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
+        Me.MenuStrip1.ResumeLayout(False)
+        Me.MenuStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents btnAscomCamera As System.Windows.Forms.Button
     Friend WithEvents btnTakeImage As System.Windows.Forms.Button
     Friend WithEvents pbLastImage As System.Windows.Forms.PictureBox
     Friend WithEvents tbLog As System.Windows.Forms.TextBox
-    Friend WithEvents tbSelectedCam As System.Windows.Forms.TextBox
-    Friend WithEvents tbExposeTime As System.Windows.Forms.TextBox
-    Friend WithEvents btnOpenImage As System.Windows.Forms.Button
     Friend WithEvents scMain As SplitContainer
-    Friend WithEvents tbStorageRoot As TextBox
-    Friend WithEvents Label2 As Label
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents btnUp10 As Button
     Friend WithEvents Button1 As Button
     Friend WithEvents Button2 As Button
     Friend WithEvents btnUp2 As Button
-    Friend WithEvents Button3 As Button
-    Friend WithEvents Button4 As Button
-    Friend WithEvents Button5 As Button
+    Friend WithEvents pgMain As PropertyGrid
+    Friend WithEvents scLeftPanel As SplitContainer
+    Friend WithEvents MenuStrip1 As MenuStrip
+    Friend WithEvents FileToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents SelectCameraToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem1 As ToolStripSeparator
+    Friend WithEvents ExitToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents OpenLastImageToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents FTPUploadToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents HardwareToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents GAINToMAXToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents GAINToMINToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tCheckExpState As Timer
+    Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
+    Friend WithEvents OpenStoragePathToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents JoinToVideoToolStripMenuItem As ToolStripMenuItem
 End Class

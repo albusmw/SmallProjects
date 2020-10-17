@@ -3,30 +3,37 @@ Option Strict On
 
 Public Class Form1
 
-    Const GainNotSet As Short = Short.MinValue + 1
+    Private DB As New cDB
 
-    Dim SelectedCamera As String = "ASCOM.ASICamera2.Camera"
-    Dim FileName As String
+    Private NeverStarted As New DateTime(0)
+    Private Never As New DateTime(DateTime.MaxValue.Ticks)
+
+    Private LastTaken As DateTime = NeverStarted
+
+    Private CaptureIdx As Integer = -1
+
+    '''<summary>Name of the last saved JPG file.</summary>
+    Private LastJPG As String = String.Empty
+    '''<summary>Name of the last saved PNG file.</summary>
+    Private LastPNG As String = String.Empty
+
     Dim LastLoggedDate As New DateTime(0)
-    Dim SelectedGain As Short = GainNotSet
-    Dim CurrentImageName As String = "AllSkyImage"
-
-    Private Sub btnAscomCamera_Click(sender As Object, e As EventArgs) Handles btnAscomCamera.Click
-        tbSelectedCam.Text = Chooser_Camera()
-        Log("Selected: " & tbSelectedCam.Text)
-    End Sub
 
     Private Function Chooser_Camera() As String
         Dim Chooser As New ASCOM.Utilities.Chooser
         Chooser.DeviceType = "Camera"
-        SelectedCamera = Chooser.Choose(SelectedCamera)
-        Return SelectedCamera
+        DB.ASCOMCam = Chooser.Choose(DB.ASCOMCam)
+        Return DB.ASCOMCam
     End Function
 
     Private Sub btnTakeImage_Click(sender As Object, e As EventArgs) Handles btnTakeImage.Click
+        TakeImage(Never)
+    End Sub
+
+    Private Sub TakeImage(ByVal TimeStamp As DateTime)
 
         Log("Connecting camera")
-        Dim Camera As New ASCOM.DriverAccess.Camera(SelectedCamera)
+        Dim Camera As New ASCOM.DriverAccess.Camera(DB.ASCOMCam)
         Camera.Connected = True
         Log("    DONE (" & Camera.Description & ")")
         Log("    Gain range    : " & Camera.GainMin.ToString.Trim & " ... " & Camera.GainMax.ToString.Trim)
@@ -36,18 +43,20 @@ Public Class Form1
         Camera.BinY = 1
 
         'Set gain
-        If SelectedGain <> GainNotSet Then
-            If SelectedGain > Camera.GainMax Then SelectedGain = Camera.GainMax
-            If SelectedGain < Camera.GainMin Then SelectedGain = Camera.GainMin
-            Camera.Gain = SelectedGain
+        If DB.SelectedGain <> DB.GainNotSet Then
+            If DB.SelectedGain > Camera.GainMax Then DB.SelectedGain = Camera.GainMax
+            If DB.SelectedGain < Camera.GainMin Then DB.SelectedGain = Camera.GainMin
+            Camera.Gain = DB.SelectedGain
         End If
         Log("    Gain selected: " & Camera.Gain.ToString.Trim)
 
-        StartLog("Starting exposure with " & tbExposeTime.Text.ToString.Trim & " seconds")
+        'Start exposing
+        StartLog("Starting exposure with " & DB.ExposureTime.ToString.Trim & " seconds")
         btnTakeImage.Enabled = False : System.Windows.Forms.Application.DoEvents()
-        Camera.StartExposure(Val(tbExposeTime.Text.Replace(",", ".")), False)
+        Camera.StartExposure(DB.ExposureTime, False)
         Do
             If Camera.ImageReady Then Exit Do
+            System.Windows.Forms.Application.DoEvents()
         Loop Until 1 = 0
         Dim CCDSensorData As Integer(,) = CType(Camera.ImageArray, Integer(,))
         btnTakeImage.Enabled = True : System.Windows.Forms.Application.DoEvents()
@@ -59,10 +68,12 @@ Public Class Form1
         Log(PixelX.ToString.Trim & " x " & PixelY.ToString.Trim & " = " & (PixelX * PixelY).ToString.Trim & ", " & Camera.SensorType.ToString)
 
         Dim BitmapToCreate As Bitmap
+        Dim ColorPixelFormat As System.Drawing.Imaging.PixelFormat = System.Drawing.Imaging.PixelFormat.Format24bppRgb
+        Dim MonoPixelFormat As System.Drawing.Imaging.PixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed
         If Camera.SensorType <> ASCOM.DeviceInterface.SensorType.Monochrome Then
-            BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1) \ 2, (CCDSensorData.GetUpperBound(1) + 1) \ 2, System.Drawing.Imaging.PixelFormat.Format24bppRgb)      'color mode
+            BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1) \ 2, (CCDSensorData.GetUpperBound(1) + 1) \ 2, ColorPixelFormat)   'color mode
         Else
-            BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1), (CCDSensorData.GetUpperBound(1) + 1), System.Drawing.Imaging.PixelFormat.Format8bppIndexed)              'grayscale mode (we use 24bppRgb as well here - to be improved ...)
+            BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1), (CCDSensorData.GetUpperBound(1) + 1), MonoPixelFormat)            'grayscale mode (we use 24bppRgb as well here - to be improved ...)
         End If
 
         'Prepare underlaying bitmap byte data and copy 
@@ -71,13 +82,13 @@ Public Class Form1
         Dim TotalByteCount As Integer = Math.Abs(BitmapByteData.Stride) * BitmapToCreate.Height
         Log(TotalByteCount.ToString.Trim & " byte for bitmap")
 
-        Dim RGBValues(TotalByteCount - 1) As Byte
-        System.Runtime.InteropServices.Marshal.Copy(FirstLineAdr, RGBValues, 0, TotalByteCount)
+        Dim BitmapValues(TotalByteCount - 1) As Byte
+        System.Runtime.InteropServices.Marshal.Copy(FirstLineAdr, BitmapValues, 0, TotalByteCount)
 
         'Start manipulation of the image - copy CCD data data from the camera to the image structure
         Dim CCDSensorBayerStep As Integer = 0
-        Dim BytePerOutputPixel As Integer = 0      'RGB, each 1 byte
-        Dim Scaler As Integer = 256
+        Dim BytePerOutputPixel As Integer = 0       'RGB, each 1 byte
+        Dim Scaler As Integer = 256                 'convert 16-bit colors to 8-bit
         Dim Min As Integer = Integer.MaxValue
         Dim Max As Integer = Integer.MinValue
         Dim Y As Integer = 0
@@ -86,15 +97,15 @@ Public Class Form1
             'Color sensor
             CCDSensorBayerStep = 2
             BytePerOutputPixel = 3       'RGB, each 1 byte
-            For Counter As Integer = 0 To RGBValues.Length - 1 Step BytePerOutputPixel
+            For Counter As Integer = 0 To BitmapValues.Length - 1 Step BytePerOutputPixel
                 'Read the bayer matrix data (only use 3 of 4 pixel)
-                Dim R As Byte = CByte(Math.Floor(CCDSensorData(Y + 1, X) / Scaler))
-                Dim G As Byte = CByte(Math.Floor(CCDSensorData(Y, X) / Scaler))
-                Dim B As Byte = CByte(Math.Floor(CCDSensorData(Y, X + 1) / Scaler))
+                Dim R As Byte = CByte(Math.Floor(CCDSensorData(Y + 1, X) / Scaler)) : SetMinMax(CCDSensorData(Y + 1, X), Min, Max)
+                Dim G As Byte = CByte(Math.Floor(CCDSensorData(Y, X) / Scaler)) : SetMinMax(CCDSensorData(Y, X), Min, Max)
+                Dim B As Byte = CByte(Math.Floor(CCDSensorData(Y, X + 1) / Scaler)) : SetMinMax(CCDSensorData(Y, X + 1), Min, Max)
                 'Transfer the data to the byte array
-                RGBValues(Counter) = B
-                RGBValues(Counter + 1) = R
-                RGBValues(Counter + 2) = G
+                BitmapValues(Counter) = B
+                BitmapValues(Counter + 1) = R
+                BitmapValues(Counter + 2) = G
                 Y += CCDSensorBayerStep
                 If Y > CCDSensorData.GetUpperBound(0) Then
                     Y = 0
@@ -105,13 +116,11 @@ Public Class Form1
             'Monochromatic sensor
             CCDSensorBayerStep = 1
             BytePerOutputPixel = 1
-            For Counter As Integer = 0 To RGBValues.Length - 1 Step BytePerOutputPixel
+            For Counter As Integer = 0 To BitmapValues.Length - 1 Step BytePerOutputPixel
                 'Read the grayscale data
-                Dim Value As Byte = CByte(Math.Floor(CCDSensorData(Y, X) / Scaler))
+                Dim Value As Byte = CByte(Math.Floor(CCDSensorData(Y, X) / Scaler)) : SetMinMax(CCDSensorData(Y, X), Min, Max)
                 'Transfer the data to the byte array
-                RGBValues(Counter) = Value
-                'RGBValues(Counter + 1) = Value
-                'RGBValues(Counter + 2) = Value
+                BitmapValues(Counter) = Value
                 Y += CCDSensorBayerStep
                 If Y > CCDSensorData.GetUpperBound(0) Then
                     Y = 0
@@ -119,29 +128,67 @@ Public Class Form1
                 End If
             Next Counter
         End If
+        Log("    MIN value: " & Min.ToString.Trim)
+        Log("    MAX value: " & Max.ToString.Trim)
 
-        System.Runtime.InteropServices.Marshal.Copy(RGBValues, 0, FirstLineAdr, TotalByteCount)
+        'Add text by setting pixel to max
+        Dim IP1 As Bitmap = DrawText(DB.Inprint_station)
+        Dim NoText As Color = Color.FromArgb(0, 0, 0, 0)
+        Dim PixelValue As Byte = CByte(Math.Floor(Max / Scaler))
+        For ScanX As Integer = 0 To IP1.Width - 1
+            For ScanY As Integer = 0 To IP1.Height - 1
+                If IP1.GetPixel(ScanX, ScanY) <> NoText Then
+                    BitmapValues(ScanX + (ScanY * BitmapToCreate.Width)) = PixelValue
+                End If
+            Next ScanY
+        Next ScanX
+
+        'Get the image data from the RGB values
+        System.Runtime.InteropServices.Marshal.Copy(BitmapValues, 0, FirstLineAdr, TotalByteCount)
         BitmapToCreate.UnlockBits(BitmapByteData)
 
         'Create a grayscale palette
-        If Camera.SensorType = ASCOM.DeviceInterface.SensorType.Monochrome Then
-            Dim GrayScale As Imaging.ColorPalette = BitmapToCreate.Palette
-            For Idx As Integer = 0 To 255
-                GrayScale.Entries(Idx) = Color.FromArgb(Idx, Idx, Idx)
-            Next Idx
-            BitmapToCreate.Palette = GrayScale
+        If DB.SaveIndexedGrayscale = True Then
+            If Camera.SensorType = ASCOM.DeviceInterface.SensorType.Monochrome Then
+                Dim GrayScale As Imaging.ColorPalette = BitmapToCreate.Palette
+                For Idx As Integer = 0 To GrayScale.Entries.Length - 1
+                    GrayScale.Entries(Idx) = Color.FromArgb(Idx, Idx, Idx)
+                Next Idx
+                BitmapToCreate.Palette = GrayScale
+            End If
         End If
 
         'Set the image to be displayed
         pbLastImage.Image = BitmapToCreate
 
         'Save image
-        Dim BaseFileName As String = CurrentImageName
-        FileName = tbStorageRoot.Text & "\" & BaseFileName
-        StartLog("Saving image to <" & BaseFileName & ".png" & ">")
-        BitmapToCreate.Save(FileName & ".png", System.Drawing.Imaging.ImageFormat.Png)
-        StartLog("Saving image to <" & BaseFileName & ".jpg" & ">")
-        BitmapToCreate.Save(FileName & ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg)
+        Dim BaseFileName As String = DB.CurrentImageName
+        Dim FullPathName = IO.Path.Combine(DB.StorageRoot, BaseFileName)
+        If DB.SaveAsJPG = True Then
+            LastJPG = FullPathName & ".jpg"
+            StartLog("Saving image to <" & LastJPG & ">")
+            BitmapToCreate.Save(LastJPG, System.Drawing.Imaging.ImageFormat.Jpeg)
+        End If
+        If DB.SaveAsPNG = True Then
+            LastPNG = FullPathName & ".png"
+            StartLog("Saving image to <" & LastPNG & ">")
+            BitmapToCreate.Save(LastPNG, System.Drawing.Imaging.ImageFormat.Png)
+        End If
+
+        'Copy to timeline
+        If TimeStamp <> Never Then
+            Dim TimeFormat As String = String.Empty
+            Try
+                TimeFormat = Format(TimeStamp, DB.FileNameFormat)
+            Catch ex As Exception
+                'Do nothing
+            End Try
+            If DB.FileNameFormat.Contains("%") Then TimeFormat = Format(CaptureIdx, DB.FileNameFormat.Replace("%", "0"))
+            If DB.SaveAsJPG = True Then
+                System.IO.File.Copy(LastJPG, IO.Path.Combine(DB.StorageRoot, BaseFileName) & TimeFormat & ".jpg")
+            End If
+        End If
+
         FinishLog("    DONE.")
 
         StartLog("Disconnecting camera")
@@ -149,6 +196,11 @@ Public Class Form1
         FinishLog("    DONE.")
         Log("==============================================")
 
+    End Sub
+
+    Private Sub SetMinMax(ByVal Value As Integer, ByRef Min As Integer, ByRef Max As Integer)
+        If Value > Max Then Max = Value
+        If Value < Min Then Min = Value
     End Sub
 
     Private Sub Log(ByVal NewText As String)
@@ -187,40 +239,24 @@ Public Class Form1
         End If
     End Function
 
-    Private Sub btnOpenImage_Click(sender As Object, e As EventArgs) Handles btnOpenImage.Click
-        If MsgBox("YES for JPEG, NO for PNG", MsgBoxStyle.YesNo Or MsgBoxStyle.Question) = MsgBoxResult.Yes Then
-            Process.Start(FileName & ".jpg")
-        Else
-            Process.Start(FileName & ".png")
-        End If
-    End Sub
-
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        tbStorageRoot.Text = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+        pgMain.SelectedObject = DB
     End Sub
 
     Private Sub btnUp10_Click(sender As Object, e As EventArgs) Handles btnUp10.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) * 10).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime * 10
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) / 10).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime / 10
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) / 2).Trim.Replace(",", ".")
+        DB.ExposureTime = DB.ExposureTime / 2
     End Sub
 
     Private Sub btnUp2_Click(sender As Object, e As EventArgs) Handles btnUp2.Click
-        tbExposeTime.Text = CStr(Val(tbExposeTime.Text) * 2).Trim.Replace(",", ".")
-    End Sub
-
-    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        SelectedGain = Short.MaxValue
-    End Sub
-
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-        SelectedGain = Short.MinValue
+        DB.ExposureTime = DB.ExposureTime * 2
     End Sub
 
     Private Sub UploadFile(ByVal File As String)
@@ -232,7 +268,7 @@ Public Class Form1
         Dim FTP_Pwd As String = "qbZHD57224"
 
         'Get the object used to communicate with the server.  
-        Dim RemoteFilename As String = "ftp://www.albusmw.de/" & CurrentImageName & ".jpg"
+        Dim RemoteFilename As String = "ftp://www.albusmw.de/" & DB.CurrentImageName & ".jpg"
         Dim request As Net.FtpWebRequest = CType(Net.WebRequest.Create(RemoteFilename), Net.FtpWebRequest)
         request.Method = Net.WebRequestMethods.Ftp.UploadFile
 
@@ -255,10 +291,100 @@ Public Class Form1
 
         response.Close()
 
-
     End Sub
 
-    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        UploadFile(CurrentImageName & ".jpg")
+    Private Function ValRegIndep(ByVal Text As String) As Double
+        Return Val(Text.Replace(",", "."))
+    End Function
+
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        End
     End Sub
+
+    Private Sub SelectCameraToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SelectCameraToolStripMenuItem.Click
+        DB.ASCOMCam = Chooser_Camera()
+        Log("Selected: " & DB.ASCOMCam)
+    End Sub
+
+    Private Sub OpenLastImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastImageToolStripMenuItem.Click
+        If System.IO.File.Exists(LastJPG) = True And System.IO.File.Exists(LastPNG) = False Then Process.Start(LastJPG)
+        If System.IO.File.Exists(LastJPG) = False And System.IO.File.Exists(LastPNG) = True Then Process.Start(LastPNG)
+        If System.IO.File.Exists(LastJPG) = True And System.IO.File.Exists(LastPNG) = True Then
+            If MsgBox("YES for JPG, NO for PNG", MsgBoxStyle.YesNo Or MsgBoxStyle.Question) = MsgBoxResult.Yes Then
+                Process.Start(LastJPG)
+            Else
+                Process.Start(LastPNG)
+            End If
+        End If
+    End Sub
+
+    Private Sub FTPUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FTPUploadToolStripMenuItem.Click
+        UploadFile(IO.Path.Combine(DB.StorageRoot, DB.CurrentImageName & ".jpg"))
+    End Sub
+
+    Private Sub GAINToMAXToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMAXToolStripMenuItem.Click
+        DB.SelectedGain = Short.MaxValue
+    End Sub
+
+    Private Sub GAINToMINToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMINToolStripMenuItem.Click
+        DB.SelectedGain = Short.MinValue
+    End Sub
+
+    Private Sub tCheckExpState_Tick(sender As Object, e As EventArgs) Handles tCheckExpState.Tick
+        'Initial start
+        If LastTaken = NeverStarted And DB.CaptureInterval > 0.0 Then
+            CaptureIdx = 0
+            LastTaken = Now
+            TakeImage(LastTaken)
+        End If
+        'Next Shot
+        If DB.CaptureInterval > 0.0 Then
+            If Now >= LastTaken.AddSeconds(DB.CaptureInterval) Then
+                LastTaken = LastTaken.AddSeconds(DB.CaptureInterval)
+                CaptureIdx += 1
+                TakeImage(Now)
+            End If
+        End If
+        'Stop
+        If DB.CaptureInterval = 0 Then
+            LastTaken = NeverStarted
+        End If
+    End Sub
+
+    Private Sub OpenStoragePathToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenStoragePathToolStripMenuItem.Click
+        If System.IO.Directory.Exists(DB.StorageRoot) Then Process.Start(DB.StorageRoot)
+    End Sub
+
+    Private Sub JoinToVideoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles JoinToVideoToolStripMenuItem.Click
+        Dim FFMPEG As New ProcessStartInfo
+        With FFMPEG
+            .FileName = DB.FFMPEGEXE
+            .WorkingDirectory = System.IO.Path.GetDirectoryName(DB.FFMPEGEXE)
+            .Arguments = "-start_number 0 -f image2 -i " & DB.StorageRoot & "\AllSkyImage15.09.2020_%04d.jpg -codec:v libx264 C:\temp\output.mp4"
+            .UseShellExecute = True
+            .RedirectStandardError = False
+        End With
+        Dim Runner As Process = Process.Start(FFMPEG)
+        Runner.WaitForExit()
+        'MsgBox(Runner.StandardError.ReadToEnd)
+    End Sub
+
+    Private Function DrawText(ByVal Text As String) As Bitmap
+
+        'Create a text field and add it pixel-by-pixel
+        Dim MyFont As New Font("Courier New", DB.Inprint_FontSize)
+        Dim NoText As New Pen(Color.Black)
+        Dim RequiredSize As Drawing.Size = TextRenderer.MeasureText(Text, MyFont)
+        Dim Bmp As New Bitmap(RequiredSize.Width, RequiredSize.Height)
+        Dim gra As Graphics = Graphics.FromImage(Bmp)
+        gra.DrawRectangle(NoText, 0, 0, RequiredSize.Width, RequiredSize.Height)
+        gra.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None
+        gra.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel
+        gra.Clear(Color.Transparent)
+        TextRenderer.DrawText(gra, Text, MyFont, New Point(0, 0), Color.Red)
+        gra.Dispose()
+        Return Bmp
+
+    End Function
+
 End Class
