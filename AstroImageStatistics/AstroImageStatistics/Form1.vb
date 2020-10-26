@@ -1,8 +1,11 @@
 ﻿Option Explicit On
 Option Strict On
-Imports DocumentFormat.OpenXml.Office2013.PowerPoint.Roaming
 
 Public Class Form1
+
+    Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal pDst As IntPtr,
+                                                                 ByVal pSrc As IntPtr,
+                                                                 ByVal ByteLen As Long)
 
     Private LastOpenedFiles As New frmLastOpenedFiles
 
@@ -24,7 +27,7 @@ Public Class Form1
     '''<summary>Last FITS header.</summary>
     Private LastFITSHeader As cFITSHeaderParser
     '''<summary>Statistics of the last plot.</summary>
-    Private LastStat As AstroNET.Statistics.sStatistics
+    Public LastStat As AstroNET.Statistics.sStatistics
 
     '''<summary>Statistics of all processed files.</summary>
     Private AllStat As New Dictionary(Of String, AstroNET.Statistics.sStatistics)
@@ -32,7 +35,7 @@ Public Class Form1
     Private AllHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
 
     '''<summary>Statistics processor (for the last file).</summary>
-    Dim SingleStatCalc As AstroNET.Statistics
+    Public SingleStatCalc As AstroNET.Statistics
 
     '''<summary>Statistics for pixel with identical Y value.</summary>
     Dim StatPerRow() As Ato.cSingleValueStatistics
@@ -761,13 +764,13 @@ Public Class Form1
                             'JPG
                             Dim myEncoderParameters As New System.Drawing.Imaging.EncoderParameters(1)
                             myEncoderParameters.Param(0) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, DB.ImageQuality)
-                            cLockBitmap.CalculateOutputBitmap(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/jpeg"), myEncoderParameters)
+                            cLockBitmap.GetGrayscaleImage(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/jpeg"), myEncoderParameters)
                         Case 6
                             'PNG - try to do 8bit but only get a palett with 256 values but still 24-bit ...
                             Dim myEncoderParameters As New System.Drawing.Imaging.EncoderParameters(2)
                             myEncoderParameters.Param(0) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, DB.ImageQuality)
                             myEncoderParameters.Param(1) = New System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.ColorDepth, 8)
-                            cLockBitmap.CalculateOutputBitmap(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/png"), myEncoderParameters)
+                            cLockBitmap.GetGrayscaleImage(.ImageData(0).Data, LastStat.MonoStatistics_Int.Max.Key).BitmapToProcess.Save(sfdMain.FileName, GetEncoderInfo("image/png"), myEncoderParameters)
 
                             Dim X As New System.Windows.Media.Imaging.PngBitmapEncoder
 
@@ -1314,6 +1317,89 @@ Public Class Form1
         Log("Fixed " & FixedPixelCount.ValRegIndep & " pixel changed")
         Idle()
 
+    End Sub
+
+    Private Sub tsmiUseOpenCV_Click(sender As Object, e As EventArgs) Handles tsmiUseOpenCV.Click
+
+        'https://shimat.github.io/opencvsharp_docs/html/d69c29a1-7fb1-4f78-82e9-79be971c3d03.htm
+
+        Dim ImagePath As String = "C:\!Work\Astro\IC5146\rawframes\frame_1.png"
+
+        Using src As New OpenCvSharp.Mat(ImagePath, OpenCvSharp.ImreadModes.Grayscale)
+
+            Dim dst As New OpenCvSharp.Mat
+            OpenCvSharp.Cv2.CvtColor(src, dst, OpenCvSharp.ColorConversionCodes.GRAY2BGR)      'Converts image from one color space to another
+
+            CppStyleStarDetector(src, dst) ' C++-style
+
+            'For transformation details see https://docs.opencv.org/master/da/d6e/tutorial_py_geometric_transformations.html
+            'Dim Transformer As OpenCvSharp.Mat = OpenCvSharp.Cv2.GetRotationMatrix2D(New OpenCvSharp.Point2f(CSng((src.Width - 1) / 2), CSng((src.Height - 1) / 2)), 45.0, 1.0)
+
+            'Transformer = New  OpenCvSharp.Mat(2, 3, OpenCvSharp.MatType.CV_64FC1, New Double(,) {{1, 2, 3}, {4, 5, 6}})
+            'Dim dsize As OpenCvSharp.Size
+
+            'Dim dst As OpenCvSharp.Mat = src.WarpAffine(Transformer, dsize, OpenCvSharp.InterpolationFlags.Lanczos4, OpenCvSharp.BorderTypes.Constant)
+
+
+            Using w1 As New OpenCvSharp.Window("img", src),
+                  w2 As New OpenCvSharp.Window("features", dst)
+                OpenCvSharp.Cv2.WaitKey()
+            End Using
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' Extracts keypoints by C++-style code (cv::StarDetector)
+    ''' </summary>
+    ''' <param name="src"></param>
+    ''' <param name="dst"></param>
+    Private Sub CppStyleStarDetector(ByVal src As OpenCvSharp.Mat, ByVal dst As OpenCvSharp.Mat)
+
+        Dim detector As OpenCvSharp.XFeatures2D.StarDetector = OpenCvSharp.XFeatures2D.StarDetector.Create()
+        Dim keypoints() As OpenCvSharp.KeyPoint = detector.Detect(src, Nothing)
+
+        If keypoints IsNot Nothing Then
+            For Each kpt As OpenCvSharp.KeyPoint In keypoints
+                Dim r As Single = kpt.Size / 2
+                Dim a = kpt.Pt
+                OpenCvSharp.Cv2.Circle(dst, New OpenCvSharp.Point(kpt.Pt.X, kpt.Pt.Y), CInt(Math.Truncate(r)), New OpenCvSharp.Scalar(0, 255, 0), 1, OpenCvSharp.LineTypes.Link8, 0)
+                OpenCvSharp.Cv2.Line(dst, New OpenCvSharp.Point(kpt.Pt.X + r, kpt.Pt.Y + r), New OpenCvSharp.Point(kpt.Pt.X - r, kpt.Pt.Y - r), New OpenCvSharp.Scalar(0, 255, 0), 1, OpenCvSharp.LineTypes.Link8, 0)
+                OpenCvSharp.Cv2.Line(dst, New OpenCvSharp.Point(kpt.Pt.X - r, kpt.Pt.Y + r), New OpenCvSharp.Point(kpt.Pt.X + r, kpt.Pt.Y - r), New OpenCvSharp.Scalar(0, 255, 0), 1, OpenCvSharp.LineTypes.Link8, 0)
+            Next kpt
+        End If
+
+    End Sub
+
+    Private Sub OpenCVMedianFilterToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenCVMedianFilterToolStripMenuItem.Click
+
+        Using src As New OpenCvSharp.Mat(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2, SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1, OpenCvSharp.MatType.CV_16UC1, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data)
+
+            Dim dst As New OpenCvSharp.Mat
+            OpenCvSharp.Cv2.MedianBlur(src, dst, 3)
+
+            Dim MyHandle As Runtime.InteropServices.GCHandle = Runtime.InteropServices.GCHandle.Alloc(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, Runtime.InteropServices.GCHandleType.Pinned)
+            Dim WritePtr As IntPtr = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, 0)
+            Dim Length As Long = SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data.LongLength
+            CopyMemory(WritePtr, dst.Data, Length)
+            MyHandle.Free()
+
+            'Using w1 As New OpenCvSharp.Window("srv", src),
+            '      w2 As New OpenCvSharp.Window("dst", dst)
+            '    OpenCvSharp.Cv2.WaitKey()
+            'End Using
+
+        End Using
+
+    End Sub
+
+    Private Sub DisplayImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DisplayImageToolStripMenuItem.Click
+        Dim ImageDisplay As New frmImageDisplay
+        ImageDisplay.FileToDisplay = LastFile
+        ImageDisplay.Show()
+        ImageDisplay.DataContainer = SingleStatCalc
+        ImageDisplay.StatToUsed = LastStat
+        ImageDisplay.GenerateDisplayImage()
     End Sub
 
 End Class

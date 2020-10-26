@@ -73,6 +73,9 @@ Partial Class Form1
         Me.FITSTestFilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NEFReadingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SetPixelAboveCertainValueToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem9 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiUseOpenCV = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenCVMedianFilterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -85,6 +88,7 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
+        Me.DisplayImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -101,7 +105,7 @@ Partial Class Form1
         'msMain
         '
         Me.msMain.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem, Me.DisplayImageToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
@@ -349,7 +353,7 @@ Partial Class Form1
         '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem, Me.SetPixelAboveCertainValueToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem, Me.SetPixelAboveCertainValueToolStripMenuItem, Me.ToolStripMenuItem9, Me.tsmiUseOpenCV, Me.OpenCVMedianFilterToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -357,55 +361,72 @@ Partial Class Form1
         'WriteTestDataToolStripMenuItem1
         '
         Me.WriteTestDataToolStripMenuItem1.Name = "WriteTestDataToolStripMenuItem1"
-        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(231, 22)
+        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(336, 22)
         Me.WriteTestDataToolStripMenuItem1.Text = "Write test data"
         '
         'AfiineTranslateToolStripMenuItem
         '
         Me.AfiineTranslateToolStripMenuItem.Name = "AfiineTranslateToolStripMenuItem"
-        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.AfiineTranslateToolStripMenuItem.Text = "Afiine translate"
         '
         'BitGrayscaleFileGenerationToolStripMenuItem
         '
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Name = "BitGrayscaleFileGenerationToolStripMenuItem"
-        Me.BitGrayscaleFileGenerationToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.BitGrayscaleFileGenerationToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Text = "16bit grayscale file generation"
         '
         'ASCOMDynamicallyToolStripMenuItem
         '
         Me.ASCOMDynamicallyToolStripMenuItem.Name = "ASCOMDynamicallyToolStripMenuItem"
-        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.ASCOMDynamicallyToolStripMenuItem.Text = "ASCOM dynamically"
         '
         'ToolStripMenuItem6
         '
         Me.ToolStripMenuItem6.Name = "ToolStripMenuItem6"
-        Me.ToolStripMenuItem6.Size = New System.Drawing.Size(228, 6)
+        Me.ToolStripMenuItem6.Size = New System.Drawing.Size(333, 6)
         '
         'FocusToolStripMenuItem
         '
         Me.FocusToolStripMenuItem.Name = "FocusToolStripMenuItem"
-        Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.FocusToolStripMenuItem.Text = "Focus"
         '
         'FITSTestFilesToolStripMenuItem
         '
         Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
-        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
         '
         'NEFReadingToolStripMenuItem
         '
         Me.NEFReadingToolStripMenuItem.Name = "NEFReadingToolStripMenuItem"
-        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.NEFReadingToolStripMenuItem.Text = "NEF reading"
         '
         'SetPixelAboveCertainValueToolStripMenuItem
         '
         Me.SetPixelAboveCertainValueToolStripMenuItem.Name = "SetPixelAboveCertainValueToolStripMenuItem"
-        Me.SetPixelAboveCertainValueToolStripMenuItem.Size = New System.Drawing.Size(231, 22)
+        Me.SetPixelAboveCertainValueToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.SetPixelAboveCertainValueToolStripMenuItem.Text = "Set pixel above certain value"
+        '
+        'ToolStripMenuItem9
+        '
+        Me.ToolStripMenuItem9.Name = "ToolStripMenuItem9"
+        Me.ToolStripMenuItem9.Size = New System.Drawing.Size(333, 6)
+        '
+        'tsmiUseOpenCV
+        '
+        Me.tsmiUseOpenCV.Name = "tsmiUseOpenCV"
+        Me.tsmiUseOpenCV.Size = New System.Drawing.Size(336, 22)
+        Me.tsmiUseOpenCV.Text = "Use OpenCV"
+        '
+        'OpenCVMedianFilterToolStripMenuItem
+        '
+        Me.OpenCVMedianFilterToolStripMenuItem.Name = "OpenCVMedianFilterToolStripMenuItem"
+        Me.OpenCVMedianFilterToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.OpenCVMedianFilterToolStripMenuItem.Text = "OpenCV Median Filter (ERROR: Row-Colum issue)"
         '
         'ofdMain
         '
@@ -532,6 +553,12 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
+        'DisplayImageToolStripMenuItem
+        '
+        Me.DisplayImageToolStripMenuItem.Name = "DisplayImageToolStripMenuItem"
+        Me.DisplayImageToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
+        Me.DisplayImageToolStripMenuItem.Text = "Display image"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -628,4 +655,8 @@ Partial Class Form1
     Friend WithEvents NEFReadingToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents SetPixelAboveCertainValueToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiSetPixelToValue As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem9 As ToolStripSeparator
+    Friend WithEvents tsmiUseOpenCV As ToolStripMenuItem
+    Friend WithEvents OpenCVMedianFilterToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents DisplayImageToolStripMenuItem As ToolStripMenuItem
 End Class

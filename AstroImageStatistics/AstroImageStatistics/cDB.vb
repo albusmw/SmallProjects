@@ -130,8 +130,4 @@ Public Class cDB
         Return RetVal
     End Function
 
-
-
-
-
 End Class
