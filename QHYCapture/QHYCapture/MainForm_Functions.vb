@@ -37,6 +37,8 @@ Partial Public Class MainForm
                     Select Case PropType
                         Case GetType(Int32)
                             PropValue = CType(ExpAttrib.Value, Int32)
+                        Case GetType(UInt32)
+                            PropValue = CType(ExpAttrib.Value, UInt32)
                         Case GetType(Double)
                             PropValue = Val(ExpAttrib.Value.Replace(",", "."))
                         Case GetType(String)
@@ -71,9 +73,9 @@ Partial Public Class MainForm
     End Sub
 
     '''<summary>Start the exposure.</summary>
-    Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter, ByVal Chip_Pixel As sSize_UInt) As cSingleCaptureData
+    Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter, ByVal Chip_Pixel As sSize_UInt) As cSingleCaptureInfo
 
-        Dim SingleCaptureData As New cSingleCaptureData
+        Dim SingleCaptureData As New cSingleCaptureInfo
 
         'Set exposure parameters (first time / on property change / always if configured)
         If (CaptureIdx = 1) Or (M.DB.ConfigAlways = True) Or PropertyChanged = True Then SetExpParameters(CalculateROI(Chip_Pixel))
@@ -394,7 +396,7 @@ Partial Public Class MainForm
     '''<summary>Calculate all entries from the FITS header.</summary>
     '''<param name="SingleCaptureData">Capture configuration.</param>
     '''<param name="FileNameToWrite">File name with replacement parameters to use.</param>
-    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureData, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As Dictionary(Of eFITSKeywords, Object)
+    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureInfo, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As Dictionary(Of eFITSKeywords, Object)
 
         Dim CustomElement As New Dictionary(Of eFITSKeywords, Object)
 
@@ -403,6 +405,7 @@ Partial Public Class MainForm
         Dim PLATESZ2 As Double = (Pixel_Size.Height * SingleCaptureData.NAXIS2) / 1000                          '[mm]
         Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
         Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
+        Dim FilterName As String = [Enum].GetName(GetType(eFilter), SingleCaptureData.FilterActive)
 
         CustomElement.Add(eFITSKeywords.OBS_ID, (DB_meta.GUID))
 
@@ -423,6 +426,7 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.FOV1, FOV1)
         CustomElement.Add(eFITSKeywords.FOV2, FOV2)
         CustomElement.Add(eFITSKeywords.COLORTYP, "0")                                                           '<- check
+        CustomElement.Add(eFITSKeywords.FILTER, FilterName)
 
         CustomElement.Add(eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsStart))
         CustomElement.Add(eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsEnd))
@@ -450,7 +454,7 @@ Partial Public Class MainForm
         FileNameToWrite = FileNameToWrite.Replace("$EXP$", SingleCaptureData.ExpTime.ValRegIndep)
         FileNameToWrite = FileNameToWrite.Replace("$GAIN$", SingleCaptureData.Gain.ValRegIndep)
         FileNameToWrite = FileNameToWrite.Replace("$OFFS$", SingleCaptureData.Offset.ValRegIndep)
-        FileNameToWrite = FileNameToWrite.Replace("$FILT$", [Enum].GetName(GetType(eFilter), SingleCaptureData.FilterActive))
+        FileNameToWrite = FileNameToWrite.Replace("$FILT$", FilterName)
         FileNameToWrite = FileNameToWrite.Replace("$RMODE$", [Enum].GetName(GetType(eReadOutMode), M.DB.ReadOutMode))
 
         Return CustomElement

@@ -187,6 +187,9 @@ Public Class Form1
             If DB.SaveAsJPG = True Then
                 System.IO.File.Copy(LastJPG, IO.Path.Combine(DB.StorageRoot, BaseFileName) & TimeFormat & ".jpg")
             End If
+            If DB.SaveAsPNG = True Then
+                System.IO.File.Copy(LastPNG, IO.Path.Combine(DB.StorageRoot, BaseFileName) & TimeFormat & ".png")
+            End If
         End If
 
         FinishLog("    DONE.")
@@ -386,5 +389,14 @@ Public Class Form1
         Return Bmp
 
     End Function
+
+    Private Sub MyCaptureDefaultsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MyCaptureDefaultsToolStripMenuItem.Click
+        With DB
+            .CaptureInterval = 30
+            .SaveAsPNG = True
+            .SaveAsJPG = False
+            .FileNameFormat = "%%%%"
+        End With
+    End Sub
 
 End Class

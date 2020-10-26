@@ -96,16 +96,16 @@ Partial Public Class MainForm
             'Enter capture loop
             Dim EndTimeStamps As New List(Of DateTime)
             Dim TotalCaptureTime As Double = 0
-            Dim LastCaptureData As New cSingleCaptureData
+            Dim RunningCaptureInfo As New cSingleCaptureInfo
 
-            For CaptureIdx As UInt32 = 1 To CUInt(M.DB.CaptureCount)                              '1 extra round for async
+            For CaptureLoopCount As UInt32 = 1 To CUInt(M.DB.CaptureCount)
 
                 '================================================================================
                 ' START EXPOSURE ON FIRST ENTRY
                 '================================================================================
 
-                If CaptureIdx = 1 Then
-                    LastCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
+                If CaptureLoopCount = 1 Then
+                    RunningCaptureInfo = StartExposure(CaptureLoopCount, FilterActive, Chip_Pixel)
                 End If
 
                 '================================================================================
@@ -140,8 +140,8 @@ Partial Public Class MainForm
                     Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
                 End If
                 LED_reading(False)
-                LastCaptureData.ObsEnd = Now
-                EndTimeStamps.Add(LastCaptureData.ObsEnd)
+                RunningCaptureInfo.ObsEnd = Now
+                EndTimeStamps.Add(RunningCaptureInfo.ObsEnd)
 
                 Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
                 LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
@@ -159,8 +159,8 @@ Partial Public Class MainForm
                         LogError("Overscan removal FAILED")
                     End If
                 End If
-                LastCaptureData.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1)
-                LastCaptureData.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2)
+                RunningCaptureInfo.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1)
+                RunningCaptureInfo.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2)
                 M.DB.Stopper.Stamp("ChangeAspect")
 
                 'Software binning - if > 1 data type is moved from UInt16 to UInt32
@@ -173,9 +173,9 @@ Partial Public Class MainForm
                 'RETRIGGER CAPTURE
                 '================================================================================
 
-                Dim SingleCaptureData As cSingleCaptureData = LastCaptureData
-                If (CaptureIdx <= M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
-                    LastCaptureData = StartExposure(CaptureIdx, FilterActive, Chip_Pixel)
+                Dim LastCaptureInfo As cSingleCaptureInfo = RunningCaptureInfo
+                If (CaptureLoopCount <= M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
+                    RunningCaptureInfo = StartExposure(CUInt(CaptureLoopCount + 1), FilterActive, Chip_Pixel)
                 End If
 
                 '================================================================================
@@ -186,13 +186,13 @@ Partial Public Class MainForm
                 If EndTimeStamps.Count > 2 Then
                     Dim ThisDuration As Double = (EndTimeStamps(EndTimeStamps.Count - 1) - EndTimeStamps(EndTimeStamps.Count - 2)).TotalSeconds
                     TotalCaptureTime += ThisDuration
-                    tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureIdx / TotalCaptureTime, "0.0") & " FPS"
+                    tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureLoopCount / TotalCaptureTime, "0.0") & " FPS"
                 End If
 
                 'Calculate statistics
                 Dim SingleStat As New AstroNET.Statistics.sStatistics
-                If M.DB.CalcStatistics = True Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataModeType)
-                SingleStat.MonoStatistics_Int.Width = SingleCaptureData.NAXIS1 : SingleStat.MonoStatistics_Int.Height = SingleCaptureData.NAXIS2
+                If M.DB.CalcStatistics = True Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataFixFloat)
+                SingleStat.MonoStatistics_Int.Width = LastCaptureInfo.NAXIS1 : SingleStat.MonoStatistics_Int.Height = LastCaptureInfo.NAXIS2
 
                 LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat)
                 M.DB.Stopper.Stamp("Statistics - calc")
@@ -201,10 +201,10 @@ Partial Public Class MainForm
                 Dim DisplaySumStat As Boolean = False
                 If DB_PlotAndText.Prop.Log_ClearStat = True Then RTFGen.Clear()
                 If M.DB.CaptureCount > 1 And DB_PlotAndText.Prop.Log_ClearStat = True Then DisplaySumStat = True
-                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(DB_PlotAndText.Prop.BayerPatternNames)
-                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(DB_PlotAndText.Prop.BayerPatternNames)
+                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(False, DB_PlotAndText.Prop.BayerPatternNames)
+                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(False, DB_PlotAndText.Prop.BayerPatternNames)
                 If IsNothing(SingleStatReport) = False Then
-                    RTFGen.AddEntry("Capture #" & CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
+                    RTFGen.AddEntry("Capture #" & LastCaptureInfo.CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
                     For Idx As Integer = 0 To SingleStatReport.Count - 1
                         Dim Line As String = SingleStatReport(Idx)
                         If DisplaySumStat = True Then Line &= "#" & LoopStatReport(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
@@ -221,10 +221,10 @@ Partial Public Class MainForm
                 'Set caption
                 Dim PlotTitle As New List(Of String)
                 PlotTitle.Add(M.DB.UsedCameraId.ToString)
-                PlotTitle.Add(LastCaptureData.ExpTime.ToString.Trim & " s")
-                PlotTitle.Add("Gain " & LastCaptureData.Gain.ToString.Trim)
-                PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), LastCaptureData.FilterActive))
-                PlotTitle.Add("Temperature " & LastCaptureData.ObsStartTemp.ToString.Trim & " °C")
+                PlotTitle.Add(RunningCaptureInfo.ExpTime.ToString.Trim & " s")
+                PlotTitle.Add("Gain " & RunningCaptureInfo.Gain.ToString.Trim)
+                PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), RunningCaptureInfo.FilterActive))
+                PlotTitle.Add("Temperature " & RunningCaptureInfo.ObsStartTemp.ToString.Trim & " °C")
                 DB_PlotAndText.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
                 DB_PlotAndText.Plot(M.DB.CaptureCount, SingleStat, LoopStat)
 
@@ -262,7 +262,7 @@ Partial Public Class MainForm
 
                     'Compose all FITS keyword entries
                     Dim FileNameToWrite As String = M.DB.FileName
-                    Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(SingleCaptureData, Pixel_Size, FileNameToWrite)
+                    Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(LastCaptureInfo, Pixel_Size, FileNameToWrite)
 
                     M.DB.LastStoredFile = System.IO.Path.Combine(Path, FileNameToWrite & "." & M.DB.FITSExtension)
                     Select Case SingleStatCalc.DataMode
@@ -278,7 +278,7 @@ Partial Public Class MainForm
 
                 If M.DB.StopFlag = True Then Exit For
 
-            Next CaptureIdx
+            Next CaptureLoopCount
 
             '================================================================================
             'Stop live mode if used

@@ -8,7 +8,7 @@ Public Class M
 End Class
 
 '''<summary>Characteristics data of one single capture.</summary>
-Public Class cSingleCaptureData
+Public Class cSingleCaptureInfo
     '''<summary>Running capture index.</summary>
     Public CaptureIdx As UInt32 = 0
     '''<summary>Temperature [°C] at start of exposure.</summary>
