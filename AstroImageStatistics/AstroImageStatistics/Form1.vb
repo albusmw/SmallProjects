@@ -15,8 +15,6 @@ Public Class Form1
 
     Private DB As New cDB
 
-    '''<summary>Handle to Intel IPP functions.</summary>
-    Private IPP As cIntelIPP
     '''<summary>Location of the EXE.</summary>
     Private MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly.Location)
     '''<summary>Drag-and-drop handler.</summary>
@@ -60,7 +58,7 @@ Public Class Form1
         Dim FITSReader As New cFITSReader
         Dim DataStartPos As Integer = 0
 
-        SingleStatCalc = New AstroNET.Statistics(IPP)
+        SingleStatCalc = New AstroNET.Statistics(DB.IPP)
 
         Running()
 
@@ -360,13 +358,13 @@ Public Class Form1
         Dim IPPLoadError As String = String.Empty
         Dim IPPPathToUse As String = cIntelIPP.SearchDLLToUse(cIntelIPP.PossiblePaths(MyPath).ToArray, IPPLoadError)
         If String.IsNullOrEmpty(IPPLoadError) = True Then
-            IPP = New cIntelIPP(IPPPathToUse)
+            DB.IPP = New cIntelIPP(IPPPathToUse)
             cFITSWriter.UseIPPForWriting = True
         Else
             cFITSWriter.UseIPPForWriting = False
         End If
-        cFITSWriter.IPPPath = IPP.IPPPath
-        cFITSReader.IPPPath = IPP.IPPPath
+        cFITSWriter.IPPPath = DB.IPP.IPPPath
+        cFITSReader.IPPPath = DB.IPP.IPPPath
 
         DD = New Ato.DragDrop(tbLogOutput, False)
         pgMain.SelectedObject = DB
@@ -1041,9 +1039,9 @@ Public Class Form1
         SignalProcessing.RegressPoly(Vignette, DB.VigPolyOrder, Polynomial)
         Dim Vignette_Y_Fit As Double() = SignalProcessing.ApplyPoly(Vignette.KeyList.ToArray, Polynomial)
         Disp1.PlotData("Fitting", Vignette.KeyList.ToArray, Vignette_Y_Fit, Color.Green)
-        IPP.DivC(Vignette_Y_Fit, IPP.Max(Vignette_Y_Fit))                                                       'Norm to maximum
-        Dim NormMin As Double = IPP.Min(Vignette_Y_Fit)
-        IPP.DivC(Vignette_Y_Fit, NormMin)
+        DB.IPP.DivC(Vignette_Y_Fit, DB.IPP.Max(Vignette_Y_Fit))                                                       'Norm to maximum
+        Dim NormMin As Double = DB.IPP.Min(Vignette_Y_Fit)
+        DB.IPP.DivC(Vignette_Y_Fit, NormMin)
         Dim VignetteCorrection As New Dictionary(Of Double, Double)
         Dim YPtr As Integer = 0
         For Each Entry As Double In Vignette.KeyList
@@ -1199,7 +1197,7 @@ Public Class Form1
         TopValFiltered = TopValFiltered.SortDictionaryInverse
 
         Dim Navigator As New frmNavigator
-        Navigator.IPP = IPP
+        Navigator.IPP = DB.IPP
         Navigator.tbRootFile.Text = LastFile
         Navigator.lbPixel.Items.Clear()
         If TopValFiltered.Count > 0 Then
@@ -1397,8 +1395,9 @@ Public Class Form1
         Dim ImageDisplay As New frmImageDisplay
         ImageDisplay.FileToDisplay = LastFile
         ImageDisplay.Show()
-        ImageDisplay.DataContainer = SingleStatCalc
+        ImageDisplay.SingleStatCalc = SingleStatCalc
         ImageDisplay.StatToUsed = LastStat
+        ImageDisplay.MyIPP = DB.IPP
         ImageDisplay.GenerateDisplayImage()
     End Sub
 

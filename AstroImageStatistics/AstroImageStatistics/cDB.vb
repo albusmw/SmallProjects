@@ -3,6 +3,9 @@ Option Strict On
 
 Public Class cDB
 
+    '''<summary>Handle to Intel IPP functions.</summary>
+    Public IPP As cIntelIPP
+
     Private Const Cat_load As String = "1.) Loading"
     Private Const Cat_analysis As String = "2.) Analysis"
     Private Const Cat_Proc_Vignette As String = "3) Processing - vignette"

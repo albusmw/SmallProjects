@@ -169,6 +169,9 @@
     <Compile Include="..\..\..\src\atomics\cNEFReader.vb">
       <Link>cNEFReader.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\ComponentModelConverter.vb">
+      <Link>ComponentModelConverter.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cSingleValueStatistics.vb">
       <Link>cSingleValueStatistics.vb</Link>
     </Compile>

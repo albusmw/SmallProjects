@@ -23,50 +23,140 @@ Partial Class frmImageDisplay
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.scMain = New System.Windows.Forms.SplitContainer()
+        Me.scLeft = New System.Windows.Forms.SplitContainer()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
+        Me.scDetails = New System.Windows.Forms.SplitContainer()
+        Me.tbDetails = New System.Windows.Forms.TextBox()
+        Me.ssMain = New System.Windows.Forms.StatusStrip()
+        Me.tsslInfo1 = New System.Windows.Forms.ToolStripStatusLabel()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.SuspendLayout()
+        CType(Me.scLeft, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scLeft.Panel1.SuspendLayout()
+        Me.scLeft.Panel2.SuspendLayout()
+        Me.scLeft.SuspendLayout()
+        CType(Me.scDetails, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scDetails.Panel1.SuspendLayout()
+        Me.scDetails.SuspendLayout()
+        Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
         '
         'scMain
         '
-        Me.scMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.scMain.Location = New System.Drawing.Point(0, 0)
         Me.scMain.Name = "scMain"
         '
         'scMain.Panel1
         '
-        Me.scMain.Panel1.Controls.Add(Me.pgMain)
-        Me.scMain.Size = New System.Drawing.Size(975, 823)
+        Me.scMain.Panel1.Controls.Add(Me.scLeft)
+        Me.scMain.Size = New System.Drawing.Size(975, 798)
         Me.scMain.SplitterDistance = 248
         Me.scMain.TabIndex = 0
         '
+        'scLeft
+        '
+        Me.scLeft.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scLeft.Location = New System.Drawing.Point(0, 0)
+        Me.scLeft.Name = "scLeft"
+        Me.scLeft.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scLeft.Panel1
+        '
+        Me.scLeft.Panel1.Controls.Add(Me.pgMain)
+        '
+        'scLeft.Panel2
+        '
+        Me.scLeft.Panel2.Controls.Add(Me.scDetails)
+        Me.scLeft.Size = New System.Drawing.Size(248, 798)
+        Me.scLeft.SplitterDistance = 360
+        Me.scLeft.TabIndex = 1
+        '
         'pgMain
         '
-        Me.pgMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.pgMain.Location = New System.Drawing.Point(12, 12)
+        Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgMain.Location = New System.Drawing.Point(0, 0)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(233, 799)
+        Me.pgMain.Size = New System.Drawing.Size(248, 360)
         Me.pgMain.TabIndex = 0
+        '
+        'scDetails
+        '
+        Me.scDetails.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scDetails.Location = New System.Drawing.Point(0, 0)
+        Me.scDetails.Name = "scDetails"
+        Me.scDetails.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scDetails.Panel1
+        '
+        Me.scDetails.Panel1.Controls.Add(Me.tbDetails)
+        Me.scDetails.Size = New System.Drawing.Size(248, 434)
+        Me.scDetails.SplitterDistance = 82
+        Me.scDetails.TabIndex = 0
+        '
+        'tbDetails
+        '
+        Me.tbDetails.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tbDetails.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.tbDetails.Location = New System.Drawing.Point(0, 0)
+        Me.tbDetails.Multiline = True
+        Me.tbDetails.Name = "tbDetails"
+        Me.tbDetails.ReadOnly = True
+        Me.tbDetails.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.tbDetails.Size = New System.Drawing.Size(248, 82)
+        Me.tbDetails.TabIndex = 0
+        '
+        'ssMain
+        '
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslInfo1})
+        Me.ssMain.Location = New System.Drawing.Point(0, 801)
+        Me.ssMain.Name = "ssMain"
+        Me.ssMain.Size = New System.Drawing.Size(975, 22)
+        Me.ssMain.TabIndex = 1
+        Me.ssMain.Text = "StatusStrip1"
+        '
+        'tsslInfo1
+        '
+        Me.tsslInfo1.Name = "tsslInfo1"
+        Me.tsslInfo1.Size = New System.Drawing.Size(22, 17)
+        Me.tsslInfo1.Text = "---"
         '
         'frmImageDisplay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(975, 823)
+        Me.Controls.Add(Me.ssMain)
         Me.Controls.Add(Me.scMain)
+        Me.KeyPreview = True
         Me.Name = "frmImageDisplay"
         Me.Text = "Image display"
         Me.scMain.Panel1.ResumeLayout(False)
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
+        Me.scLeft.Panel1.ResumeLayout(False)
+        Me.scLeft.Panel2.ResumeLayout(False)
+        CType(Me.scLeft, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scLeft.ResumeLayout(False)
+        Me.scDetails.Panel1.ResumeLayout(False)
+        Me.scDetails.Panel1.PerformLayout()
+        CType(Me.scDetails, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scDetails.ResumeLayout(False)
+        Me.ssMain.ResumeLayout(False)
+        Me.ssMain.PerformLayout()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
 
     Friend WithEvents scMain As SplitContainer
     Friend WithEvents pgMain As PropertyGrid
+    Friend WithEvents ssMain As StatusStrip
+    Friend WithEvents tsslInfo1 As ToolStripStatusLabel
+    Friend WithEvents scLeft As SplitContainer
+    Friend WithEvents scDetails As SplitContainer
+    Friend WithEvents tbDetails As TextBox
 End Class

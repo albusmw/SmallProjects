@@ -27,3 +27,6 @@ Solver testing:
 
 
 Histo code:				https://pastebin.com/Wb0J48E1
+
+- frmImageDisplay:		* Nicht nur percentage, sondern direkt Wert eingebbar machen für cut-off percentage
+                        * Anzeigen wieviele Pixel im Range sind 
