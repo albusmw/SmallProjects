@@ -174,7 +174,7 @@ Partial Public Class MainForm
                 '================================================================================
 
                 Dim LastCaptureInfo As cSingleCaptureInfo = RunningCaptureInfo
-                If (CaptureLoopCount <= M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
+                If (CaptureLoopCount < M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
                     RunningCaptureInfo = StartExposure(CUInt(CaptureLoopCount + 1), FilterActive, Chip_Pixel)
                 End If
 
@@ -260,11 +260,14 @@ Partial Public Class MainForm
                     Dim Path As String = System.IO.Path.Combine(M.DB.StoragePath, DB_meta.GUID)
                     If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
 
-                    'Compose all FITS keyword entries
+                    'Compose all FITS keyword entries and replace placeholders in filename ($EXP$, ...)
                     Dim FileNameToWrite As String = M.DB.FileName
                     Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(LastCaptureInfo, Pixel_Size, FileNameToWrite)
 
-                    M.DB.LastStoredFile = System.IO.Path.Combine(Path, FileNameToWrite & "." & M.DB.FITSExtension)
+                    'Generate final filename
+                    M.DB.LastStoredFile = MakeUnique(System.IO.Path.Combine(Path, FileNameToWrite & "." & M.DB.FITSExtension))
+
+                    'Store file and display if selected
                     Select Case SingleStatCalc.DataMode
                         Case AstroNET.Statistics.eDataMode.UInt16
                             cFITSWriter.Write(M.DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
@@ -310,6 +313,23 @@ Partial Public Class MainForm
         M.DB.RunningFlag = False
 
     End Sub
+
+    Private Function MakeUnique(ByVal FullPath As String) As String
+        If System.IO.File.Exists(FullPath) = False Then
+            'FullPath OK
+        Else
+            Dim Dir As String = IO.Path.GetDirectoryName(FullPath)
+            Dim FileName As String = IO.Path.GetFileNameWithoutExtension(FullPath)
+            Dim FileExt As String = IO.Path.GetExtension(FullPath)
+            Dim FileIdx As Integer = 1
+            Do
+                FullPath = System.IO.Path.Combine(Dir, FileName & "(" & FileIdx.ToString.Trim & ")" & FileExt)
+                If System.IO.File.Exists(FullPath) = False Then Exit Do
+                FileIdx += 1
+            Loop Until 1 = 0
+        End If
+        Return FullPath
+    End Function
 
     '''<summary>Keep the GUI alive during exposure.</summary>
     '''<param name="ExposureTime">Expected time for the display.</param>
