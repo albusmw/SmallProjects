@@ -60,7 +60,7 @@ Partial Class frmNavigator
         Me.tbFilterString.Name = "tbFilterString"
         Me.tbFilterString.Size = New System.Drawing.Size(1120, 20)
         Me.tbFilterString.TabIndex = 1
-        Me.tbFilterString.Text = "QHY600_L_*.*"
+        Me.tbFilterString.Text = "QHY600_L_*.fit*"
         '
         'tbOffsetX
         '

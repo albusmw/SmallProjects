@@ -53,13 +53,15 @@ Partial Class frmImageDisplay
         'scMain.Panel1
         '
         Me.scMain.Panel1.Controls.Add(Me.scLeft)
-        Me.scMain.Size = New System.Drawing.Size(975, 798)
-        Me.scMain.SplitterDistance = 248
+        Me.scMain.Size = New System.Drawing.Size(1134, 974)
+        Me.scMain.SplitterDistance = 288
         Me.scMain.TabIndex = 0
         '
         'scLeft
         '
-        Me.scLeft.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scLeft.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.scLeft.Location = New System.Drawing.Point(0, 0)
         Me.scLeft.Name = "scLeft"
         Me.scLeft.Orientation = System.Windows.Forms.Orientation.Horizontal
@@ -71,8 +73,8 @@ Partial Class frmImageDisplay
         'scLeft.Panel2
         '
         Me.scLeft.Panel2.Controls.Add(Me.scDetails)
-        Me.scLeft.Size = New System.Drawing.Size(248, 798)
-        Me.scLeft.SplitterDistance = 360
+        Me.scLeft.Size = New System.Drawing.Size(288, 974)
+        Me.scLeft.SplitterDistance = 412
         Me.scLeft.TabIndex = 1
         '
         'pgMain
@@ -80,7 +82,7 @@ Partial Class frmImageDisplay
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(0, 0)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(248, 360)
+        Me.pgMain.Size = New System.Drawing.Size(288, 412)
         Me.pgMain.TabIndex = 0
         '
         'scDetails
@@ -93,8 +95,8 @@ Partial Class frmImageDisplay
         'scDetails.Panel1
         '
         Me.scDetails.Panel1.Controls.Add(Me.tbDetails)
-        Me.scDetails.Size = New System.Drawing.Size(248, 434)
-        Me.scDetails.SplitterDistance = 82
+        Me.scDetails.Size = New System.Drawing.Size(288, 558)
+        Me.scDetails.SplitterDistance = 213
         Me.scDetails.TabIndex = 0
         '
         'tbDetails
@@ -106,15 +108,15 @@ Partial Class frmImageDisplay
         Me.tbDetails.Name = "tbDetails"
         Me.tbDetails.ReadOnly = True
         Me.tbDetails.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbDetails.Size = New System.Drawing.Size(248, 82)
+        Me.tbDetails.Size = New System.Drawing.Size(288, 213)
         Me.tbDetails.TabIndex = 0
         '
         'ssMain
         '
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslInfo1})
-        Me.ssMain.Location = New System.Drawing.Point(0, 801)
+        Me.ssMain.Location = New System.Drawing.Point(0, 977)
         Me.ssMain.Name = "ssMain"
-        Me.ssMain.Size = New System.Drawing.Size(975, 22)
+        Me.ssMain.Size = New System.Drawing.Size(1134, 22)
         Me.ssMain.TabIndex = 1
         Me.ssMain.Text = "StatusStrip1"
         '
@@ -128,7 +130,7 @@ Partial Class frmImageDisplay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(975, 823)
+        Me.ClientSize = New System.Drawing.Size(1134, 999)
         Me.Controls.Add(Me.ssMain)
         Me.Controls.Add(Me.scMain)
         Me.KeyPreview = True
