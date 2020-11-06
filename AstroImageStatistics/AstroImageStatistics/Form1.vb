@@ -369,14 +369,13 @@ Public Class Form1
         DD = New Ato.DragDrop(tbLogOutput, False)
         pgMain.SelectedObject = DB
 
-        'Drop auswerten
+        'If a file is droped to the EXE (icon), use this as filename
         With My.Application
             If .CommandLineArgs.Count > 0 Then
                 Dim FileName As String = .CommandLineArgs.Item(0)
                 If System.IO.File.Exists(FileName) Then LoadFile(FileName)
             End If
         End With
-
 
     End Sub
 
@@ -861,11 +860,11 @@ Public Class Form1
         Dim SolverIn_Dec As String() = File_Dec_JNow.Trim.Trim("'"c).Split(":"c)
         cPlateSolve.PlateSolvePath = DB.PlateSolve2Path
         With Solver
-            .SetRA(CInt(SolverIn_RA(0)), CInt(SolverIn_RA(1)), Val(SolverIn_RA(2)))                     'theoretical position (Wikipedia, J2000.0)
-            .SetDec(CInt(SolverIn_Dec(0)), CInt(SolverIn_Dec(1)), Val(SolverIn_Dec(2)))                 'theoretical position (Wikipedia, J2000.0)
-            .SetDimX(Val(File_FOV1) * 60)                                                               'constant for system [telescope-camera]
-            .SetDimY(Val(File_FOV2) * 60)                                                               'constant for system [telescope-camera]
-            .HoldOpenTime = 100
+            .SetRA(File_RA_J2000)                                                                       'theoretical position (Wikipedia, J2000.0)
+            .SetDec(File_Dec_J2000)                                                                     'theoretical position (Wikipedia, J2000.0)
+            .SetDimX(Val(File_FOV1) * cPlateSolve.DegToMin)                                             'constant for system [telescope-camera]
+            .SetDimY(Val(File_FOV2) * cPlateSolve.DegToMin)                                             'constant for system [telescope-camera]
+            .HoldOpenTime = DB.PlateSolve2HoldOpen
             Dim RawOut As String() = {}
             ErrorCode1 = .Solve(LastFile, RawOut)
         End With
@@ -878,18 +877,15 @@ Public Class Form1
         J2000ToJNow(Solver.SolvedRA * RadToH, Solver.SolvedDec * RadToGrad, JNow_RA_solved, JNow_Dec_solved)
 
         Dim Output As New List(Of String)
-        Output.Add("Start with   RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow)")
+        Output.Add("Start with   RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow file string)")
         Output.Add("             RA <" & Ato.AstroCalc.FormatHMS(File_RA_J2000) & ">, DEC <" & Ato.AstroCalc.Format360Degree(File_Dec_J2000) & "> (J2000)")
         Output.Add("Solved as    RA <" & Ato.AstroCalc.FormatHMS(Solver.SolvedRA * RadToH) & ">, DEC <" & Ato.AstroCalc.Format360Degree(Solver.SolvedDec * RadToGrad) & "> (J2000)")
         Output.Add("Converted to RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
+        Output.Add("Angle           <" & Solver.RotationAngle.ValRegIndep & ">")
+        Output.Add("Error        RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
+        Output.Add("             RA <" & Solver.PixelErrorRA.ValRegIndep & " pixel>, DEC < " & Solver.PixelErrorDec.ValRegIndep & " pixel>")
 
-        MsgBox(Join(Output.ToArray, System.Environment.NewLine))
-
-
-
-
-
-
+        Log("PLATE SOLVE: > ", Output.ToArray)
 
         '----------------------------------------------------------------------------------------------------
         'Code taken from ASCOM_CamTest
@@ -941,13 +937,13 @@ Public Class Form1
 
         'Next File
 
-
-
-
-
     End Sub
 
     '''<summary>Convert JNow to J2000 epoch.</summary>
+    '''<param name="JNowRA">RA in apparent co-ordinates [hours].</param>
+    '''<param name="JNowDec">DEC in apparent co-ordinates [deg].</param>
+    '''<param name="J2000RA">J2000 Right Ascension [hours].</param>
+    '''<param name="J2000Dec">J2000 Declination [deg].</param>
     '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
     Public Shared Sub JNowToJ2000(ByVal JNowRA As Double, ByVal JNowDec As Double, ByRef J2000RA As Double, ByRef J2000Dec As Double)
         Dim X As New ASCOM.Astrometry.Transform.Transform
@@ -1398,7 +1394,33 @@ Public Class Form1
         ImageDisplay.SingleStatCalc = SingleStatCalc
         ImageDisplay.StatToUsed = LastStat
         ImageDisplay.MyIPP = DB.IPP
+        ImageDisplay.Props.MinCutOff = LastStat.MonoStatistics_Int.Min.Key
+        ImageDisplay.Props.MaxCutOff = LastStat.MonoStatistics_Int.Max.Key
         ImageDisplay.GenerateDisplayImage()
+    End Sub
+
+    Private Sub CoordsForALADINCallToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CoordsForALADINCallToolStripMenuItem.Click
+
+        Dim FileToRun As String = LastFile
+
+        'Get the FITS header information
+        Dim DataStartPos As Integer = -1
+        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun, DataStartPos)
+        Dim File_RA_JNow As String = Nothing
+        Dim File_Dec_JNow As String = Nothing
+        For Each Entry As cFITSHeaderParser.sHeaderElement In X
+            If Entry.Keyword = eFITSKeywords.RA Then File_RA_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
+            If Entry.Keyword = eFITSKeywords.DEC Then File_Dec_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
+        Next Entry
+
+        'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
+        Dim File_RA_J2000 As Double = Double.NaN
+        Dim File_Dec_J2000 As Double = Double.NaN
+        JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
+
+        Dim AladinCall As String = Ato.AstroCalc.FormatHMS(File_RA_J2000) & " " & Ato.AstroCalc.Format360Degree(File_Dec_J2000)
+        Clipboard.Clear:Clipboard.SetText(AladinCall)
+
     End Sub
 
 End Class

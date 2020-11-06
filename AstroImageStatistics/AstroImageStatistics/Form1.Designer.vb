@@ -76,6 +76,7 @@ Partial Class Form1
         Me.ToolStripMenuItem9 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiUseOpenCV = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenCVMedianFilterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DisplayImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -88,7 +89,8 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
-        Me.DisplayImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.CoordsForALADINCallToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -105,7 +107,7 @@ Partial Class Form1
         'msMain
         '
         Me.msMain.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem, Me.DisplayImageToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem, Me.DisplayImageToolStripMenuItem, Me.ToolsToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
@@ -428,6 +430,12 @@ Partial Class Form1
         Me.OpenCVMedianFilterToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
         Me.OpenCVMedianFilterToolStripMenuItem.Text = "OpenCV Median Filter (ERROR: Row-Colum issue)"
         '
+        'DisplayImageToolStripMenuItem
+        '
+        Me.DisplayImageToolStripMenuItem.Name = "DisplayImageToolStripMenuItem"
+        Me.DisplayImageToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
+        Me.DisplayImageToolStripMenuItem.Text = "Display image"
+        '
         'ofdMain
         '
         Me.ofdMain.Multiselect = True
@@ -553,11 +561,18 @@ Partial Class Form1
         Me.scLeft.SplitterDistance = 570
         Me.scLeft.TabIndex = 0
         '
-        'DisplayImageToolStripMenuItem
+        'ToolsToolStripMenuItem
         '
-        Me.DisplayImageToolStripMenuItem.Name = "DisplayImageToolStripMenuItem"
-        Me.DisplayImageToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
-        Me.DisplayImageToolStripMenuItem.Text = "Display image"
+        Me.ToolsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.CoordsForALADINCallToolStripMenuItem})
+        Me.ToolsToolStripMenuItem.Name = "ToolsToolStripMenuItem"
+        Me.ToolsToolStripMenuItem.Size = New System.Drawing.Size(46, 22)
+        Me.ToolsToolStripMenuItem.Text = "Tools"
+        '
+        'CoordsForALADINCallToolStripMenuItem
+        '
+        Me.CoordsForALADINCallToolStripMenuItem.Name = "CoordsForALADINCallToolStripMenuItem"
+        Me.CoordsForALADINCallToolStripMenuItem.Size = New System.Drawing.Size(196, 22)
+        Me.CoordsForALADINCallToolStripMenuItem.Text = "Coords for ALADIN call"
         '
         'Form1
         '
@@ -659,4 +674,6 @@ Partial Class Form1
     Friend WithEvents tsmiUseOpenCV As ToolStripMenuItem
     Friend WithEvents OpenCVMedianFilterToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents DisplayImageToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents CoordsForALADINCallToolStripMenuItem As ToolStripMenuItem
 End Class

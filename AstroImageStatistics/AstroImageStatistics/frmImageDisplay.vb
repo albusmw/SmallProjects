@@ -4,7 +4,7 @@ Option Strict On
 Public Class frmImageDisplay
 
     '''<summary>Configuration for the display.</summary>
-    Private ImageDisplayProp As New cImageDisplayProp
+    Public Props As New cImageDisplayProp
 
     '''<summary>Statistics calculator (where the image data are stored ...).</summary>
     Public SingleStatCalc As AstroNET.Statistics
@@ -19,6 +19,8 @@ Public Class frmImageDisplay
     '''<summary>A copy of the image as 1D vector (increases speed).</summary>
     Private ImageData() As UInt16
     Private OutputImage As cLockBitmap32Bit
+
+    Private ZoomInOutputImage As cLockBitmap32Bit
 
     'This elements are self-coded and will not work in 64-bit from the toolbox ...
     Private WithEvents pbMain As PictureBoxEx
@@ -60,7 +62,7 @@ Public Class frmImageDisplay
 
         'Configure GUI in general
         scMain.SplitterDistance = 200
-        pgMain.SelectedObject = ImageDisplayProp
+        pgMain.SelectedObject = Props
 
     End Sub
 
@@ -92,8 +94,8 @@ Public Class frmImageDisplay
 
         'Display final image
         Stopper.Tic()
-        pbMain.BackColor = ImageDisplayProp.BackColor
-        pbZoomed.BackColor = ImageDisplayProp.BackColor
+        pbMain.BackColor = Props.BackColor
+        pbZoomed.BackColor = Props.BackColor
         OutputImage.UnlockBits()
         pbMain.Image = OutputImage.BitmapToProcess
         Stopper.Toc("Display image")
@@ -108,37 +110,35 @@ Public Class frmImageDisplay
     Private Sub CalculateLUT()
 
         'Calculate data range and scaling
-        Dim MinRangeEnd As Long = StatToUsed.MonochromHistogram_PctFract(ImageDisplayProp.LowCutOffPct)
-        Dim MaxRangeEnd As Long = StatToUsed.MonochromHistogram_PctFract(ImageDisplayProp.UpperCutOffPct)
-        Dim Data_Min As Long = StatToUsed.MonoStatistics_Int.Min.Key : If ImageDisplayProp.MinMaxPctRescale = True Then Data_Min = MinRangeEnd
-        Dim Data_Max As Long = StatToUsed.MonoStatistics_Int.Max.Key : If ImageDisplayProp.MinMaxPctRescale = True Then Data_Max = MaxRangeEnd
+        Dim Data_Min As Long = StatToUsed.MonoStatistics_Int.Min.Key : If Props.MinMaxPctRescale = True Then Data_Min = Props.MinCutOff
+        Dim Data_Max As Long = StatToUsed.MonoStatistics_Int.Max.Key : If Props.MinMaxPctRescale = True Then Data_Max = Props.MaxCutOff
         Dim LinOffset As Double = -Data_Min
         Dim LinScale As Double = 255 / (Data_Max - Data_Min)
-        Dim MinRangeScaled As Double = Math.Floor((MinRangeEnd + LinOffset) * LinScale)
-        Dim MaxRangeScaled As Double = Math.Floor((MaxRangeEnd + LinOffset) * LinScale)
+        Dim MinRangeScaled As Double = Math.Floor((Props.MinCutOff + LinOffset) * LinScale)
+        Dim MaxRangeScaled As Double = Math.Floor((Props.MaxCutOff + LinOffset) * LinScale)
 
         'Generate LUT
         For Each Entry As Long In StatToUsed.MonochromHistogram_Int.Keys
             Dim ColorToUse As Color
             Select Case Entry
-                Case Is < MinRangeEnd
-                    If ImageDisplayProp.CutOffSpecialColor = True Then
-                        ColorToUse = ImageDisplayProp.LowCutOffPctColor
+                Case Is < Props.MinCutOff
+                    If Props.CutOffSpecialColor = True Then
+                        ColorToUse = Props.MinCutOff_color
                     Else
-                        ColorToUse = cColorMaps.ColorByMap(MinRangeScaled, ImageDisplayProp.ColorMap)
+                        ColorToUse = cColorMaps.ColorByMap(MinRangeScaled, Props.ColorMap)
                     End If
-                Case Is > MaxRangeEnd
-                    If ImageDisplayProp.CutOffSpecialColor = True Then
-                        ColorToUse = ImageDisplayProp.UpperCutOffPctColor
+                Case Is > Props.MaxCutOff
+                    If Props.CutOffSpecialColor = True Then
+                        ColorToUse = Props.MaxCutOff_color
                     Else
-                        ColorToUse = cColorMaps.ColorByMap(MaxRangeScaled, ImageDisplayProp.ColorMap)
+                        ColorToUse = cColorMaps.ColorByMap(MaxRangeScaled, Props.ColorMap)
                     End If
                 Case Else
-                    If ImageDisplayProp.ColorUniMode = True Then
-                        ColorToUse = ImageDisplayProp.ColorUni
+                    If Props.ColorUniMode = True Then
+                        ColorToUse = Props.ColorUni
                     Else
                         Dim Scaled As Double = Math.Floor((Entry + LinOffset) * LinScale)
-                        ColorToUse = cColorMaps.ColorByMap(Scaled, ImageDisplayProp.ColorMap)
+                        ColorToUse = cColorMaps.ColorByMap(Scaled, Props.ColorMap)
                     End If
             End Select
             LUT(CInt(Entry)) = (CInt(ColorToUse.A) << 24) + (CInt(ColorToUse.R) << 16) + (CInt(ColorToUse.G) << 8) + CInt(ColorToUse.B)
@@ -171,29 +171,37 @@ Public Class frmImageDisplay
     End Sub
 
     Private Sub pgMain_PropertyValueChanged(s As Object, e As PropertyValueChangedEventArgs) Handles pgMain.PropertyValueChanged
+        Select Case pgMain.SelectedGridItem.PropertyDescriptor.Name
+            Case "MinCutOff_pct"
+                Props.MinCutOff = StatToUsed.MonochromHistogram_PctFract(Props.MinCutOff_pct)
+            Case "MaxCutOff_pct"
+                Props.MaxCutOff = StatToUsed.MonochromHistogram_PctFract(Props.MaxCutOff_pct)
+        End Select
+        DisplayCurrentProps()
         GenerateDisplayImage()
     End Sub
 
     Private Sub pgMain_MouseWheel(sender As Object, e As MouseEventArgs) Handles pgMain.MouseWheel
         Dim PropToChange As cImageDisplayProp = CType(pgMain.SelectedObject, cImageDisplayProp)
         Select Case pgMain.SelectedGridItem.PropertyDescriptor.Name
-            Case "UpperCutOffPct"
-                PropToChange.UpperCutOffPct += Math.Sign(e.Delta) * PropToChange.PctStepSize
-                If PropToChange.UpperCutOffPct > 100.0 Then PropToChange.UpperCutOffPct = 100.0
-                GenerateDisplayImage()
-            Case "LowCutOffPct"
-                PropToChange.LowCutOffPct += Math.Sign(e.Delta) * PropToChange.PctStepSize
-                If PropToChange.LowCutOffPct < 0.0 Then PropToChange.LowCutOffPct = 0.0
-                GenerateDisplayImage()
+            Case "MinCutOff_pct"
+                PropToChange.MinCutOff_pct += Math.Sign(e.Delta) * PropToChange.PctStepSize
+                If PropToChange.MinCutOff_pct < 0.0 Then PropToChange.MinCutOff_pct = 0.0
+                Props.MinCutOff = StatToUsed.MonochromHistogram_PctFract(Props.MinCutOff_pct)
+            Case "MaxCutOff_pct"
+                PropToChange.MaxCutOff_pct += Math.Sign(e.Delta) * PropToChange.PctStepSize
+                If PropToChange.MaxCutOff_pct > 100.0 Then PropToChange.MaxCutOff_pct = 100.0
+                Props.MaxCutOff = StatToUsed.MonochromHistogram_PctFract(Props.MaxCutOff_pct)
         End Select
-        pgMain.SelectedObject = ImageDisplayProp
+        DisplayCurrentProps()
+        GenerateDisplayImage()
     End Sub
 
     Private Sub pbMain_MouseWheel(sender As Object, e As MouseEventArgs) Handles pbMain.MouseWheel
         If e.Delta > 0 Then
-            ImageDisplayProp.ZoomSize -= 2
+            Props.ZoomSize -= 2
         Else
-            ImageDisplayProp.ZoomSize += 2
+            Props.ZoomSize += 2
         End If
         UpdateZoomCenter()
         ShowDetails()
@@ -222,13 +230,13 @@ Public Class frmImageDisplay
 
         'Calculate the zoom area
         Dim X_left As Integer : Dim X_right As Integer : Dim Y_up As Integer : Dim Y_down As Integer
-        Dim RealCenter As Point = PictureBoxEx.CenterSizeToXY(Coordinates, ImageDisplayProp.ZoomSize, X_left, X_right, Y_up, Y_down)
+        Dim RealCenter As Point = PictureBoxEx.CenterSizeToXY(Coordinates, Props.ZoomSize, X_left, X_right, Y_up, Y_down)
 
         'Set ROI rectangle coordinates
         ROICoord = New Rectangle(X_left, Y_up, X_right - X_left + 1, Y_down - Y_up + 1)
-        ImageDisplayProp.Zoom_X = RealCenter.X
-        ImageDisplayProp.Zoom_Y = RealCenter.Y
-        pgMain.SelectedObject = ImageDisplayProp
+        Props.Zoom_X = RealCenter.X
+        Props.Zoom_Y = RealCenter.Y
+        pgMain.SelectedObject = Props
 
     End Sub
 
@@ -251,14 +259,14 @@ Public Class frmImageDisplay
         tbDetails.Text = String.Join(System.Environment.NewLine, Report)
 
         'Extend scale if configured
-        If ImageDisplayProp.ZoomExtendRange Then
+        If Props.ZoomExtendRange Then
 
         End If
 
         'Get the magnified version
-        Dim ZoomInAsDisplayed(,) As UInt16 = ImgArrayFunction.RepeatePixel(ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, ImageDisplayProp.PixelPerRealPixel)
+        Dim ZoomInAsDisplayed(,) As UInt16 = ImgArrayFunction.RepeatePixel(ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, Props.PixelPerRealPixel)
 
-        Dim ZoomInOutputImage As New cLockBitmap32Bit(ZoomInAsDisplayed.GetUpperBound(0) + 1, ZoomInAsDisplayed.GetUpperBound(1) + 1)
+        ZoomInOutputImage = New cLockBitmap32Bit(ZoomInAsDisplayed.GetUpperBound(0) + 1, ZoomInAsDisplayed.GetUpperBound(1) + 1)
         ZoomInOutputImage.LockBits(False)
         Dim CopyPtr As Integer = 0
         For Y As Integer = 0 To ZoomInAsDisplayed.GetUpperBound(1)
@@ -269,9 +277,21 @@ Public Class frmImageDisplay
             Next X
         Next Y
         ZoomInOutputImage.UnlockBits()
-        pbZoomed.InterpolationMode = ImageDisplayProp.ZoomInterpolation
+        pbZoomed.InterpolationMode = Props.ZoomInterpolation
         pbZoomed.Image = ZoomInOutputImage.BitmapToProcess
 
+    End Sub
+
+    Private Sub cms_SetCutOff_Click(sender As Object, e As EventArgs) Handles cms_SetCutOff.Click
+        Props.MinCutOff = ZoomStatistics.MonoStatistics_Int.Min.Key
+        Props.MaxCutOff = ZoomStatistics.MonoStatistics_Int.Max.Key
+        DisplayCurrentProps()
+        GenerateDisplayImage()
+    End Sub
+
+    '''<summary>Display the updated properties.</summary>
+    Private Sub DisplayCurrentProps()
+        pgMain.SelectedObject = Props
     End Sub
 
 End Class
@@ -287,26 +307,40 @@ Public Class cImageDisplayProp
     <ComponentModel.DisplayName("a) Lower cut-off percentage")>
     <ComponentModel.Description("Values below this percentage value are special colored")>
     <ComponentModel.DefaultValue(0.0)>
-    Public Property LowCutOffPct As Double = 0.0
+    Public Property MinCutOff_pct As Double = 0.0
+
+    '''<summary>Values below this percentage value are special colored.</summary>
+    <ComponentModel.Category(Cat_Range)>
+    <ComponentModel.DisplayName("a) Lower cut-off percentage")>
+    <ComponentModel.Description("Values below this percentage value are special colored")>
+    <ComponentModel.DefaultValue(0)>
+    Public Property MinCutOff As System.Int64 = System.Int64.MinValue
 
     '''<summary>Color to use if value is below display range.</summary>
     <ComponentModel.Category(Cat_Range)>
     <ComponentModel.DisplayName("b) Lower cut-off color")>
     <ComponentModel.Description("Color for values below this percentage value")>
-    Public Property LowCutOffPctColor As Color = Color.Blue
+    Public Property MinCutOff_color As Color = Color.Blue
 
     '''<summary>Stop display color conversion at given percentage value.</summary>
     <ComponentModel.Category(Cat_Range)>
     <ComponentModel.DisplayName("c) Upper cut-off percentage")>
     <ComponentModel.Description("Values above this percentage value are special colored")>
     <ComponentModel.DefaultValue(100.0)>
-    Public Property UpperCutOffPct As Double = 100.0
+    Public Property MaxCutOff_pct As Double = 100.0
+
+    '''<summary>Stop display color conversion at given percentage value.</summary>
+    <ComponentModel.Category(Cat_Range)>
+    <ComponentModel.DisplayName("c) Upper cut-off percentage")>
+    <ComponentModel.Description("Values above this percentage value are special colored")>
+    <ComponentModel.DefaultValue(0)>
+    Public Property MaxCutOff As System.Int64 = System.Int64.MaxValue
 
     '''<summary>Color to use if value is above display range.</summary>
     <ComponentModel.Category(Cat_Range)>
     <ComponentModel.DisplayName("d) Upper cut-off color")>
     <ComponentModel.Description("Color for values above this percentage value")>
-    Public Property UpperCutOffPctColor As Color = Color.Red
+    Public Property MaxCutOff_color As Color = Color.Red
 
     '''<summary>Color to use if value is above display range.</summary>
     <ComponentModel.Category(Cat_Range)>

@@ -41,6 +41,11 @@ Public Class cDB
     <ComponentModel.DefaultValue("C:\Bin\PlateSolve2\PlateSolve2.exe")>
     Public Property PlateSolve2Path As String = "C:\Bin\PlateSolve2\PlateSolve2.exe"
 
+    <ComponentModel.Category(Cat_analysis)>
+    <ComponentModel.DisplayName("d.) PlateSolve2 hold open time")>
+    <ComponentModel.DefaultValue(0)>
+    Public Property PlateSolve2HoldOpen As Integer = 0
+
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName("a.) Clean log on any analysis?")>
     <ComponentModel.DefaultValue(True)>

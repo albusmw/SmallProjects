@@ -22,11 +22,14 @@ Partial Class frmImageDisplay
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.scDetails = New System.Windows.Forms.SplitContainer()
         Me.tbDetails = New System.Windows.Forms.TextBox()
+        Me.cmsImage = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.cms_SetCutOff = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslInfo1 = New System.Windows.Forms.ToolStripStatusLabel()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -39,6 +42,7 @@ Partial Class frmImageDisplay
         CType(Me.scDetails, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scDetails.Panel1.SuspendLayout()
         Me.scDetails.SuspendLayout()
+        Me.cmsImage.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -53,6 +57,10 @@ Partial Class frmImageDisplay
         'scMain.Panel1
         '
         Me.scMain.Panel1.Controls.Add(Me.scLeft)
+        '
+        'scMain.Panel2
+        '
+        Me.scMain.Panel2.ContextMenuStrip = Me.cmsImage
         Me.scMain.Size = New System.Drawing.Size(1134, 974)
         Me.scMain.SplitterDistance = 288
         Me.scMain.TabIndex = 0
@@ -111,6 +119,18 @@ Partial Class frmImageDisplay
         Me.tbDetails.Size = New System.Drawing.Size(288, 213)
         Me.tbDetails.TabIndex = 0
         '
+        'cmsImage
+        '
+        Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff})
+        Me.cmsImage.Name = "cmsImage"
+        Me.cmsImage.Size = New System.Drawing.Size(230, 26)
+        '
+        'cms_SetCutOff
+        '
+        Me.cms_SetCutOff.Name = "cms_SetCutOff"
+        Me.cms_SetCutOff.Size = New System.Drawing.Size(229, 22)
+        Me.cms_SetCutOff.Text = "Set zoom min-max as cut-off"
+        '
         'ssMain
         '
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslInfo1})
@@ -147,6 +167,7 @@ Partial Class frmImageDisplay
         Me.scDetails.Panel1.PerformLayout()
         CType(Me.scDetails, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scDetails.ResumeLayout(False)
+        Me.cmsImage.ResumeLayout(False)
         Me.ssMain.ResumeLayout(False)
         Me.ssMain.PerformLayout()
         Me.ResumeLayout(False)
@@ -161,4 +182,6 @@ Partial Class frmImageDisplay
     Friend WithEvents scLeft As SplitContainer
     Friend WithEvents scDetails As SplitContainer
     Friend WithEvents tbDetails As TextBox
+    Friend WithEvents cmsImage As ContextMenuStrip
+    Friend WithEvents cms_SetCutOff As ToolStripMenuItem
 End Class
