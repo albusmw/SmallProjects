@@ -26,11 +26,17 @@ Public Class Form1
         Return DB.ASCOMCam
     End Function
 
-    Private Sub btnTakeImage_Click(sender As Object, e As EventArgs) Handles btnTakeImage.Click
-        TakeImage(Never)
-    End Sub
-
     Private Sub TakeImage(ByVal TimeStamp As DateTime)
+
+        'Check pre condition
+        If DB.SunHeight > DB.MaxSunHeight Then
+            tsslNoCapture.Text = "SUN TOO HIGH!"
+            tsslNoCapture.BackColor = Color.Red
+            Exit Sub
+        End If
+
+        tsslNoCapture.Text = "Preconditions OK"
+        tsslNoCapture.BackColor = Color.Green
 
         Log("Connecting camera")
         Dim Camera As New ASCOM.DriverAccess.Camera(DB.ASCOMCam)
@@ -52,14 +58,14 @@ Public Class Form1
 
         'Start exposing
         StartLog("Starting exposure with " & DB.ExposureTime.ToString.Trim & " seconds")
-        btnTakeImage.Enabled = False : System.Windows.Forms.Application.DoEvents()
+        tsmiTakeOnePicture.Enabled = False : tsslCapture.BackColor = Color.Red : System.Windows.Forms.Application.DoEvents()
         Camera.StartExposure(DB.ExposureTime, False)
         Do
             If Camera.ImageReady Then Exit Do
             System.Windows.Forms.Application.DoEvents()
         Loop Until 1 = 0
         Dim CCDSensorData As Integer(,) = CType(Camera.ImageArray, Integer(,))
-        btnTakeImage.Enabled = True : System.Windows.Forms.Application.DoEvents()
+        tsmiTakeOnePicture.Enabled = True : tsslCapture.BackColor = Color.Gray : System.Windows.Forms.Application.DoEvents()
         FinishLog("    DONE.")
 
         Dim PixelX As Integer = CCDSensorData.GetUpperBound(0) + 1
@@ -132,16 +138,19 @@ Public Class Form1
         Log("    MAX value: " & Max.ToString.Trim)
 
         'Add text by setting pixel to max
-        Dim IP1 As Bitmap = DrawText(DB.Inprint_station)
-        Dim NoText As Color = Color.FromArgb(0, 0, 0, 0)
-        Dim PixelValue As Byte = CByte(Math.Floor(Max / Scaler))
-        For ScanX As Integer = 0 To IP1.Width - 1
-            For ScanY As Integer = 0 To IP1.Height - 1
-                If IP1.GetPixel(ScanX, ScanY) <> NoText Then
-                    BitmapValues(ScanX + (ScanY * BitmapToCreate.Width)) = PixelValue
-                End If
-            Next ScanY
-        Next ScanX
+        Dim Inprint As New ImageInprint.sInprintParams
+        With Inprint
+            .TextToPrint = DB.Inprint_station
+            .TextSize = DB.Inprint_FontSize
+            .PixelValue = CByte(Math.Floor(Max / Scaler))
+            .PrintRight = False
+        End With
+        ImageInprint.Mono8BitText(BitmapToCreate, BitmapValues, Inprint)
+        With Inprint
+            .TextToPrint = Format(Now, "dd.MM.yyyy_HH.mm.ss") & System.Environment.NewLine & "Sun height: " & DB.SunHeight.ValRegIndep("0.00")
+            .PrintRight = True
+        End With
+        ImageInprint.Mono8BitText(BitmapToCreate, BitmapValues, Inprint)
 
         'Get the image data from the RGB values
         System.Runtime.InteropServices.Marshal.Copy(BitmapValues, 0, FirstLineAdr, TotalByteCount)
@@ -243,22 +252,35 @@ Public Class Form1
     End Function
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        'Get build data
+        Dim BuildDate As String = String.Empty
+        Dim AllResources As String() = System.Reflection.Assembly.GetExecutingAssembly.GetManifestResourceNames
+        For Each Entry As String In AllResources
+            If Entry.EndsWith(".BuildDate.txt") Then
+                BuildDate = " (Build of " & (New System.IO.StreamReader(System.Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream(Entry)).ReadToEnd.Trim).Replace(",", ".") & ")"
+                Exit For
+            End If
+        Next Entry
+        Me.Text &= BuildDate
+
         pgMain.SelectedObject = DB
+
     End Sub
 
-    Private Sub btnUp10_Click(sender As Object, e As EventArgs) Handles btnUp10.Click
+    Private Sub btnUp10_Click(sender As Object, e As EventArgs)
         DB.ExposureTime = DB.ExposureTime * 10
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs)
         DB.ExposureTime = DB.ExposureTime / 10
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    Private Sub Button2_Click(sender As Object, e As EventArgs)
         DB.ExposureTime = DB.ExposureTime / 2
     End Sub
 
-    Private Sub btnUp2_Click(sender As Object, e As EventArgs) Handles btnUp2.Click
+    Private Sub btnUp2_Click(sender As Object, e As EventArgs)
         DB.ExposureTime = DB.ExposureTime * 2
     End Sub
 
@@ -321,7 +343,7 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub FTPUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FTPUploadToolStripMenuItem.Click
+    Private Sub FTPUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiFTPUpload.Click
         UploadFile(IO.Path.Combine(DB.StorageRoot, DB.CurrentImageName & ".jpg"))
     End Sub
 
@@ -334,12 +356,14 @@ Public Class Form1
     End Sub
 
     Private Sub tCheckExpState_Tick(sender As Object, e As EventArgs) Handles tCheckExpState.Tick
+
         'Initial start
         If LastTaken = NeverStarted And DB.CaptureInterval > 0.0 Then
             CaptureIdx = 0
             LastTaken = Now
             TakeImage(LastTaken)
         End If
+
         'Next Shot
         If DB.CaptureInterval > 0.0 Then
             If Now >= LastTaken.AddSeconds(DB.CaptureInterval) Then
@@ -348,10 +372,21 @@ Public Class Form1
                 TakeImage(Now)
             End If
         End If
+
         'Stop
         If DB.CaptureInterval = 0 Then
             LastTaken = NeverStarted
         End If
+
+        'Init sun parameters
+        If DB.SunSet = DateTime.MinValue Then
+            DB.CalcSunParam()
+            pgMain.SelectedObject = DB
+        End If
+
+        DB.CalcSunPos()
+        tsslSunPos.Text = "Sun height: " & DB.SunHeight.ValRegIndep("0.0")
+
     End Sub
 
     Private Sub OpenStoragePathToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenStoragePathToolStripMenuItem.Click
@@ -372,24 +407,6 @@ Public Class Form1
         'MsgBox(Runner.StandardError.ReadToEnd)
     End Sub
 
-    Private Function DrawText(ByVal Text As String) As Bitmap
-
-        'Create a text field and add it pixel-by-pixel
-        Dim MyFont As New Font("Courier New", DB.Inprint_FontSize)
-        Dim NoText As New Pen(Color.Black)
-        Dim RequiredSize As Drawing.Size = TextRenderer.MeasureText(Text, MyFont)
-        Dim Bmp As New Bitmap(RequiredSize.Width, RequiredSize.Height)
-        Dim gra As Graphics = Graphics.FromImage(Bmp)
-        gra.DrawRectangle(NoText, 0, 0, RequiredSize.Width, RequiredSize.Height)
-        gra.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None
-        gra.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel
-        gra.Clear(Color.Transparent)
-        TextRenderer.DrawText(gra, Text, MyFont, New Point(0, 0), Color.Red)
-        gra.Dispose()
-        Return Bmp
-
-    End Function
-
     Private Sub MyCaptureDefaultsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MyCaptureDefaultsToolStripMenuItem.Click
         With DB
             .CaptureInterval = 30
@@ -397,6 +414,10 @@ Public Class Form1
             .SaveAsJPG = False
             .FileNameFormat = "%%%%"
         End With
+    End Sub
+
+    Private Sub tsmiTakeOnePicture_Click(sender As Object, e As EventArgs) Handles tsmiTakeOnePicture.Click
+        TakeImage(Never)
     End Sub
 
 End Class
