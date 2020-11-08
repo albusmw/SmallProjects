@@ -73,6 +73,7 @@ Partial Class MainForm
         Me.tsbCapture = New System.Windows.Forms.ToolStripButton()
         Me.tsbStopCapture = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsbCooling = New System.Windows.Forms.ToolStripButton()
         Me.ilMain = New System.Windows.Forms.ImageList(Me.components)
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.tcMain = New System.Windows.Forms.TabControl()
@@ -88,7 +89,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.tsbCooling = New System.Windows.Forms.ToolStripButton()
+        Me.tsmiGetAllXMLParameters = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -202,7 +203,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.OpenLastStoredFileToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.tsmiGetAllXMLParameters, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.OpenLastStoredFileToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -440,6 +441,17 @@ Partial Class MainForm
         Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
         Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 38)
         '
+        'tsbCooling
+        '
+        Me.tsbCooling.Image = CType(resources.GetObject("tsbCooling.Image"), System.Drawing.Image)
+        Me.tsbCooling.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.tsbCooling.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsbCooling.Name = "tsbCooling"
+        Me.tsbCooling.Size = New System.Drawing.Size(53, 35)
+        Me.tsbCooling.Text = "Cooling"
+        Me.tsbCooling.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.tsbCooling.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
+        '
         'ilMain
         '
         Me.ilMain.ImageStream = CType(resources.GetObject("ilMain.ImageStream"), System.Windows.Forms.ImageListStreamer)
@@ -598,16 +610,11 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'tsbCooling
+        'tsmiGetAllXMLParameters
         '
-        Me.tsbCooling.Image = CType(resources.GetObject("tsbCooling.Image"), System.Drawing.Image)
-        Me.tsbCooling.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.tsbCooling.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.tsbCooling.Name = "tsbCooling"
-        Me.tsbCooling.Size = New System.Drawing.Size(53, 35)
-        Me.tsbCooling.Text = "Cooling"
-        Me.tsbCooling.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.tsbCooling.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
+        Me.tsmiGetAllXMLParameters.Name = "tsmiGetAllXMLParameters"
+        Me.tsmiGetAllXMLParameters.Size = New System.Drawing.Size(218, 22)
+        Me.tsmiGetAllXMLParameters.Text = "Get all XML parameters"
         '
         'MainForm
         '
@@ -715,4 +722,5 @@ Partial Class MainForm
     Friend WithEvents TabPage3 As TabPage
     Friend WithEvents pgPlotAndText As PropertyGrid
     Friend WithEvents tsbCooling As ToolStripButton
+    Friend WithEvents tsmiGetAllXMLParameters As ToolStripMenuItem
 End Class

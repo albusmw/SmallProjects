@@ -337,6 +337,13 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ShowLiveImage As Boolean = False
 
+    <ComponentModel.Category(Cat3)>
+    <ComponentModel.DisplayName("   g) Infinit stack mode")>
+    <ComponentModel.Description("Stack all images (use for focus or drift analysis)")>
+    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property StackAll As Boolean = False
+
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>

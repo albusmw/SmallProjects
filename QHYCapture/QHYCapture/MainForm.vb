@@ -84,6 +84,7 @@ Partial Public Class MainForm
             Dim PinHandler As cIntelIPP.cPinHandler
             Dim CamRawBuffer As Byte() = {}
             Dim CamRawBufferPtr As IntPtr = Nothing
+            Dim InfinitBuffer(,) As UInt32 = {}
             M.DB.Stopper.Stamp("Prepare buffers")
 
             'Select filter
@@ -166,6 +167,15 @@ Partial Public Class MainForm
                 'Software binning - if > 1 data type is moved from UInt16 to UInt32
                 If M.DB.SoftwareBinning > 1 Then
                     SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data = ImageProcessing.Binning(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.SoftwareBinning)
+                    SingleStatCalc.Reset_UInt16()
+                End If
+
+                'Infinit stack (for focus quality estimation)
+                If M.DB.StackAll = True Then
+                    Dim AsUInt32(,) As UInt32 = {}
+                    M.DB.IPP.Convert(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, AsUInt32)
+                    M.DB.IPP.Add(AsUInt32, InfinitBuffer)
+                    M.DB.IPP.Copy(InfinitBuffer, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data)
                     SingleStatCalc.Reset_UInt16()
                 End If
 
@@ -654,6 +664,7 @@ Partial Public Class MainForm
             .DDR_RAM = False
             .ConfigAlways = False
             .FilterSlot = eFilter.Invalid
+            .ShowLiveImage = True
         End With
         With DB_PlotAndText.Prop
             .Log_ClearStat = True
@@ -1183,4 +1194,14 @@ Partial Public Class MainForm
             Log("No suitable camera found!")
         End If
     End Sub
+
+    Private Sub tsmiGetAllXMLParameters_Click(sender As Object, e As EventArgs) Handles tsmiGetAllXMLParameters.Click
+        Dim FileOut As New List(Of String)
+        FileOut.AddRange(GetAllPropertyNames(M.DB.GetType))
+        FileOut.AddRange(GetAllPropertyNames(DB_meta.GetType))
+        Dim XMLXMLParameterFile As String = System.IO.Path.Combine(M.DB.EXEPath, "AllXMLParameters.txt")
+        System.IO.File.WriteAllLines(XMLXMLParameterFile, FileOut)
+        Process.Start(XMLXMLParameterFile)
+    End Sub
+
 End Class

@@ -9,21 +9,15 @@ Partial Public Class MainForm
     '''<summary>Execute an XML file sequence.</summary>
     Private Sub RunXMLSequence(ByVal SpecFile As String)
         Dim BoolTrue As New List(Of String)({"TRUE", "YES", "1"})
-        Dim SpecDoc As New Xml.XmlDocument : SpecDoc.Load(SpecFile)
         Dim BindFlagsSet As Reflection.BindingFlags = Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.SetProperty
         'Reflect database
         Dim DB_Type As Type = M.DB.GetType
-        Dim DB_props As New List(Of String)
-        For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
-            DB_props.Add(SingleProperty.Name)
-        Next SingleProperty
+        Dim DB_props As List(Of String) = GetAllPropertyNames(M.DB.GetType)
         'Reflect meta database
         Dim DB_meta_Type As Type = DB_meta.GetType
-        Dim DB_meta_props As New List(Of String)
-        For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
-            DB_meta_props.Add(SingleProperty.Name)
-        Next SingleProperty
-        'Move over all exposure specifications
+        Dim DB_meta_props As List(Of String) = GetAllPropertyNames(DB_meta.GetType)
+        'Move over all exposure specifications in the file
+        Dim SpecDoc As New Xml.XmlDocument : SpecDoc.Load(SpecFile)
         For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
             Dim CloseCam As Boolean = True                                                      'close camera after series?
             'Load all attributes from the file
@@ -71,6 +65,17 @@ Partial Public Class MainForm
         Next ExpNode
         CloseCamera()
     End Sub
+
+    '''<summary>Get a list of all available property names.</summary>
+    Private Function GetAllPropertyNames(ByRef TypeToReflect As Type) As List(Of String)
+        Dim RetVal As New List(Of String)
+        Dim DescriptionAttribute As Type = GetType(System.ComponentModel.DescriptionAttribute)
+        For Each SingleProperty As Reflection.PropertyInfo In TypeToReflect.GetProperties()
+            Dim PropertyName As String = SingleProperty.Name
+            RetVal.Add(PropertyName)
+        Next SingleProperty
+        Return RetVal
+    End Function
 
     '''<summary>Start the exposure.</summary>
     Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter, ByVal Chip_Pixel As sSize_UInt) As cSingleCaptureInfo
