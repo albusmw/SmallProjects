@@ -181,7 +181,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   a) Camera to search")>
     <ComponentModel.Description("Search string for the camera - string must occure in the CameraID. Use * to use first found camera.")>
     <ComponentModel.DefaultValue("*")>
-    Public Property CamToUse As String = "*"
+    Public Property CamToUse As String = "600M"
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   b) Read-out mode")>
@@ -201,7 +201,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   d) Target Temp")>
     <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
     <ComponentModel.DefaultValue(300.0)>
-    Public Property TargetTemp As Double = 300.0
+    Public Property TargetTemp As Double = -10.0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   e) Binning - Hardware")>
@@ -287,7 +287,7 @@ Public Class cDB
     <ComponentModel.Description("Remove the overscan area in the stored data and file")>
     <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property RemoveOverscan As Boolean = False
+    Public Property RemoveOverscan As Boolean = True
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("  g) Config for each capture")>
@@ -582,6 +582,6 @@ Public Class cDB_meta
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   6. Load 10Micron data")>
     <ComponentModel.DefaultValue(False)>
-    Public Property Load10MicronDataAlways As Boolean = False
+    Public Property Load10MicronDataAlways As Boolean = True
 
 End Class
