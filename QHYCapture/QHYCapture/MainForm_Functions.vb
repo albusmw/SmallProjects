@@ -19,7 +19,6 @@ Partial Public Class MainForm
         'Move over all exposure specifications in the file
         Dim SpecDoc As New Xml.XmlDocument : SpecDoc.Load(SpecFile)
         For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
-            Dim CloseCam As Boolean = True                                                      'close camera after series?
             'Load all attributes from the file
             For Each ExpAttrib As Xml.XmlAttribute In ExpNode.Attributes
                 Dim PropType As Type = Nothing
@@ -50,7 +49,6 @@ Partial Public Class MainForm
                     Try
                         If DB_props.Contains(ExpAttrib.Name) Then DB_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, M.DB, New Object() {PropValue})
                         If DB_meta_props.Contains(ExpAttrib.Name) Then DB_meta_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, DB_meta, New Object() {PropValue})
-                        If ExpAttrib.Name = "CloseCam" Then CloseCam = CBool(PropValue)                             'close camera at this exposure end?
                     Catch ex As Exception
                         Log("Failed for <" & ExpAttrib.Name & ">: " & ex.Message)
                     End Try
@@ -59,9 +57,9 @@ Partial Public Class MainForm
             RefreshProperties()
             'Start exposure if specified
             If M.DB.CaptureCount > 0 Then
-                QHYCapture(True)
-                If CloseCam = True Then CloseCamera()
+                QHYCapture(M.DB.CloseCam)
             End If
+            If M.DB.StopFlag = True Then Exit For
         Next ExpNode
         CloseCamera()
     End Sub
@@ -94,7 +92,9 @@ Partial Public Class MainForm
         End If
 
         'Temperature
+        LED_update(tsslLED_cooling, True)
         SetTemperature(M.DB.CoolingTimeOut)
+        LED_update(tsslLED_cooling, False)
 
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & M.DB.CaptureCount.ValRegIndep
@@ -113,7 +113,7 @@ Partial Public Class MainForm
         End With
 
         'Start expose (single or live frame mode)
-        LED_capture(True)
+        LED_update(tsslLED_capture, True)
         M.DB.Stopper.Start()
         If M.DB.StreamMode = eStreamMode.SingleFrame Then
             CallOK("ExpQHYCCDSingleFrame", QHY.QHYCamera.ExpQHYCCDSingleFrame(M.DB.CamHandle))
@@ -380,8 +380,9 @@ Partial Public Class MainForm
             QHY.QHYCamera.ReleaseQHYCCDResource()
             M.DB.CamHandle = IntPtr.Zero
         End If
-        LED_capture(False)
-        LED_reading(False)
+        LED_update(tsslLED_cooling, True)
+        LED_update(tsslLED_capture, False)
+        LED_update(tsslLED_reading, True)
     End Sub
 
     '''<summary>Load the data from the 10Micron mount.</summary>
@@ -475,17 +476,10 @@ Partial Public Class MainForm
     End Sub
 
     '''<summary>Active or deactive the capture LED.</summary>
-    Private Sub LED_capture(ByVal Capturing As Boolean)
-        LED_update(tsslLED_capture, Capturing)
-    End Sub
-
-    '''<summary>Active or deactive the reading LED.</summary>
-    Private Sub LED_reading(ByVal Capturing As Boolean)
-        LED_update(tsslLED_reading, Capturing)
-    End Sub
-
-    '''<summary>Active or deactive the capture LED.</summary>
     Private Sub LED_update(ByRef LED As ToolStripStatusLabel, ByVal Status As Boolean)
+        tsslLED_cooling.Enabled = False : tsslLED_cooling.BackColor = System.Drawing.SystemColors.Control
+        tsslLED_capture.Enabled = False : tsslLED_capture.BackColor = System.Drawing.SystemColors.Control
+        tsslLED_reading.Enabled = False : tsslLED_reading.BackColor = System.Drawing.SystemColors.Control
         LED.Enabled = Status
         LED.BackColor = CType(IIf(Status, Color.Red, System.Drawing.SystemColors.Control), Color)
         LED.Invalidate()

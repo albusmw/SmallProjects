@@ -296,6 +296,13 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ConfigAlways As Boolean = True
 
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName("  h) Close cam on each xml exp")>
+    <ComponentModel.Description("Close and re-open the camera after each exposure XML entry")>
+    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property CloseCam As Boolean = False
+
     '===================================================================================================
 
     <ComponentModel.Category(Cat3)>
@@ -352,43 +359,6 @@ Public Class cDB
     <ComponentModel.DefaultValue(True)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property CalcStatistics As Boolean = True
-
-    '''<summary>Handle data entered via a MIDI input device.</summary>
-    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
-        Select Case Channel
-            Case 1
-                Gain += Value
-            Case 2
-                WhiteBalance_Red += Value
-            Case 3
-                WhiteBalance_Green += Value
-            Case 4
-                WhiteBalance_Blue += Value
-            Case 5
-                Contrast += Value / 100
-            Case 6
-                Brightness += Value / 100
-        End Select
-        RaiseEvent PropertyChanged()
-    End Sub
-
-    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
-        Select Case Channel
-            Case 1
-                Gain = 0
-            Case 2
-                WhiteBalance_Red = 128
-            Case 3
-                WhiteBalance_Green = 128
-            Case 4
-                WhiteBalance_Blue = 128
-            Case 5
-                Contrast = 0.0
-            Case 6
-                Brightness = 0.0
-        End Select
-        RaiseEvent PropertyChanged()
-    End Sub
 
     '===================================================================================================
 
@@ -469,7 +439,7 @@ Public Class cDB
     Public Property CoolingTimeOut As Double = 60.0
 
     <ComponentModel.Category(CatX)>
-    <ComponentModel.DisplayName("   a) Cooling time-out")>
+    <ComponentModel.DisplayName("   b) Filter wheel time-out")>
     <ComponentModel.Description("Time [s] after which the filter wheel movement is stoped and the software goes on even if the filter is NOT in place")>
     <ComponentModel.DefaultValue(15.0)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
@@ -483,6 +453,43 @@ Public Class cDB
             If ROI.X = 0 And ROI.Y = 0 And ROI.Width = 0 And ROI.Height = 0 Then Return False Else Return True
         End Get
     End Property
+
+    '''<summary>Handle data entered via a MIDI input device.</summary>
+    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
+        Select Case Channel
+            Case 1
+                Gain += Value
+            Case 2
+                WhiteBalance_Red += Value
+            Case 3
+                WhiteBalance_Green += Value
+            Case 4
+                WhiteBalance_Blue += Value
+            Case 5
+                Contrast += Value / 100
+            Case 6
+                Brightness += Value / 100
+        End Select
+        RaiseEvent PropertyChanged()
+    End Sub
+
+    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
+        Select Case Channel
+            Case 1
+                Gain = 0
+            Case 2
+                WhiteBalance_Red = 128
+            Case 3
+                WhiteBalance_Green = 128
+            Case 4
+                WhiteBalance_Blue = 128
+            Case 5
+                Contrast = 0.0
+            Case 6
+                Brightness = 0.0
+        End Select
+        RaiseEvent PropertyChanged()
+    End Sub
 
 End Class
 

@@ -128,10 +128,10 @@ Partial Public Class MainForm
                 'Read image data from camera - ALWAYS WITH OVERSCAN
                 Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
                 Dim LiveModePollCount As Integer = 0
-                LED_reading(True)
+                LED_update(tsslLED_reading, True)
                 If M.DB.StreamMode = eStreamMode.SingleFrame Then
                     CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
-                    LED_capture(False)
+                    LED_update(tsslLED_capture, True)
                 Else
                     Dim LiveModeReady As UInteger = UInteger.MaxValue
                     Do
@@ -140,7 +140,7 @@ Partial Public Class MainForm
                         DE()
                     Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
                 End If
-                LED_reading(False)
+                LED_update(tsslLED_reading, False)
                 RunningCaptureInfo.ObsEnd = Now
                 EndTimeStamps.Add(RunningCaptureInfo.ObsEnd)
 
@@ -149,7 +149,7 @@ Partial Public Class MainForm
                 LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
                 M.DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & " x)")
 
-                'Remove overscan - do NOT run if an ROU is set
+                'Remove overscan - do NOT run if an ROI is set
                 Dim SingleStatCalc As New AstroNET.Statistics(M.DB.IPP)
                 SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(M.DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
                 If M.DB.RemoveOverscan = True And M.DB.ROISet = False Then
@@ -654,17 +654,21 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub FastLiveModeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FastLiveModeToolStripMenuItem.Click
+        Dim ROISize As Integer = 100
         With M.DB
             .StreamMode = eStreamMode.LiveFrame
             .ExposureTime = 0.01
             .Gain = 20
-            .ROI = New Drawing.Rectangle(100, 100, 100, 100)
+            .ROI = New Drawing.Rectangle((9600 \ 2) - ROISize, (6422 \ 2) - ROISize, 2 * ROISize, 2 * ROISize)
             .CaptureCount = Int32.MaxValue
             .StoreImage = False
             .DDR_RAM = False
             .ConfigAlways = False
             .FilterSlot = eFilter.Invalid
             .ShowLiveImage = True
+        End With
+        With DB_meta
+            .Load10MicronDataAlways = False
         End With
         With DB_PlotAndText.Prop
             .Log_ClearStat = True

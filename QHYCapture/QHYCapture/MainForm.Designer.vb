@@ -26,6 +26,7 @@ Partial Class MainForm
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
+        Me.tsslLED_cooling = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslLED_capture = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslLED_reading = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tspbProgress = New System.Windows.Forms.ToolStripProgressBar()
@@ -38,6 +39,7 @@ Partial Class MainForm
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RunXMLSequenceToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiGetAllXMLParameters = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem6 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExplorerHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExploreCurrentCampaignToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -89,7 +91,6 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.tsmiGetAllXMLParameters = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -122,12 +123,22 @@ Partial Class MainForm
         '
         'ssMain
         '
-        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslLED_capture, Me.tsslLED_reading, Me.tspbProgress, Me.tsslProgress, Me.tsslSplit1, Me.tsslMain, Me.tsslSplit2, Me.tsmiFPSIndicator, Me.tsslMemory})
+        Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslLED_cooling, Me.tsslLED_capture, Me.tsslLED_reading, Me.tspbProgress, Me.tsslProgress, Me.tsslSplit1, Me.tsslMain, Me.tsslSplit2, Me.tsmiFPSIndicator, Me.tsslMemory})
         Me.ssMain.Location = New System.Drawing.Point(0, 490)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Size = New System.Drawing.Size(943, 24)
         Me.ssMain.TabIndex = 1
         Me.ssMain.Text = "StatusStrip1"
+        '
+        'tsslLED_cooling
+        '
+        Me.tsslLED_cooling.BorderSides = CType((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
+            Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
+        Me.tsslLED_cooling.Enabled = False
+        Me.tsslLED_cooling.Name = "tsslLED_cooling"
+        Me.tsslLED_cooling.Size = New System.Drawing.Size(53, 19)
+        Me.tsslLED_cooling.Text = "Cooling"
         '
         'tsslLED_capture
         '
@@ -214,6 +225,12 @@ Partial Class MainForm
         Me.RunXMLSequenceToolStripMenuItem.Size = New System.Drawing.Size(218, 22)
         Me.RunXMLSequenceToolStripMenuItem.Text = "Run XML sequence"
         '
+        'tsmiGetAllXMLParameters
+        '
+        Me.tsmiGetAllXMLParameters.Name = "tsmiGetAllXMLParameters"
+        Me.tsmiGetAllXMLParameters.Size = New System.Drawing.Size(218, 22)
+        Me.tsmiGetAllXMLParameters.Text = "Get all XML parameters"
+        '
         'ToolStripMenuItem6
         '
         Me.ToolStripMenuItem6.Name = "ToolStripMenuItem6"
@@ -276,7 +293,7 @@ Partial Class MainForm
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(104, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -307,25 +324,25 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
@@ -610,12 +627,6 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
-        'tsmiGetAllXMLParameters
-        '
-        Me.tsmiGetAllXMLParameters.Name = "tsmiGetAllXMLParameters"
-        Me.tsmiGetAllXMLParameters.Size = New System.Drawing.Size(218, 22)
-        Me.tsmiGetAllXMLParameters.Text = "Get all XML parameters"
-        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -723,4 +734,5 @@ Partial Class MainForm
     Friend WithEvents pgPlotAndText As PropertyGrid
     Friend WithEvents tsbCooling As ToolStripButton
     Friend WithEvents tsmiGetAllXMLParameters As ToolStripMenuItem
+    Friend WithEvents tsslLED_cooling As ToolStripStatusLabel
 End Class
