@@ -87,8 +87,14 @@ Public Enum eFilter As Byte
     G = 3
     <ComponentModel.Description("Blue")>
     B = 4
-    <ComponentModel.Description("H alpha ")>
+    <ComponentModel.Description("H alpha")>
     H_alpha = 5
+    <ComponentModel.Description("S-II")>
+    S_II = 6
+    <ComponentModel.Description("O_III")>
+    O_III = 7
+    <ComponentModel.Description("Empty")>
+    Empty = 9
 End Enum
 
 '''<summary>Available stream modes.</summary>
