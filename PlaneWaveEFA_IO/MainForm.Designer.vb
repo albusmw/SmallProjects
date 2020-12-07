@@ -26,6 +26,11 @@ Partial Class MainForm
         Me.lbLog = New System.Windows.Forms.ListBox()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.pgMain = New System.Windows.Forms.PropertyGrid()
+        Me.scLeft = New System.Windows.Forms.SplitContainer()
+        Me.pgValues = New System.Windows.Forms.PropertyGrid()
+        Me.scLeft.Panel1.SuspendLayout()
+        Me.scLeft.Panel2.SuspendLayout()
+        Me.scLeft.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnGo
@@ -51,7 +56,7 @@ Partial Class MainForm
         Me.lbLog.Location = New System.Drawing.Point(271, 54)
         Me.lbLog.Name = "lbLog"
         Me.lbLog.ScrollAlwaysVisible = True
-        Me.lbLog.Size = New System.Drawing.Size(411, 421)
+        Me.lbLog.Size = New System.Drawing.Size(411, 465)
         Me.lbLog.TabIndex = 1
         '
         'Button1
@@ -66,22 +71,53 @@ Partial Class MainForm
         '
         'pgMain
         '
-        Me.pgMain.Location = New System.Drawing.Point(2, 12)
+        Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgMain.Location = New System.Drawing.Point(0, 0)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(263, 463)
+        Me.pgMain.Size = New System.Drawing.Size(253, 253)
         Me.pgMain.TabIndex = 3
+        '
+        'scLeft
+        '
+        Me.scLeft.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.scLeft.Location = New System.Drawing.Point(12, 12)
+        Me.scLeft.Name = "scLeft"
+        Me.scLeft.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scLeft.Panel1
+        '
+        Me.scLeft.Panel1.Controls.Add(Me.pgMain)
+        '
+        'scLeft.Panel2
+        '
+        Me.scLeft.Panel2.Controls.Add(Me.pgValues)
+        Me.scLeft.Size = New System.Drawing.Size(253, 507)
+        Me.scLeft.SplitterDistance = 253
+        Me.scLeft.TabIndex = 4
+        '
+        'pgValues
+        '
+        Me.pgValues.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgValues.Location = New System.Drawing.Point(0, 0)
+        Me.pgValues.Name = "pgValues"
+        Me.pgValues.Size = New System.Drawing.Size(253, 250)
+        Me.pgValues.TabIndex = 4
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(694, 487)
-        Me.Controls.Add(Me.pgMain)
+        Me.ClientSize = New System.Drawing.Size(694, 531)
+        Me.Controls.Add(Me.scLeft)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.lbLog)
         Me.Controls.Add(Me.btnGo)
         Me.Name = "MainForm"
         Me.Text = "PW EFA COM Test Version 1.1"
+        Me.scLeft.Panel1.ResumeLayout(False)
+        Me.scLeft.Panel2.ResumeLayout(False)
+        Me.scLeft.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -89,4 +125,6 @@ Partial Class MainForm
   Friend WithEvents lbLog As System.Windows.Forms.ListBox
   Friend WithEvents Button1 As System.Windows.Forms.Button
     Friend WithEvents pgMain As PropertyGrid
+    Friend WithEvents scLeft As SplitContainer
+    Friend WithEvents pgValues As PropertyGrid
 End Class

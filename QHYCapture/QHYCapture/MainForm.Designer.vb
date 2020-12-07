@@ -293,7 +293,7 @@ Partial Class MainForm
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(104, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -324,25 +324,25 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem

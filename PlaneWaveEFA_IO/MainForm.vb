@@ -4,10 +4,13 @@ Option Strict On
 Public Class MainForm
 
     Private DB As New cDB
+    Private PWIValues As New cPWIValues
 
     Private Sub btnGo_Click(sender As Object, e As EventArgs) Handles btnGo.Click
         lbLog.Items.Clear()
         Run()
+        pgValues.SelectedObject = PWIValues
+        pgValues.Refresh()
     End Sub
 
     Private Sub Run()
@@ -15,47 +18,52 @@ Public Class MainForm
         Try
 
             '-----------------------------------------------------
-            'Open COM port
-            Dim EFA As IO.Ports.SerialPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_EFA, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
-            EFA.DiscardOutBuffer() : EFA.DiscardInBuffer()
-            EFA.Handshake = IO.Ports.Handshake.None
-            EFA.DtrEnable = True
+            'Open COM ports
+            Dim EFA_ComPort As IO.Ports.SerialPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_EFA, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
+            EFA_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
+            EFA_ComPort.Handshake = IO.Ports.Handshake.None
+            EFA_ComPort.DtrEnable = True
+            Dim DeltaT_ComPort As IO.Ports.SerialPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_DeltaT, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
+            DeltaT_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
+            DeltaT_ComPort.Handshake = IO.Ports.Handshake.None
+            DeltaT_ComPort.DtrEnable = True
 
             '=====================================================
             'Transmit
 
             'Position is correct ...
-            Dim Position As Integer = GetPosition(EFA)
+            Dim Position As Integer = GetPosition(EFA_ComPort)
             Log("Raw position reading: <" & Position & ">")
             Log("   -> Decoded       : <" & Ato.PlaneWaveEFA.GetPositionMicrons(Position) & " µm>")
             LogSep("-"c)
 
             'GOTO over (focuser not moving any more) is correct ...
-            Log("GOTO over       : <" & GetGotoOver(EFA) & ">")
+            Log("GOTO over       : <" & GetGotoOver(EFA_ComPort) & ">")
             LogSep("-"c)
 
             'Temperature measurement is correct ...
-            Log("T primary       : <" & GetTemperature(EFA, 0) & ">")
+            Dim Status As String = String.Empty
+            PWIValues.T_primary = GetEFATemp(EFA_ComPort, 0, Status)
             LogSep("-"c)
-            Log("T ambient       : <" & GetTemperature(EFA, 1) & ">")
+            PWIValues.T_ambient = GetEFATemp(EFA_ComPort, 1, Status)
             LogSep("-"c)
-            Log("T secondary     : <" & GetTemperature(EFA, 2) & ">")
+            PWIValues.T_secondary = GetEFATemp(EFA_ComPort, 2, Status)
             LogSep("-"c)
 
             'Fans set and get is correct
-            Log("Fans            : <" & GetFans(EFA) & ">")
+            PWIValues.Fan = GetFans(EFA_ComPort)
             LogSep("-"c)
-            Log("Set fans OFF    : <" & SetFans(EFA, False) & ">")
+            Log("Set fans OFF    : <" & SetFans(EFA_ComPort, False) & ">")
             LogSep("-"c)
-            Log("Fans            : <" & GetFans(EFA) & ">")
+            PWIValues.Fan = GetFans(EFA_ComPort)
             LogSep("-"c)
 
             '-----------------------------------------------------
             'Close again
-            If IsNothing(EFA) = False Then
-                If EFA.IsOpen Then EFA.Close()
-            End If
-            EFA = Nothing
+            If IsNothing(EFA_ComPort) = False Then If EFA_ComPort.IsOpen Then EFA_ComPort.Close()
+            If IsNothing(DeltaT_ComPort) = False Then If DeltaT_ComPort.IsOpen Then DeltaT_ComPort.Close()
+            EFA_ComPort = Nothing
+            DeltaT_ComPort = Nothing
 
         Catch ex As TimeoutException
 
@@ -74,7 +82,7 @@ Public Class MainForm
         Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.MTR_GET_POS
 
         Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
 
         '-----------------------------------------------------
         'Decode
@@ -89,7 +97,7 @@ Public Class MainForm
         Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.MTR_GOTO_OVER
 
         Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
 
         '-----------------------------------------------------
         'Decode
@@ -97,33 +105,37 @@ Public Class MainForm
 
     End Function
 
-    Private Function GetTemperature(ByRef Port As IO.Ports.SerialPort, ByVal Sensor As Byte) As Double
+    Private Function GetEFATemp(ByRef Port As IO.Ports.SerialPort, ByVal Sensor As Byte, ByRef Status As String) As Double
 
         Log("Running command <Get T of sensor " & Sensor.ToString.Trim & "> ...")
         Ato.PlaneWaveEFA.PrepareCOM(Port)
         Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.TEMP_GET(Sensor)
 
         Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
 
         '-----------------------------------------------------
         'Decode
-        Return Ato.PlaneWaveEFA.TEMP_GET_decode(AnswerBuffer)
+        Dim RetVal As Double = Ato.PlaneWaveEFA.TEMP_GET_decode(AnswerBuffer, Status)
+        Log("T[" & Sensor.ToString.Trim & "            : <" & RetVal & "> (" & Status & ")")
+        Return RetVal
 
     End Function
 
-    Private Function GetFans(ByRef Port As IO.Ports.SerialPort) As Boolean
+    Private Function GetFans(ByRef Port As IO.Ports.SerialPort) As Ato.PlaneWaveEFA.eOnOff
 
         Log("Running command <Get Fans status> ...")
         Ato.PlaneWaveEFA.PrepareCOM(Port)
         Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_GET
 
         Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
 
         '-----------------------------------------------------
         'Decode
-        Return Ato.PlaneWaveEFA.FANS_GET_decode(AnswerBuffer)
+        Dim RetVal As Ato.PlaneWaveEFA.eOnOff = Ato.PlaneWaveEFA.FANS_GET_decode(AnswerBuffer)
+        Log("Fans            : <" & RetVal & ">")
+        Return RetVal
 
     End Function
 
@@ -134,17 +146,17 @@ Public Class MainForm
         Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_SET(State)
 
         Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & COMCommunication(Port, CommandBuffer, AnswerBuffer))
+        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
 
         Return True
 
     End Function
 
-    Private Function COMCommunication(ByRef Port As IO.Ports.SerialPort, ByRef CommandBuffer As Byte(), ByRef AnswerBuffer As Byte()) As Boolean
+    Private Function EFACommunication(ByRef EFAPort As IO.Ports.SerialPort, ByRef CommandBuffer As Byte(), ByRef AnswerBuffer As Byte()) As Boolean
         LogWrite(CommandBuffer)
-        Port.Write(CommandBuffer, 0, CommandBuffer.Length)
-        Dim RetVal As Boolean = Ato.PlaneWaveEFA.ValidateEcho(Port, CommandBuffer)
-        AnswerBuffer = Ato.PlaneWaveEFA.ReadAnswer(Port)
+        EFAPort.Write(CommandBuffer, 0, CommandBuffer.Length)
+        Dim RetVal As Boolean = Ato.PlaneWaveEFA.ValidateEcho(EFAPort, CommandBuffer)
+        AnswerBuffer = Ato.PlaneWaveEFA.ReadAnswer(EFAPort)
         LogRead(AnswerBuffer)
         Return RetVal
     End Function
@@ -193,5 +205,6 @@ Public Class MainForm
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
         pgMain.SelectedObject = DB
+        pgValues.SelectedObject = PWIValues
     End Sub
 End Class

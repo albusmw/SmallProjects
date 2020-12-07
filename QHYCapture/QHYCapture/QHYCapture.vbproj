@@ -42,7 +42,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>AstroCam.ico</ApplicationIcon>
+    <ApplicationIcon>QHY600.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -196,6 +196,7 @@
       <Link>Everything64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="QHY600.ico" />
     <EmbeddedResource Include="BuildDate.txt" />
     <Content Include="..\BiasCapture.qhycapture.xml">
       <Link>XML Examples\BiasCapture.qhycapture.xml</Link>
