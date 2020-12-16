@@ -6,13 +6,27 @@ Option Strict On
 
 Public Class frmNavigator
 
+    '''<summary>Instalce of the IPP class to use.</summary>
     Public IPP As cIntelIPP
-    Dim SingleStatCalc As New AstroNET.Statistics(IPP)
 
-    Dim MosaikForm As New cImgForm
-    Dim UseIPP As Boolean = True
+    Private UseIPP As Boolean = True
 
+    '''<summary>Mosaik statistics processor.</summary>
+    Private MosaikStatCalc As New AstroNET.Statistics(IPP)
+    '''<summary>Mosaik statistics.</summary>
+    Private MosaikStatistics As AstroNET.Statistics.sStatistics
+    '''<summary>Form showing the mosaik.</summary>
+    Private MosaikForm As New cImgForm
+
+    Private WithEvents clbDropHandler As Ato.DragDrop
+
+    Private UpdateRunning As Boolean = False
+
+    '''<summary>Main function to plot the mosaik.</summary>
     Public Sub ShowMosaik()
+
+        'Do not do anything as long as items are added from a queue
+        If UpdateRunning Then Exit Sub
 
         'Read the same segment from all files and compose a new combined image
         Dim TileSize As Integer = 0             'size for 1 tile
@@ -28,23 +42,19 @@ Public Class frmNavigator
             ErrorStatus(Text)
             Exit Sub
         End Try
-        If System.IO.File.Exists(tbRootFile.Text) = False Then
-            ErrorStatus("Root folder <" & tbRootFile.Text & "> does not exist.")
-            Exit Sub
-        End If
 
-        Dim BaseDirectory As String = System.IO.Path.GetDirectoryName(tbRootFile.Text)
         Dim FITSReader As New cFITSReader
 
-        Dim AllFiles As New List(Of String)(System.IO.Directory.GetFiles(BaseDirectory, tbFilterString.Text))
-        If AllFiles.Count = 0 Then
-            ErrorStatus("No files match the filter criteria.")
-            Exit Sub
-        End If
+        'Get all files to show
+        Dim AllFiles As New List(Of String)
+        For Each SingleFile As String In clbFiles.CheckedItems
+            If System.IO.File.Exists(SingleFile) Then AllFiles.Add(SingleFile)
+        Next SingleFile
+        If AllFiles.Count = 0 Then Exit Sub
 
         Dim MosaikWidth As Integer = CInt(Math.Ceiling(Math.Sqrt(AllFiles.Count)))              'Number of tiles in X direction
         Dim MosaikHeight As Integer = CInt(Math.Ceiling(AllFiles.Count / MosaikWidth))          'Number of tiles in Y direction
-        ReDim SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(MosaikWidth * TileSize + (MosaikWidth - 1) - 1, MosaikHeight * TileSize + (MosaikHeight - 1) - 1)
+        ReDim MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data(MosaikWidth * TileSize + (MosaikWidth - 1) - 1, MosaikHeight * TileSize + (MosaikHeight - 1) - 1)
 
         'Compose the mosaik
         Dim WidthPtr As Integer = 0 : Dim WidthIdx As Integer = 0
@@ -57,7 +67,7 @@ Public Class frmNavigator
             Try
                 For X As Integer = 0 To TileSize - 1
                     For Y As Integer = 0 To TileSize - 1
-                        SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
+                        MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
                     Next Y
                 Next X
             Catch ex As Exception
@@ -72,17 +82,11 @@ Public Class frmNavigator
         Next FileIdx
 
         'Run mosaik statistics
-        Dim Stat As AstroNET.Statistics.sStatistics = SingleStatCalc.ImageStatistics(AstroNET.Statistics.sStatistics.eDataMode.Fixed)
-        tbStatResult.Text = Join(Stat.StatisticsReport(True).ToArray, System.Environment.NewLine)
+        MosaikStatistics = MosaikStatCalc.ImageStatistics(AstroNET.Statistics.sStatistics.eDataMode.Fixed)
+        tbStatResult.Text = Join(MosaikStatistics.StatisticsReport(True, True).ToArray, System.Environment.NewLine)
 
-        ShowDataForm(MosaikForm, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, Stat.MonoStatistics_Int.Min.Key, Stat.MonoStatistics_Int.Max.Key)
+        ShowDataForm(MosaikForm, MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data, MosaikStatistics.MonoStatistics_Int.Min.Key, MosaikStatistics.MonoStatistics_Int.Max.Key)
         pbMain.Value = 0
-
-        If cbSaveFITS.Checked Then
-            Dim FileToGenerate As String = System.IO.Path.Combine(BaseDirectory, "Mosaik.fits")
-            cFITSWriter.Write(FileToGenerate, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
-            Process.Start(FileToGenerate)
-        End If
 
         tsslStatus.Text = AllFiles.Count.ToString.Trim & " files filtered and displayed."
         tsslStatus.BackColor = Color.Green
@@ -155,7 +159,7 @@ Public Class frmNavigator
         End Select
     End Sub
 
-    Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged
+    Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged, clbFiles.ItemCheck
         ShowMosaik()
     End Sub
 
@@ -170,6 +174,73 @@ Public Class frmNavigator
 
     Private Sub frmNavigator_Load(sender As Object, e As EventArgs) Handles Me.Load
         cbColorModes.SelectedIndex = 2
+        clbDropHandler = New Ato.DragDrop(clbFiles)
+        clbDropHandler.FillList = False
+    End Sub
+
+    Private Sub btnCheckAll_Click(sender As Object, e As EventArgs) Handles btnCheckAll.Click
+        For Idx As Integer = 0 To clbFiles.Items.Count - 1
+            clbFiles.SetItemCheckState(Idx, CheckState.Checked)
+        Next Idx
+    End Sub
+
+    Private Sub btnUncheckAll_Click(sender As Object, e As EventArgs) Handles btnUncheckAll.Click
+        For Idx As Integer = 0 To clbFiles.Items.Count - 1
+            clbFiles.SetItemCheckState(Idx, CheckState.Unchecked)
+        Next Idx
+    End Sub
+
+    Private Sub btnDeleteAll_Click(sender As Object, e As EventArgs) Handles btnDeleteAll.Click
+        clbFiles.Items.Clear()
+    End Sub
+
+    Private Sub btnSaveMosaik_Click(sender As Object, e As EventArgs) Handles btnSaveMosaik.Click
+        With sfdMain
+            .Filter = "FITS (*.fits)|*.fits"
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+        cFITSWriter.Write(sfdMain.FileName, MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
+        Process.Start(sfdMain.FileName)
+    End Sub
+
+    Private Sub clbDropHandler_DropOccured(Files() As String) Handles clbDropHandler.DropOccured
+        'Add all files from a drop event
+        UpdateRunning = True
+        For Each SingleFile As String In Files
+            If clbFiles.Items.Contains(SingleFile) = False Then
+                clbFiles.Items.Add(SingleFile, True)
+            End If
+        Next SingleFile
+        UpdateRunning = False
+        ShowMosaik()
+    End Sub
+
+    Private Sub clbFiles_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbFiles.SelectedIndexChanged
+        tbSelected.Text = clbFiles.SelectedItem.ToString
+    End Sub
+
+    Private Sub bntAddRange_Click(sender As Object, e As EventArgs) Handles bntAddRange.Click
+        'Get root folder
+        Dim RootFolder As String = String.Empty
+        If System.IO.File.Exists(tbRootFile.Text) Then
+            RootFolder = System.IO.Path.GetDirectoryName(tbRootFile.Text)
+        Else
+            If System.IO.Directory.Exists(tbRootFile.Text) Then
+                RootFolder = tbRootFile.Text
+            End If
+        End If
+        If String.IsNullOrEmpty(RootFolder) Then Exit Sub
+        'Add all files that match the filter criteria
+        Dim AllFiles As New List(Of String)(System.IO.Directory.GetFiles(RootFolder, tbFilterString.Text))
+        If AllFiles.Count = 0 Then Exit Sub
+        UpdateRunning = True
+        For Each SingleFile As String In AllFiles
+            If clbFiles.Items.Contains(SingleFile) = False Then
+                clbFiles.Items.Add(SingleFile, True)
+            End If
+        Next SingleFile
+        UpdateRunning = False
+        ShowMosaik()
     End Sub
 
 End Class

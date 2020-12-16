@@ -3,7 +3,7 @@ Option Strict On
 
 Public Class MainForm
 
-    Dim Downloader As New AstroCalc.NET.Common.cDownloader
+    Dim Downloader As New cDownloader
 
     Private Sub tbAdr_TextChanged(sender As Object, e As EventArgs) Handles tbAdr.TextChanged
         wbMain.Navigate(tbAdr.Text)
@@ -13,6 +13,17 @@ Public Class MainForm
         'Init everything
         tbLinks.Text = String.Empty
         Downloader.InitWebClient()
+    End Sub
+
+    Private Sub StrassennamenÜberVIVOToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StrassennamenÜberVIVOToolStripMenuItem.Click
+        Dim Names As New List(Of String)
+        For Each Entry As String In System.IO.File.ReadAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamen.txt")
+            Names.Add(Entry.PartAfter(">").PartBefore("<"))
+        Next
+        System.IO.File.WriteAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamenxx.txt", Names.ToArray)
+    End Sub
+
+    Private Sub ParseSitzungsProtokolle()
         Dim LinkCount As Integer = wbMain.Document.Links.Count
         Dim Downloaded As Integer = 0
         'Navigate through all links
@@ -39,14 +50,6 @@ Public Class MainForm
             'Indicate progress
             tbProgress.Text = "Processed " & Downloaded.ToString.Trim & "/" & LinkCount.ToString.Trim & " links"
         Next Element
-    End Sub
-
-    Private Sub StrassennamenÜberVIVOToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StrassennamenÜberVIVOToolStripMenuItem.Click
-        Dim Names As New List(Of String)
-        For Each Entry As String In System.IO.File.ReadAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamen.txt")
-            Names.Add(Entry.PartAfter(">").PartBefore("<"))
-        Next
-        System.IO.File.WriteAllLines("C:\Users\albusmw\Dropbox\Holzkirchen Strassennamenxx.txt", Names.ToArray)
     End Sub
 
 End Class

@@ -8,96 +8,121 @@ Public Class cDB
 
     Private Const Cat_load As String = "1.) Loading"
     Private Const Cat_analysis As String = "2.) Analysis"
-    Private Const Cat_Proc_Vignette As String = "3) Processing - vignette"
+    Private Const Cat_plot As String = "3.) Plotting"
+    Private Const Cat_Proc_Vignette As String = "4.) Processing - vignette"
     Private Const Cat_log As String = "5.) Logging"
-    Private Const Cat_plot As String = "6.) Plotting"
-    Private Const Cat_save As String = "7.) Saving"
+    Private Const Cat_save As String = "6.) Saving"
     Private Const Cat_misc As String = "9.) Misc"
 
     <ComponentModel.Category(Cat_load)>
-    <ComponentModel.DisplayName("a.) Use IPP?")>
+    <ComponentModel.DisplayName("a) Use IPP?")>
     <ComponentModel.Description("Use the Intel IPP for loading and other steps (recommended - speed-up)")>
     <ComponentModel.DefaultValue(True)>
     Public Property UseIPP As Boolean = True
 
     <ComponentModel.Category(Cat_load)>
-    <ComponentModel.DisplayName("b.) Force direct read-in")>
+    <ComponentModel.DisplayName("b) Force direct read-in")>
     <ComponentModel.Description("Do not apply BZERO or BSCALE - this may help on problems with incorrect scaling coefficients")>
     <ComponentModel.DefaultValue(False)>
     Public Property ForceDirect As Boolean = False
 
+    '===================================================================================================================================================
+
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("a.) Stacking")>
+    <ComponentModel.DisplayName("a) Mono statistics")>
+    <ComponentModel.Description("Calculate the mono statistics (can be of interest if e.g. color balance is applied to a mono image which would be wrong ...)")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property MonoStatistics As Boolean = True
+
+    <ComponentModel.Category(Cat_analysis)>
+    <ComponentModel.DisplayName("b) Bayer statistics")>
+    <ComponentModel.Description("Calculate the bayer statistics (can be of interest if e.g. color balance is applied to a mono image which would be wrong ...)")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property BayerStatistics As Boolean = True
+
+    <ComponentModel.Category(Cat_analysis)>
+    <ComponentModel.DisplayName("c) Stacking")>
     <ComponentModel.DefaultValue(False)>
     Public Property Stacking As Boolean = False
 
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("b.) Vignette resolution")>
-    <ComponentModel.DefaultValue(1000)>
-    Public Property VigResolution As Integer = 1000
-
-    <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("c.) PlateSolve2 Path")>
+    <ComponentModel.DisplayName("d) PlateSolve2 Path")>
     <ComponentModel.DefaultValue("C:\Bin\PlateSolve2\PlateSolve2.exe")>
     Public Property PlateSolve2Path As String = "C:\Bin\PlateSolve2\PlateSolve2.exe"
 
     <ComponentModel.Category(Cat_analysis)>
-    <ComponentModel.DisplayName("d.) PlateSolve2 hold open time")>
+    <ComponentModel.DisplayName("e) PlateSolve2 hold open time")>
     <ComponentModel.DefaultValue(0)>
     Public Property PlateSolve2HoldOpen As Integer = 0
 
-    <ComponentModel.Category(Cat_log)>
-    <ComponentModel.DisplayName("a.) Clean log on any analysis?")>
-    <ComponentModel.DefaultValue(True)>
-    Public Property AutoClearLog As Boolean = True
+    '===================================================================================================================================================
 
     <ComponentModel.Category(Cat_plot)>
-    <ComponentModel.DisplayName("b.) Auto-open graph")>
+    <ComponentModel.DisplayName("a) Auto-open graph")>
     <ComponentModel.DefaultValue(True)>
     Public Property AutoOpenStatGraph As Boolean = True
 
     <ComponentModel.Category(Cat_plot)>
-    <ComponentModel.DisplayName("c.) Plot style")>
+    <ComponentModel.DisplayName("b) Plot style")>
     Public Property PlotStyle As cZEDGraphService.eCurveMode = cZEDGraphService.eCurveMode.LinesAndPoints
 
     <ComponentModel.Category(Cat_plot)>
-    <ComponentModel.DisplayName("d.) Stack graphs below form")>
+    <ComponentModel.DisplayName("c) Stack graphs below form")>
     <ComponentModel.Description("Position graphs below the main window (exact overlay of different graph windows)")>
     <ComponentModel.DefaultValue(False)>
     Public Property StackGraphs As Boolean = False
 
-    <ComponentModel.Category(Cat_save)>
-    <ComponentModel.DisplayName("a.) Image quality")>
-    <ComponentModel.Description("Image quality parameter to use")>
-    <ComponentModel.DefaultValue(80L)>
-    Public Property ImageQuality As Int64 = 80L
+    '===================================================================================================================================================
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
-    <ComponentModel.DisplayName("a.) Vignette polynomial order")>
+    <ComponentModel.DisplayName("a) Vignette resolution")>
+    <ComponentModel.Description("Number of bins for the vignette calculation - use 0 for infinit (no bin) resolution")>
+    <ComponentModel.DefaultValue(1000)>
+    Public Property VigResolution As Integer = 1000
+
+    <ComponentModel.Category(Cat_Proc_Vignette)>
+    <ComponentModel.DisplayName("b) Vignette polynomial order")>
     <ComponentModel.Description("Order of the fitting vignette")>
     <ComponentModel.DefaultValue(19)>
     Public Property VigPolyOrder As Integer = 19
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
-    <ComponentModel.DisplayName("b.) Vignette correction start distance")>
+    <ComponentModel.DisplayName("c) Vignette correction start distance")>
     <ComponentModel.Description("Distance below are ignored for correction")>
     <ComponentModel.DefaultValue(-1)>
-    Public Property VigStartDistance As Integer = -1
+    Public Property VigStartDistance As Integer = 0
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
-    <ComponentModel.DisplayName("c.) Vignette correction stop distance")>
+    <ComponentModel.DisplayName("d) Vignette correction stop distance")>
     <ComponentModel.Description("Distance below are ignored for correction")>
     <ComponentModel.DefaultValue(-1)>
-    Public Property VigStopDistance As Integer = -1
+    Public Property VigStopDistance As Integer = 10000
+
+    '===================================================================================================================================================
+
+    <ComponentModel.Category(Cat_log)>
+    <ComponentModel.DisplayName("a) Clean log on any analysis?")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property AutoClearLog As Boolean = True
+
+    '===================================================================================================================================================
+
+    <ComponentModel.Category(Cat_save)>
+    <ComponentModel.DisplayName("a) Image quality")>
+    <ComponentModel.Description("Image quality parameter to use")>
+    <ComponentModel.DefaultValue(80L)>
+    Public Property ImageQuality As Int64 = 80L
+
+    '===================================================================================================================================================
 
     <ComponentModel.Category(Cat_misc)>
-    <ComponentModel.DisplayName("   a) Bayer pattern")>
-    <ComponentModel.Description("Bayer pattern")>
+    <ComponentModel.DisplayName("a) Bayer pattern")>
+    <ComponentModel.Description("Bayer pattern - 1 character for each channel")>
     <ComponentModel.DefaultValue("RGGB")>
     Public Property BayerPattern As String = "RGGB"
 
     <ComponentModel.Category(Cat_misc)>
-    <ComponentModel.DisplayName("Used IPP path")>
+    <ComponentModel.DisplayName("b) Used IPP path")>
     Public ReadOnly Property IPPPath As String
         Get
             Return MyIPPPath

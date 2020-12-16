@@ -42,11 +42,18 @@ Public Class frmFITSGrep
         Next FileName
 
         'Get all headers
-        Dim AllHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
+        Dim FITSFilesHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
+        Dim AllKeywords As New Dictionary(Of eFITSKeywords, List(Of Object))
         For Each FileName As String In QueryResults
             tsslMain.Text = FileName : tsslMain.Invalidate()
             Dim DataStartPos As Integer = -1
-            AllHeaders.Add(FileName.Trim, (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName.Trim, DataStartPos))).GetCardsAsDictionary)
+            Dim Key As String = FileName.Trim
+            FITSFilesHeaders.Add(Key, (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(Key, DataStartPos))).GetCardsAsDictionary)
+            For Each FITSKeyword As eFITSKeywords In FITSFilesHeaders(Key).Keys
+                Dim KeywordValue As Object = FITSFilesHeaders(Key)(FITSKeyword)
+                If AllKeywords.ContainsKey(FITSKeyword) = False Then AllKeywords.Add(FITSKeyword, New List(Of Object))
+                If AllKeywords(FITSKeyword).Contains(KeywordValue) = False Then AllKeywords(FITSKeyword).Add(KeywordValue)
+            Next FITSKeyword
             tspbMain.Value += 1
         Next FileName
         tsslMain.Text = String.Empty
@@ -54,9 +61,23 @@ Public Class frmFITSGrep
         'Output results
         Dim Output As New List(Of String)
         Dim EmptyString As String = "----"
-        For Each FileName As String In AllHeaders.Keys
-            Output.Add(FileName.PadRight(MaxPathLength) & " : " & GetCard(AllHeaders(FileName), eFITSKeywords.BITPIX, EmptyString) & "|" & GetCard(AllHeaders(FileName), eFITSKeywords.NAXIS3, EmptyString) & "|" & GetCard(AllHeaders(FileName), eFITSKeywords.AUTHOR, EmptyString))
+        For Each FileName As String In FITSFilesHeaders.Keys
+            Dim OutLine As New List(Of String)
+            OutLine.Add(FileName.PadRight(MaxPathLength))
+            For Each FITSKeyword As eFITSKeywords In AllKeywords.Keys
+                If AllKeywords(FITSKeyword).Count > 1 Then
+                    OutLine.Add(GetCard(FITSFilesHeaders(FileName), FITSKeyword, EmptyString))
+                End If
+            Next FITSKeyword
+            Output.Add(Join(OutLine.ToArray, "|"))
         Next FileName
+        Output.Add("Keywords identical in ALL files:")
+        Dim OneForAllFile As String = QueryResults(0)
+        For Each FITSKey As eFITSKeywords In AllKeywords.Keys
+            If AllKeywords(FITSKey).Count = 1 Then
+                Output.Add(GetCard(FITSFilesHeaders(OneForAllFile), FITSKey, EmptyString))
+            End If
+        Next FITSKey
 
         'Finish
         tbOutput.Text &= Join(Output.ToArray, System.Environment.NewLine)
