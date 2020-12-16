@@ -1208,4 +1208,13 @@ Partial Public Class MainForm
         Process.Start(XMLXMLParameterFile)
     End Sub
 
+    Private Sub tsmiFile_CreateXML_Click(sender As Object, e As EventArgs) Handles tsmiFile_CreateXML.Click
+
+        Dim XMLGeneration As New frmXMLGeneration
+        XMLGeneration.Show()
+
+    End Sub
+
+
+
 End Class

@@ -91,6 +91,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.tsmiFile_CreateXML = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -214,7 +215,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.tsmiGetAllXMLParameters, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.OpenLastStoredFileToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RunXMLSequenceToolStripMenuItem, Me.tsmiGetAllXMLParameters, Me.ToolStripMenuItem6, Me.ExplorerHereToolStripMenuItem, Me.ExploreCurrentCampaignToolStripMenuItem, Me.OpenLastStoredFileToolStripMenuItem, Me.ToolStripMenuItem1, Me.TestWebInterfaceToolStripMenuItem, Me.StoreStatisticsAsEXCELFileToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem, Me.tsmiFile_CreateXML})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -324,25 +325,25 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
         'FastLiveModeToolStripMenuItem
         '
         Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'TESTToolStripMenuItem
@@ -627,6 +628,12 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
+        'tsmiFile_CreateXML
+        '
+        Me.tsmiFile_CreateXML.Name = "tsmiFile_CreateXML"
+        Me.tsmiFile_CreateXML.Size = New System.Drawing.Size(218, 22)
+        Me.tsmiFile_CreateXML.Text = "Create XML sequence"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -735,4 +742,5 @@ Partial Class MainForm
     Friend WithEvents tsbCooling As ToolStripButton
     Friend WithEvents tsmiGetAllXMLParameters As ToolStripMenuItem
     Friend WithEvents tsslLED_cooling As ToolStripStatusLabel
+    Friend WithEvents tsmiFile_CreateXML As ToolStripMenuItem
 End Class

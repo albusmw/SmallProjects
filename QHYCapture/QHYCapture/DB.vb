@@ -184,63 +184,69 @@ Public Class cDB
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   a) Camera to search")>
+    <ComponentModel.DisplayName("   1.1) Camera to search")>
     <ComponentModel.Description("Search string for the camera - string must occure in the CameraID. Use * to use first found camera.")>
     <ComponentModel.DefaultValue("*")>
     Public Property CamToUse As String = "600M"
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   b) Read-out mode")>
+    <ComponentModel.DisplayName("   1.2) Read-out mode")>
     <ComponentModel.Description("Photographic or high-gain.")>
     <ComponentModel.DefaultValue(eReadOutMode.Photographic)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   c) Stream mode")>
+    <ComponentModel.DisplayName("   1.3) Stream mode")>
     <ComponentModel.Description("Photo or Video.")>
     <ComponentModel.DefaultValue(eStreamMode.SingleFrame)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   d) Target Temp")>
+    <ComponentModel.DisplayName("   1.4.1) Target Temp")>
     <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
     <ComponentModel.DefaultValue(300.0)>
     Public Property TargetTemp As Double = -10.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   e) Binning - Hardware")>
+    <ComponentModel.DisplayName("   1.4.2) Target Temp")>
+    <ComponentModel.Description("Tolerable temperature error")>
+    <ComponentModel.DefaultValue(0.1)>
+    Public Property TargetTempTolerance As Double = 0.1
+
+    <ComponentModel.Category(Cat1)>
+    <ComponentModel.DisplayName("   1.5.1) Binning - Hardware")>
     <ComponentModel.Description("Hardware Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
     Public Property HardwareBinning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   f) Binning - Software")>
+    <ComponentModel.DisplayName("   1.5.2) Binning - Software")>
     <ComponentModel.Description("Software Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
     Public Property SoftwareBinning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   g) Read resolution")>
-    <ComponentModel.Description("Read resolution")>
+    <ComponentModel.DisplayName("   1.6) Read resolution")>
+    <ComponentModel.Description("Bit per pixel resolution")>
     <ComponentModel.DefaultValue(eReadResolution.Res16Bit)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property ReadResolution As eReadResolution = eReadResolution.Res16Bit
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   h) ROI")>
+    <ComponentModel.DisplayName("   1.7) ROI")>
     <ComponentModel.Description("ROI (without binning)")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   i) USB traffic")>
+    <ComponentModel.DisplayName("   1.8) USB traffic")>
     <ComponentModel.Description("USB traffic - 0 is fastest, maximum value depends on the camera")>
-    <ComponentModel.DefaultValue(0.0)>
-    Public Property USBTraffic As Double = 0.0
+    <ComponentModel.DefaultValue(20.0)>
+    Public Property USBTraffic As Double = 20.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName("   j) DDR RAM")>
+    <ComponentModel.DisplayName("   1.9) DDR RAM")>
     <ComponentModel.Description("Use DDR RAM?")>
     <ComponentModel.DefaultValue(True)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>

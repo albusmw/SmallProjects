@@ -276,7 +276,7 @@ Partial Public Class MainForm
                 CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
                 Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
                 tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & M.DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
-                If CurrentTemp <= M.DB.TargetTemp Then Exit Do
+                If System.Math.Abs(CurrentTemp - M.DB.TargetTemp) <= M.DB.TargetTempTolerance Then Exit Do
                 System.Threading.Thread.Sleep(500)
                 DE()
             Loop Until TimeOutT.ElapsedMilliseconds > TimeOut * 1000
@@ -380,9 +380,9 @@ Partial Public Class MainForm
             QHY.QHYCamera.ReleaseQHYCCDResource()
             M.DB.CamHandle = IntPtr.Zero
         End If
-        LED_update(tsslLED_cooling, True)
+        LED_update(tsslLED_cooling, False)
         LED_update(tsslLED_capture, False)
-        LED_update(tsslLED_reading, True)
+        LED_update(tsslLED_reading, False)
     End Sub
 
     '''<summary>Load the data from the 10Micron mount.</summary>
