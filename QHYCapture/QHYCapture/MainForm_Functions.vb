@@ -7,7 +7,7 @@ Partial Public Class MainForm
     Private Delegate Sub InvokeDelegate()
 
     '''<summary>Execute an XML file sequence.</summary>
-    Private Sub RunXMLSequence(ByVal SpecFile As String)
+    Private Sub RunXMLSequence(ByVal SpecFile As String, ByVal RunExposure As Boolean)
         Dim BoolTrue As New List(Of String)({"TRUE", "YES", "1"})
         Dim BindFlagsSet As Reflection.BindingFlags = Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.SetProperty
         'Reflect database
@@ -56,12 +56,12 @@ Partial Public Class MainForm
             Next ExpAttrib
             RefreshProperties()
             'Start exposure if specified
-            If M.DB.CaptureCount > 0 Then
+            If M.DB.CaptureCount > 0 And RunExposure Then
                 QHYCapture(M.DB.CloseCam)
             End If
             If M.DB.StopFlag = True Then Exit For
         Next ExpNode
-        CloseCamera()
+        If RunExposure Then CloseCamera()
     End Sub
 
     '''<summary>Get a list of all available property names.</summary>
@@ -81,7 +81,9 @@ Partial Public Class MainForm
         Dim SingleCaptureData As New cSingleCaptureInfo
 
         'Set exposure parameters (first time / on property change / always if configured)
+        LED_update(tsslLED_config, True)
         If (CaptureIdx = 1) Or (M.DB.ConfigAlways = True) Or PropertyChanged = True Then SetExpParameters(CalculateROI(Chip_Pixel))
+        LED_update(tsslLED_config, False)
         M.DB.Stopper.Stamp("Set exposure parameters")
 
         'Cancel any running exposure
@@ -269,20 +271,39 @@ Partial Public Class MainForm
     '''<summary>Set the requested temperature.</summary>
     '''<param name="TimeOut">Time-out [s] for the complete cooling process</param>
     Private Function SetTemperature(ByVal TimeOut As Double) As Double
-        Dim CurrentTemp As Double = Double.NaN
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
+        Dim CurrentTemp As Double = Double.NaN
         If M.DB.TargetTemp > -100 Then
             Do
-                CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
-                Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
-                tsslMain.Text = "Temp is current" & CurrentTemp.ValRegIndep & ", Target: " & M.DB.TargetTemp.ValRegIndep & ", cooler @ " & CurrentPWM.ValRegIndep & " %"
-                If System.Math.Abs(CurrentTemp - M.DB.TargetTemp) <= M.DB.TargetTempTolerance Then Exit Do
+                If GetTempState(CurrentTemp) = True Then Exit Do
                 System.Threading.Thread.Sleep(500)
                 DE()
-            Loop Until TimeOutT.ElapsedMilliseconds > TimeOut * 1000
+            Loop Until (TimeOutT.ElapsedMilliseconds > TimeOut * 1000) Or M.DB.StopFlag = True
         End If
         M.DB.Stopper.Stamp("Set temperature")
         Return CurrentTemp
+    End Function
+
+    '''<summary>Get and display the requested temperature.</summary>
+    Private Function GetTempState() As Boolean
+        Dim DontCare As Double = Double.NaN
+        Return GetTempState(DontCare)
+    End Function
+
+    '''<summary>Get and display the requested temperature.</summary>
+    Private Function GetTempState(ByRef CurrentTemp As Double) As Boolean
+        Dim RetVal As Boolean = False
+        CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
+        Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
+        tsslTemperature.Text = "T = " & CurrentTemp.ValRegIndep & " °C (-> " & M.DB.TargetTemp.ValRegIndep & " °C, cooler @ " & CurrentPWM.ValRegIndep & " %)"
+        If System.Math.Abs(CurrentTemp - M.DB.TargetTemp) <= M.DB.TargetTempTolerance Then
+            RetVal = True
+            tsslTemperature.BackColor = Color.Green
+        Else
+            RetVal = False
+            tsslTemperature.BackColor = Color.Red
+        End If
+        Return RetVal
     End Function
 
     '''<summary>Activate a certain filter.</summary>
@@ -477,6 +498,8 @@ Partial Public Class MainForm
 
     '''<summary>Active or deactive the capture LED.</summary>
     Private Sub LED_update(ByRef LED As ToolStripStatusLabel, ByVal Status As Boolean)
+        tsslLED_init.Enabled = False : tsslLED_init.BackColor = System.Drawing.SystemColors.Control
+        tsslLED_config.Enabled = False : tsslLED_config.BackColor = System.Drawing.SystemColors.Control
         tsslLED_cooling.Enabled = False : tsslLED_cooling.BackColor = System.Drawing.SystemColors.Control
         tsslLED_capture.Enabled = False : tsslLED_capture.BackColor = System.Drawing.SystemColors.Control
         tsslLED_reading.Enabled = False : tsslLED_reading.BackColor = System.Drawing.SystemColors.Control

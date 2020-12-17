@@ -44,8 +44,12 @@ Partial Public Class MainForm
         M.DB.Stopper.Start()
 
         'Try to get a suitable camera and continue if found
+        LED_update(tsslLED_init, True)
         If InitQHY(M.DB.CamToUse) = False Then Log("No suitable camera found!")
-        If M.DB.CamHandle <> IntPtr.Zero Then
+        LED_update(tsslLED_init, False)
+        If M.DB.CamHandle = IntPtr.Zero Then Exit Sub
+
+        LED_update(tsslLED_config, True)
 
             'Get chip properties
             QHY.QHYCamera.GetQHYCCDChipInfo(M.DB.CamHandle, Chip_Physical.Width, Chip_Physical.Height, Chip_Pixel.Width, Chip_Pixel.Height, Pixel_Size.Width, Pixel_Size.Height, bpp)
@@ -76,6 +80,8 @@ Partial Public Class MainForm
 
                 Log("==============================================================================")
             End If
+
+            LED_update(tsslLED_config, False)
 
             Dim ChannelToRead As UInteger = 0
 
@@ -114,6 +120,7 @@ Partial Public Class MainForm
                 '================================================================================
 
                 IdleExposureTime(M.DB.ExposureTime)
+                If StopNow() Then Exit For
 
                 'Get the buffer size from the DLL - typically too big but does not care ...
                 Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(M.DB.CamHandle)
@@ -131,7 +138,7 @@ Partial Public Class MainForm
                 LED_update(tsslLED_reading, True)
                 If M.DB.StreamMode = eStreamMode.SingleFrame Then
                     CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
-                    LED_update(tsslLED_capture, True)
+                    LED_update(tsslLED_capture, False)
                 Else
                     Dim LiveModeReady As UInteger = UInteger.MaxValue
                     Do
@@ -160,8 +167,8 @@ Partial Public Class MainForm
                         LogError("Overscan removal FAILED")
                     End If
                 End If
-                RunningCaptureInfo.NAXIS1 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1)
-                RunningCaptureInfo.NAXIS2 = CUInt(SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2)
+                RunningCaptureInfo.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1
+                RunningCaptureInfo.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2
                 M.DB.Stopper.Stamp("ChangeAspect")
 
                 'Software binning - if > 1 data type is moved from UInt16 to UInt32
@@ -211,14 +218,14 @@ Partial Public Class MainForm
                 Dim DisplaySumStat As Boolean = False
                 If DB_PlotAndText.Prop.Log_ClearStat = True Then RTFGen.Clear()
                 If M.DB.CaptureCount > 1 And DB_PlotAndText.Prop.Log_ClearStat = True Then DisplaySumStat = True
-                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(False, DB_PlotAndText.Prop.BayerPatternNames)
-                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(False, DB_PlotAndText.Prop.BayerPatternNames)
+                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(True, True, DB_PlotAndText.Prop.BayerPatternNames)
+                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(True, True, DB_PlotAndText.Prop.BayerPatternNames)
                 If IsNothing(SingleStatReport) = False Then
                     RTFGen.AddEntry("Capture #" & LastCaptureInfo.CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
                     For Idx As Integer = 0 To SingleStatReport.Count - 1
                         Dim Line As String = SingleStatReport(Idx)
-                        If DisplaySumStat = True Then Line &= "#" & LoopStatReport(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 2)
-                        RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
+                    If DisplaySumStat = True Then Line &= "|" & LoopStatReport(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 1)
+                    RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
                     Next Idx
                     RTFGen.ForceRefresh()
                     DE()
@@ -296,14 +303,11 @@ Partial Public Class MainForm
             '================================================================================
             'Stop live mode if used
 
-            If M.DB.StreamMode = eStreamMode.LiveFrame Then
-                CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(M.DB.CamHandle))
-            End If
+            M.DB.StopFlag = True
+            StopNow()
 
-            'Release buffer handles
-            PinHandler = Nothing
-
-        End If
+        'Release buffer handles
+        PinHandler = Nothing
 
         'Close camera if selected 
         If CloseAtEnd = True Then CloseCamera()
@@ -319,10 +323,24 @@ Partial Public Class MainForm
             Log("--------------------------------------------------------------")
         End If
 
-        tsslMain.Text = "--IDLE--"
+        'Reset GUI to idle state
+        tsslMain.Text = "--IDLE--" : tsslMain.BackColor = ssMain.BackColor
+        tsslTemperature.Text = "T = ??? °C" : tsslTemperature.BackColor = ssMain.BackColor
         M.DB.RunningFlag = False
 
     End Sub
+
+    '''<summary></summary>
+    '''<returns>TRUE if camera hardware is stopped and exit can be performed.</returns>
+    Private Function StopNow() As Boolean
+        If M.DB.StopFlag Then
+            CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(M.DB.CamHandle))
+            CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(M.DB.CamHandle))
+            If M.DB.StreamMode = eStreamMode.LiveFrame Then CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(M.DB.CamHandle))
+            Return True
+        End If
+        Return False
+    End Function
 
     Private Function MakeUnique(ByVal FullPath As String) As String
         If System.IO.File.Exists(FullPath) = False Then
@@ -349,19 +367,20 @@ Partial Public Class MainForm
             Dim TimePassed As Double = Double.NaN
             tspbProgress.Maximum = CInt(ExposureTime * 10)
             Do
+                GetTempState()
                 System.Threading.Thread.Sleep(100)
                 TimePassed = (Now - ExpStart).TotalSeconds
                 If TimePassed < ExposureTime Then
                     Dim ProgBarVal As Integer = CInt(TimePassed * 10)
                     If ProgBarVal <= tspbProgress.Maximum Then tspbProgress.Value = ProgBarVal
-                    tsslProgress.Text = Format(TimePassed, "0.0").Trim & "/" & ExposureTime.ToString.Trim & " seconds exposed"
-                Else
-                    tspbProgress.Value = 0
-                    tsslProgress.Text = "---"
+                    Dim TimeFormat As String = CStr(IIf(ExposureTime < 10, "0.0", "0"))
+                    tsslProgress.Text = Format(TimePassed, TimeFormat).Trim & "/" & ExposureTime.ToString.Trim & " seconds exposed"
                 End If
                 DE()
-            Loop Until TimePassed >= ExposureTime
+            Loop Until (TimePassed >= ExposureTime) Or (M.DB.StopFlag = True)
         End If
+        tspbProgress.Value = 0
+        tsslProgress.Text = "---"
     End Sub
 
     '''<summary>Calculate the size of the requested ROI.</summary>
@@ -511,7 +530,7 @@ Partial Public Class MainForm
         System.Windows.Forms.Application.DoEvents()
     End Sub
 
-    Private Sub ExplorerHereToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExplorerHereToolStripMenuItem.Click
+    Private Sub tsmiFile_ExploreHere_Click(sender As Object, e As EventArgs) Handles tsmiFile_ExploreHere.Click
         Diagnostics.Process.Start(M.DB.EXEPath)
     End Sub
 
@@ -577,7 +596,7 @@ Partial Public Class MainForm
 
     End Sub
 
-    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+    Private Sub tsmiFile_Exit_Click(sender As Object, e As EventArgs) Handles tsmiFile_Exit.Click
         End
     End Sub
 
@@ -640,7 +659,7 @@ Partial Public Class MainForm
         CloseCamera()
     End Sub
 
-    Private Sub TestWebInterfaceToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestWebInterfaceToolStripMenuItem.Click
+    Private Sub tsmiFile_TestWebInterface_Click(sender As Object, e As EventArgs) Handles tsmiFile_TestWebInterface.Click
         'Test call for the web interface
         System.Diagnostics.Process.Start("http://localhost:1250/GetParameterList")
     End Sub
@@ -757,7 +776,7 @@ Partial Public Class MainForm
         CloseCamera()
     End Sub
 
-    Private Sub ExploreCurrentCampaignToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExploreCurrentCampaignToolStripMenuItem.Click
+    Private Sub tsmiFile_ExploreCampaign_Click(sender As Object, e As EventArgs) Handles tsmiFile_ExploreCampaign.Click
         Dim FolderToOpen As String = System.IO.Path.Combine(M.DB.StoragePath, DB_meta.GUID)
         If System.IO.Directory.Exists(FolderToOpen) = True Then System.Diagnostics.Process.Start(FolderToOpen)
     End Sub
@@ -833,13 +852,15 @@ Partial Public Class MainForm
         Load10MicronData()
     End Sub
 
-    Private Sub RunXMLSequenceToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RunXMLSequenceToolStripMenuItem.Click
+    Private Sub tsmiFile_RunSequence_Click(sender As Object, e As EventArgs) Handles tsmiFile_RunSequence.Click, tsmiFile_LoadSettings.Click
+        'Load / run the passed XML config file
         With ofdMain
             .Filter = "XML definitions (*.qhycapture.xml)|*.qhycapture.xml"
             .Multiselect = False
             If .ShowDialog <> DialogResult.OK Then Exit Sub
         End With
-        RunXMLSequence(ofdMain.FileName)
+        Dim Run As Boolean = CBool(IIf(CType(sender, ToolStripMenuItem).Tag.ToString.Trim.ToUpper = "RUN", True, False))
+        RunXMLSequence(ofdMain.FileName, Run)
     End Sub
 
     Private Sub tsmiASIZWO_Click(sender As Object, e As EventArgs) Handles tsmiASIZWO.Click
@@ -1163,7 +1184,7 @@ Partial Public Class MainForm
         RefreshProperties()
     End Sub
 
-    Private Sub OpenLastStoredFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLastStoredFileToolStripMenuItem.Click
+    Private Sub tsmiFile_OpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiFile_OpenLastFile.Click
         If System.IO.File.Exists(M.DB.LastStoredFile) Then Process.Start(M.DB.LastStoredFile)
     End Sub
 

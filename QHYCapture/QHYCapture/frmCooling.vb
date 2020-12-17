@@ -19,9 +19,9 @@ Public Class frmCooling
         Dim TargetTemp As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_COOLER)
         Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
 
-        tbT_measured.Text = ValRegIndep(CurrentTemp, "#0.0")
-        tbT_set.Text = ValRegIndep(TargetTemp, "#0.0")
-        tbCoolerPWM.Text = ValRegIndep(CurrentPWM, "#0")
+        tbT_measured.Text = CurrentTemp.ValRegIndep("#0.0")
+        tbT_set.Text = TargetTemp.ValRegIndep("#0.0")
+        tbCoolerPWM.Text = CurrentPWM.ValRegIndep("#0")
         Dim Delta As Double = CurrentTemp - TargetTemp
         Dim DeltaDisp As Integer = CInt(Math.Abs(Delta * 10))
         If DeltaDisp > 100 Then DeltaDisp = 100
@@ -35,7 +35,7 @@ Public Class frmCooling
 
     Private Sub btnSetTemp_Click(sender As Object, e As EventArgs) Handles btnSetTemp.Click
         Dim NewTemp As Double
-        If Double.TryParse(InputBox("New target: ", "New temperature", ValRegIndep(M.DB.TargetTemp)), NewTemp) = True Then M.DB.TargetTemp = NewTemp
+        If Double.TryParse(InputBox("New target: ", "New temperature", M.DB.TargetTemp.ValRegIndep), NewTemp) = True Then M.DB.TargetTemp = NewTemp
     End Sub
 
     '''<summary>Get a configured timed cooling.</summary>

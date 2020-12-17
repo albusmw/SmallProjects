@@ -18,16 +18,27 @@ Public Class cDB
     Public ReadOnly GainNotSet As Short = Short.MinValue + 1
 
     <ComponentModel.Category(Cat_TimeControl)>
-    <ComponentModel.DisplayName("1.) Capture interval [s]")>
+    <ComponentModel.DisplayName("1.1) Capture interval [s]")>
     <ComponentModel.Description("Set to 0 to disable.")>
     <ComponentModel.DefaultValue(0.0)>
     Public Property CaptureInterval As Double = 0.0
 
     <ComponentModel.Category(Cat_TimeControl)>
-    <ComponentModel.DisplayName("2.) Max sun height")>
+    <ComponentModel.DisplayName("1.2) Capture during day time?")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property CaptureDuringDay As Boolean = True
+
+    <ComponentModel.Category(Cat_TimeControl)>
+    <ComponentModel.DisplayName("2.1) Sun height for day setting")>
     <ComponentModel.Description("Capture only for specified sun height.")>
-    <ComponentModel.DefaultValue(5.0)>
-    Public Property MaxSunHeight As Double = 5.0
+    <ComponentModel.DefaultValue(-6.0)>
+    Public Property SunHeight_Day As Double = -6.0
+
+    <ComponentModel.Category(Cat_TimeControl)>
+    <ComponentModel.DisplayName("2.2) Sun height for night setting")>
+    <ComponentModel.Description("Capture only for specified sun height.")>
+    <ComponentModel.DefaultValue(-18.0)>
+    Public Property SunHeight_Night As Double = -18.0
 
     <ComponentModel.Category(Cat_TimeControl)>
     <ComponentModel.DisplayName("3.) File name format")>
@@ -41,15 +52,24 @@ Public Class cDB
     Public Property ASCOMCam As String = "ASCOM.ASICamera2.Camera"
 
     <ComponentModel.Category(Cat_ExposureControl)>
-    <ComponentModel.DisplayName("2.) Exposure time")>
-    <ComponentModel.DefaultValue(5.0)>
-    Public Property ExposureTime As Double = 10.0
+    <ComponentModel.DisplayName("2.1) Exposure time - Night")>
+    <ComponentModel.DefaultValue(30.0)>
+    Public Property Exp_Night As Double = 30.0
 
     <ComponentModel.Category(Cat_ExposureControl)>
-    <ComponentModel.DisplayName("3.) Gain")>
-    <ComponentModel.DefaultValue(300)>
-    Public Property SelectedGain As Short = 100
+    <ComponentModel.DisplayName("2.2) Exposure time - Day")>
+    <ComponentModel.DefaultValue(0.02)>
+    Public Property Exp_Day As Double = 0.02
 
+    <ComponentModel.Category(Cat_ExposureControl)>
+    <ComponentModel.DisplayName("3.1) Gain - Night")>
+    <ComponentModel.DefaultValue(CType(100, Short))>
+    Public Property Gain_Night As Short = 100
+
+    <ComponentModel.Category(Cat_ExposureControl)>
+    <ComponentModel.DisplayName("3.2) Gain - Day")>
+    <ComponentModel.DefaultValue(CType(0, Short))>
+    Public Property Gain_Day As Short = 0
 
     <ComponentModel.Category(Cat_Inprints)>
     <ComponentModel.DisplayName("1.) Font size")>
@@ -88,6 +108,7 @@ Public Class cDB
 
     <ComponentModel.Category(Cat_Misc)>
     <ComponentModel.DisplayName("1) FFMPEG EXE path")>
+    <ComponentModel.DefaultValue("C:\BIN\ffmpeg-4.3.1-essentials_build\bin\ffmpeg.exe")>
     Public Property FFMPEGEXE As String = "C:\BIN\ffmpeg-4.3.1-essentials_build\bin\ffmpeg.exe"
 
     <ComponentModel.Category(Cat_Misc)>

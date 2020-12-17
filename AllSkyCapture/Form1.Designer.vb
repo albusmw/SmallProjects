@@ -41,15 +41,12 @@ Partial Class Form1
         Me.tsmiTakeOnePicture = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiFTPUpload = New System.Windows.Forms.ToolStripMenuItem()
-        Me.HardwareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.GAINToMAXToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.GAINToMINToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SetToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MyCaptureDefaultsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tCheckExpState = New System.Windows.Forms.Timer(Me.components)
         Me.ssMain = New System.Windows.Forms.StatusStrip()
-        Me.tsslSunPos = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslCapture = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSunPos = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslNoCapture = New System.Windows.Forms.ToolStripStatusLabel()
         CType(Me.pbLastImage, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -84,7 +81,7 @@ Partial Class Form1
         Me.tbLog.Name = "tbLog"
         Me.tbLog.ReadOnly = True
         Me.tbLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLog.Size = New System.Drawing.Size(339, 235)
+        Me.tbLog.Size = New System.Drawing.Size(339, 236)
         Me.tbLog.TabIndex = 3
         '
         'scMain
@@ -123,7 +120,7 @@ Partial Class Form1
         '
         Me.scLeftPanel.Panel2.Controls.Add(Me.tbLog)
         Me.scLeftPanel.Size = New System.Drawing.Size(339, 471)
-        Me.scLeftPanel.SplitterDistance = 232
+        Me.scLeftPanel.SplitterDistance = 231
         Me.scLeftPanel.TabIndex = 4
         '
         'pgMain
@@ -131,12 +128,12 @@ Partial Class Form1
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(0, 0)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(339, 232)
+        Me.pgMain.Size = New System.Drawing.Size(339, 231)
         Me.pgMain.TabIndex = 16
         '
         'msMain
         '
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.TestToolStripMenuItem, Me.HardwareToolStripMenuItem, Me.SetToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.TestToolStripMenuItem, Me.SetToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Size = New System.Drawing.Size(811, 24)
@@ -200,38 +197,19 @@ Partial Class Form1
         'tsmiTakeOnePicture
         '
         Me.tsmiTakeOnePicture.Name = "tsmiTakeOnePicture"
-        Me.tsmiTakeOnePicture.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiTakeOnePicture.Size = New System.Drawing.Size(146, 22)
         Me.tsmiTakeOnePicture.Text = "Take 1 picture"
         '
         'ToolStripMenuItem3
         '
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(143, 6)
         '
         'tsmiFTPUpload
         '
         Me.tsmiFTPUpload.Name = "tsmiFTPUpload"
-        Me.tsmiFTPUpload.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiFTPUpload.Size = New System.Drawing.Size(146, 22)
         Me.tsmiFTPUpload.Text = "FTP upload"
-        '
-        'HardwareToolStripMenuItem
-        '
-        Me.HardwareToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.GAINToMAXToolStripMenuItem, Me.GAINToMINToolStripMenuItem})
-        Me.HardwareToolStripMenuItem.Name = "HardwareToolStripMenuItem"
-        Me.HardwareToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
-        Me.HardwareToolStripMenuItem.Text = "Hardware"
-        '
-        'GAINToMAXToolStripMenuItem
-        '
-        Me.GAINToMAXToolStripMenuItem.Name = "GAINToMAXToolStripMenuItem"
-        Me.GAINToMAXToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
-        Me.GAINToMAXToolStripMenuItem.Text = "GAIN to MAX"
-        '
-        'GAINToMINToolStripMenuItem
-        '
-        Me.GAINToMINToolStripMenuItem.Name = "GAINToMINToolStripMenuItem"
-        Me.GAINToMINToolStripMenuItem.Size = New System.Drawing.Size(145, 22)
-        Me.GAINToMINToolStripMenuItem.Text = "GAIN to MIN"
         '
         'SetToolStripMenuItem
         '
@@ -243,7 +221,7 @@ Partial Class Form1
         'MyCaptureDefaultsToolStripMenuItem
         '
         Me.MyCaptureDefaultsToolStripMenuItem.Name = "MyCaptureDefaultsToolStripMenuItem"
-        Me.MyCaptureDefaultsToolStripMenuItem.Size = New System.Drawing.Size(179, 22)
+        Me.MyCaptureDefaultsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.MyCaptureDefaultsToolStripMenuItem.Text = "My capture defaults"
         '
         'tCheckExpState
@@ -259,18 +237,18 @@ Partial Class Form1
         Me.ssMain.TabIndex = 17
         Me.ssMain.Text = "StatusStrip1"
         '
-        'tsslSunPos
-        '
-        Me.tsslSunPos.Name = "tsslSunPos"
-        Me.tsslSunPos.Size = New System.Drawing.Size(22, 17)
-        Me.tsslSunPos.Text = "---"
-        '
         'tsslCapture
         '
         Me.tsslCapture.BackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
         Me.tsslCapture.Name = "tsslCapture"
         Me.tsslCapture.Size = New System.Drawing.Size(83, 17)
         Me.tsslCapture.Text = "EXP RUNNING"
+        '
+        'tsslSunPos
+        '
+        Me.tsslSunPos.Name = "tsslSunPos"
+        Me.tsslSunPos.Size = New System.Drawing.Size(22, 17)
+        Me.tsslSunPos.Text = "---"
         '
         'tsslNoCapture
         '
@@ -320,9 +298,6 @@ Partial Class Form1
     Friend WithEvents OpenLastImageToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiFTPUpload As ToolStripMenuItem
-    Friend WithEvents HardwareToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents GAINToMAXToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents GAINToMINToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tCheckExpState As Timer
     Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
     Friend WithEvents OpenStoragePathToolStripMenuItem As ToolStripMenuItem
