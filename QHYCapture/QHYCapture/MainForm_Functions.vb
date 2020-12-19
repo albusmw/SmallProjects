@@ -17,7 +17,13 @@ Partial Public Class MainForm
         Dim DB_meta_Type As Type = DB_meta.GetType
         Dim DB_meta_props As List(Of String) = GetAllPropertyNames(DB_meta.GetType)
         'Move over all exposure specifications in the file
-        Dim SpecDoc As New Xml.XmlDocument : SpecDoc.Load(SpecFile)
+        Dim SpecDoc As New Xml.XmlDocument
+        Try
+            SpecDoc.Load(SpecFile)
+        Catch ex As Exception
+            MsgBox("XML error: [" & ex.Message & "]")
+            Exit Sub
+        End Try
         For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
             'Load all attributes from the file
             For Each ExpAttrib As Xml.XmlAttribute In ExpNode.Attributes

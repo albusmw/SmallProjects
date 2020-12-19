@@ -163,7 +163,7 @@ Public Class Form1
         With Inprint
             Dim AllLines As New List(Of String)
             AllLines.Add(DB.Inprint_station)
-            AllLines.Add("Exp [" & ExpToUse.ValRegIndep & "] / Gain [" & GainToUse & "]")
+            AllLines.Add("Exp [" & ExpToUse.ValRegIndep("0.0000") & "] / Gain [" & GainToUse & "]")
             .TextToPrint = Join(AllLines.ToArray, System.Environment.NewLine)
             .TextSize = DB.Inprint_FontSize
             .PixelValue = CByte(Math.Floor(Max / Scaler))

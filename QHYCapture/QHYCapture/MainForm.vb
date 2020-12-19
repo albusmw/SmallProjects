@@ -120,10 +120,10 @@ Partial Public Class MainForm
                 '================================================================================
 
                 IdleExposureTime(M.DB.ExposureTime)
-                If StopNow() Then Exit For
+            If StopNow(False) Then Exit For
 
-                'Get the buffer size from the DLL - typically too big but does not care ...
-                Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(M.DB.CamHandle)
+            'Get the buffer size from the DLL - typically too big but does not care ...
+            Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(M.DB.CamHandle)
                 LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
                 If CamRawBuffer.Length <> BytesToTransfer_reported Then
                     PinHandler = New cIntelIPP.cPinHandler
@@ -300,11 +300,10 @@ Partial Public Class MainForm
 
             Next CaptureLoopCount
 
-            '================================================================================
-            'Stop live mode if used
+        '================================================================================
+        'Stop live mode if used
 
-            M.DB.StopFlag = True
-            StopNow()
+        StopNow(True)
 
         'Release buffer handles
         PinHandler = Nothing
@@ -332,8 +331,8 @@ Partial Public Class MainForm
 
     '''<summary></summary>
     '''<returns>TRUE if camera hardware is stopped and exit can be performed.</returns>
-    Private Function StopNow() As Boolean
-        If M.DB.StopFlag Then
+    Private Function StopNow(ByVal Force As Boolean) As Boolean
+        If M.DB.StopFlag Or Force = True Then
             CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(M.DB.CamHandle))
             CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(M.DB.CamHandle))
             If M.DB.StreamMode = eStreamMode.LiveFrame Then CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(M.DB.CamHandle))
