@@ -32,9 +32,9 @@ Public Class cSingleCaptureInfo
     '''<summary>Selected brightness value.</summary>
     Public Brightness As Double = Double.NaN
     '''<summary>Number of pixel in X direction (bigger axis).</summary>
-    Public NAXIS1 As UInteger = 0
+    Public NAXIS1 As Integer = 0
     '''<summary>Number of pixel in Y direction (bigger axis).</summary>
-    Public NAXIS2 As UInteger = 0
+    Public NAXIS2 As Integer = 0
 End Class
 
 '''<summary>Size description.</summary>
@@ -192,21 +192,21 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   1.2) Read-out mode")>
     <ComponentModel.Description("Photographic or high-gain.")>
-    <ComponentModel.DefaultValue(eReadOutMode.Photographic)>
+    <ComponentModel.DefaultValue(GetType(eReadOutMode), "Photographic")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   1.3) Stream mode")>
     <ComponentModel.Description("Photo or Video.")>
-    <ComponentModel.DefaultValue(eStreamMode.SingleFrame)>
+    <ComponentModel.DefaultValue(GetType(eStreamMode), "SingleFrame")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   1.4.1) Target Temp")>
     <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
-    <ComponentModel.DefaultValue(300.0)>
+    <ComponentModel.DefaultValue(-10.0)>
     Public Property TargetTemp As Double = -10.0
 
     <ComponentModel.Category(Cat1)>
@@ -237,6 +237,7 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   1.7) ROI")>
     <ComponentModel.Description("ROI (without binning)")>
+    <ComponentModel.DefaultValue(GetType(Drawing.Rectangle), "0, 0, 0, 0")>
     Public Property ROI As New Drawing.Rectangle(0, 0, 0, 0)
 
     <ComponentModel.Category(Cat1)>
@@ -258,7 +259,7 @@ Public Class cDB
     <ComponentModel.DisplayName("   a) # of captures")>
     <ComponentModel.Description("Number of exposured to take with identical settings.")>
     <ComponentModel.DefaultValue(1)>
-    Public Property CaptureCount As UInt32 = 1
+    Public Property CaptureCount As Integer = 1
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   b) Filter slot")>
@@ -297,7 +298,7 @@ Public Class cDB
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   f) Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored data and file")>
-    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.DefaultValue(True)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property RemoveOverscan As Boolean = True
 
@@ -556,7 +557,7 @@ Public Class cDB_meta
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName("   6. Telescope used")>
     <ComponentModel.Description("Telescope name to add to the meta data.")>
-    <ComponentModel.DefaultValue("Planewave CDK 12.5 with reducer")>
+    <ComponentModel.DefaultValue("CDK 12.5 with reducer")>
     Public Property Telescope As String = "CDK 12.5 with reducer"
 
     <ComponentModel.Category(Cat1)>
@@ -607,7 +608,7 @@ Public Class cDB_meta
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName("   6. Load 10Micron data")>
-    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.DefaultValue(True)>
     Public Property Load10MicronDataAlways As Boolean = True
 
 End Class

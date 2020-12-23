@@ -29,7 +29,7 @@ Public Class Form1
     Private Sub TakeImage(ByVal TimeStamp As DateTime)
 
         'Check pre condition
-        If DB.SunHeight > DB.MaxSunHeight Then
+        If DB.SunHeight > DB.SunHeight_Day And DB.CaptureDuringDay = False Then
             tsslNoCapture.Text = "SUN TOO HIGH!"
             tsslNoCapture.BackColor = Color.Red
             Exit Sub
@@ -48,20 +48,41 @@ Public Class Form1
         Camera.BinX = 1
         Camera.BinY = 1
 
+        'Calculate settings
+        Dim ExpToUse As Double = Double.NaN
+        Dim GainToUse As Short = Short.MinValue
+        If DB.SunHeight < DB.SunHeight_Night Then
+            'Night
+            ExpToUse = DB.Exp_Night
+            GainToUse = DB.Gain_Night
+        Else
+            If DB.SunHeight > DB.SunHeight_Day Then
+                'Day
+                ExpToUse = DB.Exp_Day
+                GainToUse = DB.Gain_Day
+            Else
+                'Dusk / Dawn
+                Dim SunHeightRel As Double = (DB.SunHeight - DB.SunHeight_Night) / (DB.SunHeight_Day - DB.SunHeight_Night)  '0=night, 1=day
+                ExpToUse = (DB.Exp_Night) + SunHeightRel * (DB.Exp_Day - DB.Exp_Night)
+                GainToUse = CShort((DB.Gain_Night) + SunHeightRel * (DB.Gain_Day - DB.Gain_Night))
+            End If
+        End If
+
         'Set gain
-        If DB.SelectedGain <> DB.GainNotSet Then
-            If DB.SelectedGain > Camera.GainMax Then DB.SelectedGain = Camera.GainMax
-            If DB.SelectedGain < Camera.GainMin Then DB.SelectedGain = Camera.GainMin
-            Camera.Gain = DB.SelectedGain
+        If GainToUse <> DB.GainNotSet Then
+            If GainToUse > Camera.GainMax Then GainToUse = Camera.GainMax
+            If GainToUse < Camera.GainMin Then GainToUse = Camera.GainMin
+            Camera.Gain = GainToUse
         End If
         Log("    Gain selected: " & Camera.Gain.ToString.Trim)
 
         'Start exposing
-        StartLog("Starting exposure with " & DB.ExposureTime.ToString.Trim & " seconds")
+        StartLog("Starting exposure with " & ExpToUse.ToString.Trim & " seconds")
         tsmiTakeOnePicture.Enabled = False : tsslCapture.BackColor = Color.Red : System.Windows.Forms.Application.DoEvents()
-        Camera.StartExposure(DB.ExposureTime, False)
+        Camera.StartExposure(ExpToUse, False)
         Do
             If Camera.ImageReady Then Exit Do
+            System.Threading.Thread.Sleep(100)
             System.Windows.Forms.Application.DoEvents()
         Loop Until 1 = 0
         Dim CCDSensorData As Integer(,) = CType(Camera.ImageArray, Integer(,))
@@ -140,14 +161,20 @@ Public Class Form1
         'Add text by setting pixel to max
         Dim Inprint As New ImageInprint.sInprintParams
         With Inprint
-            .TextToPrint = DB.Inprint_station
+            Dim AllLines As New List(Of String)
+            AllLines.Add(DB.Inprint_station)
+            AllLines.Add("Exp [" & ExpToUse.ValRegIndep("0.0000") & "] / Gain [" & GainToUse & "]")
+            .TextToPrint = Join(AllLines.ToArray, System.Environment.NewLine)
             .TextSize = DB.Inprint_FontSize
             .PixelValue = CByte(Math.Floor(Max / Scaler))
             .PrintRight = False
         End With
         ImageInprint.Mono8BitText(BitmapToCreate, BitmapValues, Inprint)
         With Inprint
-            .TextToPrint = Format(Now, "dd.MM.yyyy_HH.mm.ss") & System.Environment.NewLine & "Sun height: " & DB.SunHeight.ValRegIndep("0.00")
+            Dim AllLines As New List(Of String)
+            AllLines.Add(Format(Now, "dd.MM.yyyy_HH.mm.ss"))
+            AllLines.Add("Sun height: " & DB.SunHeight.ValRegIndep("0.00"))
+            .TextToPrint = Join(AllLines.ToArray, System.Environment.NewLine)
             .PrintRight = True
         End With
         ImageInprint.Mono8BitText(BitmapToCreate, BitmapValues, Inprint)
@@ -268,22 +295,6 @@ Public Class Form1
 
     End Sub
 
-    Private Sub btnUp10_Click(sender As Object, e As EventArgs)
-        DB.ExposureTime = DB.ExposureTime * 10
-    End Sub
-
-    Private Sub Button1_Click(sender As Object, e As EventArgs)
-        DB.ExposureTime = DB.ExposureTime / 10
-    End Sub
-
-    Private Sub Button2_Click(sender As Object, e As EventArgs)
-        DB.ExposureTime = DB.ExposureTime / 2
-    End Sub
-
-    Private Sub btnUp2_Click(sender As Object, e As EventArgs)
-        DB.ExposureTime = DB.ExposureTime * 2
-    End Sub
-
     Private Sub UploadFile(ByVal File As String)
 
         'File generated: http://www.albusmw.de/transfer/AllSkyImage.jpg
@@ -345,14 +356,6 @@ Public Class Form1
 
     Private Sub FTPUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiFTPUpload.Click
         UploadFile(IO.Path.Combine(DB.StorageRoot, DB.CurrentImageName & ".jpg"))
-    End Sub
-
-    Private Sub GAINToMAXToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMAXToolStripMenuItem.Click
-        DB.SelectedGain = Short.MaxValue
-    End Sub
-
-    Private Sub GAINToMINToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GAINToMINToolStripMenuItem.Click
-        DB.SelectedGain = Short.MinValue
     End Sub
 
     Private Sub tCheckExpState_Tick(sender As Object, e As EventArgs) Handles tCheckExpState.Tick
