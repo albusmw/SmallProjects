@@ -30,10 +30,16 @@ Partial Class frmImageDisplay
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.cmsImage = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cms_SetCutOff = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.SaveAsSeenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.scImageAndScale = New System.Windows.Forms.SplitContainer()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslInfo1 = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
+        Me.SendToNavigatorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
+        Me.scMain.Panel2.SuspendLayout()
         Me.scMain.SuspendLayout()
         CType(Me.scLeft, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scLeft.Panel1.SuspendLayout()
@@ -43,6 +49,8 @@ Partial Class frmImageDisplay
         Me.scDetails.Panel1.SuspendLayout()
         Me.scDetails.SuspendLayout()
         Me.cmsImage.SuspendLayout()
+        CType(Me.scImageAndScale, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scImageAndScale.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -61,6 +69,7 @@ Partial Class frmImageDisplay
         'scMain.Panel2
         '
         Me.scMain.Panel2.ContextMenuStrip = Me.cmsImage
+        Me.scMain.Panel2.Controls.Add(Me.scImageAndScale)
         Me.scMain.Size = New System.Drawing.Size(1134, 974)
         Me.scMain.SplitterDistance = 288
         Me.scMain.TabIndex = 0
@@ -121,15 +130,36 @@ Partial Class frmImageDisplay
         '
         'cmsImage
         '
-        Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff})
+        Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff, Me.SendToNavigatorToolStripMenuItem, Me.ToolStripMenuItem1, Me.SaveAsSeenToolStripMenuItem})
         Me.cmsImage.Name = "cmsImage"
-        Me.cmsImage.Size = New System.Drawing.Size(230, 26)
+        Me.cmsImage.Size = New System.Drawing.Size(230, 98)
         '
         'cms_SetCutOff
         '
         Me.cms_SetCutOff.Name = "cms_SetCutOff"
         Me.cms_SetCutOff.Size = New System.Drawing.Size(229, 22)
         Me.cms_SetCutOff.Text = "Set zoom min-max as cut-off"
+        '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(226, 6)
+        '
+        'SaveAsSeenToolStripMenuItem
+        '
+        Me.SaveAsSeenToolStripMenuItem.Name = "SaveAsSeenToolStripMenuItem"
+        Me.SaveAsSeenToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
+        Me.SaveAsSeenToolStripMenuItem.Text = "Save as seen"
+        '
+        'scImageAndScale
+        '
+        Me.scImageAndScale.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scImageAndScale.Location = New System.Drawing.Point(0, 0)
+        Me.scImageAndScale.Name = "scImageAndScale"
+        Me.scImageAndScale.Orientation = System.Windows.Forms.Orientation.Horizontal
+        Me.scImageAndScale.Size = New System.Drawing.Size(842, 974)
+        Me.scImageAndScale.SplitterDistance = 945
+        Me.scImageAndScale.TabIndex = 0
         '
         'ssMain
         '
@@ -146,6 +176,12 @@ Partial Class frmImageDisplay
         Me.tsslInfo1.Size = New System.Drawing.Size(22, 17)
         Me.tsslInfo1.Text = "---"
         '
+        'SendToNavigatorToolStripMenuItem
+        '
+        Me.SendToNavigatorToolStripMenuItem.Name = "SendToNavigatorToolStripMenuItem"
+        Me.SendToNavigatorToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
+        Me.SendToNavigatorToolStripMenuItem.Text = "Send to navigator"
+        '
         'frmImageDisplay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -157,6 +193,7 @@ Partial Class frmImageDisplay
         Me.Name = "frmImageDisplay"
         Me.Text = "Image display"
         Me.scMain.Panel1.ResumeLayout(False)
+        Me.scMain.Panel2.ResumeLayout(False)
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scMain.ResumeLayout(False)
         Me.scLeft.Panel1.ResumeLayout(False)
@@ -168,6 +205,8 @@ Partial Class frmImageDisplay
         CType(Me.scDetails, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scDetails.ResumeLayout(False)
         Me.cmsImage.ResumeLayout(False)
+        CType(Me.scImageAndScale, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scImageAndScale.ResumeLayout(False)
         Me.ssMain.ResumeLayout(False)
         Me.ssMain.PerformLayout()
         Me.ResumeLayout(False)
@@ -184,4 +223,9 @@ Partial Class frmImageDisplay
     Friend WithEvents tbDetails As TextBox
     Friend WithEvents cmsImage As ContextMenuStrip
     Friend WithEvents cms_SetCutOff As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem1 As ToolStripSeparator
+    Friend WithEvents SaveAsSeenToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents sfdMain As SaveFileDialog
+    Friend WithEvents scImageAndScale As SplitContainer
+    Friend WithEvents SendToNavigatorToolStripMenuItem As ToolStripMenuItem
 End Class

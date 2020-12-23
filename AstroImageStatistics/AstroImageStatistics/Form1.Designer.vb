@@ -33,6 +33,7 @@ Partial Class Form1
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiSaveLastStatXLS = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveAllFilesStat = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSaveFITSAndStats = New System.Windows.Forms.ToolStripMenuItem()
         Me.StoreStackingResultToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveMeanFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.SumImageDoubleToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -48,22 +49,32 @@ Partial Class Form1
         Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SpecialAnalysisToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysis = New System.Windows.Forms.ToolStripMenuItem()
         Me.RowAndColumnStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.PlotStatisticsVsGainToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ReplotStatisticsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ADUQuantizationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiCalcVignette = New System.Windows.Forms.ToolStripMenuItem()
-        Me.HotPixelToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisPlot = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisPlot_Replot = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisPlot_ADUQuant = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisHotPixel = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisHotPixel_detect = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisHotPixel_fixfile = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem7 = New System.Windows.Forms.ToolStripSeparator()
         Me.MultifileAreaCompareToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiManualColorBalancer = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisVignette = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisVignette_CalcRaw = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisVignette_CalcParam = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisVignette_Correct = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisVignette_Display = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem10 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiAnalysisVignette_Clear = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisPixelMap = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysisPixelMap_SaveFor = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiProcessing = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAdjustRGB = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiStretch = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPlateSolve = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiCorrectVignette = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSetPixelToValue = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiProcessing_MedianFilter = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestCodeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WriteTestDataToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.AfiineTranslateToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -76,7 +87,7 @@ Partial Class Form1
         Me.SetPixelAboveCertainValueToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem9 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiUseOpenCV = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OpenCVMedianFilterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MedianWithinNETToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DisplayImageToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CoordsForALADINCallToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -92,7 +103,9 @@ Partial Class Form1
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.scLeft = New System.Windows.Forms.SplitContainer()
-        Me.tsmiSaveFITSAndStats = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsMain = New System.Windows.Forms.ToolStrip()
+        Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
+        Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -104,12 +117,13 @@ Partial Class Form1
         Me.scLeft.Panel1.SuspendLayout()
         Me.scLeft.Panel2.SuspendLayout()
         Me.scLeft.SuspendLayout()
+        Me.tsMain.SuspendLayout()
         Me.SuspendLayout()
         '
         'msMain
         '
         Me.msMain.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.SpecialAnalysisToolStripMenuItem, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem, Me.DisplayImageToolStripMenuItem, Me.ToolsToolStripMenuItem})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.tsmiAnalysis, Me.tsmiProcessing, Me.TestCodeToolStripMenuItem, Me.DisplayImageToolStripMenuItem, Me.ToolsToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
@@ -172,6 +186,12 @@ Partial Class Form1
         Me.tsmiSaveAllFilesStat.Name = "tsmiSaveAllFilesStat"
         Me.tsmiSaveAllFilesStat.Size = New System.Drawing.Size(300, 22)
         Me.tsmiSaveAllFilesStat.Text = "Save all-files statistics"
+        '
+        'tsmiSaveFITSAndStats
+        '
+        Me.tsmiSaveFITSAndStats.Name = "tsmiSaveFITSAndStats"
+        Me.tsmiSaveFITSAndStats.Size = New System.Drawing.Size(300, 22)
+        Me.tsmiSaveFITSAndStats.Text = "Save FITS and statistics summary"
         '
         'StoreStackingResultToolStripMenuItem
         '
@@ -262,12 +282,12 @@ Partial Class Form1
         Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(300, 22)
         Me.ExitToolStripMenuItem.Text = "Exit"
         '
-        'SpecialAnalysisToolStripMenuItem
+        'tsmiAnalysis
         '
-        Me.SpecialAnalysisToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.PlotStatisticsVsGainToolStripMenuItem, Me.ReplotStatisticsToolStripMenuItem, Me.ADUQuantizationToolStripMenuItem, Me.tsmiCalcVignette, Me.HotPixelToolStripMenuItem, Me.ToolStripMenuItem7, Me.MultifileAreaCompareToolStripMenuItem, Me.tsmiManualColorBalancer})
-        Me.SpecialAnalysisToolStripMenuItem.Name = "SpecialAnalysisToolStripMenuItem"
-        Me.SpecialAnalysisToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
-        Me.SpecialAnalysisToolStripMenuItem.Text = "Special analysis"
+        Me.tsmiAnalysis.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.RowAndColumnStatisticsToolStripMenuItem, Me.tsmiAnalysisPlot, Me.tsmiAnalysisHotPixel, Me.ToolStripMenuItem7, Me.MultifileAreaCompareToolStripMenuItem, Me.tsmiManualColorBalancer, Me.tsmiAnalysisVignette, Me.tsmiAnalysisPixelMap})
+        Me.tsmiAnalysis.Name = "tsmiAnalysis"
+        Me.tsmiAnalysis.Size = New System.Drawing.Size(62, 22)
+        Me.tsmiAnalysis.Text = "Analysis"
         '
         'RowAndColumnStatisticsToolStripMenuItem
         '
@@ -275,37 +295,44 @@ Partial Class Form1
         Me.RowAndColumnStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
         Me.RowAndColumnStatisticsToolStripMenuItem.Text = "Row and column statistics"
         '
-        'PlotStatisticsVsGainToolStripMenuItem
+        'tsmiAnalysisPlot
         '
-        Me.PlotStatisticsVsGainToolStripMenuItem.Name = "PlotStatisticsVsGainToolStripMenuItem"
-        Me.PlotStatisticsVsGainToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.PlotStatisticsVsGainToolStripMenuItem.Text = "Plot statistics vs gain"
+        Me.tsmiAnalysisPlot.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysisPlot_Replot, Me.tsmiAnalysisPlot_ADUQuant})
+        Me.tsmiAnalysisPlot.Name = "tsmiAnalysisPlot"
+        Me.tsmiAnalysisPlot.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
+        Me.tsmiAnalysisPlot.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiAnalysisPlot.Text = "Plot"
         '
-        'ReplotStatisticsToolStripMenuItem
+        'tsmiAnalysisPlot_Replot
         '
-        Me.ReplotStatisticsToolStripMenuItem.Name = "ReplotStatisticsToolStripMenuItem"
-        Me.ReplotStatisticsToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
-        Me.ReplotStatisticsToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.ReplotStatisticsToolStripMenuItem.Text = "Re-plot statistics"
+        Me.tsmiAnalysisPlot_Replot.Name = "tsmiAnalysisPlot_Replot"
+        Me.tsmiAnalysisPlot_Replot.Size = New System.Drawing.Size(167, 22)
+        Me.tsmiAnalysisPlot_Replot.Text = "Re-plot statistics"
         '
-        'ADUQuantizationToolStripMenuItem
+        'tsmiAnalysisPlot_ADUQuant
         '
-        Me.ADUQuantizationToolStripMenuItem.Name = "ADUQuantizationToolStripMenuItem"
-        Me.ADUQuantizationToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Q), System.Windows.Forms.Keys)
-        Me.ADUQuantizationToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.ADUQuantizationToolStripMenuItem.Text = "ADU quantization"
+        Me.tsmiAnalysisPlot_ADUQuant.Name = "tsmiAnalysisPlot_ADUQuant"
+        Me.tsmiAnalysisPlot_ADUQuant.Size = New System.Drawing.Size(167, 22)
+        Me.tsmiAnalysisPlot_ADUQuant.Text = "ADU quantization"
         '
-        'tsmiCalcVignette
+        'tsmiAnalysisHotPixel
         '
-        Me.tsmiCalcVignette.Name = "tsmiCalcVignette"
-        Me.tsmiCalcVignette.Size = New System.Drawing.Size(212, 22)
-        Me.tsmiCalcVignette.Text = "Vignette"
+        Me.tsmiAnalysisHotPixel.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysisHotPixel_detect, Me.tsmiAnalysisHotPixel_fixfile})
+        Me.tsmiAnalysisHotPixel.Name = "tsmiAnalysisHotPixel"
+        Me.tsmiAnalysisHotPixel.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiAnalysisHotPixel.Text = "Hot pixel"
         '
-        'HotPixelToolStripMenuItem
+        'tsmiAnalysisHotPixel_detect
         '
-        Me.HotPixelToolStripMenuItem.Name = "HotPixelToolStripMenuItem"
-        Me.HotPixelToolStripMenuItem.Size = New System.Drawing.Size(212, 22)
-        Me.HotPixelToolStripMenuItem.Text = "Hot pixel"
+        Me.tsmiAnalysisHotPixel_detect.Name = "tsmiAnalysisHotPixel_detect"
+        Me.tsmiAnalysisHotPixel_detect.Size = New System.Drawing.Size(159, 22)
+        Me.tsmiAnalysisHotPixel_detect.Text = "Detect"
+        '
+        'tsmiAnalysisHotPixel_fixfile
+        '
+        Me.tsmiAnalysisHotPixel_fixfile.Name = "tsmiAnalysisHotPixel_fixfile"
+        Me.tsmiAnalysisHotPixel_fixfile.Size = New System.Drawing.Size(159, 22)
+        Me.tsmiAnalysisHotPixel_fixfile.Text = "Fix based on file"
         '
         'ToolStripMenuItem7
         '
@@ -324,9 +351,64 @@ Partial Class Form1
         Me.tsmiManualColorBalancer.Size = New System.Drawing.Size(212, 22)
         Me.tsmiManualColorBalancer.Text = "Manual color balancer"
         '
+        'tsmiAnalysisVignette
+        '
+        Me.tsmiAnalysisVignette.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysisVignette_CalcRaw, Me.tsmiAnalysisVignette_CalcParam, Me.tsmiAnalysisVignette_Correct, Me.tsmiAnalysisVignette_Display, Me.ToolStripMenuItem10, Me.tsmiAnalysisVignette_Clear})
+        Me.tsmiAnalysisVignette.Name = "tsmiAnalysisVignette"
+        Me.tsmiAnalysisVignette.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiAnalysisVignette.Text = "Vignette"
+        '
+        'tsmiAnalysisVignette_CalcRaw
+        '
+        Me.tsmiAnalysisVignette_CalcRaw.Name = "tsmiAnalysisVignette_CalcRaw"
+        Me.tsmiAnalysisVignette_CalcRaw.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_CalcRaw.Text = "Calculate raw data"
+        '
+        'tsmiAnalysisVignette_CalcParam
+        '
+        Me.tsmiAnalysisVignette_CalcParam.Name = "tsmiAnalysisVignette_CalcParam"
+        Me.tsmiAnalysisVignette_CalcParam.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_CalcParam.Text = "Calculate fitting parameters"
+        '
+        'tsmiAnalysisVignette_Correct
+        '
+        Me.tsmiAnalysisVignette_Correct.Name = "tsmiAnalysisVignette_Correct"
+        Me.tsmiAnalysisVignette_Correct.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_Correct.Text = "Correct"
+        '
+        'tsmiAnalysisVignette_Display
+        '
+        Me.tsmiAnalysisVignette_Display.Name = "tsmiAnalysisVignette_Display"
+        Me.tsmiAnalysisVignette_Display.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_Display.Text = "Display"
+        '
+        'ToolStripMenuItem10
+        '
+        Me.ToolStripMenuItem10.Name = "ToolStripMenuItem10"
+        Me.ToolStripMenuItem10.Size = New System.Drawing.Size(217, 6)
+        '
+        'tsmiAnalysisVignette_Clear
+        '
+        Me.tsmiAnalysisVignette_Clear.Name = "tsmiAnalysisVignette_Clear"
+        Me.tsmiAnalysisVignette_Clear.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_Clear.Text = "Clear"
+        '
+        'tsmiAnalysisPixelMap
+        '
+        Me.tsmiAnalysisPixelMap.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysisPixelMap_SaveFor})
+        Me.tsmiAnalysisPixelMap.Name = "tsmiAnalysisPixelMap"
+        Me.tsmiAnalysisPixelMap.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiAnalysisPixelMap.Text = "Pixel map files"
+        '
+        'tsmiAnalysisPixelMap_SaveFor
+        '
+        Me.tsmiAnalysisPixelMap_SaveFor.Name = "tsmiAnalysisPixelMap_SaveFor"
+        Me.tsmiAnalysisPixelMap_SaveFor.Size = New System.Drawing.Size(221, 22)
+        Me.tsmiAnalysisPixelMap_SaveFor.Text = "Save pixel coordinates for ..."
+        '
         'tsmiProcessing
         '
-        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiCorrectVignette, Me.tsmiSetPixelToValue})
+        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiSetPixelToValue, Me.tsmiProcessing_MedianFilter})
         Me.tsmiProcessing.Name = "tsmiProcessing"
         Me.tsmiProcessing.Size = New System.Drawing.Size(76, 22)
         Me.tsmiProcessing.Text = "Processing"
@@ -349,21 +431,21 @@ Partial Class Form1
         Me.tsmiPlateSolve.Size = New System.Drawing.Size(301, 22)
         Me.tsmiPlateSolve.Text = "Plate solve image"
         '
-        'tsmiCorrectVignette
-        '
-        Me.tsmiCorrectVignette.Name = "tsmiCorrectVignette"
-        Me.tsmiCorrectVignette.Size = New System.Drawing.Size(301, 22)
-        Me.tsmiCorrectVignette.Text = "Correct vignette"
-        '
         'tsmiSetPixelToValue
         '
         Me.tsmiSetPixelToValue.Name = "tsmiSetPixelToValue"
         Me.tsmiSetPixelToValue.Size = New System.Drawing.Size(301, 22)
         Me.tsmiSetPixelToValue.Text = "Set pixel above to certain value"
         '
+        'tsmiProcessing_MedianFilter
+        '
+        Me.tsmiProcessing_MedianFilter.Name = "tsmiProcessing_MedianFilter"
+        Me.tsmiProcessing_MedianFilter.Size = New System.Drawing.Size(301, 22)
+        Me.tsmiProcessing_MedianFilter.Text = "Median filter"
+        '
         'TestCodeToolStripMenuItem
         '
-        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem, Me.SetPixelAboveCertainValueToolStripMenuItem, Me.ToolStripMenuItem9, Me.tsmiUseOpenCV, Me.OpenCVMedianFilterToolStripMenuItem})
+        Me.TestCodeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WriteTestDataToolStripMenuItem1, Me.AfiineTranslateToolStripMenuItem, Me.BitGrayscaleFileGenerationToolStripMenuItem, Me.ASCOMDynamicallyToolStripMenuItem, Me.ToolStripMenuItem6, Me.FocusToolStripMenuItem, Me.FITSTestFilesToolStripMenuItem, Me.NEFReadingToolStripMenuItem, Me.SetPixelAboveCertainValueToolStripMenuItem, Me.ToolStripMenuItem9, Me.tsmiUseOpenCV, Me.MedianWithinNETToolStripMenuItem})
         Me.TestCodeToolStripMenuItem.Name = "TestCodeToolStripMenuItem"
         Me.TestCodeToolStripMenuItem.Size = New System.Drawing.Size(68, 22)
         Me.TestCodeToolStripMenuItem.Text = "Test code"
@@ -371,72 +453,72 @@ Partial Class Form1
         'WriteTestDataToolStripMenuItem1
         '
         Me.WriteTestDataToolStripMenuItem1.Name = "WriteTestDataToolStripMenuItem1"
-        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(336, 22)
+        Me.WriteTestDataToolStripMenuItem1.Size = New System.Drawing.Size(274, 22)
         Me.WriteTestDataToolStripMenuItem1.Text = "Write test data"
         '
         'AfiineTranslateToolStripMenuItem
         '
         Me.AfiineTranslateToolStripMenuItem.Name = "AfiineTranslateToolStripMenuItem"
-        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.AfiineTranslateToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.AfiineTranslateToolStripMenuItem.Text = "Afiine translate"
         '
         'BitGrayscaleFileGenerationToolStripMenuItem
         '
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Name = "BitGrayscaleFileGenerationToolStripMenuItem"
-        Me.BitGrayscaleFileGenerationToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.BitGrayscaleFileGenerationToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.BitGrayscaleFileGenerationToolStripMenuItem.Text = "16bit grayscale file generation"
         '
         'ASCOMDynamicallyToolStripMenuItem
         '
         Me.ASCOMDynamicallyToolStripMenuItem.Name = "ASCOMDynamicallyToolStripMenuItem"
-        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.ASCOMDynamicallyToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.ASCOMDynamicallyToolStripMenuItem.Text = "ASCOM dynamically"
         '
         'ToolStripMenuItem6
         '
         Me.ToolStripMenuItem6.Name = "ToolStripMenuItem6"
-        Me.ToolStripMenuItem6.Size = New System.Drawing.Size(333, 6)
+        Me.ToolStripMenuItem6.Size = New System.Drawing.Size(271, 6)
         '
         'FocusToolStripMenuItem
         '
         Me.FocusToolStripMenuItem.Name = "FocusToolStripMenuItem"
-        Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.FocusToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.FocusToolStripMenuItem.Text = "Focus"
         '
         'FITSTestFilesToolStripMenuItem
         '
         Me.FITSTestFilesToolStripMenuItem.Name = "FITSTestFilesToolStripMenuItem"
-        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.FITSTestFilesToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.FITSTestFilesToolStripMenuItem.Text = "FITS Test Files"
         '
         'NEFReadingToolStripMenuItem
         '
         Me.NEFReadingToolStripMenuItem.Name = "NEFReadingToolStripMenuItem"
-        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.NEFReadingToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.NEFReadingToolStripMenuItem.Text = "NEF reading"
         '
         'SetPixelAboveCertainValueToolStripMenuItem
         '
         Me.SetPixelAboveCertainValueToolStripMenuItem.Name = "SetPixelAboveCertainValueToolStripMenuItem"
-        Me.SetPixelAboveCertainValueToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
+        Me.SetPixelAboveCertainValueToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.SetPixelAboveCertainValueToolStripMenuItem.Text = "Set pixel above certain value"
         '
         'ToolStripMenuItem9
         '
         Me.ToolStripMenuItem9.Name = "ToolStripMenuItem9"
-        Me.ToolStripMenuItem9.Size = New System.Drawing.Size(333, 6)
+        Me.ToolStripMenuItem9.Size = New System.Drawing.Size(271, 6)
         '
         'tsmiUseOpenCV
         '
         Me.tsmiUseOpenCV.Name = "tsmiUseOpenCV"
-        Me.tsmiUseOpenCV.Size = New System.Drawing.Size(336, 22)
+        Me.tsmiUseOpenCV.Size = New System.Drawing.Size(274, 22)
         Me.tsmiUseOpenCV.Text = "Use OpenCV"
         '
-        'OpenCVMedianFilterToolStripMenuItem
+        'MedianWithinNETToolStripMenuItem
         '
-        Me.OpenCVMedianFilterToolStripMenuItem.Name = "OpenCVMedianFilterToolStripMenuItem"
-        Me.OpenCVMedianFilterToolStripMenuItem.Size = New System.Drawing.Size(336, 22)
-        Me.OpenCVMedianFilterToolStripMenuItem.Text = "OpenCV Median Filter (ERROR: Row-Colum issue)"
+        Me.MedianWithinNETToolStripMenuItem.Name = "MedianWithinNETToolStripMenuItem"
+        Me.MedianWithinNETToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
+        Me.MedianWithinNETToolStripMenuItem.Text = ".NET Median Filter (for reference only)"
         '
         'DisplayImageToolStripMenuItem
         '
@@ -472,7 +554,7 @@ Partial Class Form1
         Me.tbLogOutput.Multiline = True
         Me.tbLogOutput.Name = "tbLogOutput"
         Me.tbLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbLogOutput.Size = New System.Drawing.Size(1289, 1125)
+        Me.tbLogOutput.Size = New System.Drawing.Size(1289, 1116)
         Me.tbLogOutput.TabIndex = 3
         Me.tbLogOutput.WordWrap = False
         '
@@ -480,7 +562,7 @@ Partial Class Form1
         '
         Me.ssMain.ImageScalingSize = New System.Drawing.Size(24, 24)
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslRunning, Me.tsslMain, Me.tspbMain})
-        Me.ssMain.Location = New System.Drawing.Point(0, 1161)
+        Me.ssMain.Location = New System.Drawing.Point(0, 1177)
         Me.ssMain.Name = "ssMain"
         Me.ssMain.Padding = New System.Windows.Forms.Padding(1, 0, 9, 0)
         Me.ssMain.Size = New System.Drawing.Size(1692, 22)
@@ -515,7 +597,7 @@ Partial Class Form1
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.pgMain.Location = New System.Drawing.Point(3, 3)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(363, 564)
+        Me.pgMain.Size = New System.Drawing.Size(363, 559)
         Me.pgMain.TabIndex = 5
         Me.pgMain.ToolbarVisible = False
         '
@@ -527,7 +609,7 @@ Partial Class Form1
         Me.gbDetails.Controls.Add(Me.tbDetails)
         Me.gbDetails.Location = New System.Drawing.Point(3, 3)
         Me.gbDetails.Name = "gbDetails"
-        Me.gbDetails.Size = New System.Drawing.Size(363, 551)
+        Me.gbDetails.Size = New System.Drawing.Size(363, 547)
         Me.gbDetails.TabIndex = 6
         Me.gbDetails.TabStop = False
         Me.gbDetails.Text = "Details"
@@ -542,7 +624,7 @@ Partial Class Form1
         Me.tbDetails.Multiline = True
         Me.tbDetails.Name = "tbDetails"
         Me.tbDetails.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbDetails.Size = New System.Drawing.Size(351, 526)
+        Me.tbDetails.Size = New System.Drawing.Size(351, 522)
         Me.tbDetails.TabIndex = 0
         '
         'scMain
@@ -550,7 +632,7 @@ Partial Class Form1
         Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.scMain.Location = New System.Drawing.Point(12, 27)
+        Me.scMain.Location = New System.Drawing.Point(12, 52)
         Me.scMain.Name = "scMain"
         '
         'scMain.Panel1
@@ -560,7 +642,7 @@ Partial Class Form1
         'scMain.Panel2
         '
         Me.scMain.Panel2.Controls.Add(Me.tbLogOutput)
-        Me.scMain.Size = New System.Drawing.Size(1668, 1131)
+        Me.scMain.Size = New System.Drawing.Size(1668, 1122)
         Me.scMain.SplitterDistance = 369
         Me.scMain.TabIndex = 7
         '
@@ -578,21 +660,43 @@ Partial Class Form1
         'scLeft.Panel2
         '
         Me.scLeft.Panel2.Controls.Add(Me.gbDetails)
-        Me.scLeft.Size = New System.Drawing.Size(369, 1131)
-        Me.scLeft.SplitterDistance = 570
+        Me.scLeft.Size = New System.Drawing.Size(369, 1122)
+        Me.scLeft.SplitterDistance = 565
         Me.scLeft.TabIndex = 0
         '
-        'tsmiSaveFITSAndStats
+        'tsMain
         '
-        Me.tsmiSaveFITSAndStats.Name = "tsmiSaveFITSAndStats"
-        Me.tsmiSaveFITSAndStats.Size = New System.Drawing.Size(300, 22)
-        Me.tsmiSaveFITSAndStats.Text = "Save FITS and statistics summary"
+        Me.tsMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsb_Open, Me.tsb_Display})
+        Me.tsMain.Location = New System.Drawing.Point(0, 24)
+        Me.tsMain.Name = "tsMain"
+        Me.tsMain.Size = New System.Drawing.Size(1692, 25)
+        Me.tsMain.TabIndex = 8
+        Me.tsMain.Text = "ToolStrip1"
+        '
+        'tsb_Open
+        '
+        Me.tsb_Open.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.tsb_Open.Image = CType(resources.GetObject("tsb_Open.Image"), System.Drawing.Image)
+        Me.tsb_Open.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsb_Open.Name = "tsb_Open"
+        Me.tsb_Open.Size = New System.Drawing.Size(52, 22)
+        Me.tsb_Open.Text = "Open ..."
+        '
+        'tsb_Display
+        '
+        Me.tsb_Display.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.tsb_Display.Image = CType(resources.GetObject("tsb_Display.Image"), System.Drawing.Image)
+        Me.tsb_Display.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsb_Display.Name = "tsb_Display"
+        Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
+        Me.tsb_Display.Text = "Display"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1692, 1183)
+        Me.ClientSize = New System.Drawing.Size(1692, 1199)
+        Me.Controls.Add(Me.tsMain)
         Me.Controls.Add(Me.scMain)
         Me.Controls.Add(Me.ssMain)
         Me.Controls.Add(Me.msMain)
@@ -617,6 +721,8 @@ Partial Class Form1
         Me.scLeft.Panel2.ResumeLayout(False)
         CType(Me.scLeft, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scLeft.ResumeLayout(False)
+        Me.tsMain.ResumeLayout(False)
+        Me.tsMain.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -641,11 +747,10 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
     Friend WithEvents SumImageDoubleToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents MaxMinInt32ToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents SpecialAnalysisToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysis As ToolStripMenuItem
     Friend WithEvents RowAndColumnStatisticsToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents PlotStatisticsVsGainToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents pgMain As PropertyGrid
-    Friend WithEvents ReplotStatisticsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisPlot As ToolStripMenuItem
     Friend WithEvents AfiineTranslateToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiSaveLastStatXLS As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem3 As ToolStripSeparator
@@ -658,17 +763,14 @@ Partial Class Form1
     Friend WithEvents tsslRunning As ToolStripStatusLabel
     Friend WithEvents BitGrayscaleFileGenerationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
-    Friend WithEvents ADUQuantizationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiPlateSolve As ToolStripMenuItem
-    Friend WithEvents tsmiCalcVignette As ToolStripMenuItem
-    Friend WithEvents tsmiCorrectVignette As ToolStripMenuItem
     Friend WithEvents FITSGrepToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ASCOMDynamicallyToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem5 As ToolStripSeparator
     Friend WithEvents ClearStatisticsMemoryToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem6 As ToolStripSeparator
     Friend WithEvents FocusToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents HotPixelToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisHotPixel As ToolStripMenuItem
     Friend WithEvents FITSTestFilesToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem7 As ToolStripSeparator
     Friend WithEvents MultifileAreaCompareToolStripMenuItem As ToolStripMenuItem
@@ -686,10 +788,27 @@ Partial Class Form1
     Friend WithEvents tsmiSetPixelToValue As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem9 As ToolStripSeparator
     Friend WithEvents tsmiUseOpenCV As ToolStripMenuItem
-    Friend WithEvents OpenCVMedianFilterToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents DisplayImageToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CoordsForALADINCallToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiManualColorBalancer As ToolStripMenuItem
     Friend WithEvents tsmiSaveFITSAndStats As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisVignette As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisVignette_CalcRaw As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisVignette_Display As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem10 As ToolStripSeparator
+    Friend WithEvents tsmiAnalysisVignette_Clear As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisVignette_Correct As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisVignette_CalcParam As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisPlot_Replot As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisPlot_ADUQuant As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisPixelMap As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisPixelMap_SaveFor As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisHotPixel_detect As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysisHotPixel_fixfile As ToolStripMenuItem
+    Friend WithEvents MedianWithinNETToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiProcessing_MedianFilter As ToolStripMenuItem
+    Friend WithEvents tsMain As ToolStrip
+    Friend WithEvents tsb_Open As ToolStripButton
+    Friend WithEvents tsb_Display As ToolStripButton
 End Class

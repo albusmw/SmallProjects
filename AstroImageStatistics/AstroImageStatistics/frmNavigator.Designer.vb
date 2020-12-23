@@ -353,8 +353,6 @@ Partial Class frmNavigator
 
     Friend WithEvents tbRootFile As TextBox
     Friend WithEvents tbFilterString As TextBox
-    Friend WithEvents tbOffsetX As TextBox
-    Friend WithEvents tbOffsetY As TextBox
     Friend WithEvents tbTileSize As TextBox
     Friend WithEvents Label1 As Label
     Friend WithEvents Label2 As Label
@@ -378,4 +376,6 @@ Partial Class frmNavigator
     Friend WithEvents sfdMain As SaveFileDialog
     Friend WithEvents Label7 As Label
     Friend WithEvents tbSelected As TextBox
+    Public WithEvents tbOffsetX As TextBox
+    Public WithEvents tbOffsetY As TextBox
 End Class

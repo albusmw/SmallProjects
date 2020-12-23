@@ -14,6 +14,14 @@ Public Class cDB
     Private Const Cat_save As String = "6.) Saving"
     Private Const Cat_misc As String = "9.) Misc"
 
+    '''<summary>Location of the EXE.</summary>
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property MyPath As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly.Location)
+
+    '''<summary>Location of the EXE.</summary>
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property LastFiles As String = System.IO.Path.Combine(MyPath, "LastOpened.txt")
+
     <ComponentModel.Category(Cat_load)>
     <ComponentModel.DisplayName("a) Use IPP?")>
     <ComponentModel.Description("Use the Intel IPP for loading and other steps (recommended - speed-up)")>
@@ -75,10 +83,10 @@ Public Class cDB
     '===================================================================================================================================================
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
-    <ComponentModel.DisplayName("a) Vignette resolution")>
+    <ComponentModel.DisplayName("a) Vignette calculation bins")>
     <ComponentModel.Description("Number of bins for the vignette calculation - use 0 for infinit (no bin) resolution")>
     <ComponentModel.DefaultValue(1000)>
-    Public Property VigResolution As Integer = 1000
+    Public Property VigCalcBins As Integer = 1000
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
     <ComponentModel.DisplayName("b) Vignette polynomial order")>
@@ -89,13 +97,13 @@ Public Class cDB
     <ComponentModel.Category(Cat_Proc_Vignette)>
     <ComponentModel.DisplayName("c) Vignette correction start distance")>
     <ComponentModel.Description("Distance below are ignored for correction")>
-    <ComponentModel.DefaultValue(-1)>
+    <ComponentModel.DefaultValue(0)>
     Public Property VigStartDistance As Integer = 0
 
     <ComponentModel.Category(Cat_Proc_Vignette)>
     <ComponentModel.DisplayName("d) Vignette correction stop distance")>
     <ComponentModel.Description("Distance below are ignored for correction")>
-    <ComponentModel.DefaultValue(-1)>
+    <ComponentModel.DefaultValue(10000)>
     Public Property VigStopDistance As Integer = 10000
 
     '===================================================================================================================================================
@@ -129,6 +137,32 @@ Public Class cDB
         End Get
     End Property
     Public MyIPPPath As String = String.Empty
+
+    '''<summary>Get all (existing) files last loaded.</summary>
+    Public Function GetRecentFiles() As List(Of String)
+        Dim RetVal As New List(Of String)
+        If System.IO.File.Exists(LastFiles) Then
+            For Each Line As String In System.IO.File.ReadAllLines(LastFiles)
+                If System.IO.File.Exists(Line) Then RetVal.Add(Line)
+            Next Line
+        End If
+        Return RetVal
+    End Function
+
+    '''<summary>Get all (existing) files last loaded.</summary>
+    Public Sub StoreRecentFile(ByVal NewFile As String)
+        Dim FileContent As New List(Of String)
+        If System.IO.File.Exists(LastFiles) Then
+            For Each Line As String In System.IO.File.ReadAllLines(LastFiles)
+                FileContent.Add(Line)
+                If System.IO.Path.GetFullPath(Line) = System.IO.Path.GetFullPath(NewFile) Then
+                    Exit Sub                'file already in the list ...
+                End If
+            Next Line
+        End If
+        FileContent.Insert(0, NewFile)         'insert new file at top
+        System.IO.File.WriteAllLines(LastFiles, FileContent.ToArray)
+    End Sub
 
     '''<summary>Get the channel name of the bayer pattern index.</summary>
     '''<param name="Idx">0-based index.</param>

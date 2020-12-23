@@ -35,8 +35,8 @@ Public Class MainForm
     Dim Reader As New cFITSReader
     Dim Data(,) As Double = Nothing
     Reader.ReadIn(AllFiles(0), Data)
-    Dim BSCALE As Double = Reader.BSCALE
-    Dim BZERO As Double = Reader.BZERO
+        Dim BSCALE As Double = Reader.BSCALE
+        Dim BZERO As Double = Reader.BZERO
     '================================================================================
 
     '================================================================================
@@ -136,15 +136,15 @@ Public Class MainForm
     Dim FixedFile As String = Root & "\" & "Dark_02_repaired.FIT"
     If System.IO.File.Exists(FixedFile) Then System.IO.File.Delete(FixedFile)
     System.IO.File.Copy(AllFiles(0), FixedFile)
-    Dim PointReader As New cFITSReader
-    Dim ImageData(,) As Double = Nothing
-    PointReader.ReadIn(FixedFile, ImageData)
-    PointReader.FixSample(FixedFile, SuspectHotPixelPositions, RepairValue.ToArray)
+        Dim PointReader As New cFITSReader
+        Dim ImageData(,) As Double = Nothing
+        Dim DataStartPosition As Integer = PointReader.ReadIn(FixedFile, ImageData)
+        PointReader.FixSample(FixedFile, DataStartPosition, SuspectHotPixelPositions, RepairValue.ToArray)
 
-    '================================================================================
-    'Finish
+        '================================================================================
+        'Finish
 
-    tbLog.AddEntry("==========================================================")
+        tbLog.AddEntry("==========================================================")
     CType(sender, Button).Enabled = True
 
   End Sub
@@ -192,62 +192,57 @@ Public Class MainForm
     Return ((2 * U1) - 1) * W
   End Function
 
-  Private Sub btnConvert_Click(sender As Object, e As EventArgs) Handles btnConvert.Click
+    Private Sub btnConvert_Click(sender As Object, e As EventArgs) Handles btnConvert.Click
 
-    Dim Root As String = "C:\Users\weis_m\Dropbox\Astro\!Bilder\FITS\"
-    Dim AllFiles As New List(Of String)
-    For Each File As String In System.IO.Directory.GetFiles(Root, "lasttest_Ha_1x1_600s_m20C_001.fit")
-      AllFiles.Add(File)
-    Next File
+        Dim Root As String = "C:\Users\weis_m\Dropbox\Astro\!Bilder\FITS\"
+        Dim AllFiles As New List(Of String)
+        For Each File As String In System.IO.Directory.GetFiles(Root, "lasttest_Ha_1x1_600s_m20C_001.fit")
+            AllFiles.Add(File)
+        Next File
 
-    '================================================================================
-    tbLog.AddEntry("Reading file <" & AllFiles(0) & "> ...")
-    Dim Reader As New cFITSReader
-    Dim Data(,) As Double = Nothing
-    Reader.ReadIn(AllFiles(0), Data)
-    Dim BSCALE As Double = Reader.BSCALE
-    Dim BZERO As Double = Reader.BZERO
-    '================================================================================
+        '================================================================================
+        tbLog.AddEntry("Reading file <" & AllFiles(0) & "> ...")
+        Dim Reader As New cFITSReader
+        Dim Data(,) As Double = Nothing
+        Reader.ReadIn(AllFiles(0), Data)
+        Dim BSCALE As Double = Reader.BSCALE
+        Dim BZERO As Double = Reader.BZERO
+        '================================================================================
 
-    '================================================================================
-    tbLog.AddEntry("Processing basic statistics ...")
-    Dim Max As Double = Double.MinValue
-    Dim Min As Double = Double.MaxValue
-    Dim Sum As Double = 0
-    Dim SumSum As Double = 0
-    For Idx1 As Integer = 0 To Data.GetUpperBound(0)
-      For Idx2 As Integer = 0 To Data.GetUpperBound(1)
-        Sum += Data(Idx1, Idx2)
-        SumSum += Data(Idx1, Idx2) * Data(Idx1, Idx2)
-        If Data(Idx1, Idx2) > Max Then Max = Data(Idx1, Idx2)
-        If Data(Idx1, Idx2) < Min Then Min = Data(Idx1, Idx2)
-      Next Idx2
-    Next Idx1
-    Dim Scale As Double = 255 / Max
-    '================================================================================
+        '================================================================================
+        tbLog.AddEntry("Processing basic statistics ...")
+        Dim Max As Double = Double.MinValue
+        Dim Min As Double = Double.MaxValue
+        Dim Sum As Double = 0
+        Dim SumSum As Double = 0
+        For Idx1 As Integer = 0 To Data.GetUpperBound(0)
+            For Idx2 As Integer = 0 To Data.GetUpperBound(1)
+                Sum += Data(Idx1, Idx2)
+                SumSum += Data(Idx1, Idx2) * Data(Idx1, Idx2)
+                If Data(Idx1, Idx2) > Max Then Max = Data(Idx1, Idx2)
+                If Data(Idx1, Idx2) < Min Then Min = Data(Idx1, Idx2)
+            Next Idx2
+        Next Idx1
+        Dim Scale As Double = 255 / Max
+        '================================================================================
 
-    'Create a transparent PNG
-    Dim StarBaseColor As Color = System.Drawing.Color.FromArgb(255, 0, 0)
-    Dim bmp As New Bitmap(Data.GetUpperBound(0) + 1, Data.GetUpperBound(1) + 1)
-    Dim g As Graphics = Graphics.FromImage(bmp)
-    g.Clear(Color.Transparent)
-    For Idx1 As Integer = 0 To Data.GetUpperBound(0)
-      For Idx2 As Integer = 0 To Data.GetUpperBound(1)
-        Dim Alpha As Integer = CInt(Data(Idx1, Idx2) * Scale)
-        bmp.SetPixel(Idx1, Idx2, System.Drawing.Color.FromArgb(Alpha, StarBaseColor))
-      Next Idx2
-    Next Idx1
+        'Create a transparent PNG
+        Dim StarBaseColor As Color = System.Drawing.Color.FromArgb(255, 0, 0)
+        Dim bmp As New Bitmap(Data.GetUpperBound(0) + 1, Data.GetUpperBound(1) + 1)
+        Dim g As Graphics = Graphics.FromImage(bmp)
+        g.Clear(Color.Transparent)
+        For Idx1 As Integer = 0 To Data.GetUpperBound(0)
+            For Idx2 As Integer = 0 To Data.GetUpperBound(1)
+                Dim Alpha As Integer = CInt(Data(Idx1, Idx2) * Scale)
+                bmp.SetPixel(Idx1, Idx2, System.Drawing.Color.FromArgb(Alpha, StarBaseColor))
+            Next Idx2
+        Next Idx1
 
-    'Save
-    bmp.Save("C:\Users\weis_m\Desktop\Stars.png", System.Drawing.Imaging.ImageFormat.Png)
+        'Save
+        bmp.Save("C:\Users\weis_m\Desktop\Stars.png", System.Drawing.Imaging.ImageFormat.Png)
 
-    MsgBox("OK")
+        MsgBox("OK")
 
-  End Sub
-
-  Private Sub btnDisplay_Click(sender As Object, e As EventArgs) Handles btnDisplay.Click
-    Dim Box As New TestForm
-    Box.Show()
-  End Sub
+    End Sub
 
 End Class

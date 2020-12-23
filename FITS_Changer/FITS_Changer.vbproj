@@ -1,18 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9DA7C288-5C06-42CA-919F-B2DCAAB1483A}</ProjectGuid>
+    <ProjectGuid>{D155CD91-EC4D-474C-9323-651E07E49681}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>FITSDarkProcessor.MainForm</StartupObject>
-    <RootNamespace>FITSDarkProcessor</RootNamespace>
-    <AssemblyName>FITSDarkProcessor</AssemblyName>
+    <StartupObject>FITS_Changer.My.MyApplication</StartupObject>
+    <RootNamespace>FITS_Changer</RootNamespace>
+    <AssemblyName>FITS_Changer</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <MyType>WindowsFormsWithCustomSubMain</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -21,10 +20,8 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>FITSDarkProcessor.xml</DocumentationFile>
+    <DocumentationFile>FITS_Changer.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,9 +30,8 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>FITSDarkProcessor.xml</DocumentationFile>
+    <DocumentationFile>FITS_Changer.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -68,33 +64,16 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\src\atomics\cFITSHeaderChanger.vb">
+      <Link>cFITSHeaderChanger.vb</Link>
+    </Compile>
     <Compile Include="..\..\src\atomics\cFITSHeaderKeywords.vb">
       <Link>cFITSHeaderKeywords.vb</Link>
     </Compile>
     <Compile Include="..\..\src\atomics\cFITSHeaderParser.vb">
       <Link>cFITSHeaderParser.vb</Link>
     </Compile>
-    <Compile Include="..\..\src\atomics\cFITSReader.vb">
-      <Link>cFITSReader.vb</Link>
-    </Compile>
-    <Compile Include="..\..\src\atomics\cIntelIPP.vb">
-      <Link>cIntelIPP.vb</Link>
-    </Compile>
-    <Compile Include="..\..\src\atomics\cSingleValueStatistics.vb">
-      <Link>cSingleValueStatistics.vb</Link>
-    </Compile>
-    <Compile Include="..\..\src\atomics\Extensions.vb">
-      <Link>Extensions.vb</Link>
-    </Compile>
-    <Compile Include="..\..\src\atomics\PlaneWaveEFA.vb">
-      <Link>PlaneWaveEFA.vb</Link>
-    </Compile>
-    <Compile Include="LogList.Designer.vb">
-      <DependentUpon>LogList.vb</DependentUpon>
-    </Compile>
-    <Compile Include="LogList.vb">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="cFITSKeywords.vb" />
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -103,17 +82,45 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="LogList.resx">
-      <DependentUpon>LogList.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ToDo.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

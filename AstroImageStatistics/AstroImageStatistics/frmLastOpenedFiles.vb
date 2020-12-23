@@ -49,4 +49,9 @@ Public Class frmLastOpenedFiles
         End Try
     End Sub
 
+    Private Sub frmLastOpenedFiles_KeyUp(sender As Object, e As KeyEventArgs) Handles Me.KeyUp
+        If e.KeyCode = Keys.Escape Then
+            Me.DialogResult = DialogResult.Cancel
+        End If
+    End Sub
 End Class

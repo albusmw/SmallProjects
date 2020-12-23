@@ -64,6 +64,7 @@ Public Class frmNavigator
             Dim File As String = AllFiles(FileIdx)
             pbMain.Value = FileIdx : DE()
             Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize, False)
+            cOpenCvSharp.MedianBlur(Data, 3)
             Try
                 For X As Integer = 0 To TileSize - 1
                     For Y As Integer = 0 To TileSize - 1
