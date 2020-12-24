@@ -90,7 +90,7 @@ Public Class cFITSGrepper
                                               FileCount += 1
                                               ReportSave(New sProgress(FileCount, QueryResults.Count, "Parsing <" & FileName & ">"))
                                               Dim DataStartPos As Integer = -1
-                                              Dim AllCards As Dictionary(Of eFITSKeywords, Object) = (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(AllHeaders(FileName), DataStartPos))).GetCardsAsDictionary
+                                              Dim AllCards As Dictionary(Of eFITSKeywords, Object) = (New cFITSHeaderParser(cFITSHeaderChanger.ParseHeader(AllHeaders(FileName), DataStartPos))).GetCardsAsDictionary
                                               If AllCards.Count > 0 Then
                                                   AllFileHeaders.TryAdd(FileName, AllCards)
                                               Else

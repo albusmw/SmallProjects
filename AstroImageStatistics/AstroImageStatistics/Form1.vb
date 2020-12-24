@@ -89,7 +89,7 @@ Public Class Form1
         Log("  -> <" & System.IO.Path.GetFileNameWithoutExtension(FileName) & ">")
         LastFile = FileName
         Log("FITS header:")
-        LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(FileName, DataStartPos))
+        LastFITSHeader = New cFITSHeaderParser(cFITSHeaderChanger.ParseHeader(FileName, DataStartPos))
         Dim FITSHeaderDict As Dictionary(Of eFITSKeywords, Object) = LastFITSHeader.GetCardsAsDictionary
         Dim ContentToPrint As New List(Of String)
         For Each Entry As eFITSKeywords In FITSHeaderDict.Keys
@@ -867,7 +867,7 @@ Public Class Form1
 
         'Get the FITS header information
         Dim DataStartPos As Integer = -1
-        Dim FITSHeader As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun, DataStartPos)
+        Dim FITSHeader As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ParseHeader(FileToRun, DataStartPos)
         Dim File_RA_JNow As String = Nothing
         Dim File_Dec_JNow As String = Nothing
         Dim File_FOV1 As Object = Nothing
@@ -1287,7 +1287,7 @@ Public Class Form1
 
         'Get the FITS header information
         Dim DataStartPos As Integer = -1
-        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ReadHeader(FileToRun, DataStartPos)
+        Dim X As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ParseHeader(FileToRun, DataStartPos)
         Dim File_RA_JNow As String = Nothing
         Dim File_Dec_JNow As String = Nothing
         For Each Entry As cFITSHeaderParser.sHeaderElement In X

@@ -21,7 +21,7 @@ Public Class frmFITSGrep
                                                 Dim FileName As String = QueryResults(Idx)
                                                 Dim DataStartPos As Integer = -1
                                                 Dim Key As String = FileName.Trim
-                                                Dim AllCards As Dictionary(Of eFITSKeywords, Object) = (New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(Key, DataStartPos))).GetCardsAsDictionary
+                                                Dim AllCards As Dictionary(Of eFITSKeywords, Object) = (New cFITSHeaderParser(cFITSHeaderChanger.ParseHeader(Key, DataStartPos))).GetCardsAsDictionary
                                                 SyncLock FITSFilesHeaders
                                                     FITSFilesHeaders.Add(Key, AllCards)
                                                 End SyncLock
