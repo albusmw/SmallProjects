@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class Form1
+Partial Class MainForm
     Inherits System.Windows.Forms.Form
 
     'Das Formular überschreibt den Löschvorgang, um die Komponentenliste zu bereinigen.
@@ -22,14 +22,14 @@ Partial Class Form1
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenRecentFiles = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenLastFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem8 = New System.Windows.Forms.ToolStripSeparator()
-        Me.FITSGrepToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiFITSGrep = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.tsmiSaveLastStatXLS = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSaveAllFilesStat = New System.Windows.Forms.ToolStripMenuItem()
@@ -106,6 +106,7 @@ Partial Class Form1
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
+        Me.tsmiAstroBinSearch = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -133,7 +134,7 @@ Partial Class Form1
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiOpenFile, Me.tsmiOpenRecentFiles, Me.tsmiOpenLastFile, Me.ToolStripMenuItem8, Me.FITSGrepToolStripMenuItem, Me.ToolStripMenuItem2, Me.tsmiSaveLastStatXLS, Me.tsmiSaveAllFilesStat, Me.tsmiSaveFITSAndStats, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ToolStripMenuItem4, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiOpenFile, Me.tsmiOpenRecentFiles, Me.tsmiOpenLastFile, Me.ToolStripMenuItem8, Me.tsmiFITSGrep, Me.tsmiAstroBinSearch, Me.ToolStripMenuItem2, Me.tsmiSaveLastStatXLS, Me.tsmiSaveAllFilesStat, Me.tsmiSaveFITSAndStats, Me.StoreStackingResultToolStripMenuItem, Me.tsmiSaveImageData, Me.ToolStripMenuItem4, Me.ClearStatisticsMemoryToolStripMenuItem, Me.ToolStripMenuItem1, Me.OpenEXELocationToolStripMenuItem, Me.ToolStripMenuItem5, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 22)
         Me.FileToolStripMenuItem.Text = "File"
@@ -163,11 +164,11 @@ Partial Class Form1
         Me.ToolStripMenuItem8.Name = "ToolStripMenuItem8"
         Me.ToolStripMenuItem8.Size = New System.Drawing.Size(297, 6)
         '
-        'FITSGrepToolStripMenuItem
+        'tsmiFITSGrep
         '
-        Me.FITSGrepToolStripMenuItem.Name = "FITSGrepToolStripMenuItem"
-        Me.FITSGrepToolStripMenuItem.Size = New System.Drawing.Size(300, 22)
-        Me.FITSGrepToolStripMenuItem.Text = "FITS Grep"
+        Me.tsmiFITSGrep.Name = "tsmiFITSGrep"
+        Me.tsmiFITSGrep.Size = New System.Drawing.Size(300, 22)
+        Me.tsmiFITSGrep.Text = "FITS Grep"
         '
         'ToolStripMenuItem2
         '
@@ -691,7 +692,13 @@ Partial Class Form1
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
-        'Form1
+        'tsmiAstroBinSearch
+        '
+        Me.tsmiAstroBinSearch.Name = "tsmiAstroBinSearch"
+        Me.tsmiAstroBinSearch.Size = New System.Drawing.Size(300, 22)
+        Me.tsmiAstroBinSearch.Text = "AstroBin search"
+        '
+        'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -704,7 +711,7 @@ Partial Class Form1
         Me.KeyPreview = True
         Me.MainMenuStrip = Me.msMain
         Me.Margin = New System.Windows.Forms.Padding(2)
-        Me.Name = "Form1"
+        Me.Name = "MainForm"
         Me.Text = "Astro Image Statistics Version 0.3"
         Me.msMain.ResumeLayout(False)
         Me.msMain.PerformLayout()
@@ -764,7 +771,7 @@ Partial Class Form1
     Friend WithEvents BitGrayscaleFileGenerationToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
     Friend WithEvents tsmiPlateSolve As ToolStripMenuItem
-    Friend WithEvents FITSGrepToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiFITSGrep As ToolStripMenuItem
     Friend WithEvents ASCOMDynamicallyToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem5 As ToolStripSeparator
     Friend WithEvents ClearStatisticsMemoryToolStripMenuItem As ToolStripMenuItem
@@ -811,4 +818,5 @@ Partial Class Form1
     Friend WithEvents tsMain As ToolStrip
     Friend WithEvents tsb_Open As ToolStripButton
     Friend WithEvents tsb_Display As ToolStripButton
+    Friend WithEvents tsmiAstroBinSearch As ToolStripMenuItem
 End Class

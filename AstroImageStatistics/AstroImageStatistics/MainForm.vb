@@ -1,7 +1,7 @@
 ﻿Option Explicit On
 Option Strict On
 
-Public Class Form1
+Public Class MainForm
 
     Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal pDst As IntPtr,
                                                                  ByVal pSrc As IntPtr,
@@ -994,7 +994,7 @@ Public Class Form1
         JNowDec = X.DECApparent
     End Sub
 
-    Private Sub FITSGrepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSGrepToolStripMenuItem.Click
+    Private Sub FITSGrepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiFITSGrep.Click
         Dim X As New frmFITSGrep : X.Show()
     End Sub
 
@@ -1679,6 +1679,11 @@ Public Class Form1
 
     Private Sub tsb_Display_Click(sender As Object, e As EventArgs) Handles tsb_Display.Click
         DisplayImageToolStripMenuItem_Click(Nothing, Nothing)
+    End Sub
+
+    Private Sub tsmiAstroBinSearch_Click(sender As Object, e As EventArgs) Handles tsmiAstroBinSearch.Click
+        Dim AstroBinSearch As New frmAstroBinSearch
+        AstroBinSearch.Show()
     End Sub
 
 End Class
