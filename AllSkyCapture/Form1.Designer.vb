@@ -48,6 +48,7 @@ Partial Class Form1
         Me.tsslCapture = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslSunPos = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslNoCapture = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.TelnetClientToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbLastImage, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -189,7 +190,7 @@ Partial Class Form1
         '
         'TestToolStripMenuItem
         '
-        Me.TestToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTakeOnePicture, Me.ToolStripMenuItem3, Me.tsmiFTPUpload})
+        Me.TestToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTakeOnePicture, Me.ToolStripMenuItem3, Me.tsmiFTPUpload, Me.TelnetClientToolStripMenuItem})
         Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
         Me.TestToolStripMenuItem.Size = New System.Drawing.Size(39, 20)
         Me.TestToolStripMenuItem.Text = "Test"
@@ -197,18 +198,18 @@ Partial Class Form1
         'tsmiTakeOnePicture
         '
         Me.tsmiTakeOnePicture.Name = "tsmiTakeOnePicture"
-        Me.tsmiTakeOnePicture.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiTakeOnePicture.Size = New System.Drawing.Size(180, 22)
         Me.tsmiTakeOnePicture.Text = "Take 1 picture"
         '
         'ToolStripMenuItem3
         '
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(143, 6)
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(177, 6)
         '
         'tsmiFTPUpload
         '
         Me.tsmiFTPUpload.Name = "tsmiFTPUpload"
-        Me.tsmiFTPUpload.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiFTPUpload.Size = New System.Drawing.Size(180, 22)
         Me.tsmiFTPUpload.Text = "FTP upload"
         '
         'SetToolStripMenuItem
@@ -221,7 +222,7 @@ Partial Class Form1
         'MyCaptureDefaultsToolStripMenuItem
         '
         Me.MyCaptureDefaultsToolStripMenuItem.Name = "MyCaptureDefaultsToolStripMenuItem"
-        Me.MyCaptureDefaultsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.MyCaptureDefaultsToolStripMenuItem.Size = New System.Drawing.Size(179, 22)
         Me.MyCaptureDefaultsToolStripMenuItem.Text = "My capture defaults"
         '
         'tCheckExpState
@@ -255,6 +256,12 @@ Partial Class Form1
         Me.tsslNoCapture.Name = "tsslNoCapture"
         Me.tsslNoCapture.Size = New System.Drawing.Size(119, 17)
         Me.tsslNoCapture.Text = "ToolStripStatusLabel1"
+        '
+        'TelnetClientToolStripMenuItem
+        '
+        Me.TelnetClientToolStripMenuItem.Name = "TelnetClientToolStripMenuItem"
+        Me.TelnetClientToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.TelnetClientToolStripMenuItem.Text = "Telnet client"
         '
         'Form1
         '
@@ -310,4 +317,5 @@ Partial Class Form1
     Friend WithEvents ToolStripMenuItem3 As ToolStripSeparator
     Friend WithEvents tsslCapture As ToolStripStatusLabel
     Friend WithEvents tsslNoCapture As ToolStripStatusLabel
+    Friend WithEvents TelnetClientToolStripMenuItem As ToolStripMenuItem
 End Class

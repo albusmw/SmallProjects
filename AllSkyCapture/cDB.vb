@@ -3,6 +3,8 @@ Option Strict On
 
 Public Class cDB
 
+    Public Camera As ASCOM.DriverAccess.Camera = Nothing
+
     Private ThisNightParam As AstroCalc.NET.Sun.sSunRaiseAndSet
 
     '''<summary>Location of the EXE.</summary>
