@@ -39,14 +39,16 @@ Public Class Form1
         tsslNoCapture.BackColor = Color.Green
 
         Log("Connecting camera")
-        Dim Camera As New ASCOM.DriverAccess.Camera(DB.ASCOMCam)
-        Camera.Connected = True
-        Log("    DONE (" & Camera.Description & ")")
-        Log("    Gain range    : " & Camera.GainMin.ToString.Trim & " ... " & Camera.GainMax.ToString.Trim)
-        Log("    Exposure range: " & Camera.ExposureMin.ToString.Trim & " ... " & Camera.ExposureMax.ToString.Trim)
+        If IsNothing(DB.Camera) Then
+            DB.Camera = New ASCOM.DriverAccess.Camera(DB.ASCOMCam)
+        End If
+        DB.Camera.Connected = True
+        Log("    DONE (" & DB.Camera.Description & ")")
+        Log("    Gain range    : " & DB.Camera.GainMin.ToString.Trim & " ... " & DB.Camera.GainMax.ToString.Trim)
+        Log("    Exposure range: " & DB.Camera.ExposureMin.ToString.Trim & " ... " & DB.Camera.ExposureMax.ToString.Trim)
 
-        Camera.BinX = 1
-        Camera.BinY = 1
+        DB.Camera.BinX = 1
+        DB.Camera.BinY = 1
 
         'Calculate settings
         Dim ExpToUse As Double = Double.NaN
@@ -70,34 +72,34 @@ Public Class Form1
 
         'Set gain
         If GainToUse <> DB.GainNotSet Then
-            If GainToUse > Camera.GainMax Then GainToUse = Camera.GainMax
-            If GainToUse < Camera.GainMin Then GainToUse = Camera.GainMin
-            Camera.Gain = GainToUse
+            If GainToUse > DB.Camera.GainMax Then GainToUse = DB.Camera.GainMax
+            If GainToUse < DB.Camera.GainMin Then GainToUse = DB.Camera.GainMin
+            DB.Camera.Gain = GainToUse
         End If
-        Log("    Gain selected: " & Camera.Gain.ToString.Trim)
+        Log("    Gain selected: " & DB.Camera.Gain.ToString.Trim)
 
         'Start exposing
         StartLog("Starting exposure with " & ExpToUse.ToString.Trim & " seconds")
         tsmiTakeOnePicture.Enabled = False : tsslCapture.BackColor = Color.Red : System.Windows.Forms.Application.DoEvents()
-        Camera.StartExposure(ExpToUse, False)
+        DB.Camera.StartExposure(ExpToUse, False)
         Do
-            If Camera.ImageReady Then Exit Do
+            If DB.Camera.ImageReady Then Exit Do
             System.Threading.Thread.Sleep(100)
             System.Windows.Forms.Application.DoEvents()
         Loop Until 1 = 0
-        Dim CCDSensorData As Integer(,) = CType(Camera.ImageArray, Integer(,))
+        Dim CCDSensorData As Integer(,) = CType(DB.Camera.ImageArray, Integer(,))
         tsmiTakeOnePicture.Enabled = True : tsslCapture.BackColor = Color.Gray : System.Windows.Forms.Application.DoEvents()
         FinishLog("    DONE.")
 
         Dim PixelX As Integer = CCDSensorData.GetUpperBound(0) + 1
         Dim PixelY As Integer = CCDSensorData.GetUpperBound(1) + 1
 
-        Log(PixelX.ToString.Trim & " x " & PixelY.ToString.Trim & " = " & (PixelX * PixelY).ToString.Trim & ", " & Camera.SensorType.ToString)
+        Log(PixelX.ToString.Trim & " x " & PixelY.ToString.Trim & " = " & (PixelX * PixelY).ToString.Trim & ", " & DB.Camera.SensorType.ToString)
 
         Dim BitmapToCreate As Bitmap
         Dim ColorPixelFormat As System.Drawing.Imaging.PixelFormat = System.Drawing.Imaging.PixelFormat.Format24bppRgb
         Dim MonoPixelFormat As System.Drawing.Imaging.PixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed
-        If Camera.SensorType <> ASCOM.DeviceInterface.SensorType.Monochrome Then
+        If DB.Camera.SensorType <> ASCOM.DeviceInterface.SensorType.Monochrome Then
             BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1) \ 2, (CCDSensorData.GetUpperBound(1) + 1) \ 2, ColorPixelFormat)   'color mode
         Else
             BitmapToCreate = New Bitmap((CCDSensorData.GetUpperBound(0) + 1), (CCDSensorData.GetUpperBound(1) + 1), MonoPixelFormat)            'grayscale mode (we use 24bppRgb as well here - to be improved ...)
@@ -120,7 +122,7 @@ Public Class Form1
         Dim Max As Integer = Integer.MinValue
         Dim Y As Integer = 0
         Dim X As Integer = 0
-        If Camera.SensorType <> ASCOM.DeviceInterface.SensorType.Monochrome Then
+        If DB.Camera.SensorType <> ASCOM.DeviceInterface.SensorType.Monochrome Then
             'Color sensor
             CCDSensorBayerStep = 2
             BytePerOutputPixel = 3       'RGB, each 1 byte
@@ -185,7 +187,7 @@ Public Class Form1
 
         'Create a grayscale palette
         If DB.SaveIndexedGrayscale = True Then
-            If Camera.SensorType = ASCOM.DeviceInterface.SensorType.Monochrome Then
+            If DB.Camera.SensorType = ASCOM.DeviceInterface.SensorType.Monochrome Then
                 Dim GrayScale As Imaging.ColorPalette = BitmapToCreate.Palette
                 For Idx As Integer = 0 To GrayScale.Entries.Length - 1
                     GrayScale.Entries(Idx) = Color.FromArgb(Idx, Idx, Idx)
@@ -231,7 +233,7 @@ Public Class Form1
         FinishLog("    DONE.")
 
         StartLog("Disconnecting camera")
-        Camera.Connected = False
+        DB.Camera.Connected = False
         FinishLog("    DONE.")
         Log("==============================================")
 

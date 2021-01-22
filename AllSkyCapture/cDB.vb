@@ -3,6 +3,8 @@ Option Strict On
 
 Public Class cDB
 
+    Public Camera As ASCOM.DriverAccess.Camera = Nothing
+
     Private ThisNightParam As AstroCalc.NET.Sun.sSunRaiseAndSet
 
     '''<summary>Location of the EXE.</summary>
@@ -59,7 +61,7 @@ Public Class cDB
     <ComponentModel.Category(Cat_ExposureControl)>
     <ComponentModel.DisplayName("2.2) Exposure time - Day")>
     <ComponentModel.DefaultValue(0.02)>
-    Public Property Exp_Day As Double = 0.02
+    Public Property Exp_Day As Double = 0.002
 
     <ComponentModel.Category(Cat_ExposureControl)>
     <ComponentModel.DisplayName("3.1) Gain - Night")>

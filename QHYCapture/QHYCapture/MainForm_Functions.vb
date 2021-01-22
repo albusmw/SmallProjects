@@ -14,8 +14,8 @@ Partial Public Class MainForm
         Dim DB_Type As Type = M.DB.GetType
         Dim DB_props As List(Of String) = GetAllPropertyNames(M.DB.GetType)
         'Reflect meta database
-        Dim DB_meta_Type As Type = DB_meta.GetType
-        Dim DB_meta_props As List(Of String) = GetAllPropertyNames(DB_meta.GetType)
+        Dim DB_meta_Type As Type = M.Meta.GetType
+        Dim DB_meta_props As List(Of String) = GetAllPropertyNames(M.Meta.GetType)
         'Move over all exposure specifications in the file
         Dim SpecDoc As New Xml.XmlDocument
         Try
@@ -54,7 +54,7 @@ Partial Public Class MainForm
                 If IsNothing(PropValue) = False Then
                     Try
                         If DB_props.Contains(ExpAttrib.Name) Then DB_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, M.DB, New Object() {PropValue})
-                        If DB_meta_props.Contains(ExpAttrib.Name) Then DB_meta_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, DB_meta, New Object() {PropValue})
+                        If DB_meta_props.Contains(ExpAttrib.Name) Then DB_meta_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, M.Meta, New Object() {PropValue})
                     Catch ex As Exception
                         Log("Failed for <" & ExpAttrib.Name & ">: " & ex.Message)
                     End Try
@@ -82,13 +82,18 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Start the exposure.</summary>
-    Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter, ByVal Chip_Pixel As sSize_UInt) As cSingleCaptureInfo
+    '''<param name="CaptureIdx">Capture index to run.</param>
+    '''<param name="FilterActive">Filter selected.</param>
+    Private Function StartExposure(ByVal CaptureIdx As UInt32, ByVal FilterActive As eFilter) As cSingleCaptureInfo
 
         Dim SingleCaptureData As New cSingleCaptureInfo
 
         'Set exposure parameters (first time / on property change / always if configured)
         LED_update(tsslLED_config, True)
-        If (CaptureIdx = 1) Or (M.DB.ConfigAlways = True) Or PropertyChanged = True Then SetExpParameters(CalculateROI(Chip_Pixel))
+        If (CaptureIdx = 1) Or (M.DB.ConfigAlways = True) Or PropertyChanged = True Then
+            M.DB.ROI = AdjustAndCorrectROI()
+            SetExpParameters()
+        End If
         LED_update(tsslLED_config, False)
         M.DB.Stopper.Stamp("Set exposure parameters")
 
@@ -100,14 +105,14 @@ Partial Public Class MainForm
         End If
 
         'Temperature
-        LED_update(tsslLED_cooling, True)
-        SetTemperature(M.DB.CoolingTimeOut)
-        LED_update(tsslLED_cooling, False)
+        If M.DB.Temp_Target <> M.DB.Temp_DoNotRun Then
+            SetTemperature()
+        End If
 
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & M.DB.CaptureCount.ValRegIndep
 
-        If DB_meta.Load10MicronDataAlways = True Then Load10MicronData()
+        If M.Meta.Load10MicronDataAlways = True Then Load10MicronData()
 
         With SingleCaptureData
             .CaptureIdx = CaptureIdx
@@ -228,7 +233,7 @@ Partial Public Class MainForm
                             AllReadOutModes.Add(ReadoutMode.ValRegIndep & ": " & ReadoutModeName.ToString & " (" & ResX.ValRegIndep & "x" & ResY.ValRegIndep & ")")
                         Next ReadoutMode
 
-                        If M.DB.Log_CamProp Then
+                        If M.Meta.Log_CamProp Then
                             Log("Available read-out modes:")
                             Log(AllReadOutModes)
                         End If
@@ -275,34 +280,44 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Set the requested temperature.</summary>
-    '''<param name="TimeOut">Time-out [s] for the complete cooling process</param>
-    Private Function SetTemperature(ByVal TimeOut As Double) As Double
+    Private Function SetTemperature() As Double
+        LED_update(tsslLED_cooling, True)
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
         Dim CurrentTemp As Double = Double.NaN
-        If M.DB.TargetTemp > -100 Then
+        Dim FirstInToleranceTime As DateTime = DateTime.MaxValue
+        If M.DB.Temp_Target > -100 Then
             Do
-                If GetTempState(CurrentTemp) = True Then Exit Do
+                If CCDTempOK(CurrentTemp) = True Then
+                    If FirstInToleranceTime = DateTime.MaxValue Then
+                        FirstInToleranceTime = DateTime.Now
+                    Else
+                        tsslTemperature.Text &= ", " & (Now - FirstInToleranceTime).TotalSeconds.ValRegIndep("0.0") & " s within tolerance"
+                    End If
+                Else
+                    FirstInToleranceTime = DateTime.MaxValue
+                End If
                 System.Threading.Thread.Sleep(500)
                 DE()
-            Loop Until (TimeOutT.ElapsedMilliseconds > TimeOut * 1000) Or M.DB.StopFlag = True
+            Loop Until (TimeOutT.ElapsedMilliseconds > M.DB.Temp_TimeOutAndOK * 1000) Or (M.DB.StopFlag = True) Or (Now - FirstInToleranceTime).TotalSeconds >= M.DB.Temp_StableTime
         End If
         M.DB.Stopper.Stamp("Set temperature")
+        LED_update(tsslLED_cooling, False)
         Return CurrentTemp
     End Function
 
     '''<summary>Get and display the requested temperature.</summary>
-    Private Function GetTempState() As Boolean
+    Private Function CCDTempOK() As Boolean
         Dim DontCare As Double = Double.NaN
-        Return GetTempState(DontCare)
+        Return CCDTempOK(DontCare)
     End Function
 
     '''<summary>Get and display the requested temperature.</summary>
-    Private Function GetTempState(ByRef CurrentTemp As Double) As Boolean
+    Private Function CCDTempOK(ByRef CurrentTemp As Double) As Boolean
         Dim RetVal As Boolean = False
         CurrentTemp = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
         Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
-        tsslTemperature.Text = "T = " & CurrentTemp.ValRegIndep & " °C (-> " & M.DB.TargetTemp.ValRegIndep & " °C, cooler @ " & CurrentPWM.ValRegIndep & " %)"
-        If System.Math.Abs(CurrentTemp - M.DB.TargetTemp) <= M.DB.TargetTempTolerance Then
+        tsslTemperature.Text = "T = " & CurrentTemp.ValRegIndep & " °C (-> " & M.DB.Temp_Target.ValRegIndep & " °C, cooler @ " & CurrentPWM.ValRegIndep & " %)"
+        If System.Math.Abs(CurrentTemp - M.DB.Temp_Target) <= M.DB.Temp_Tolerance Then
             RetVal = True
             tsslTemperature.BackColor = Color.Green
         Else
@@ -380,9 +395,9 @@ Partial Public Class MainForm
     End Function
 
     ''<summary>Set the exposure parameters</summary>
-    Private Sub SetExpParameters(ByVal ROIForCapture As System.Drawing.Rectangle)
+    Private Sub SetExpParameters()
         CallOK("SetQHYCCDBinMode", QHY.QHYCamera.SetQHYCCDBinMode(M.DB.CamHandle, CUInt(M.DB.HardwareBinning), CUInt(M.DB.HardwareBinning)))
-        CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(M.DB.CamHandle, CUInt(ROIForCapture.X), CUInt(ROIForCapture.Y), CUInt(ROIForCapture.Width \ M.DB.HardwareBinning), CUInt(ROIForCapture.Height \ M.DB.HardwareBinning)))
+        CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(M.DB.CamHandle, CUInt(M.DB.ROI.X), CUInt(M.DB.ROI.Y), CUInt(M.DB.ROI.Width \ M.DB.HardwareBinning), CUInt(M.DB.ROI.Height \ M.DB.HardwareBinning)))
         CallOK("CONTROL_TRANSFERBIT", QHY.QHYCamera.SetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_TRANSFERBIT, M.DB.ReadResolution))
         CallOK("CONTROL_GAIN", QHY.QHYCamera.SetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN, M.DB.Gain))
         CallOK("CONTROL_OFFSET", QHY.QHYCamera.SetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET, M.DB.Offset))
@@ -414,46 +429,46 @@ Partial Public Class MainForm
 
     '''<summary>Load the data from the 10Micron mount.</summary>
     Private Sub Load10MicronData()
-        Dim Client10Micron As New Net.Sockets.TcpClient(DB_meta.IP_10Micron, 3490)
+        Dim Client10Micron As New Net.Sockets.TcpClient(M.Meta.IP_10Micron, 3490)
         Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
         c10Micron.SendCommand(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
-        DB_meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
-        DB_meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
-        DB_meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
-        DB_meta.TelescopeDeclination = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeDeclination)
-        DB_meta.TelescopeAltitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAltitude)
-        DB_meta.TelescopeAzimuth = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAzimuth)
+        M.Meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
+        M.Meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
+        M.Meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
+        M.Meta.TelescopeDeclination = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeDeclination)
+        M.Meta.TelescopeAltitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAltitude)
+        M.Meta.TelescopeAzimuth = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAzimuth)
         RefreshProperties()
     End Sub
 
     '''<summary>Calculate all entries from the FITS header.</summary>
     '''<param name="SingleCaptureData">Capture configuration.</param>
     '''<param name="FileNameToWrite">File name with replacement parameters to use.</param>
-    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureInfo, ByVal Pixel_Size As sSize_Dbl, ByRef FileNameToWrite As String) As Dictionary(Of eFITSKeywords, Object)
+    Private Function GenerateFITSHeader(ByVal SingleCaptureData As cSingleCaptureInfo, ByRef FileNameToWrite As String) As Dictionary(Of eFITSKeywords, Object)
 
         Dim CustomElement As New Dictionary(Of eFITSKeywords, Object)
 
         'Precalculation
-        Dim PLATESZ1 As Double = (Pixel_Size.Width * SingleCaptureData.NAXIS1) / 1000                           '[mm]
-        Dim PLATESZ2 As Double = (Pixel_Size.Height * SingleCaptureData.NAXIS2) / 1000                          '[mm]
-        Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
-        Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * DB_meta.TelescopeFocalLength)) * (180 / Math.PI)
+        Dim PLATESZ1 As Double = (M.Meta.Pixel_Size.Width * SingleCaptureData.NAXIS1) / 1000                           '[mm]
+        Dim PLATESZ2 As Double = (M.Meta.Pixel_Size.Height * SingleCaptureData.NAXIS2) / 1000                          '[mm]
+        Dim FOV1 As Double = 2 * Math.Atan(PLATESZ1 / (2 * M.Meta.TelescopeFocalLength)) * (180 / Math.PI)
+        Dim FOV2 As Double = 2 * Math.Atan(PLATESZ2 / (2 * M.Meta.TelescopeFocalLength)) * (180 / Math.PI)
         Dim FilterName As String = [Enum].GetName(GetType(eFilter), SingleCaptureData.FilterActive)
 
-        CustomElement.Add(eFITSKeywords.OBS_ID, (DB_meta.GUID))
+        CustomElement.Add(eFITSKeywords.OBS_ID, (M.Meta.GUID))
 
-        CustomElement.Add(eFITSKeywords.OBJECT, DB_meta.ObjectName)
-        CustomElement.Add(eFITSKeywords.RA, DB_meta.TelescopeRightAscension)
-        CustomElement.Add(eFITSKeywords.DEC, DB_meta.TelescopeDeclination)
+        CustomElement.Add(eFITSKeywords.OBJECT, M.Meta.ObjectName)
+        CustomElement.Add(eFITSKeywords.RA, M.Meta.TelescopeRightAscension)
+        CustomElement.Add(eFITSKeywords.DEC, M.Meta.TelescopeDeclination)
 
-        CustomElement.Add(eFITSKeywords.AUTHOR, DB_meta.Author)
-        CustomElement.Add(eFITSKeywords.ORIGIN, DB_meta.Origin)
-        CustomElement.Add(eFITSKeywords.TELESCOP, DB_meta.Telescope)
-        CustomElement.Add(eFITSKeywords.TELAPER, DB_meta.TelescopeAperture / 1000.0)
-        CustomElement.Add(eFITSKeywords.TELFOC, DB_meta.TelescopeFocalLength / 1000.0)
+        CustomElement.Add(eFITSKeywords.AUTHOR, M.Meta.Author)
+        CustomElement.Add(eFITSKeywords.ORIGIN, M.Meta.Origin)
+        CustomElement.Add(eFITSKeywords.TELESCOP, M.Meta.Telescope)
+        CustomElement.Add(eFITSKeywords.TELAPER, M.Meta.TelescopeAperture / 1000.0)
+        CustomElement.Add(eFITSKeywords.TELFOC, M.Meta.TelescopeFocalLength / 1000.0)
         CustomElement.Add(eFITSKeywords.INSTRUME, M.DB.UsedCameraId.ToString)
-        CustomElement.Add(eFITSKeywords.PIXSIZE1, Pixel_Size.Width)
-        CustomElement.Add(eFITSKeywords.PIXSIZE2, Pixel_Size.Height)
+        CustomElement.Add(eFITSKeywords.PIXSIZE1, M.Meta.Pixel_Size.Width)
+        CustomElement.Add(eFITSKeywords.PIXSIZE2, M.Meta.Pixel_Size.Height)
         CustomElement.Add(eFITSKeywords.PLATESZ1, PLATESZ1 / 10)                        'calculated from the image data as ROI may be set ...
         CustomElement.Add(eFITSKeywords.PLATESZ2, PLATESZ2 / 10)                        'calculated from the image data as ROI may be set ...
         CustomElement.Add(eFITSKeywords.FOV1, FOV1)
@@ -469,12 +484,12 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.CRPIX1, 0.5 * (SingleCaptureData.NAXIS1 + 1))
         CustomElement.Add(eFITSKeywords.CRPIX2, 0.5 * (SingleCaptureData.NAXIS2 + 1))
 
-        CustomElement.Add(eFITSKeywords.IMAGETYP, DB_meta.ExposureType)
+        CustomElement.Add(eFITSKeywords.IMAGETYP, M.Meta.ExposureType)
         CustomElement.Add(eFITSKeywords.EXPTIME, SingleCaptureData.ExpTime)
         CustomElement.Add(eFITSKeywords.GAIN, SingleCaptureData.Gain)
         CustomElement.Add(eFITSKeywords.OFFSET, SingleCaptureData.Offset)
         CustomElement.Add(eFITSKeywords.BRIGHTNESS, SingleCaptureData.Brightness)
-        CustomElement.Add(eFITSKeywords.SETTEMP, M.DB.TargetTemp)
+        CustomElement.Add(eFITSKeywords.SETTEMP, M.DB.Temp_Target)
         CustomElement.Add(eFITSKeywords.CCDTEMP, SingleCaptureData.ObsStartTemp)
         CustomElement.Add(eFITSKeywords.FOCUS, SingleCaptureData.TelescopeFocus)
 

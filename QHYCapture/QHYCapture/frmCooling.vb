@@ -12,7 +12,7 @@ Public Class frmCooling
 
         'Get a timed cooling if configured
         Dim TimedCool As Double = GetTimedTemp()
-        If Double.IsNaN(TimedCool) = False Then M.DB.TargetTemp = TimedCool
+        If Double.IsNaN(TimedCool) = False Then M.DB.Temp_Target = TimedCool
 
         'Get current camera parameters
         Dim CurrentTemp As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
@@ -35,7 +35,7 @@ Public Class frmCooling
 
     Private Sub btnSetTemp_Click(sender As Object, e As EventArgs) Handles btnSetTemp.Click
         Dim NewTemp As Double
-        If Double.TryParse(InputBox("New target: ", "New temperature", M.DB.TargetTemp.ValRegIndep), NewTemp) = True Then M.DB.TargetTemp = NewTemp
+        If Double.TryParse(InputBox("New target: ", "New temperature", M.DB.Temp_Target.ValRegIndep), NewTemp) = True Then M.DB.Temp_Target = NewTemp
     End Sub
 
     '''<summary>Get a configured timed cooling.</summary>

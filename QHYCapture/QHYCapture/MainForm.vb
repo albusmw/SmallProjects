@@ -4,10 +4,6 @@ Imports System.Windows.Forms
 
 Partial Public Class MainForm
 
-    '''<summary>DB that holds meta information.</summary>
-    Private DB_meta As New cDB_meta
-    '''<summary>DB that holds meta information.</summary>
-    Private DB_PlotAndText As New cAstroStatDisp
     '''<summary>WCF interface.</summary>
     Private WithEvents DB_ServiceContract As cDB_ServiceContract
     '''<summary>Indicate that a property was changed and parameters need to be updated in the camera.</summary>
@@ -30,10 +26,6 @@ Partial Public Class MainForm
     Public Sub QHYCapture(ByVal CloseAtEnd As Boolean)
 
         Const BitsPerByte As Integer = 8
-        Dim SDKVersion(3) As UInteger
-        Dim Chip_Physical As sSize_Dbl      'chip physical size [mm]
-        Dim Chip_Pixel As sSize_UInt        'chip size [pixel]
-        Dim Pixel_Size As sSize_Dbl         'chip pixel size [um]
         Dim EffArea As sRect_UInt
         Dim OverArea As sRect_UInt
         Dim bpp As UInteger = 0
@@ -51,254 +43,261 @@ Partial Public Class MainForm
 
         LED_update(tsslLED_config, True)
 
-            'Get chip properties
-            QHY.QHYCamera.GetQHYCCDChipInfo(M.DB.CamHandle, Chip_Physical.Width, Chip_Physical.Height, Chip_Pixel.Width, Chip_Pixel.Height, Pixel_Size.Width, Pixel_Size.Height, bpp)
-            QHY.QHYCamera.GetQHYCCDEffectiveArea(M.DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
-            QHY.QHYCamera.GetQHYCCDOverScanArea(M.DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
-            M.DB.Stopper.Stamp("Get chip properties")
+        'Get chip properties
+        QHY.QHYCamera.GetQHYCCDChipInfo(M.DB.CamHandle, M.Meta.MyChip_Physical.Width, M.Meta.MyChip_Physical.Height, M.Meta.MyChip_Pixel.Width, M.Meta.MyChip_Pixel.Height, M.Meta.MyPixel_Size.Width, M.Meta.MyPixel_Size.Height, bpp)
+        QHY.QHYCamera.GetQHYCCDEffectiveArea(M.DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
+        QHY.QHYCamera.GetQHYCCDOverScanArea(M.DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
+        M.DB.Stopper.Stamp("Get chip properties")
 
-            'Log chip properties
-            If M.DB.Log_CamProp = True Then
-                QHY.QHYCamera.GetQHYCCDSDKVersion(SDKVersion(0), SDKVersion(1), SDKVersion(2), SDKVersion(3))                   'Get the SDK version
-                Log("SDK version: " & BuildSDKVersion(SDKVersion))                                                              'Display the SDK version
+        'Log chip properties
+        If M.Meta.Log_CamProp = True Then
+            QHY.QHYCamera.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))       'Get the SDK version
+            Log("SDK version: " & M.Meta.SDKVersionString)                                                                                  'Display the SDK version
 
-                Log("Chip info (bpp: " & bpp.ValRegIndep & ")")
-                Log("  Chip  W x H    :" & Chip_Physical.Width.ValRegIndep & " x " & Chip_Physical.Height.ValRegIndep & " mm")
-                Log("  Image W x H    :" & Chip_Pixel.Width.ValRegIndep & " x " & Chip_Pixel.Height.ValRegIndep & " pixel")
-                Log("  Pixel W x H    :" & Pixel_Size.Width.ValRegIndep & " x " & Pixel_Size.Height.ValRegIndep & " um")
-                Log("CCD Effective Area:")
-                Log("  Start X:Y    :" & EffArea.X.ValRegIndep & ":" & EffArea.Y.ValRegIndep)
-                Log("  Size  X x Y  :" & EffArea.Width.ValRegIndep & " x " & EffArea.Height.ValRegIndep)
-                Log("CCD Overscan Area:")
-                Log("  Start X:Y    :" & OverArea.X.ValRegIndep & ":" & OverArea.Y.ValRegIndep)
-                Log("  Size  X x Y  :" & OverArea.Width.ValRegIndep & " x " & OverArea.Height.ValRegIndep)
-                Log("==============================================================================")
+            Log("Chip info (bpp: " & bpp.ValRegIndep & ")")
+            Log("  Chip  W x H  :" & M.Meta.MyChip_Physical.Width.ValRegIndep & " x " & M.Meta.MyChip_Physical.Height.ValRegIndep & " mm")
+            Log("  Image W x H  :" & M.Meta.MyChip_Pixel.Width.ValRegIndep & " x " & M.Meta.MyChip_Pixel.Height.ValRegIndep & " pixel")
+            Log("  Pixel W x H  :" & M.Meta.MyPixel_Size.Width.ValRegIndep & " x " & M.Meta.MyPixel_Size.Height.ValRegIndep & " um")
+            Log("CCD Effective Area:")
+            Log("  Start X : Y  :" & EffArea.X.ValRegIndep & ":" & EffArea.Y.ValRegIndep)
+            Log("  Size  W x H  :" & EffArea.Width.ValRegIndep & " x " & EffArea.Height.ValRegIndep)
+            Log("CCD Overscan Area:")
+            Log("  Start X : Y  :" & OverArea.X.ValRegIndep & ":" & OverArea.Y.ValRegIndep)
+            Log("  Size  W x H  :" & OverArea.Width.ValRegIndep & " x " & OverArea.Height.ValRegIndep)
+            Log("==============================================================================")
 
-                Log("ControlValues:")                                                                                           'Start reading all control values
-                LogControlValues()
-                M.DB.Stopper.Stamp("GetQHYCCDParams")
+            Log("ControlValues:")                                                                                                           'Start reading all control values
+            LogControlValues()
+            M.DB.Stopper.Stamp("GetQHYCCDParams")
 
-                Log("==============================================================================")
+            Log("==============================================================================")
+        End If
+
+        LED_update(tsslLED_config, False)
+
+        Dim ChannelToRead As UInteger = 0
+
+        'Prepare buffers
+        LoopStat = New AstroNET.Statistics.sStatistics
+        Dim PinHandler As cIntelIPP.cPinHandler = Nothing
+        Dim CamRawBuffer As Byte() = {}
+        Dim CamRawBufferPtr As IntPtr = Nothing
+        Dim InfinitBuffer(,) As UInt32 = {}
+        M.DB.Stopper.Stamp("Prepare buffers")
+
+        'Select filter
+        Dim FilterActive As eFilter = eFilter.Invalid
+        If M.DB.FilterSlot <> eFilter.Invalid And M.DB.UseFilterWheel = True Then
+            FilterActive = ActiveFilter(M.DB.CamHandle, M.DB.FilterSlot, M.DB.FilterWheelTimeOut)
+        End If
+        M.DB.Stopper.Stamp("Select filter")
+
+        'Enter capture loop
+        Dim EndTimeStamps As New List(Of DateTime)
+        Dim TotalCaptureTime As Double = 0
+        Dim RunningCaptureInfo As New cSingleCaptureInfo
+
+        For CaptureLoopCount As UInt32 = 1 To CUInt(M.DB.CaptureCount)
+
+            '================================================================================
+            ' START EXPOSURE ON FIRST ENTRY
+            '================================================================================
+
+            If CaptureLoopCount = 1 Then
+                RunningCaptureInfo = StartExposure(CaptureLoopCount, FilterActive)
             End If
 
-            LED_update(tsslLED_config, False)
+            '================================================================================
+            ' WAIT FOR END AND READ BUFFERS
+            '================================================================================
 
-            Dim ChannelToRead As UInteger = 0
-
-            'Prepare buffers
-            LoopStat = New AstroNET.Statistics.sStatistics
-            Dim PinHandler As cIntelIPP.cPinHandler
-            Dim CamRawBuffer As Byte() = {}
-            Dim CamRawBufferPtr As IntPtr = Nothing
-            Dim InfinitBuffer(,) As UInt32 = {}
-            M.DB.Stopper.Stamp("Prepare buffers")
-
-            'Select filter
-            Dim FilterActive As eFilter = eFilter.Invalid
-            If M.DB.FilterSlot <> eFilter.Invalid And M.DB.UseFilterWheel = True Then
-                FilterActive = ActiveFilter(M.DB.CamHandle, M.DB.FilterSlot, M.DB.FilterWheelTimeOut)
-            End If
-            M.DB.Stopper.Stamp("Select filter")
-
-            'Enter capture loop
-            Dim EndTimeStamps As New List(Of DateTime)
-            Dim TotalCaptureTime As Double = 0
-            Dim RunningCaptureInfo As New cSingleCaptureInfo
-
-            For CaptureLoopCount As UInt32 = 1 To CUInt(M.DB.CaptureCount)
-
-                '================================================================================
-                ' START EXPOSURE ON FIRST ENTRY
-                '================================================================================
-
-                If CaptureLoopCount = 1 Then
-                    RunningCaptureInfo = StartExposure(CaptureLoopCount, FilterActive, Chip_Pixel)
-                End If
-
-                '================================================================================
-                ' WAIT FOR END AND READ BUFFERS
-                '================================================================================
-
-                IdleExposureTime(M.DB.ExposureTime)
+            IdleExposureTime(M.DB.ExposureTime)
             If StopNow(False) Then Exit For
 
             'Get the buffer size from the DLL - typically too big but does not care ...
             Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(M.DB.CamHandle)
-                LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
-                If CamRawBuffer.Length <> BytesToTransfer_reported Then
-                    PinHandler = New cIntelIPP.cPinHandler
-                    ReDim CamRawBuffer(CInt(BytesToTransfer_reported - 1))
-                    CamRawBufferPtr = PinHandler.Pin(CamRawBuffer)
+            LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
+            If (CamRawBuffer.Length <> BytesToTransfer_reported) Or (IsNothing(PinHandler) = True) Then
+                PinHandler = New cIntelIPP.cPinHandler
+                ReDim CamRawBuffer(CInt(BytesToTransfer_reported - 1))
+                CamRawBufferPtr = PinHandler.Pin(CamRawBuffer)
+            End If
+            M.DB.Stopper.Stamp("GetQHYCCDMemLength & pinning")
+
+            'Read image data from camera - ALWAYS WITH OVERSCAN
+            Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
+            Dim LiveModePollCount As Integer = 0
+            LED_update(tsslLED_reading, True)
+            If M.DB.StreamMode = eStreamMode.SingleFrame Then
+                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                LED_update(tsslLED_capture, False)
+            Else
+                Dim LiveModeReady As UInteger = UInteger.MaxValue
+                Do
+                    LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
+                    LiveModePollCount += 1
+                    DE()
+                Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
+            End If
+            LED_update(tsslLED_reading, False)
+            RunningCaptureInfo.ObsEnd = Now
+            EndTimeStamps.Add(RunningCaptureInfo.ObsEnd)
+
+            Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
+            LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
+            LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
+            M.DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & " x)")
+
+            'Remove overscan - do NOT run if an ROI is set
+            Dim SingleStatCalc As New AstroNET.Statistics(M.DB.IPP)
+            SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(M.DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
+            If M.DB.RemoveOverscan = True And M.DB.ROISet = False Then
+                Dim NoOverscan(CInt(EffArea.Width - 1), CInt(EffArea.Height - 1)) As UInt16
+                Dim Status_GetROI As cIntelIPP.IppStatus = M.DB.IPP.Copy(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, NoOverscan, CInt(EffArea.X), CInt(EffArea.Y), CInt(EffArea.Width), CInt(EffArea.Height))
+                Dim Status_SetData As cIntelIPP.IppStatus = M.DB.IPP.Copy(NoOverscan, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, 0, 0, NoOverscan.GetUpperBound(0) + 1, NoOverscan.GetUpperBound(1) + 1)
+                If Status_GetROI <> cIntelIPP.IppStatus.NoErr Or Status_SetData <> cIntelIPP.IppStatus.NoErr Then
+                    LogError("Overscan removal FAILED")
                 End If
-                M.DB.Stopper.Stamp("GetQHYCCDMemLength & pinning")
+            End If
+            RunningCaptureInfo.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1
+            RunningCaptureInfo.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2
+            M.DB.Stopper.Stamp("ChangeAspect")
 
-                'Read image data from camera - ALWAYS WITH OVERSCAN
-                Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
-                Dim LiveModePollCount As Integer = 0
-                LED_update(tsslLED_reading, True)
-                If M.DB.StreamMode = eStreamMode.SingleFrame Then
-                    CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
-                    LED_update(tsslLED_capture, False)
-                Else
-                    Dim LiveModeReady As UInteger = UInteger.MaxValue
-                    Do
-                        LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
-                        LiveModePollCount += 1
-                        DE()
-                    Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
-                End If
-                LED_update(tsslLED_reading, False)
-                RunningCaptureInfo.ObsEnd = Now
-                EndTimeStamps.Add(RunningCaptureInfo.ObsEnd)
+            'Software binning - if > 1 data type is moved from UInt16 to UInt32
+            If M.DB.SoftwareBinning > 1 Then
+                SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data = ImageProcessing.Binning(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.SoftwareBinning)
+                SingleStatCalc.Reset_UInt16()
+            End If
 
-                Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
-                LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
-                LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
-                M.DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & " x)")
+            'Infinit stack (for focus quality estimation)
+            If M.DB.StackAll = True Then
+                Dim AsUInt32(,) As UInt32 = {}
+                M.DB.IPP.Convert(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, AsUInt32)
+                M.DB.IPP.Add(AsUInt32, InfinitBuffer)
+                M.DB.IPP.Copy(InfinitBuffer, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data)
+                SingleStatCalc.Reset_UInt16()
+            End If
 
-                'Remove overscan - do NOT run if an ROI is set
-                Dim SingleStatCalc As New AstroNET.Statistics(M.DB.IPP)
-                SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data = ChangeAspectIPP(M.DB.IPP, CamRawBuffer, CInt(Captured_W), CInt(Captured_H))      'only convert flat byte buffer to UInt16 matrix data
-                If M.DB.RemoveOverscan = True And M.DB.ROISet = False Then
-                    Dim NoOverscan(CInt(EffArea.Width - 1), CInt(EffArea.Height - 1)) As UInt16
-                    Dim Status_GetROI As cIntelIPP.IppStatus = M.DB.IPP.Copy(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, NoOverscan, CInt(EffArea.X), CInt(EffArea.Y), CInt(EffArea.Width), CInt(EffArea.Height))
-                    Dim Status_SetData As cIntelIPP.IppStatus = M.DB.IPP.Copy(NoOverscan, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, 0, 0, NoOverscan.GetUpperBound(0) + 1, NoOverscan.GetUpperBound(1) + 1)
-                    If Status_GetROI <> cIntelIPP.IppStatus.NoErr Or Status_SetData <> cIntelIPP.IppStatus.NoErr Then
-                        LogError("Overscan removal FAILED")
-                    End If
-                End If
-                RunningCaptureInfo.NAXIS1 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS1
-                RunningCaptureInfo.NAXIS2 = SingleStatCalc.DataProcessor_UInt16.ImageData(0).NAXIS2
-                M.DB.Stopper.Stamp("ChangeAspect")
+            If M.DB.StarSearch = True Then
+                Dim ROICenter As Point = ImageProcessing.BrightStarDetect(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.StarSearch_Blur, M.DB.StarSearch_Blur)
+                M.DB.ROI = AdjustAndCorrectROI(ROICenter, M.DB.StarSearch_ROI, M.DB.StarSearch_ROI)
+                CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(M.DB.CamHandle, CUInt(M.DB.ROI.X), CUInt(M.DB.ROI.Y), CUInt(M.DB.ROI.Width \ M.DB.HardwareBinning), CUInt(M.DB.ROI.Height \ M.DB.HardwareBinning)))
+                M.DB.StarSearch = False
+            End If
 
-                'Software binning - if > 1 data type is moved from UInt16 to UInt32
-                If M.DB.SoftwareBinning > 1 Then
-                    SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data = ImageProcessing.Binning(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.SoftwareBinning)
-                    SingleStatCalc.Reset_UInt16()
-                End If
+            '================================================================================
+            'RETRIGGER CAPTURE
+            '================================================================================
 
-                'Infinit stack (for focus quality estimation)
-                If M.DB.StackAll = True Then
-                    Dim AsUInt32(,) As UInt32 = {}
-                    M.DB.IPP.Convert(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, AsUInt32)
-                    M.DB.IPP.Add(AsUInt32, InfinitBuffer)
-                    M.DB.IPP.Copy(InfinitBuffer, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data)
-                    SingleStatCalc.Reset_UInt16()
-                End If
+            Dim LastCaptureInfo As cSingleCaptureInfo = RunningCaptureInfo
+            If (CaptureLoopCount < M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
+                RunningCaptureInfo = StartExposure(CUInt(CaptureLoopCount + 1), FilterActive)
+            End If
 
-                '================================================================================
-                'RETRIGGER CAPTURE
-                '================================================================================
+            '================================================================================
+            'STATISTICS AND PLOTTING
+            '================================================================================
 
-                Dim LastCaptureInfo As cSingleCaptureInfo = RunningCaptureInfo
-                If (CaptureLoopCount < M.DB.CaptureCount) And (M.DB.StopFlag = False) Then
-                    RunningCaptureInfo = StartExposure(CUInt(CaptureLoopCount + 1), FilterActive, Chip_Pixel)
-                End If
+            'FPS calculation
+            If EndTimeStamps.Count > 2 Then
+                Dim ThisDuration As Double = (EndTimeStamps(EndTimeStamps.Count - 1) - EndTimeStamps(EndTimeStamps.Count - 2)).TotalSeconds
+                TotalCaptureTime += ThisDuration
+                tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureLoopCount / TotalCaptureTime, "0.0") & " FPS"
+            End If
 
-                '================================================================================
-                'STATISTICS AND PLOTTING
-                '================================================================================
+            'Calculate statistics
+            Dim SingleStat As New AstroNET.Statistics.sStatistics
+            If (M.DB.StatMono = True) Or (M.DB.StatColor = True) Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataFixFloat)
+            SingleStat.MonoStatistics_Int.Width = LastCaptureInfo.NAXIS1 : SingleStat.MonoStatistics_Int.Height = LastCaptureInfo.NAXIS2
 
-                'FPS calculation
-                If EndTimeStamps.Count > 2 Then
-                    Dim ThisDuration As Double = (EndTimeStamps(EndTimeStamps.Count - 1) - EndTimeStamps(EndTimeStamps.Count - 2)).TotalSeconds
-                    TotalCaptureTime += ThisDuration
-                    tsmiFPSIndicator.Text = Format(1 / ThisDuration, "0.0") & " FPS, mean: " & Format(CaptureLoopCount / TotalCaptureTime, "0.0") & " FPS"
-                End If
+            LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat)
+            M.DB.Stopper.Stamp("Statistics - calc")
 
-                'Calculate statistics
-                Dim SingleStat As New AstroNET.Statistics.sStatistics
-                If M.DB.CalcStatistics = True Then SingleStat = SingleStatCalc.ImageStatistics(SingleStatCalc.DataFixFloat)
-                SingleStat.MonoStatistics_Int.Width = LastCaptureInfo.NAXIS1 : SingleStat.MonoStatistics_Int.Height = LastCaptureInfo.NAXIS2
-
-                LoopStat = AstroNET.Statistics.CombineStatistics(SingleStat.DataMode, SingleStat, LoopStat)
-                M.DB.Stopper.Stamp("Statistics - calc")
-
-                'Display statistics
-                Dim DisplaySumStat As Boolean = False
-                If DB_PlotAndText.Prop.Log_ClearStat = True Then RTFGen.Clear()
-                If M.DB.CaptureCount > 1 And DB_PlotAndText.Prop.Log_ClearStat = True Then DisplaySumStat = True
-                Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(True, True, DB_PlotAndText.Prop.BayerPatternNames)
-                Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(True, True, DB_PlotAndText.Prop.BayerPatternNames)
-                If IsNothing(SingleStatReport) = False Then
-                    RTFGen.AddEntry("Capture #" & LastCaptureInfo.CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
-                    For Idx As Integer = 0 To SingleStatReport.Count - 1
-                        Dim Line As String = SingleStatReport(Idx)
+            'Display statistics
+            Dim DisplaySumStat As Boolean = False
+            If M.Report.Prop.Log_ClearStat = True Then RTFGen.Clear()
+            If M.DB.CaptureCount > 1 And M.Report.Prop.Log_ClearStat = True Then DisplaySumStat = True
+            Dim SingleStatReport As List(Of String) = SingleStat.StatisticsReport(M.DB.StatMono, M.DB.StatColor, M.Report.Prop.BayerPatternNames)
+            Dim LoopStatReport As List(Of String) = LoopStat.StatisticsReport(M.DB.StatMono, M.DB.StatColor, M.Report.Prop.BayerPatternNames)
+            If IsNothing(SingleStatReport) = False Then
+                RTFGen.AddEntry("Capture #" & LastCaptureInfo.CaptureIdx.ValRegIndep & " statistics:", Drawing.Color.Black, True, True)
+                For Idx As Integer = 0 To SingleStatReport.Count - 1
+                    Dim Line As String = SingleStatReport(Idx)
                     If DisplaySumStat = True Then Line &= "|" & LoopStatReport(Idx).Substring(AstroNET.Statistics.sSingleChannelStatistics_Int.ReportHeaderLength + 1)
                     RTFGen.AddEntry(Line, Drawing.Color.Black, True, False)
-                    Next Idx
-                    RTFGen.ForceRefresh()
-                    DE()
+                Next Idx
+                RTFGen.ForceRefresh()
+                DE()
+            End If
+            M.DB.Stopper.Stamp("Statistics - text")
+
+            '================================================================================
+            'Plot histogram
+
+            'Set caption
+            Dim PlotTitle As New List(Of String)
+            PlotTitle.Add(M.DB.UsedCameraId.ToString)
+            PlotTitle.Add(RunningCaptureInfo.ExpTime.ToString.Trim & " s")
+            PlotTitle.Add("Gain " & RunningCaptureInfo.Gain.ToString.Trim)
+            PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), RunningCaptureInfo.FilterActive))
+            PlotTitle.Add("Temperature " & RunningCaptureInfo.ObsStartTemp.ToString.Trim & " °C")
+            M.Report.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
+            M.Report.Plot(M.DB.CaptureCount, SingleStat, LoopStat)
+
+            M.DB.Stopper.Stamp("Statistics - plot")
+
+            '================================================================================
+            'Display focus image if required
+            If M.DB.ShowLiveImage = True Then
+                Dim NewWindowRequired As Boolean = False
+                If IsNothing(FocusWindow) = True Then
+                    NewWindowRequired = True
+                Else
+                    If FocusWindow.Hoster.IsDisposed = True Then NewWindowRequired = True
                 End If
-                M.DB.Stopper.Stamp("Statistics - text")
-
-                '================================================================================
-                'Plot histogram
-
-                'Set caption
-                Dim PlotTitle As New List(Of String)
-                PlotTitle.Add(M.DB.UsedCameraId.ToString)
-                PlotTitle.Add(RunningCaptureInfo.ExpTime.ToString.Trim & " s")
-                PlotTitle.Add("Gain " & RunningCaptureInfo.Gain.ToString.Trim)
-                PlotTitle.Add("Filter " & [Enum].GetName(GetType(eFilter), RunningCaptureInfo.FilterActive))
-                PlotTitle.Add("Temperature " & RunningCaptureInfo.ObsStartTemp.ToString.Trim & " °C")
-                DB_PlotAndText.Plotter.SetCaptions(Join(PlotTitle.ToArray, ", "), "ADU value", "# of pixel")
-                DB_PlotAndText.Plot(M.DB.CaptureCount, SingleStat, LoopStat)
-
-                M.DB.Stopper.Stamp("Statistics - plot")
-
-                '================================================================================
-                'Display focus image if required
-                If M.DB.ShowLiveImage = True Then
-                    Dim NewWindowRequired As Boolean = False
-                    If IsNothing(FocusWindow) = True Then
-                        NewWindowRequired = True
-                    Else
-                        If FocusWindow.Hoster.IsDisposed = True Then NewWindowRequired = True
-                    End If
-                    If NewWindowRequired = True Then
-                        FocusWindow = New cImgForm
-                        FocusWindow.Show("Focus Window <" & SingleStatCalc.Dimensions & ">")
-                    End If
-                    Select Case SingleStatCalc.DataMode
-                        Case AstroNET.Statistics.eDataMode.UInt16
-                            FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
-                        Case AstroNET.Statistics.eDataMode.UInt32
-                            FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
-                    End Select
-                    M.DB.Stopper.Stamp("Focus window")
+                If NewWindowRequired = True Then
+                    FocusWindow = New cImgForm
+                    FocusWindow.Show("Focus Window <" & SingleStatCalc.Dimensions & ">")
                 End If
+                Select Case SingleStatCalc.DataMode
+                    Case AstroNET.Statistics.eDataMode.UInt16
+                        FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                    Case AstroNET.Statistics.eDataMode.UInt32
+                        FocusWindow.ShowData(SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, SingleStat.MonoStatistics_Int.Min.Key, SingleStat.MonoStatistics_Int.Max.Key)
+                End Select
+                M.DB.Stopper.Stamp("Focus window")
+            End If
 
-                '================================================================================
-                'Store image
+            '================================================================================
+            'Store image
 
-                If M.DB.StoreImage = True Then
+            If M.DB.StoreImage = True Then
 
-                    Dim Path As String = System.IO.Path.Combine(M.DB.StoragePath, DB_meta.GUID)
-                    If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
+                Dim Path As String = System.IO.Path.Combine(M.DB.StoragePath, M.Meta.GUID)
+                If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
 
-                    'Compose all FITS keyword entries and replace placeholders in filename ($EXP$, ...)
-                    Dim FileNameToWrite As String = M.DB.FileName
-                    Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(LastCaptureInfo, Pixel_Size, FileNameToWrite)
+                'Compose all FITS keyword entries and replace placeholders in filename ($EXP$, ...)
+                Dim FileNameToWrite As String = M.DB.FileName
+                Dim CustomElement As Dictionary(Of eFITSKeywords, Object) = GenerateFITSHeader(LastCaptureInfo, FileNameToWrite)
 
-                    'Generate final filename
-                    M.DB.LastStoredFile = MakeUnique(System.IO.Path.Combine(Path, FileNameToWrite & "." & M.DB.FITSExtension))
+                'Generate final filename
+                M.DB.LastStoredFile = MakeUnique(System.IO.Path.Combine(Path, FileNameToWrite & "." & M.DB.FITSExtension))
 
-                    'Store file and display if selected
-                    Select Case SingleStatCalc.DataMode
-                        Case AstroNET.Statistics.eDataMode.UInt16
-                            cFITSWriter.Write(M.DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
-                        Case AstroNET.Statistics.eDataMode.UInt32
-                            cFITSWriter.Write(M.DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, cFITSWriter.eBitPix.Int32, CustomElement)
-                    End Select
-                    If M.DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(M.DB.LastStoredFile)
+                'Store file and display if selected
+                Select Case SingleStatCalc.DataMode
+                    Case AstroNET.Statistics.eDataMode.UInt16
+                        cFITSWriter.Write(M.DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, CustomElement)
+                    Case AstroNET.Statistics.eDataMode.UInt32
+                        cFITSWriter.Write(M.DB.LastStoredFile, SingleStatCalc.DataProcessor_UInt32.ImageData(0).Data, cFITSWriter.eBitPix.Int32, CustomElement)
+                End Select
+                If M.DB.AutoOpenImage = True Then System.Diagnostics.Process.Start(M.DB.LastStoredFile)
 
-                End If
-                M.DB.Stopper.Stamp("Store image")
+            End If
+            M.DB.Stopper.Stamp("Store image")
 
-                If M.DB.StopFlag = True Then Exit For
+            If M.DB.StopFlag = True Then Exit For
 
-            Next CaptureLoopCount
+        Next CaptureLoopCount
 
         '================================================================================
         'Stop live mode if used
@@ -315,7 +314,7 @@ Partial Public Class MainForm
         '================================================================================
         'Display timing log
 
-        If M.DB.Log_Timing = True Then
+        If M.Meta.Log_Timing = True Then
             Log("--------------------------------------------------------------")
             Log("TIMING:")
             LogNoTime(M.DB.Stopper.GetLog)
@@ -366,7 +365,7 @@ Partial Public Class MainForm
             Dim TimePassed As Double = Double.NaN
             tspbProgress.Maximum = CInt(ExposureTime * 10)
             Do
-                GetTempState()
+                CCDTempOK()
                 System.Threading.Thread.Sleep(100)
                 TimePassed = (Now - ExpStart).TotalSeconds
                 If TimePassed < ExposureTime Then
@@ -382,19 +381,44 @@ Partial Public Class MainForm
         tsslProgress.Text = "---"
     End Sub
 
-    '''<summary>Calculate the size of the requested ROI.</summary>
+    '''<summary>Adjust the size of the requested ROI to the chip properties.</summary>
+    '''<param name="NewCenter">New center of the ROI to set.</param>
+    '''<param name="NewWidth">New width of the ROI.</param>
+    '''<param name="NewHeight">New height of the ROI.</param>
     '''<param name="Chip_Pixel">Size of the CCD ship [pixel].</param>
-    Private Function CalculateROI(ByVal Chip_Pixel As sSize_UInt) As System.Drawing.Rectangle
-        Dim ROIForCapture As New System.Drawing.Rectangle
-        With ROIForCapture
-            .X = M.DB.ROI.X
-            .Y = M.DB.ROI.Y
-            .Width = M.DB.ROI.Width
-            If (M.DB.ROI.X + M.DB.ROI.Width > Chip_Pixel.Width) Or (.Width = 0) Then .Width = CInt(Chip_Pixel.Width - M.DB.ROI.X)
-            .Height = M.DB.ROI.Height
-            If (M.DB.ROI.Y + M.DB.ROI.Height > Chip_Pixel.Height) Or (.Height = 0) Then .Height = CInt(Chip_Pixel.Height - M.DB.ROI.Y)
-        End With
+    Private Function AdjustAndCorrectROI(ByVal NewCenter As Point, ByVal NewWidth As Integer, ByVal NewHeight As Integer) As System.Drawing.Rectangle
+        M.DB.ROI = New Rectangle(NewCenter.X - ((NewWidth - 1) \ 2), NewCenter.Y - ((NewHeight - 1) \ 2), NewWidth, NewHeight)
+        Return AdjustAndCorrectROI()
+    End Function
+
+    '''<summary>Adjust the size of the requested ROI to the chip properties and return the correct value.</summary>
+    Private Function AdjustAndCorrectROI() As System.Drawing.Rectangle
+
+        Dim ROIForCapture As New System.Drawing.Rectangle(M.DB.ROI.X, M.DB.ROI.Y, M.DB.ROI.Width, M.DB.ROI.Height)
+
+        '1.) Auto-ROI for value 0
+        If ROIForCapture.Width <= 0 Then ROIForCapture.Width = CInt(M.Meta.Chip_Pixel.Width)
+        If ROIForCapture.Height <= 0 Then ROIForCapture.Height = CInt(M.Meta.Chip_Pixel.Height)
+
+        '2.) ROI size must be even
+        If ROIForCapture.Width Mod 2 <> 0 Then ROIForCapture.Width += 1
+        If ROIForCapture.Height Mod 2 <> 0 Then ROIForCapture.Height += 1
+
+        '3.) Ensure ROI fits the chip
+        If ROIForCapture.Width > M.Meta.Chip_Pixel.Width Then ROIForCapture.Width = CInt(M.Meta.Chip_Pixel.Width)
+        If ROIForCapture.Height > M.Meta.Chip_Pixel.Height Then ROIForCapture.Height = CInt(M.Meta.Chip_Pixel.Height)
+        If ROIForCapture.Width < 1 Then ROIForCapture.Width = 1
+        If ROIForCapture.Height < 1 Then ROIForCapture.Height = 1
+
+        '4.) Ensure ROI is within the chip
+        If ROIForCapture.X < 0 Then ROIForCapture.X = 0
+        If ROIForCapture.Y < 0 Then ROIForCapture.Y = 0
+        If ROIForCapture.X + ROIForCapture.Width > M.Meta.Chip_Pixel.Width Then ROIForCapture.X = CInt(M.Meta.Chip_Pixel.Width - ROIForCapture.Width)
+        If ROIForCapture.Y + ROIForCapture.Height > M.Meta.Chip_Pixel.Height Then ROIForCapture.Height = CInt(M.Meta.Chip_Pixel.Height - ROIForCapture.Height)
+
+        '5.) Return ROI
         Return ROIForCapture
+
     End Function
 
     '===============================================================================================
@@ -406,18 +430,6 @@ Partial Public Class MainForm
         Dim RetVal(TargetWidth - 1, TargetHeight - 1) As UInt16
         IntelIPP.Transpose(RawBuffer, RetVal)
         Return RetVal
-    End Function
-
-    '===============================================================================================
-    ' Utility functions
-    '===============================================================================================
-
-    Private Function BuildSDKVersion(ByRef Digits() As UInteger) As String
-        Dim RetVal As New List(Of String)
-        For Each Entry As UInteger In Digits
-            RetVal.Add(Entry.ValRegIndep)
-        Next Entry
-        Return Join(RetVal.ToArray, ".")
     End Function
 
     '===============================================================================================
@@ -459,7 +471,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub LogVerbose(ByVal Text As String)
-        If M.DB.Log_Verbose = True Then Log(Text)
+        If M.Meta.Log_Verbose = True Then Log(Text)
     End Sub
 
     Private Sub LogVerbose(ByVal Text As List(Of String))
@@ -565,7 +577,7 @@ Partial Public Class MainForm
 
         'Start WCF
         'netsh http add urlacl url=http://+:1250/ user=DESKTOP-I7\albusmw
-        DB_ServiceContract = New cDB_ServiceContract(M.DB, DB_meta)
+        DB_ServiceContract = New cDB_ServiceContract(M.DB, M.Meta)
         Dim WebServicePort As String = M.DB.INI.Get("Connections", "WebInterfacePort", "1250")
         If WebServicePort <> "0" Then
             Dim WebServiceAdr As String = "http://localhost:" & WebServicePort & "/"
@@ -577,7 +589,7 @@ Partial Public Class MainForm
         End If
 
         'Other objects
-        DB_PlotAndText.Plotter = New cZEDGraphService(zgcMain)
+        M.Report.Plotter = New cZEDGraphService(zgcMain)
         RefreshProperties()
 
         'Set toolstrip icons
@@ -590,8 +602,8 @@ Partial Public Class MainForm
 
         'Show DB
         pgMain.SelectedObject = M.DB
-        pgMeta.SelectedObject = DB_meta
-        pgPlotAndText.SelectedObject = DB_PlotAndText.Prop
+        pgMeta.SelectedObject = M.Meta
+        pgPlotAndText.SelectedObject = M.Report.Prop
 
     End Sub
 
@@ -601,7 +613,7 @@ Partial Public Class MainForm
 
     Private Sub tSetTemp_Tick(sender As Object, e As EventArgs) Handles tSetTemp.Tick
         If M.DB.CamHandle <> IntPtr.Zero Then
-            QHY.QHYCamera.ControlQHYCCDTemp(M.DB.CamHandle, M.DB.TargetTemp)
+            QHY.QHYCamera.ControlQHYCCDTemp(M.DB.CamHandle, M.DB.Temp_Target)
         End If
     End Sub
 
@@ -671,13 +683,12 @@ Partial Public Class MainForm
         tsbCapture_Click(tsbCapture, Nothing)
     End Sub
 
-    Private Sub FastLiveModeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FastLiveModeToolStripMenuItem.Click
+    Private Sub tsmiPreset_FastLive_Click(sender As Object, e As EventArgs) Handles tsmiPreset_FastLive.Click
         Dim ROISize As Integer = 100
         With M.DB
             .StreamMode = eStreamMode.LiveFrame
             .ExposureTime = 0.01
             .Gain = 20
-            .ROI = New Drawing.Rectangle((9600 \ 2) - ROISize, (6422 \ 2) - ROISize, 2 * ROISize, 2 * ROISize)
             .CaptureCount = Int32.MaxValue
             .StoreImage = False
             .DDR_RAM = False
@@ -685,10 +696,10 @@ Partial Public Class MainForm
             .FilterSlot = eFilter.Invalid
             .ShowLiveImage = True
         End With
-        With DB_meta
+        With M.Meta
             .Load10MicronDataAlways = False
         End With
-        With DB_PlotAndText.Prop
+        With M.Report.Prop
             .Log_ClearStat = True
         End With
         RefreshProperties()
@@ -717,8 +728,8 @@ Partial Public Class MainForm
     '''<summary>Refresh all property grid displays.</summary>
     Private Sub RefreshProperties()
         pgMain.SelectedObject = M.DB
-        pgMeta.SelectedObject = DB_meta
-        pgPlotAndText.SelectedObject = DB_PlotAndText.Prop
+        pgMeta.SelectedObject = M.Meta
+        pgPlotAndText.SelectedObject = M.Report.Prop
         DE()
     End Sub
 
@@ -776,7 +787,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsmiFile_ExploreCampaign_Click(sender As Object, e As EventArgs) Handles tsmiFile_ExploreCampaign.Click
-        Dim FolderToOpen As String = System.IO.Path.Combine(M.DB.StoragePath, DB_meta.GUID)
+        Dim FolderToOpen As String = System.IO.Path.Combine(M.DB.StoragePath, M.Meta.GUID)
         If System.IO.Directory.Exists(FolderToOpen) = True Then System.Diagnostics.Process.Start(FolderToOpen)
     End Sub
 
@@ -843,7 +854,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsmiNewGUID_Click(sender As Object, e As EventArgs) Handles tsmiNewGUID.Click
-        DB_meta.GUID = Format(Now, "yyyy_MM_dd_HH_mm_ss")
+        M.Meta.GUID = Format(Now, "yyyy_MM_dd_HH_mm_ss")
         RefreshProperties()
     End Sub
 
@@ -956,7 +967,7 @@ Partial Public Class MainForm
             CallOK(ZWO.ASICameraDll.ASIGetStartPos(CamHandle, StartPosX, StartPosY))
 
             'Prepare logging
-            Dim Path As String = System.IO.Path.Combine(M.DB.StoragePath, DB_meta.GUID)
+            Dim Path As String = System.IO.Path.Combine(M.DB.StoragePath, M.Meta.GUID)
             If System.IO.Directory.Exists(Path) = False Then System.IO.Directory.CreateDirectory(Path)
             Dim CSVLogPath As String = System.IO.Path.Combine(Path, "ZWO_Statisic_Log.csv")
             System.IO.File.WriteAllText(System.IO.Path.Combine(Path, "InitialLog.log"), tbLogOutput.Text)
@@ -1077,17 +1088,20 @@ Partial Public Class MainForm
                                         LogTiming("", Ticker)
 
                                         'Plot histogram
-                                        DB_PlotAndText.Plotter.Clear()
-                                        DB_PlotAndText.Plotter.PlotXvsY(DB_PlotAndText.Prop.BayerPattern(0), LoopStat.BayerHistograms_Int(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
-                                        DB_PlotAndText.Plotter.PlotXvsY(DB_PlotAndText.Prop.BayerPattern(1), LoopStat.BayerHistograms_Int(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
-                                        DB_PlotAndText.Plotter.PlotXvsY(DB_PlotAndText.Prop.BayerPattern(2), LoopStat.BayerHistograms_Int(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
-                                        DB_PlotAndText.Plotter.PlotXvsY(DB_PlotAndText.Prop.BayerPattern(3), LoopStat.BayerHistograms_Int(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
-                                        DB_PlotAndText.Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram_Int, New cZEDGraphService.sGraphStyle(Color.Black, 1))
-                                        DB_PlotAndText.Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
+                                        With M.Report
+                                            .Plotter.Clear()
+                                            .Plotter.PlotXvsY(.Prop.BayerPattern(0), LoopStat.BayerHistograms_Int(0, 0), New cZEDGraphService.sGraphStyle(Color.Red, 1))
+                                            .Plotter.PlotXvsY(.Prop.BayerPattern(1), LoopStat.BayerHistograms_Int(0, 1), New cZEDGraphService.sGraphStyle(Color.LightGreen, 1))
+                                            .Plotter.PlotXvsY(.Prop.BayerPattern(2), LoopStat.BayerHistograms_Int(1, 0), New cZEDGraphService.sGraphStyle(Color.DarkGreen, 1))
+                                            .Plotter.PlotXvsY(.Prop.BayerPattern(3), LoopStat.BayerHistograms_Int(1, 1), New cZEDGraphService.sGraphStyle(Color.Blue, 1))
+                                            .Plotter.PlotXvsY("Mono histo", LoopStat.MonochromHistogram_Int, New cZEDGraphService.sGraphStyle(Color.Black, 1))
+                                            .Plotter.ManuallyScaleXAxis(LoopStat.MonoStatistics_Int.Min.Key, LoopStat.MonoStatistics_Int.Max.Key)
 
-                                        DB_PlotAndText.Plotter.AutoScaleYAxisLog()
-                                        DB_PlotAndText.Plotter.GridOnOff(True, True)
-                                        DB_PlotAndText.Plotter.ForceUpdate()
+                                            .Plotter.AutoScaleYAxisLog()
+                                            .Plotter.GridOnOff(True, True)
+                                            .Plotter.ForceUpdate()
+                                        End With
+
 
                                         'Write image data
                                         If M.DB.StoreImage = True Then
@@ -1162,7 +1176,7 @@ Partial Public Class MainForm
         Return Process.GetCurrentProcess.PrivateMemorySize64 / 1048576
     End Function
 
-    Private Sub BiasCaptureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiSpeedTest.Click
+    Private Sub tsmiSpeedTest_Click(sender As Object, e As EventArgs) Handles tsmiSpeedTest.Click
         With M.DB
             .StreamMode = eStreamMode.LiveFrame
             .ExposureTime = 0.0001
@@ -1172,10 +1186,11 @@ Partial Public Class MainForm
             .DDR_RAM = False
             .ConfigAlways = False
             .FilterSlot = eFilter.Invalid
-            .CalcStatistics = False
+            .StatMono = False
+            .StatColor = False
             .RemoveOverscan = False
         End With
-        With DB_PlotAndText.Prop
+        With M.Report.Prop
             .Log_ClearStat = True
             .PlotSingleStatistics = False
             .PlotMeanStatistics = False
@@ -1193,12 +1208,11 @@ Partial Public Class MainForm
             .CaptureCount = 1000000
             .USBTraffic = 25
             .ExposureTime = 0.001
-            .CalcStatistics = True
             .ShowLiveImage = False
             .StoreImage = False
             .ConfigAlways = True
         End With
-        With DB_PlotAndText.Prop
+        With M.Report.Prop
             .PlotSingleStatistics = True
             .PlotMeanStatistics = True
         End With
@@ -1222,7 +1236,7 @@ Partial Public Class MainForm
     Private Sub tsmiGetAllXMLParameters_Click(sender As Object, e As EventArgs) Handles tsmiGetAllXMLParameters.Click
         Dim FileOut As New List(Of String)
         FileOut.AddRange(GetAllPropertyNames(M.DB.GetType))
-        FileOut.AddRange(GetAllPropertyNames(DB_meta.GetType))
+        FileOut.AddRange(GetAllPropertyNames(M.Meta.GetType))
         Dim XMLXMLParameterFile As String = System.IO.Path.Combine(M.DB.EXEPath, "AllXMLParameters.txt")
         System.IO.File.WriteAllLines(XMLXMLParameterFile, FileOut)
         Process.Start(XMLXMLParameterFile)
@@ -1235,6 +1249,19 @@ Partial Public Class MainForm
 
     End Sub
 
+    Private Sub tsmiPreset_SkipCooling_Click(sender As Object, e As EventArgs) Handles tsmiPreset_SkipCooling.Click
+        Dim ROISize As Integer = 100
+        With M.DB
+            .Temp_Target = .Temp_DoNotRun
+            .Temp_Tolerance = 2 * .Temp_DoNotRun
+            .Temp_StableTime = 0
+        End With
+        RefreshProperties()
+    End Sub
 
+    Private Sub MonoCameraToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MonoCameraToolStripMenuItem.Click
+        M.DB.StatColor = False
+
+    End Sub
 
 End Class

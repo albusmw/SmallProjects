@@ -61,9 +61,10 @@ Partial Class MainForm
         Me.GainVariationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiSpeedTest = New System.Windows.Forms.ToolStripMenuItem()
-        Me.FastLiveModeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPreset_FastLive = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPreset_SkipCooling = New System.Windows.Forms.ToolStripMenuItem()
         Me.TESTToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.USBTreeReaderToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
@@ -96,6 +97,7 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.MonoCameraToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -361,7 +363,7 @@ Partial Class MainForm
         '
         'PresetsToolStripMenuItem
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.FastLiveModeToolStripMenuItem, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem})
+        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSpeedTest, Me.tsmiPreset_FastLive, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem, Me.tsmiPreset_SkipCooling, Me.MonoCameraToolStripMenuItem})
         Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
         Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
         Me.PresetsToolStripMenuItem.Text = "Presets"
@@ -369,26 +371,32 @@ Partial Class MainForm
         'tsmiSpeedTest
         '
         Me.tsmiSpeedTest.Name = "tsmiSpeedTest"
-        Me.tsmiSpeedTest.Size = New System.Drawing.Size(168, 22)
+        Me.tsmiSpeedTest.Size = New System.Drawing.Size(180, 22)
         Me.tsmiSpeedTest.Text = "Speed test"
         '
-        'FastLiveModeToolStripMenuItem
+        'tsmiPreset_FastLive
         '
-        Me.FastLiveModeToolStripMenuItem.Name = "FastLiveModeToolStripMenuItem"
-        Me.FastLiveModeToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
-        Me.FastLiveModeToolStripMenuItem.Text = "Fast live mode"
+        Me.tsmiPreset_FastLive.Name = "tsmiPreset_FastLive"
+        Me.tsmiPreset_FastLive.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiPreset_FastLive.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(168, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
+        '
+        'tsmiPreset_SkipCooling
+        '
+        Me.tsmiPreset_SkipCooling.Name = "tsmiPreset_SkipCooling"
+        Me.tsmiPreset_SkipCooling.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiPreset_SkipCooling.Text = "Skip cooling"
         '
         'TESTToolStripMenuItem
         '
@@ -673,6 +681,12 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
+        'MonoCameraToolStripMenuItem
+        '
+        Me.MonoCameraToolStripMenuItem.Name = "MonoCameraToolStripMenuItem"
+        Me.MonoCameraToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.MonoCameraToolStripMenuItem.Text = "Mono camera"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -738,7 +752,7 @@ Partial Class MainForm
     Friend WithEvents ExposureTimeSeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents GainVariationToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents tsmiFile_TestWebInterface As Windows.Forms.ToolStripMenuItem
-    Friend WithEvents FastLiveModeToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tsmiPreset_FastLive As Windows.Forms.ToolStripMenuItem
     Friend WithEvents tbLogOutput As Windows.Forms.TextBox
     Friend WithEvents CenterROIToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents tcMain As Windows.Forms.TabControl
@@ -786,4 +800,6 @@ Partial Class MainForm
     Friend WithEvents tsslLED_init As ToolStripStatusLabel
     Friend WithEvents tsslTemperature As ToolStripStatusLabel
     Friend WithEvents tsmiFile_LoadSettings As ToolStripMenuItem
+    Friend WithEvents tsmiPreset_SkipCooling As ToolStripMenuItem
+    Friend WithEvents MonoCameraToolStripMenuItem As ToolStripMenuItem
 End Class
