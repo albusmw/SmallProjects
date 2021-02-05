@@ -1,45 +1,31 @@
 ﻿Option Explicit On
 Option Strict On
+Imports System.ComponentModel
 
 '''<summary>Form to run everything DLL and display some header information.</summary>
 Public Class frmFITSGrep
 
     Private WithEvents FITSGrepper As New cFITSGrepper
+    Private MyTable As New DataTable
+    Private WithEvents MyData As New BindingSource
 
     Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
-        CType(sender, Button).Enabled = False : DE()
-        FITSGrepper.Grep(tbRootFolder.Text, tbFilter.Text, dgvFiles)
-        tbOutput.Text &= Join(FITSGrepper.Report.ToArray, System.Environment.NewLine)
-        tspbMain.Value = 0
-        UpdateStatus(String.Empty)
-        CType(sender, Button).Enabled = True : DE()
-    End Sub
-
-    Private Sub RunAllFITSFilesParallel(ByVal QueryResults As List(Of String))
-        Dim FITSFilesHeaders As New Dictionary(Of String, Dictionary(Of eFITSKeywords, Object))
-        Parallel.For(0, QueryResults.Count, Sub(Idx)
-                                                Dim FileName As String = QueryResults(Idx)
-                                                Dim DataStartPos As Integer = -1
-                                                Dim Key As String = FileName.Trim
-                                                Dim AllCards As Dictionary(Of eFITSKeywords, Object) = (New cFITSHeaderParser(cFITSHeaderChanger.ParseHeader(Key, DataStartPos))).GetCardsAsDictionary
-                                                SyncLock FITSFilesHeaders
-                                                    FITSFilesHeaders.Add(Key, AllCards)
-                                                End SyncLock
-
-                                                SyncLock tspbMain
-                                                    'UpdateStatus("File " & (Idx + 1).ValRegIndep & "/" & QueryResults.Count.ValRegIndep & ": " & FileName)
-                                                    'tspbMain.Value += 1
-                                                End SyncLock
-                                            End Sub)
-    End Sub
-
-    Private Sub DE()
-        System.Windows.Forms.Application.DoEvents()
-    End Sub
-
-    Private Sub UpdateStatus(ByVal Text As String)
-        tsslMain.Text = Text
-        DE()
+        Dim MyButton As Button = CType(sender, Button)
+        If MyButton.Text = "Search" Then
+            MyButton.Text = "Stop"
+            FITSGrepper.StopFlag = False
+            FITSGrepper.Grep(tbRootFolder.Text, tbFilter.Text)
+            MyData.DataSource = FITSGrepper.GetDataTable
+            adgvMain.DataSource = MyData
+            adgvMain.SortASC(adgvMain.Columns(0))
+            'adgvMain.AutoResizeColumns()
+            tbOutput.Text &= Join(FITSGrepper.Report.ToArray, System.Environment.NewLine)
+            tspbMain.Value = 0
+            MyButton.Text = "Search"
+        Else
+            FITSGrepper.StopFlag = True
+            MyButton.Text = "Search"
+        End If
     End Sub
 
     Private Sub tbRootFolder_KeyUp(sender As Object, e As KeyEventArgs) Handles tbRootFolder.KeyUp
@@ -55,7 +41,31 @@ Public Class frmFITSGrep
             tsslProgress.Text = "---/---"
             tspbMain.Value = 0
         End If
-        UpdateStatus(FITSGrepper.Progress.Message)
+        tsslMessage.Text = FITSGrepper.Progress.Message
+        System.Windows.Forms.Application.DoEvents()
     End Sub
 
+    Private Sub adgvMain_FilterStringChanged(sender As Object, e As Zuby.ADGV.AdvancedDataGridView.FilterEventArgs) Handles adgvMain.FilterStringChanged
+        MyData.Filter = adgvMain.FilterString
+    End Sub
+
+    Private Sub adgvMain_SortStringChanged(sender As Object, e As Zuby.ADGV.AdvancedDataGridView.SortEventArgs) Handles adgvMain.SortStringChanged
+        MyData.Sort = adgvMain.SortString
+    End Sub
+
+    Private Sub adgvMain_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles adgvMain.CellContentClick
+        'If the file column is selected, open file if file exists
+        If adgvMain.Columns.Item(e.ColumnIndex).HeaderText = "FileName" Then
+            Dim FileName As String = CStr(adgvMain.SelectedCells.Item(0).Value)
+            If System.IO.File.Exists(FileName) Then Process.Start(FileName)
+        End If
+    End Sub
+
+    Private Sub tsmiFile_ResetFilter_Click(sender As Object, e As EventArgs) Handles tsmiFile_ResetFilter.Click
+        adgvMain.CleanFilter(True)
+    End Sub
+
+    Private Sub MyData_ListChanged(sender As Object, e As ListChangedEventArgs) Handles MyData.ListChanged
+        tsslSelectedFiles.Text = MyData.List.Count & " files filtered"
+    End Sub
 End Class

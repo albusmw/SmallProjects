@@ -30,3 +30,28 @@ Histo code:				https://pastebin.com/Wb0J48E1
 
 - frmImageDisplay:		* Nicht nur percentage, sondern direkt Wert eingebbar machen für cut-off percentage
                         * Anzeigen wieviele Pixel im Range sind 
+
+
+Missing FITS keywords:
+from C:\Users\albusmw\Dropbox\Astro\!WORK\Andreas Gutekunst - 1540_Hα
+SITELAT 
+SITELONG
+UT      
+XPIXELSZ
+CDELTM1 
+YPIXELSZ
+CDELTM2 
+FILTERS 
+CVF     
+READOUTT
+X1      
+Y1      
+X2      
+Y2      
+COMPRESS
+FOCAL   
+DIAMETER
+FOCUSPOS
+FOCUSTMP
+BITCAMPX
+STACKNB 
