@@ -79,47 +79,42 @@ Public Class cDB
     Public Property Inprint_FontSize As Integer = 24
 
     <ComponentModel.Category(Cat_Inprints)>
-    <ComponentModel.DisplayName("2) Station")>
+    <ComponentModel.DisplayName("2.) Station")>
     <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
     Public Property Inprint_station As String = "Sternwarte Holzkirchen"
 
     <ComponentModel.Category(Cat_FileSystem)>
-    <ComponentModel.DisplayName("1) Storage root")>
+    <ComponentModel.DisplayName("1.) Storage root")>
     <ComponentModel.DefaultValue("C:\DATA_IO\AllSky")>
     Public Property StorageRoot As String = "C:\DATA_IO\AllSky"
 
     <ComponentModel.Category(Cat_FileSystem)>
-    <ComponentModel.DisplayName("2) Default file name")>
+    <ComponentModel.DisplayName("2.) Default file name")>
     <ComponentModel.DefaultValue("AllSkyImage")>
     Public Property CurrentImageName As String = "AllSkyImage"
 
     <ComponentModel.Category(Cat_FileSystem)>
-    <ComponentModel.DisplayName("3.1) Save as JPG")>
+    <ComponentModel.DisplayName("3.1.) Save as JPG")>
     <ComponentModel.DefaultValue(True)>
     Public Property SaveAsJPG As Boolean = True
 
     <ComponentModel.Category(Cat_FileSystem)>
-    <ComponentModel.DisplayName("3.2) Save as PNG")>
+    <ComponentModel.DisplayName("3.2.) Save as PNG")>
     <ComponentModel.DefaultValue(False)>
     Public Property SaveAsPNG As Boolean = False
 
     <ComponentModel.Category(Cat_FileSystem)>
-    <ComponentModel.DisplayName("4) Save grayscales as indexed")>
+    <ComponentModel.DisplayName("4.) Save grayscales as indexed")>
     <ComponentModel.DefaultValue(True)>
     Public Property SaveIndexedGrayscale As Boolean = True
 
     <ComponentModel.Category(Cat_Misc)>
-    <ComponentModel.DisplayName("1) FFMPEG EXE path")>
-    <ComponentModel.DefaultValue("C:\BIN\ffmpeg-4.3.1-essentials_build\bin\ffmpeg.exe")>
-    Public Property FFMPEGEXE As String = "C:\BIN\ffmpeg-4.3.1-essentials_build\bin\ffmpeg.exe"
-
-    <ComponentModel.Category(Cat_Misc)>
-    <ComponentModel.DisplayName("2) Station latitude")>
+    <ComponentModel.DisplayName("1.) Station latitude")>
     <ComponentModel.DefaultValue(47.878355)>
     Public Property Station_Latitude As Double = 47.878355
 
     <ComponentModel.Category(Cat_Misc)>
-    <ComponentModel.DisplayName("3) Station longitude")>
+    <ComponentModel.DisplayName("2.) Station longitude")>
     <ComponentModel.DefaultValue(11.691598)>
     Public Property Station_Longitude As Double = 11.691598
 

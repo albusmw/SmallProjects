@@ -56,25 +56,25 @@ Public Class MainForm
     '''<summary>Storage for a simple stack processing.</summary>
     Private StackingStatistics(,) As Ato.cSingleValueStatistics
 
-    Private Sub tsmiOpenFile_Click(sender As Object, e As EventArgs) Handles tsmiOpenFile.Click
+    Private Sub tsmiFile_Open_Click(sender As Object, e As EventArgs) Handles tsmiFile_Open.Click
         ofdMain.Filter = "FIT(s) files (FIT/FITS/FTS)|*.FIT;*.FITS;*.FTS"
         If ofdMain.ShowDialog <> DialogResult.OK Then Exit Sub
         For Each File As String In ofdMain.FileNames
-            LoadFile(File)
+            LoadFile(File, CurrentData)
         Next File
     End Sub
 
     '''<summary>Load the given file.</summary>
     '''<param name="FileName">File to read in.</param>
     '''<returns>Position where the data start.</returns>
-    Private Function LoadFile(ByVal FileName As String) As Integer
+    Private Function LoadFile(ByVal FileName As String, ByRef Container As AstroNET.Statistics) As Integer
 
         Dim FileNameOnly As String = System.IO.Path.GetFileName(FileName)
         Dim Stopper As New cStopper
         Dim FITSReader As New cFITSReader
         Dim DataStartPos As Integer = 0
 
-        CurrentData = New AstroNET.Statistics(DB.IPP)
+        Container = New AstroNET.Statistics(DB.IPP)
 
         Running()
 
@@ -101,12 +101,12 @@ Public Class MainForm
         '=========================================================================================================
         'Read the FITS data
 
-        CurrentData.ResetAllProcessors()
+        Container.ResetAllProcessors()
         Select Case LastFITSHeader.BitPix
             Case 8
-                CurrentData.DataProcessor_UInt16.ImageData(0).Data = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
+                Container.DataProcessor_UInt16.ImageData(0).Data = FITSReader.ReadInUInt8(FileName, DB.UseIPP)
             Case 16
-                With CurrentData.DataProcessor_UInt16
+                With Container.DataProcessor_UInt16
                     .ImageData(0).Data = FITSReader.ReadInUInt16(FileName, DB.UseIPP, DB.ForceDirect)
                     If LastFITSHeader.NAXIS3 > 1 Then
                         For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
@@ -116,9 +116,9 @@ Public Class MainForm
                     End If
                 End With
             Case 32
-                CurrentData.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, DB.UseIPP)
+                Container.DataProcessor_Int32.ImageData = FITSReader.ReadInInt32(FileName, DB.UseIPP)
             Case -32
-                With CurrentData.DataProcessor_Float32
+                With Container.DataProcessor_Float32
                     .ImageData(0).Data = FITSReader.ReadInFloat32(FileName, DB.UseIPP)
                     If LastFITSHeader.NAXIS3 > 1 Then
                         For Idx As Integer = 1 To LastFITSHeader.NAXIS3 - 1
@@ -135,7 +135,8 @@ Public Class MainForm
 
         '=========================================================================================================
         'Calculate the statistics
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+
+        CalculateStatistics(Container, DB.BayerPatternNames, CurrentStatistics)
         Stopper.Stamp(FileNameOnly & ": Statistics")
 
         'Record statistics
@@ -152,7 +153,7 @@ Public Class MainForm
         If DB.Stacking = True Then
             'Init new
             If IsNothing(StackingStatistics) = True Then
-                ReDim StackingStatistics(CurrentData.NAXIS1 - 1, CurrentData.NAXIS2 - 1)
+                ReDim StackingStatistics(Container.NAXIS1 - 1, Container.NAXIS2 - 1)
                 For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                     For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
                         StackingStatistics(Idx1, Idx2) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
@@ -161,18 +162,18 @@ Public Class MainForm
                 Next Idx1
             End If
             'Add up statistics if dimension is matching
-            If StackingStatistics.GetUpperBound(0) = CurrentData.NAXIS1 - 1 And StackingStatistics.GetUpperBound(1) = CurrentData.NAXIS2 - 1 Then
+            If StackingStatistics.GetUpperBound(0) = Container.NAXIS1 - 1 And StackingStatistics.GetUpperBound(1) = Container.NAXIS2 - 1 Then
                 Select Case LastFITSHeader.BitPix
                     Case 8, 16
                         For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                             For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
-                                StackingStatistics(Idx1, Idx2).AddValue(CurrentData.DataProcessor_UInt16.ImageData(0).Data(Idx1, Idx2))
+                                StackingStatistics(Idx1, Idx2).AddValue(Container.DataProcessor_UInt16.ImageData(0).Data(Idx1, Idx2))
                             Next Idx2
                         Next Idx1
                     Case 32
                         For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                             For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
-                                StackingStatistics(Idx1, Idx2).AddValue(CurrentData.DataProcessor_Int32.ImageData(Idx1, Idx2))
+                                StackingStatistics(Idx1, Idx2).AddValue(Container.DataProcessor_Int32.ImageData(Idx1, Idx2))
                             Next Idx2
                         Next Idx1
                 End Select
@@ -196,34 +197,34 @@ Public Class MainForm
     End Function
 
     '''<summary>Run the statistics calcuation.</summary>
-    Private Sub CalculateStatistics(ByVal DataMode As AstroNET.Statistics.sStatistics.eDataMode, ByVal ChannelNames As List(Of String))
+    Private Sub CalculateStatistics(ByRef Container As AstroNET.Statistics, ByVal ChannelNames As List(Of String), ByRef Stat As AstroNET.Statistics.sStatistics)
         Dim Indent As String = "  "
         'Calculate statistics
-        CurrentStatistics = CurrentData.ImageStatistics(DataMode)
+        Stat = Container.ImageStatistics(Container.DataFixFloat)
         'Set width and height values
-        If DataMode = AstroNET.Statistics.sStatistics.eDataMode.Fixed Then
-            CurrentStatistics.MonoStatistics_Int.Width = CurrentData.NAXIS1
-            CurrentStatistics.MonoStatistics_Int.Height = CurrentData.NAXIS2
+        If Container.DataFixFloat = AstroNET.Statistics.sStatistics.eDataMode.Fixed Then
+            Stat.MonoStatistics_Int.Width = Container.NAXIS1
+            Stat.MonoStatistics_Int.Height = Container.NAXIS2
             For BayerIdx1 As Integer = 0 To 1
                 For BayerIdx2 As Integer = 0 To 1
-                    CurrentStatistics.BayerStatistics_Int(BayerIdx1, BayerIdx2).Width = CurrentData.NAXIS1 \ 2
-                    CurrentStatistics.BayerStatistics_Int(BayerIdx1, BayerIdx2).Height = CurrentData.NAXIS2 \ 2
+                    Stat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Width = Container.NAXIS1 \ 2
+                    Stat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Height = Container.NAXIS2 \ 2
                 Next BayerIdx2
             Next BayerIdx1
         Else
-            CurrentStatistics.MonoStatistics_Float32.Width = CurrentData.NAXIS1
-            CurrentStatistics.MonoStatistics_Float32.Height = CurrentData.NAXIS2
-            CurrentStatistics.MonoStatistics_Int.Height = CurrentData.NAXIS2
+            Stat.MonoStatistics_Float32.Width = Container.NAXIS1
+            Stat.MonoStatistics_Float32.Height = Container.NAXIS2
+            Stat.MonoStatistics_Int.Height = Container.NAXIS2
             For BayerIdx1 As Integer = 0 To 1
                 For BayerIdx2 As Integer = 0 To 1
-                    CurrentStatistics.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Width = CurrentData.NAXIS1 \ 2
-                    CurrentStatistics.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Height = CurrentData.NAXIS2 \ 2
+                    Stat.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Width = Container.NAXIS1 \ 2
+                    Stat.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Height = Container.NAXIS2 \ 2
                 Next BayerIdx2
             Next BayerIdx1
         End If
         'Log statistics
         Log("Statistics:")
-        Log(Indent, CurrentStatistics.StatisticsReport(DB.MonoStatistics, DB.BayerStatistics, ChannelNames).ToArray())
+        Log(Indent, Stat.StatisticsReport(DB.MonoStatistics, DB.BayerStatistics, ChannelNames).ToArray())
         Log(New String("="c, 109))
     End Sub
 
@@ -242,31 +243,33 @@ Public Class MainForm
         With CurrentStatistics
             'Get the histogram data from mono histo
             Text.Add("MONO:")
-            If .MonochromHistogram_Int.ContainsKey(HistKey) Then
-                Dim ValuesAbove As UInt64 = .MonochromHistogram_Int_ValuesAbove(HistKey)
-                Text.Add(Indent & (100 * (X / .MonoStatistics_Int.Max.Key)).ValRegIndep("0.00") & " % of MAX")
-                Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")
-                Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
-                Text.Add(Indent & (100 * (ValuesAbove / .MonoStatistics_Int.Samples)).ValRegIndep("0.00") & " % are greater")
+            If Not IsNothing(.MonochromHistogram_Int) Then
+                If .MonochromHistogram_Int.ContainsKey(HistKey) Then
+                    Dim ValuesAbove As UInt64 = .MonochromHistogram_Int_ValuesAbove(HistKey)
+                    Text.Add(Indent & (100 * (X / .MonoStatistics_Int.Max.Key)).ValRegIndep("0.00") & " % of MAX")
+                    Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")
+                    Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
+                    Text.Add(Indent & (100 * (ValuesAbove / .MonoStatistics_Int.Samples)).ValRegIndep("0.00") & " % are greater")
+                End If
+                'Get the histogram data from Text "G1[1,0]"
+                For HIdx0 As Integer = 0 To 1
+                    For HIdx1 As Integer = 0 To 1
+                        Text.Add("BAYER[" & HIdx0.ValRegIndep & ":" & HIdx1.ValRegIndep & "]:")
+                        If .BayerHistograms_Int_Present(HIdx0, HIdx1, HistKey) Then
+                            Dim ValuesAbove As UInt64 = .BayerHistograms_Int_ValuesAbove(HIdx0, HIdx1, HistKey)
+                            Text.Add(Indent & (100 * (X / .BayerStatistics_Int(HIdx0, HIdx1).Max.Key)).ValRegIndep("0.00") & " % of MAX")                'percentage of maximum value
+                            Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")                                        'percentage of UInt16 range
+                            Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
+                            Text.Add(Indent & (100 * (ValuesAbove / .BayerStatistics_Int(HIdx0, HIdx1).Samples)).ValRegIndep("0.00") & " % are greater")
+                        Else
+                            Text.Add(Indent & "-----")
+                            Text.Add(Indent & "-----")
+                            Text.Add(Indent & "-----")
+                            Text.Add(Indent & "-----")
+                        End If
+                    Next HIdx1
+                Next HIdx0
             End If
-            'Get the histogram data from Text "G1[1,0]"
-            For HIdx0 As Integer = 0 To 1
-                For HIdx1 As Integer = 0 To 1
-                    Text.Add("BAYER[" & HIdx0.ValRegIndep & ":" & HIdx1.ValRegIndep & "]:")
-                    If .BayerHistograms_Int_Present(HIdx0, HIdx1, HistKey) Then
-                        Dim ValuesAbove As UInt64 = .BayerHistograms_Int_ValuesAbove(HIdx0, HIdx1, HistKey)
-                        Text.Add(Indent & (100 * (X / .BayerStatistics_Int(HIdx0, HIdx1).Max.Key)).ValRegIndep("0.00") & " % of MAX")                'percentage of maximum value
-                        Text.Add(Indent & (100 * (X / UInt16.MaxValue)).ValRegIndep("0.00") & " % of UInt16")                                        'percentage of UInt16 range
-                        Text.Add(Indent & ValuesAbove.ValRegIndep & " values are greater")
-                        Text.Add(Indent & (100 * (ValuesAbove / .BayerStatistics_Int(HIdx0, HIdx1).Samples)).ValRegIndep("0.00") & " % are greater")
-                    Else
-                        Text.Add(Indent & "-----")
-                        Text.Add(Indent & "-----")
-                        Text.Add(Indent & "-----")
-                        Text.Add(Indent & "-----")
-                    End If
-                Next HIdx1
-            Next HIdx0
         End With
         tbDetails.Text = Join(Text.ToArray, System.Environment.NewLine)
         Return Curve
@@ -410,7 +413,7 @@ Public Class MainForm
         With My.Application
             If .CommandLineArgs.Count > 0 Then
                 Dim FileName As String = .CommandLineArgs.Item(0)
-                If System.IO.File.Exists(FileName) Then LoadFile(FileName)
+                If System.IO.File.Exists(FileName) Then LoadFile(FileName, CurrentData)
             End If
         End With
 
@@ -478,20 +481,24 @@ Public Class MainForm
     Private Sub DD_DropOccured(Files() As String) Handles DD.DropOccured
         'Handle drag-and-drop for all dropped FIT(s) files
         For Each File As String In Files
-            If System.IO.Path.GetExtension(File).ToUpper.StartsWith(".FIT") Then LoadFile(File)
+            If System.IO.Path.GetExtension(File).ToUpper.StartsWith(".FIT") Then LoadFile(File, CurrentData)
         Next File
     End Sub
 
-    Private Sub WriteTestDataToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles WriteTestDataToolStripMenuItem1.Click
+    Private Sub tsmiTest_WriteTestData_Click(sender As Object, e As EventArgs) Handles tsmiTest_WriteTestData.Click
         cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS")
         cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") ': Process.Start("FITS_BitPix16.FITS")
         cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") ': Process.Start("FITS_BitPix32.FITS")
         cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") ': Process.Start("FITS_BitPix32f.FITS")
         cFITSWriter.WriteTestFile_Float64("FITS_BitPix64f.FITS") : Process.Start("FITS_BitPix64f.FITS")
+        cFITSWriter.WriteTestFile_UInt16_Cross(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_mono.fits"))
+        cFITSWriter.WriteTestFile_UInt16_Cross_RGB(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_rgb.fits"))
+        cFITSWriter.WriteTestFile_UInt16_XYIdent(System.IO.Path.Combine(DB.MyPath, "UInt16_XYIdent.fits"))
+        Process.Start(DB.MyPath)
         'MsgBox("OK")
     End Sub
 
-    Private Sub tsmiOpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiOpenLastFile.Click
+    Private Sub tsmiFile_OpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiFile_OpenLastFile.Click
         If System.IO.File.Exists(LastFile) = True Then
             Try
                 Process.Start(LastFile)
@@ -563,7 +570,7 @@ Public Class MainForm
         Return True
     End Function
 
-    Private Sub RowAndColumnStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RowAndColumnStatisticsToolStripMenuItem.Click
+    Private Sub RowAndColumnStatisticsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_RowColStat.Click
 
         Running()
 
@@ -759,7 +766,7 @@ Public Class MainForm
             Next BayerIdx2
         Next BayerIdx1
 
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+        CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         Idle()
 
     End Sub
@@ -825,7 +832,7 @@ Public Class MainForm
     Private Sub tsmiStretch_Click(sender As Object, e As EventArgs) Handles tsmiStretch.Click
         Running()
         ImageProcessing.MakeHistoStraight(CurrentData.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+        CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         Idle()
     End Sub
 
@@ -841,7 +848,7 @@ Public Class MainForm
         DE()
     End Sub
 
-    Private Sub tsmiAnalysisPlot_ADUQuant_Click(sender As Object, e As EventArgs) Handles tsmiAnalysisPlot_ADUQuant.Click
+    Private Sub tsmiAnalysisPlot_ADUQuant_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_Plot_ADUQuant.Click
         Dim Disp As New cZEDGraphForm
         Dim PlotData As Generic.Dictionary(Of Long, UInt64) = AstroNET.Statistics.GetQuantizationHisto(CurrentStatistics.MonochromHistogram_Int)
         Dim XAxis As Double() = PlotData.Keys.ToDouble
@@ -994,11 +1001,11 @@ Public Class MainForm
         JNowDec = X.DECApparent
     End Sub
 
-    Private Sub FITSGrepToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiFITSGrep.Click
+    Private Sub tsmiFile_FITSGrep_Click(sender As Object, e As EventArgs) Handles tsmiFile_FITSGrep.Click
         Dim X As New frmFITSGrep : X.Show()
     End Sub
 
-    Private Sub ASCOMDynamicallyToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ASCOMDynamicallyToolStripMenuItem.Click
+    Private Sub tsmiTest_ASCOMDyn_Click(sender As Object, e As EventArgs) Handles tsmiTest_ASCOMDyn.Click
         'Working but NOVAS31 does not ...
         Dim Astrometry As Object = System.Reflection.Assembly.Load("ASCOM.Astrometry").CreateInstance("ASCOM.Astrometry.Transform.Transform")
         Dim dynamicType As Type = Astrometry.GetType
@@ -1011,11 +1018,11 @@ Public Class MainForm
         Dim DecJ2000 As Double = CDbl(dynamicType.GetProperty("DecJ2000").GetValue(Astrometry))
     End Sub
 
-    Private Sub ClearStatisticsMemoryToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearStatisticsMemoryToolStripMenuItem.Click
+    Private Sub tsmiFile_ClearStatMem_Click(sender As Object, e As EventArgs) Handles tsmiFile_ClearStatMem.Click
         AllFiles.Clear()
     End Sub
 
-    Private Sub FocusToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FocusToolStripMenuItem.Click
+    Private Sub tsmiTest_Focus_Click(sender As Object, e As EventArgs) Handles tsmiTest_Focus.Click
         Dim Plot_X As New List(Of Double)
         Dim Plot_Y As New List(Of Double)
         For Each FileName As String In AllFiles.Keys
@@ -1042,14 +1049,7 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FITSTestFilesToolStripMenuItem.Click
-        cFITSWriter.WriteTestFile_UInt16_Cross(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_mono.fits"))
-        cFITSWriter.WriteTestFile_UInt16_Cross_RGB(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_rgb.fits"))
-        cFITSWriter.WriteTestFile_UInt16_XYIdent(System.IO.Path.Combine(DB.MyPath, "UInt16_XYIdent.fits"))
-        Process.Start(DB.MyPath)
-    End Sub
-
-    Private Sub MultifileAreaCompareToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MultifileAreaCompareToolStripMenuItem.Click
+    Private Sub tsmiAnalysis_MultiAreaCompare_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_MultiAreaCompare.Click
 
         Dim TopVal As Dictionary(Of UInt16, List(Of Point)) = Nothing 'SingleStatCalc.DataProcessor_UInt16.GetAbove(CUShort(LastStat.MonoStatistics_Int.Percentile(99)))
 
@@ -1097,14 +1097,14 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub tsmiOpenRecentFiles_Click(sender As Object, e As EventArgs) Handles tsmiOpenRecentFiles.Click
+    Private Sub tsmiFile_OpenRecent_Click(sender As Object, e As EventArgs) Handles tsmiFile_OpenRecent.Click
         With LastOpenedFiles
             .Files.Clear()
             For Each File As String In DB.GetRecentFiles
                 .Files.Add(File)
             Next File
             If .ShowDialog = DialogResult.OK Then
-                LoadFile(.SelectedFile)
+                LoadFile(.SelectedFile, CurrentData)
             End If
         End With
     End Sub
@@ -1172,7 +1172,7 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub NEFReadingToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NEFReadingToolStripMenuItem.Click
+    Private Sub tsmiTest_ReadNEFFile_Click(sender As Object, e As EventArgs) Handles tsmiTest_ReadNEFFile.Click
 
         Dim Reader As New cNEFReader
         Reader.Read("\\192.168.100.10\astro\2020_07_20_NeoWise\DSC_0286.NEF")
@@ -1205,7 +1205,7 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub tsmiUseOpenCV_Click(sender As Object, e As EventArgs) Handles tsmiUseOpenCV.Click
+    Private Sub tsmiTestCode_UseOpenCV_Click(sender As Object, e As EventArgs) Handles tsmiTestCode_UseOpenCV.Click
 
         'https://shimat.github.io/opencvsharp_docs/html/d69c29a1-7fb1-4f78-82e9-79be971c3d03.htm
 
@@ -1235,11 +1235,9 @@ Public Class MainForm
 
     End Sub
 
-    ''' <summary>
-    ''' Extracts keypoints by C++-style code (cv::StarDetector)
-    ''' </summary>
-    ''' <param name="src"></param>
-    ''' <param name="dst"></param>
+    '''<summary>Extracts keypoints by C++-style code (cv::StarDetector)</summary>
+    '''<param name="src"></param>
+    '''<param name="dst"></param>
     Private Sub CppStyleStarDetector(ByVal src As OpenCvSharp.Mat, ByVal dst As OpenCvSharp.Mat)
 
         Dim detector As OpenCvSharp.XFeatures2D.StarDetector = OpenCvSharp.XFeatures2D.StarDetector.Create()
@@ -1264,12 +1262,12 @@ Public Class MainForm
             Exit Sub
         Else
             cOpenCvSharp.MedianBlur(CurrentData.DataProcessor_UInt16.ImageData(0).Data, KSize)
-            CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+            CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
             If DB.AutoOpenStatGraph = True Then PlotStatistics(LastFile, CurrentStatistics)
         End If
     End Sub
 
-    Private Sub DisplayImageToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DisplayImageToolStripMenuItem.Click
+    Private Sub tsmiDisplayImage_Click(sender As Object, e As EventArgs) Handles tsmiDisplayImage.Click
         Dim ImageDisplay As New frmImageDisplay
         ImageDisplay.FileToDisplay = LastFile
         ImageDisplay.Show()
@@ -1281,7 +1279,7 @@ Public Class MainForm
         ImageDisplay.GenerateDisplayImage()
     End Sub
 
-    Private Sub CoordsForALADINCallToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CoordsForALADINCallToolStripMenuItem.Click
+    Private Sub tsmiTools_ALADINCoords_Click(sender As Object, e As EventArgs) Handles tsmiTools_ALADINCoords.Click
 
         Dim FileToRun As String = LastFile
 
@@ -1301,12 +1299,16 @@ Public Class MainForm
         JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
 
         Dim AladinCall As String = Ato.AstroCalc.FormatHMS(File_RA_J2000) & " " & Ato.AstroCalc.Format360Degree(File_Dec_J2000)
+
+        'Possible resolvers:
+        'http://tdc-www.harvard.edu/astro.image.html
+
         Clipboard.Clear()
         Clipboard.SetText(AladinCall)
 
     End Sub
 
-    Private Sub tsmiManualColorBalancer_Click(sender As Object, e As EventArgs) Handles tsmiManualColorBalancer.Click
+    Private Sub tsmiAnalysis_ManualColorBalancer_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_ManualColorBalancer.Click
         Dim X As New frmManualAdjust
         X.Show()
     End Sub
@@ -1453,7 +1455,7 @@ Public Class MainForm
         End Select
         Log(Stopper.Stamp("Vignette - correction"))
 
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+        CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         Idle()
 
     End Sub
@@ -1537,7 +1539,7 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub tsmiAnalysisPlot_Replot_Click(sender As Object, e As EventArgs) Handles tsmiAnalysisPlot_Replot.Click
+    Private Sub tsmiAnalysisPlot_Replot_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_Plot_Replot.Click
         Running()
         PlotStatistics(LastFile, CurrentStatistics)
         Idle()
@@ -1627,7 +1629,7 @@ Public Class MainForm
         Log(ReplaceLog)
         Log("Fixed " & HotPixel.Count & " pixel")
 
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+        CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         Idle()
 
     End Sub
@@ -1667,23 +1669,188 @@ Public Class MainForm
 
         'Replace original image data with new image data
         DB.IPP.Copy(NewImage, CurrentData.DataProcessor_UInt16.ImageData(0).Data)
-        CalculateStatistics(CurrentData.DataFixFloat, DB.BayerPatternNames)
+        CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         If DB.AutoOpenStatGraph = True Then PlotStatistics(LastFile, CurrentStatistics)
         Idle()
 
     End Sub
 
     Private Sub tsb_Open_Click(sender As Object, e As EventArgs) Handles tsb_Open.Click
-        tsmiOpenFile_Click(Nothing, Nothing)
+        tsmiFile_Open_Click(Nothing, Nothing)
     End Sub
 
     Private Sub tsb_Display_Click(sender As Object, e As EventArgs) Handles tsb_Display.Click
-        DisplayImageToolStripMenuItem_Click(Nothing, Nothing)
+        tsmiDisplayImage_Click(Nothing, Nothing)
     End Sub
 
-    Private Sub tsmiAstroBinSearch_Click(sender As Object, e As EventArgs) Handles tsmiAstroBinSearch.Click
+    Private Sub tsmiFile_AstroBinSearch_Click(sender As Object, e As EventArgs) Handles tsmiFile_AstroBinSearch.Click
         Dim AstroBinSearch As New frmAstroBinSearch
         AstroBinSearch.Show()
     End Sub
 
+    Private Sub tsmiFile_Compress2nd_Click(sender As Object, e As EventArgs) Handles tsmiFile_Compress2nd.Click
+
+        'Try to compress a 2nd image by searching all different pixel and only coding them
+        'Date are too different, so this may not work out ...
+
+        'Load 2nd file
+        Dim Comp2ndFile As AstroNET.Statistics = Nothing
+        ofdMain.Filter = "FIT(s) files (FIT/FITS/FTS)|*.FIT;*.FITS;*.FTS"
+        If ofdMain.ShowDialog <> DialogResult.OK Then Exit Sub
+        LoadFile(ofdMain.FileNames(0), Comp2ndFile)
+
+        'Check if files match together
+        If Comp2ndFile.DataProcessor_UInt16.ImageData(0).NAXIS1 <> CurrentData.DataProcessor_UInt16.ImageData(0).NAXIS1 Then
+            MsgBox("NAXIS1 missmatch")
+            Exit Sub
+        End If
+        If Comp2ndFile.DataProcessor_UInt16.ImageData(0).NAXIS2 <> CurrentData.DataProcessor_UInt16.ImageData(0).NAXIS2 Then
+            MsgBox("NAXIS2 missmatch")
+            Exit Sub
+        End If
+
+        'Calculate difference data
+        Dim UInt32One As UInt32 = 1
+        Dim DiffCat As New Dictionary(Of Int32, UInt32)         'All found differences
+        Dim PixelDiff As Int32 = 0                              'Diff of the current pixel
+        Dim DiffPixelCount As UInt32 = 0                        'Number of different pixel
+        Dim TotalPixel As Long = CurrentData.DataProcessor_UInt16.ImageData(0).Length
+        With CurrentData.DataProcessor_UInt16.ImageData(0)
+            For Idx1 As Integer = 0 To .NAXIS1 - 1
+                For Idx2 As Integer = 0 To .NAXIS2 - 1
+                    PixelDiff = CInt(Comp2ndFile.DataProcessor_UInt16.ImageData(0).Data(Idx1, Idx2)) - CInt(CurrentData.DataProcessor_UInt16.ImageData(0).Data(Idx1, Idx2))
+                    If PixelDiff <> 0 Then
+                        DiffPixelCount += UInt32One
+                        If Not DiffCat.ContainsKey(PixelDiff) Then
+                            DiffCat.Add(PixelDiff, 1)
+                        Else
+                            DiffCat(PixelDiff) += UInt32One
+                        End If
+                    End If
+                Next Idx2
+            Next Idx1
+        End With
+
+        'Sort by value
+        DiffCat = DiffCat.SortDictionary()
+
+        'Output log
+        Log("Number of pixel different: " & DiffPixelCount.ValRegIndep)
+        Log("Number of pixel identical: " & (TotalPixel - DiffPixelCount).ValRegIndep)
+        Log("Different pixel levels: " & DiffCat.Count.ValRegIndep)
+
+        'Generate verbose Excel file
+        With sfdMain
+            .Filter = "EXCEL file (*.xlsx)|*.xlsx"
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+
+        Using workbook As New ClosedXML.Excel.XLWorkbook
+
+            '1.) Generate data
+            Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Difference histogram")
+            Dim EntryPtr As Integer = 0
+            For Each Entry As Int32 In DiffCat.Keys
+                EntryPtr += 1
+                worksheet.Cell(EntryPtr, 1).InsertData(New Object() {Entry, DiffCat(Entry)}, True)
+            Next Entry
+            For Each col In worksheet.ColumnsUsed
+                col.AdjustToContents()
+            Next col
+
+            '2.) Save and open
+            Dim FileToGenerate As String = IO.Path.Combine(DB.MyPath, sfdMain.FileName)
+            workbook.SaveAs(FileToGenerate)
+            Process.Start(FileToGenerate)
+
+        End Using
+
+    End Sub
+
+    Private Sub tsmiAnalysis_RawFITSHeader_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_RawFITSHeader.Click
+        If System.IO.File.Exists(LastFile) Then
+            Dim FileIn As IO.FileStream = System.IO.File.OpenRead(LastFile)
+            Dim Lines As New List(Of String)
+            Dim ByteBuffer(cFITSReader.HeaderElementLength - 1) As Byte
+            For LineIdx As Integer = 1 To 100
+                FileIn.Read(ByteBuffer, 0, ByteBuffer.Length)
+                Lines.Add(System.Text.Encoding.UTF8.GetString(ByteBuffer))
+            Next LineIdx
+            Dim HeaderAsIs As New frmHeaderAsIs
+            HeaderAsIs.tbHeader.Text = Join(Lines.ToArray, System.Environment.NewLine)
+            HeaderAsIs.Show()
+        End If
+    End Sub
+
+    Private Sub tsmiAnalysis_FloatAsIntError_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_FloatAsIntError.Click
+        'Calculate if the data are "real" float or just int converted to float
+        If CurrentStatistics.DataMode = AstroNET.Statistics.sStatistics.eDataMode.Float Then
+            Dim ErrorEnergy As Double = 0.0
+            Dim Samples As ULong = 0
+            For Each Key As Single In CurrentStatistics.MonochromHistogram_Float32.Keys
+                Dim AsInt32 As Int32 = Convert.ToInt32(Key)
+                Samples += CurrentStatistics.MonochromHistogram_Float32(Key)
+                ErrorEnergy += Math.Abs((AsInt32 - Key) * CurrentStatistics.MonochromHistogram_Float32(Key))
+            Next Key
+            ErrorEnergy /= Samples
+            'Log statistics
+            Log("Float as int error: <" & ErrorEnergy.ValRegIndep & ">")
+            Log(New String("="c, 109))
+        End If
+    End Sub
+
+    Private Sub CloudWatcherCombinerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CloudWatcherCombinerToolStripMenuItem.Click
+
+        Dim Root As String = "C:\01_Daten\Wetterhistorie"
+        Dim FileName As String = "CloudWatcher.csv"
+
+        'Get all files
+        Dim AllFiles As New List(Of String)
+        For Each Folder As String In System.IO.Directory.GetDirectories(Root)
+            Dim SingleFile As String = System.IO.Path.Combine(Folder, FileName)
+            If System.IO.File.Exists(SingleFile) = True Then AllFiles.Add(SingleFile)
+        Next Folder
+        Console.WriteLine("Found <" & AllFiles.Count & "> files.")
+
+        'Max size file
+        Dim MaxSize As Long = -1
+        Dim MaxSizeFile As String = String.Empty
+        For Each SingleFile As String In AllFiles
+            Dim FileSize As Long = (New System.IO.FileInfo(SingleFile)).Length
+            If FileSize > MaxSize Then
+                MaxSize = FileSize
+                MaxSizeFile = SingleFile
+            End If
+        Next SingleFile
+        Console.WriteLine("Biggest file: <" & MaxSizeFile & ">")
+        Dim BiggestFile As Byte() = System.IO.File.ReadAllBytes(MaxSizeFile)
+
+        'Get all smaller files
+        For Each SingleFile As String In AllFiles
+            If SingleFile <> MaxSizeFile Then
+                Dim Smaller As Byte() = System.IO.File.ReadAllBytes(SingleFile)
+                Dim CanBeDeleted As Boolean = StartIsSame(BiggestFile, Smaller)
+                If CanBeDeleted Then
+                    System.IO.File.Delete(SingleFile)
+                    Console.WriteLine("Deleted <" & SingleFile & ">")
+                Else
+                    Console.WriteLine("DIFFERENT!")
+                End If
+            End If
+        Next SingleFile
+
+        Console.WriteLine("DONE.")
+        Console.ReadKey()
+    End Sub
+
+    Private Function StartIsSame(ByRef BiggerFile As Byte(), ByRef SmallerFile As Byte()) As Boolean
+        For Idx As Integer = 0 To SmallerFile.GetUpperBound(0)
+            If BiggerFile(Idx) <> SmallerFile(Idx) Then Return False
+        Next Idx
+        Return True
+    End Function
+
+    Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs)
+
+    End Sub
 End Class

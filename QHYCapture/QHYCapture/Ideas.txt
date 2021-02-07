@@ -5,3 +5,4 @@
 - ETA-Anzeige für längere Sequencen
 - Time-Out für Read-Funktion (wenn diese abstürzt ...); Mail an QHY zu dem Problem
 - Auto-Focus-Aid: ROI erst voll, dann Peak suchen für z.B. 10x10 Pixel, dann hier ROI setzen und evtl. noch Auto-Brightness
+- Statistic über den Overscan-Bereich

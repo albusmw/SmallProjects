@@ -399,17 +399,8 @@ Public Class Form1
     End Sub
 
     Private Sub JoinToVideoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles JoinToVideoToolStripMenuItem.Click
-        Dim FFMPEG As New ProcessStartInfo
-        With FFMPEG
-            .FileName = DB.FFMPEGEXE
-            .WorkingDirectory = System.IO.Path.GetDirectoryName(DB.FFMPEGEXE)
-            .Arguments = "-start_number 0 -f image2 -i " & DB.StorageRoot & "\AllSkyImage15.09.2020_%04d.jpg -codec:v libx264 C:\temp\output.mp4"
-            .UseShellExecute = True
-            .RedirectStandardError = False
-        End With
-        Dim Runner As Process = Process.Start(FFMPEG)
-        Runner.WaitForExit()
-        'MsgBox(Runner.StandardError.ReadToEnd)
+        Dim CreateVideo As New frmCreateVideo
+        CreateVideo.Show()
     End Sub
 
     Private Sub MyCaptureDefaultsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MyCaptureDefaultsToolStripMenuItem.Click
