@@ -7,32 +7,41 @@ Partial Public Class MainForm
     Private Delegate Sub InvokeDelegate()
 
     '''<summary>Execute an XML file sequence.</summary>
-    Private Sub RunXMLSequence(ByVal SpecFile As String, ByVal RunExposure As Boolean)
+    '''<param name="SpecFile">File to load specifications from.</param>
+    '''<param name="RunExposure">TRUE to run exposure sequence, FALSE for only load parameters.</param>
+    '''<returns>List of errors during sequence execution.</returns>
+    Private Function RunXMLSequence(ByVal SpecFile As String, ByVal RunExposure As Boolean) As List(Of String)
+        Dim RetVal As New List(Of String)
         Dim BoolTrue As New List(Of String)({"TRUE", "YES", "1"})
         Dim BindFlagsSet As Reflection.BindingFlags = Reflection.BindingFlags.Public Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.SetProperty
         'Reflect database
         Dim DB_Type As Type = M.DB.GetType
-        Dim DB_props As List(Of String) = GetAllPropertyNames(M.DB.GetType)
+        Dim DB_props As List(Of String) = GetAllPropertyNames(DB_Type)
         'Reflect meta database
         Dim DB_meta_Type As Type = M.Meta.GetType
-        Dim DB_meta_props As List(Of String) = GetAllPropertyNames(M.Meta.GetType)
+        Dim DB_meta_props As List(Of String) = GetAllPropertyNames(DB_meta_Type)
+        'Reflect meta database
+        Dim DB_report_Type As Type = M.Report.Prop.GetType
+        Dim DB_report_props As List(Of String) = GetAllPropertyNames(DB_report_Type)
         'Move over all exposure specifications in the file
         Dim SpecDoc As New Xml.XmlDocument
         Try
             SpecDoc.Load(SpecFile)
         Catch ex As Exception
-            MsgBox("XML error: [" & ex.Message & "]")
-            Exit Sub
+            RetVal.Add("XML error: [" & ex.Message & "]")
+            Return RetVal
         End Try
         For Each ExpNode As Xml.XmlNode In SpecDoc.SelectNodes("/sequence/exp")
             'Load all attributes from the file
             For Each ExpAttrib As Xml.XmlAttribute In ExpNode.Attributes
+                Dim PropName As String = ExpAttrib.Name
                 Dim PropType As Type = Nothing
                 Dim PropValue As Object = Nothing
                 'Get property type and value
                 Try
-                    If DB_props.Contains(ExpAttrib.Name) Then PropType = DB_Type.GetProperty(ExpAttrib.Name).PropertyType
-                    If DB_meta_props.Contains(ExpAttrib.Name) Then PropType = DB_meta_Type.GetProperty(ExpAttrib.Name).PropertyType
+                    If DB_props.Contains(PropName) Then PropType = DB_Type.GetProperty(PropName).PropertyType
+                    If DB_meta_props.Contains(PropName) Then PropType = DB_meta_Type.GetProperty(PropName).PropertyType
+                    If DB_report_props.Contains(PropName) Then PropType = DB_report_Type.GetProperty(PropName).PropertyType
                     Select Case PropType
                         Case GetType(Int32)
                             PropValue = CType(ExpAttrib.Value, Int32)
@@ -49,15 +58,28 @@ Partial Public Class MainForm
                             PropValue = [Enum].Parse(PropType, ExpAttrib.Value)
                     End Select
                 Catch ex As Exception
-                    'Do nothing ...
+                    RetVal.Add("Error processing property <" & PropName & ">: " & ex.Message)
                 End Try
                 If IsNothing(PropValue) = False Then
                     Try
-                        If DB_props.Contains(ExpAttrib.Name) Then DB_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, M.DB, New Object() {PropValue})
-                        If DB_meta_props.Contains(ExpAttrib.Name) Then DB_meta_Type.InvokeMember(ExpAttrib.Name, BindFlagsSet, Type.DefaultBinder, M.Meta, New Object() {PropValue})
+                        If DB_props.Contains(PropName) Then
+                            DB_Type.InvokeMember(PropName, BindFlagsSet, Type.DefaultBinder, M.DB, New Object() {PropValue})
+                        Else
+                            If DB_meta_props.Contains(PropName) Then
+                                DB_meta_Type.InvokeMember(PropName, BindFlagsSet, Type.DefaultBinder, M.Meta, New Object() {PropValue})
+                            Else
+                                If DB_report_props.Contains(PropName) Then
+                                    DB_report_Type.InvokeMember(PropName, BindFlagsSet, Type.DefaultBinder, M.Report.Prop, New Object() {PropValue})
+                                Else
+                                    RetVal.Add("Error processing property <" & PropName & ">: Property is not defined")
+                                End If
+                            End If
+                        End If
                     Catch ex As Exception
-                        Log("Failed for <" & ExpAttrib.Name & ">: " & ex.Message)
+                        RetVal.Add("Failed setting property <" & PropName & ">: " & ex.Message)
                     End Try
+                Else
+                    RetVal.Add("Error processing property <" & PropName & ">: Not value specified")
                 End If
             Next ExpAttrib
             RefreshProperties()
@@ -68,7 +90,8 @@ Partial Public Class MainForm
             If M.DB.StopFlag = True Then Exit For
         Next ExpNode
         If RunExposure Then CloseCamera()
-    End Sub
+        Return RetVal
+    End Function
 
     '''<summary>Get a list of all available property names.</summary>
     Private Function GetAllPropertyNames(ByRef TypeToReflect As Type) As List(Of String)
@@ -105,9 +128,7 @@ Partial Public Class MainForm
         End If
 
         'Temperature
-        If M.DB.Temp_Target <> M.DB.Temp_DoNotRun Then
-            SetTemperature()
-        End If
+        SetTemperature()
 
         'Load all parameter from the camera
         tsslMain.Text = "Taking capture " & CaptureIdx.ValRegIndep & "/" & M.DB.CaptureCount.ValRegIndep
@@ -279,8 +300,17 @@ Partial Public Class MainForm
 
     End Function
 
+    '''<summary>Returns tru if reasonable temeprature settings are configured..</summary>
+    Private Function TargetTempResonable() As Boolean
+        If M.DB.Temp_Target <= -100.0 Then Return False
+        If M.DB.Temp_Target >= 100.0 Then Return False
+        If M.DB.Temp_Tolerance >= 100.0 Then Return False
+        Return True
+    End Function
+
     '''<summary>Set the requested temperature.</summary>
-    Private Function SetTemperature() As Double
+    Private Sub SetTemperature()
+        If TargetTempResonable() = False Then Exit Sub
         LED_update(tsslLED_cooling, True)
         Dim TimeOutT As New Diagnostics.Stopwatch : TimeOutT.Reset() : TimeOutT.Start()
         Dim CurrentTemp As Double = Double.NaN
@@ -302,8 +332,7 @@ Partial Public Class MainForm
         End If
         M.DB.Stopper.Stamp("Set temperature")
         LED_update(tsslLED_cooling, False)
-        Return CurrentTemp
-    End Function
+    End Sub
 
     '''<summary>Get and display the requested temperature.</summary>
     Private Function CCDTempOK() As Boolean
