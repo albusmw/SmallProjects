@@ -416,4 +416,8 @@ Public Class Form1
         TakeImage(Never)
     End Sub
 
+    Private Sub tsmiFile_ClearLog_Click(sender As Object, e As EventArgs) Handles tsmiFile_ClearLog.Click
+        tbLog.Text = String.Empty
+    End Sub
+
 End Class

@@ -3,67 +3,84 @@ Option Strict On
 
 Public Class MainForm
 
+    '''<summary>Database for all properties.</summary>
     Private DB As New cDB
+    '''<summary>Database for all hardware related values.</summary>
     Private PWIValues As New cPWIValues
 
-    Private Sub btnGo_Click(sender As Object, e As EventArgs) Handles btnGo.Click
-        lbLog.Items.Clear()
-        Run()
-        pgValues.SelectedObject = PWIValues
-        pgValues.Refresh()
-    End Sub
+    '''<summary>Hardware communication interface.</summary>
+    Private WithEvents PWI_IO As New Ato.cPWI_IO
+    '''<summary>WCF interface.</summary>
+    Private WithEvents DB_ServiceContract As cDB_ServiceContract
+
+    '''<summary>COM interface - EFA.</summary>
+    Private EFA_ComPort As IO.Ports.SerialPort = Nothing
+    '''<summary>COM interface - DeltaT heater.</summary>
+    Private DeltaT_ComPort As IO.Ports.SerialPort = Nothing
 
     Private Sub Run()
+
+        lbLog.Items.Clear()
 
         Try
 
             '-----------------------------------------------------
             'Open COM ports
-            Dim EFA_ComPort As IO.Ports.SerialPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_EFA, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
-            EFA_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
-            EFA_ComPort.Handshake = IO.Ports.Handshake.None
-            EFA_ComPort.DtrEnable = True
-            Dim DeltaT_ComPort As IO.Ports.SerialPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_DeltaT, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
-            DeltaT_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
-            DeltaT_ComPort.Handshake = IO.Ports.Handshake.None
-            DeltaT_ComPort.DtrEnable = True
+            If IsNothing(EFA_ComPort) = True Then
+                EFA_ComPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_EFA, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
+                EFA_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
+                EFA_ComPort.Handshake = IO.Ports.Handshake.None
+                EFA_ComPort.DtrEnable = True
+            End If
+            If IsNothing(DeltaT_ComPort) = True Then
+                DeltaT_ComPort = My.Computer.Ports.OpenSerialPort(DB.COMPort_DeltaT, 19200, IO.Ports.Parity.None, 8, IO.Ports.StopBits.One)
+                DeltaT_ComPort.DiscardOutBuffer() : EFA_ComPort.DiscardInBuffer()
+                DeltaT_ComPort.Handshake = IO.Ports.Handshake.None
+                DeltaT_ComPort.DtrEnable = True
+            End If
+
+            '-----------------------------------------------------
+            'Execute pending commands
+            If DB.RunFocuserMove Then
+                DB.RunFocuserMove = False
+                MoveFocuser()
+            End If
 
             '=====================================================
             'Transmit
 
             'Position is correct ...
-            Dim Position As Integer = GetPosition(EFA_ComPort)
-            Log("Raw position reading: <" & Position & ">")
-            Log("   -> Decoded       : <" & Ato.PlaneWaveEFA.GetPositionMicrons(Position) & " µm>")
+            PWIValues.Focuser_Raw = PWI_IO.GetPosition(EFA_ComPort)
+            PWIValues.Focuser_um = PWI_IO.GetPositionMicrons(PWIValues.Focuser_Raw)
+            Log("Raw position reading: <" & PWIValues.Focuser_Raw & ">")
+            Log("   -> Decoded       : <" & PWIValues.Focuser_um & " µm>")
             LogSep("-"c)
 
             'GOTO over (focuser not moving any more) is correct ...
-            Log("GOTO over       : <" & GetGotoOver(EFA_ComPort) & ">")
+            Log("GOTO over       : <" & PWI_IO.GetGotoOver(EFA_ComPort) & ">")
             LogSep("-"c)
 
             'Temperature measurement is correct ...
             Dim Status As String = String.Empty
-            PWIValues.T_primary = GetEFATemp(EFA_ComPort, 0, Status)
+            PWIValues.T_primary = PWI_IO.GetEFATemp(EFA_ComPort, Ato.cPWI_IO.eAddr.TemperatureSensor, 0, Status)
             LogSep("-"c)
-            PWIValues.T_ambient = GetEFATemp(EFA_ComPort, 1, Status)
+            PWIValues.T_ambient = PWI_IO.GetEFATemp(EFA_ComPort, Ato.cPWI_IO.eAddr.TemperatureSensor, 1, Status)
             LogSep("-"c)
-            PWIValues.T_secondary = GetEFATemp(EFA_ComPort, 2, Status)
+            PWIValues.T_secondary = PWI_IO.GetEFATemp(EFA_ComPort, Ato.cPWI_IO.eAddr.TemperatureSensor, 2, Status)
             LogSep("-"c)
 
             'Fans set and get is correct
-            PWIValues.Fan = GetFans(EFA_ComPort)
-            LogSep("-"c)
-            Log("Set fans OFF    : <" & SetFans(EFA_ComPort, False) & ">")
-            LogSep("-"c)
-            PWIValues.Fan = GetFans(EFA_ComPort)
+            PWIValues.Fan = PWI_IO.GetFans(EFA_ComPort)
             LogSep("-"c)
 
             '-----------------------------------------------------
             'Close again
-            If IsNothing(EFA_ComPort) = False Then If EFA_ComPort.IsOpen Then EFA_ComPort.Close()
-            If IsNothing(DeltaT_ComPort) = False Then If DeltaT_ComPort.IsOpen Then DeltaT_ComPort.Close()
-            EFA_ComPort = Nothing
-            DeltaT_ComPort = Nothing
+            If DB.CloseAlways Then
+                If IsNothing(EFA_ComPort) = False Then If EFA_ComPort.IsOpen Then EFA_ComPort.Close()
+                If IsNothing(DeltaT_ComPort) = False Then If DeltaT_ComPort.IsOpen Then DeltaT_ComPort.Close()
+                EFA_ComPort = Nothing
+                DeltaT_ComPort = Nothing
+            End If
 
         Catch ex As TimeoutException
 
@@ -73,109 +90,26 @@ Public Class MainForm
 
         Log("======================================================")
 
+        pgValues.SelectedObject = PWIValues
+        pgValues.Refresh()
+
     End Sub
 
-    Private Function GetPosition(ByRef Port As IO.Ports.SerialPort) As Integer
-
-        Log("Running command <Get position> ...")
-        Ato.PlaneWaveEFA.PrepareCOM(Port)
-        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.MTR_GET_POS
-
-        Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
-
-        '-----------------------------------------------------
-        'Decode
-        Return Ato.PlaneWaveEFA.MTR_GET_POS_decode(AnswerBuffer)
-
-    End Function
-
-    Private Function GetGotoOver(ByRef Port As IO.Ports.SerialPort) As Boolean
-
-        Log("Running command <Get GOTO over> ...")
-        Ato.PlaneWaveEFA.PrepareCOM(Port)
-        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.MTR_GOTO_OVER
-
-        Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
-
-        '-----------------------------------------------------
-        'Decode
-        Return Ato.PlaneWaveEFA.MTR_GOTO_OVER_decode(AnswerBuffer)
-
-    End Function
-
-    Private Function GetEFATemp(ByRef Port As IO.Ports.SerialPort, ByVal Sensor As Byte, ByRef Status As String) As Double
-
-        Log("Running command <Get T of sensor " & Sensor.ToString.Trim & "> ...")
-        Ato.PlaneWaveEFA.PrepareCOM(Port)
-        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.TEMP_GET(Sensor)
-
-        Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
-
-        '-----------------------------------------------------
-        'Decode
-        Dim RetVal As Double = Ato.PlaneWaveEFA.TEMP_GET_decode(AnswerBuffer, Status)
-        Log("T[" & Sensor.ToString.Trim & "            : <" & RetVal & "> (" & Status & ")")
-        Return RetVal
-
-    End Function
-
-    Private Function GetFans(ByRef Port As IO.Ports.SerialPort) As Ato.PlaneWaveEFA.eOnOff
-
-        Log("Running command <Get Fans status> ...")
-        Ato.PlaneWaveEFA.PrepareCOM(Port)
-        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_GET
-
-        Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
-
-        '-----------------------------------------------------
-        'Decode
-        Dim RetVal As Ato.PlaneWaveEFA.eOnOff = Ato.PlaneWaveEFA.FANS_GET_decode(AnswerBuffer)
-        Log("Fans            : <" & RetVal & ">")
-        Return RetVal
-
-    End Function
-
-    Private Function SetFans(ByRef Port As IO.Ports.SerialPort, ByVal State As Boolean) As Boolean
-
-        Log("Running command <Set Fans status " & CStr(State) & "> ...")
-        Ato.PlaneWaveEFA.PrepareCOM(Port)
-        Dim CommandBuffer As Byte() = Ato.PlaneWaveEFA.FANS_SET(State)
-
-        Dim AnswerBuffer As Byte() = {}
-        Log(" -> Status: " & EFACommunication(Port, CommandBuffer, AnswerBuffer))
-
-        Return True
-
-    End Function
-
-    Private Function EFACommunication(ByRef EFAPort As IO.Ports.SerialPort, ByRef CommandBuffer As Byte(), ByRef AnswerBuffer As Byte()) As Boolean
-        LogWrite(CommandBuffer)
-        EFAPort.Write(CommandBuffer, 0, CommandBuffer.Length)
-        Dim RetVal As Boolean = Ato.PlaneWaveEFA.ValidateEcho(EFAPort, CommandBuffer)
-        AnswerBuffer = Ato.PlaneWaveEFA.ReadAnswer(EFAPort)
-        LogRead(AnswerBuffer)
-        Return RetVal
-    End Function
-
-
-    Private Sub LogWrite(ByRef Buffer As Byte())
-        If IsNothing(Buffer) = True Then
-            Log("  >> 0 byte")
-        Else
-            Log("  >> " & Ato.PlaneWaveEFA.AsHex(Buffer) & " (" & Buffer.Length.ToString.Trim & " byte)")
-        End If
+    '''<summary>Move focuser as configured in the properties.</summary>
+    Private Sub MoveFocuser()
+        Log("Move focuser +    : <" & PWI_IO.MoveFocuser(EFA_ComPort, CBool(IIf(DB.Focuser_SlewRate > 0, True, False)), CByte(Math.Abs(DB.Focuser_SlewRate))) & ">")
+        LogSep("-"c)
+        System.Threading.Thread.Sleep(DB.Focuser_SlewTime)
+        Log("Stop focuser +    : <" & PWI_IO.MoveFocuser(EFA_ComPort, True, 0) & ">")
+        LogSep("-"c)
     End Sub
 
-    Private Sub LogRead(ByRef Buffer As Byte())
-        If IsNothing(Buffer) = True Then
-            Log("  << 0 byte")
-        Else
-            Log("  << " & Ato.PlaneWaveEFA.AsHex(Buffer) & " (" & Buffer.Length.ToString.Trim & " byte)")
-        End If
+    Private Sub SetFan()
+
+        Log("Set fans OFF    : <" & PWI_IO.SetFans(EFA_ComPort, False) & ">")
+        LogSep("-"c)
+        PWIValues.Fan = PWI_IO.GetFans(EFA_ComPort)
+        LogSep("-"c)
 
     End Sub
 
@@ -193,7 +127,73 @@ Public Class MainForm
         Log(New String(Text, 80))
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        'Load INI
+        DB.INI.Load(DB.MyINI)
+
+        'Start WCF
+        InitWCF()
+
+        'Display database objects
+        pgMain.SelectedObject = DB
+        pgValues.SelectedObject = PWIValues
+
+    End Sub
+
+    Private Sub PWI_IO_Log(Message As String) Handles PWI_IO.Log
+        Log(Message)
+    End Sub
+
+    Private Sub PWI_IO_LogCOMIO(Message As String) Handles PWI_IO.LogCOMIO
+        If DB.LogComIO Then Log(20, Message)
+    End Sub
+
+    Private Sub tUpdater_Tick(sender As Object, e As EventArgs) Handles tUpdater.Tick
+        If DB.PollInterval > 0.0 Then
+            'Update poll interval
+            If tUpdater.Interval <> CInt(DB.PollInterval * 1000) Then
+                tUpdater.Interval = CInt(DB.PollInterval * 1000)
+            End If
+            'Read settings
+            Run()
+        End If
+    End Sub
+
+    '''<summary>Start the Windows Communication Foundation (WCF) interface.</summary>
+    Private Sub InitWCF()
+
+        'netsh http add urlacl url=http://+:1260/ user=DESKTOP-I7\albusmw
+        DB_ServiceContract = New cDB_ServiceContract(DB, PWIValues)
+        Dim WebServicePort As String = DB.INI.Get("Connections", "WebInterfacePort", "1260")
+        If WebServicePort <> "0" Then
+            Dim WebServiceAdr As String = "http://localhost:" & WebServicePort & "/"
+            DB.SetupWCF = New ServiceModel.Web.WebServiceHost(GetType(cDB_ServiceContract), New Uri(WebServiceAdr))
+            DB.serviceBehavior = DB.SetupWCF.Description.Behaviors.Find(Of ServiceModel.Description.ServiceDebugBehavior)
+            DB.serviceBehavior.HttpHelpPageEnabled = True
+            DB.serviceBehavior.IncludeExceptionDetailInFaults = True
+            DB.SetupWCF.Open()
+        End If
+
+    End Sub
+
+    Private Sub tsmiFile_OpenEXE_Click(sender As Object, e As EventArgs) Handles tsmiFile_OpenEXE.Click
+        Process.Start(DB.EXEPath)
+    End Sub
+
+    Private Sub tsmiFile_Exit_Click(sender As Object, e As EventArgs) Handles tsmiFile_Exit.Click
+        End
+    End Sub
+
+    Private Sub tsmiFile_WCF_Click(sender As Object, e As EventArgs) Handles tsmiFile_WCF.Click
+        System.Diagnostics.Process.Start("http://localhost:1260/GetParameterList")
+    End Sub
+
+    Private Sub tsmiRun_SingleQuery_Click(sender As Object, e As EventArgs) Handles tsmiRun_SingleQuery.Click
+        Run()
+    End Sub
+
+    Private Sub tsmiFile_CopyLog_Click(sender As Object, e As EventArgs) Handles tsmiFile_CopyLog.Click
         Dim CB As New List(Of String)
         For Each Entry As String In lbLog.Items
             CB.Add(Entry)
@@ -203,8 +203,8 @@ Public Class MainForm
         MsgBox("OK")
     End Sub
 
-    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
-        pgMain.SelectedObject = DB
-        pgValues.SelectedObject = PWIValues
+    Private Sub FocuserMoveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FocuserMoveToolStripMenuItem.Click
+        DB.RunFocuserMove = True
     End Sub
+
 End Class
