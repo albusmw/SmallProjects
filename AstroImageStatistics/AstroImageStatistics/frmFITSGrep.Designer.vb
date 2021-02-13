@@ -31,15 +31,17 @@ Partial Class frmFITSGrep
         Me.tspbMain = New System.Windows.Forms.ToolStripProgressBar()
         Me.tsslProgress = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslMessage = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsslSelectedFiles = New System.Windows.Forms.ToolStripStatusLabel()
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.adgvMain = New Zuby.ADGV.AdvancedDataGridView()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.tbFilter = New System.Windows.Forms.TextBox()
+        Me.tbFileFilter = New System.Windows.Forms.TextBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.msMain = New System.Windows.Forms.MenuStrip()
         Me.tsmiFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiFile_ResetFilter = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsslSelectedFiles = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.tbDirFilter = New System.Windows.Forms.TextBox()
         Me.ssMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -52,7 +54,7 @@ Partial Class frmFITSGrep
         'btnSearch
         '
         Me.btnSearch.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnSearch.Location = New System.Drawing.Point(915, 33)
+        Me.btnSearch.Location = New System.Drawing.Point(1209, 33)
         Me.btnSearch.Name = "btnSearch"
         Me.btnSearch.Size = New System.Drawing.Size(105, 24)
         Me.btnSearch.TabIndex = 0
@@ -74,7 +76,7 @@ Partial Class frmFITSGrep
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.tbRootFolder.Location = New System.Drawing.Point(79, 36)
         Me.tbRootFolder.Name = "tbRootFolder"
-        Me.tbRootFolder.Size = New System.Drawing.Size(584, 20)
+        Me.tbRootFolder.Size = New System.Drawing.Size(782, 20)
         Me.tbRootFolder.TabIndex = 2
         Me.tbRootFolder.Text = "\\192.168.100.10\astro"
         '
@@ -86,16 +88,16 @@ Partial Class frmFITSGrep
         Me.tbOutput.Multiline = True
         Me.tbOutput.Name = "tbOutput"
         Me.tbOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbOutput.Size = New System.Drawing.Size(1005, 109)
+        Me.tbOutput.Size = New System.Drawing.Size(1299, 149)
         Me.tbOutput.TabIndex = 3
         Me.tbOutput.WordWrap = False
         '
         'ssMain
         '
         Me.ssMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tspbMain, Me.tsslProgress, Me.tsslMessage, Me.tsslSelectedFiles})
-        Me.ssMain.Location = New System.Drawing.Point(0, 504)
+        Me.ssMain.Location = New System.Drawing.Point(0, 652)
         Me.ssMain.Name = "ssMain"
-        Me.ssMain.Size = New System.Drawing.Size(1032, 22)
+        Me.ssMain.Size = New System.Drawing.Size(1326, 22)
         Me.ssMain.TabIndex = 4
         Me.ssMain.Text = "StatusStrip1"
         '
@@ -117,6 +119,12 @@ Partial Class frmFITSGrep
         Me.tsslMessage.Size = New System.Drawing.Size(22, 17)
         Me.tsslMessage.Text = "---"
         '
+        'tsslSelectedFiles
+        '
+        Me.tsslSelectedFiles.Name = "tsslSelectedFiles"
+        Me.tsslSelectedFiles.Size = New System.Drawing.Size(77, 17)
+        Me.tsslSelectedFiles.Text = "0 files filtered"
+        '
         'scMain
         '
         Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -133,8 +141,8 @@ Partial Class frmFITSGrep
         'scMain.Panel2
         '
         Me.scMain.Panel2.Controls.Add(Me.tbOutput)
-        Me.scMain.Size = New System.Drawing.Size(1005, 427)
-        Me.scMain.SplitterDistance = 314
+        Me.scMain.Size = New System.Drawing.Size(1299, 575)
+        Me.scMain.SplitterDistance = 422
         Me.scMain.TabIndex = 6
         '
         'adgvMain
@@ -152,27 +160,27 @@ Partial Class frmFITSGrep
         Me.adgvMain.RowHeadersVisible = False
         Me.adgvMain.ShowEditingIcon = False
         Me.adgvMain.ShowRowErrors = False
-        Me.adgvMain.Size = New System.Drawing.Size(1005, 314)
+        Me.adgvMain.Size = New System.Drawing.Size(1299, 422)
         Me.adgvMain.TabIndex = 0
         '
         'Label2
         '
         Me.Label2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(669, 40)
+        Me.Label2.Location = New System.Drawing.Point(963, 40)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(32, 13)
+        Me.Label2.Size = New System.Drawing.Size(51, 13)
         Me.Label2.TabIndex = 7
-        Me.Label2.Text = "Filter:"
+        Me.Label2.Text = "File Filter:"
         '
-        'tbFilter
+        'tbFileFilter
         '
-        Me.tbFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbFilter.Location = New System.Drawing.Point(707, 36)
-        Me.tbFilter.Name = "tbFilter"
-        Me.tbFilter.Size = New System.Drawing.Size(201, 20)
-        Me.tbFilter.TabIndex = 8
-        Me.tbFilter.Text = "*"
+        Me.tbFileFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.tbFileFilter.Location = New System.Drawing.Point(1020, 36)
+        Me.tbFileFilter.Name = "tbFileFilter"
+        Me.tbFileFilter.Size = New System.Drawing.Size(182, 20)
+        Me.tbFileFilter.TabIndex = 8
+        Me.tbFileFilter.Text = "*"
         '
         'tUpdate
         '
@@ -183,7 +191,7 @@ Partial Class frmFITSGrep
         Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFile})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
-        Me.msMain.Size = New System.Drawing.Size(1032, 24)
+        Me.msMain.Size = New System.Drawing.Size(1326, 24)
         Me.msMain.TabIndex = 9
         Me.msMain.Text = "MenuStrip1"
         '
@@ -197,21 +205,36 @@ Partial Class frmFITSGrep
         'tsmiFile_ResetFilter
         '
         Me.tsmiFile_ResetFilter.Name = "tsmiFile_ResetFilter"
-        Me.tsmiFile_ResetFilter.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiFile_ResetFilter.Size = New System.Drawing.Size(134, 22)
         Me.tsmiFile_ResetFilter.Text = "Reset filters"
         '
-        'tsslSelectedFiles
+        'Label3
         '
-        Me.tsslSelectedFiles.Name = "tsslSelectedFiles"
-        Me.tsslSelectedFiles.Size = New System.Drawing.Size(77, 17)
-        Me.tsslSelectedFiles.Text = "0 files filtered"
+        Me.Label3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(867, 40)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(12, 13)
+        Me.Label3.TabIndex = 10
+        Me.Label3.Text = "\"
+        '
+        'tbDirFilter
+        '
+        Me.tbDirFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.tbDirFilter.Location = New System.Drawing.Point(885, 36)
+        Me.tbDirFilter.Name = "tbDirFilter"
+        Me.tbDirFilter.Size = New System.Drawing.Size(72, 20)
+        Me.tbDirFilter.TabIndex = 11
+        Me.tbDirFilter.Text = "*"
         '
         'frmFITSGrep
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1032, 526)
-        Me.Controls.Add(Me.tbFilter)
+        Me.ClientSize = New System.Drawing.Size(1326, 674)
+        Me.Controls.Add(Me.tbDirFilter)
+        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.tbFileFilter)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.scMain)
         Me.Controls.Add(Me.ssMain)
@@ -246,7 +269,7 @@ Partial Class frmFITSGrep
     Friend WithEvents tsslMessage As ToolStripStatusLabel
     Friend WithEvents scMain As SplitContainer
     Friend WithEvents Label2 As Label
-    Friend WithEvents tbFilter As TextBox
+    Friend WithEvents tbFileFilter As TextBox
     Friend WithEvents tUpdate As Timer
     Friend WithEvents tsslProgress As ToolStripStatusLabel
     Friend WithEvents adgvMain As Zuby.ADGV.AdvancedDataGridView
@@ -254,4 +277,6 @@ Partial Class frmFITSGrep
     Friend WithEvents tsmiFile As ToolStripMenuItem
     Friend WithEvents tsmiFile_ResetFilter As ToolStripMenuItem
     Friend WithEvents tsslSelectedFiles As ToolStripStatusLabel
+    Friend WithEvents Label3 As Label
+    Friend WithEvents tbDirFilter As TextBox
 End Class

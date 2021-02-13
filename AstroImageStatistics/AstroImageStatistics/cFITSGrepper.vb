@@ -52,7 +52,7 @@ Public Class cFITSGrepper
     '''<param name="RootFolder">Folder to start search in.</param>
     '''<param name="Filter">Filter to apply.</param>
     '''<param name="dgvFiles">DataGridView to fill with the results.</param>
-    Public Sub Grep(ByVal RootFolder As String, ByVal Filter As String)
+    Public Sub Grep(ByVal RootFolder As String, ByVal DirFilter As String, ByVal FileFilter As String)
 
         'Init
         Report.Clear()
@@ -64,13 +64,13 @@ Public Class cFITSGrepper
         'Run search - everything
         ReportSave(New sProgress("Running Everything search ..."))
         Dim AllFoundFiles As New List(Of String)
-        AllFoundFiles.AddRange(Everything.GetSearchResult(Chr(34) & RootFolder & Chr(34) & " " & Filter & FITSFileExtension))
+        AllFoundFiles.AddRange(Everything.GetSearchResult(Chr(34) & RootFolder & Chr(34) & " " & FileFilter & FITSFileExtension))
 
         'Run "normal" recursive search if no results
         If AllFoundFiles.Count = 0 Then
             ReportSave(New sProgress("Running traditional search ..."))
             DirScanner = New Ato.RecursivDirScanner(RootFolder)
-            DirScanner.Scan(Filter & ".fit?")
+            DirScanner.Scan(DirFilter, FileFilter & ".fit?")
             AllFoundFiles.AddRange(DirScanner.AllFiles)
         End If
 
@@ -78,6 +78,7 @@ Public Class cFITSGrepper
         AllFoundFiles.Sort()
         Report.Add(AllFoundFiles.Count.ToString.Trim & " files found")
         Progress = New sProgress(0, AllFoundFiles.Count + 1, String.Empty)
+        If AllFoundFiles.Count = 0 Then Exit Sub
 
         '=====================================================================================================================================
         ' Read all header bytes from file
@@ -181,6 +182,10 @@ Public Class cFITSGrepper
         Dim RetVal As New DataTable
         Dim ColumnsToDisplay As New Dictionary(Of eFITSKeywords, Integer)
         Dim ColPtr As Integer = 1                                                                           'we start with 1 as column 0 is the complete file name
+
+        'Check conditions
+        If IsNothing(AllFoundKeywordValues) Then Return Nothing
+
         RetVal.Columns.Add("FileName", GetType(String))
         For Each Keyword As eFITSKeywords In AllFoundKeywordValues.Keys
             If AllFoundKeywordValues(Keyword).Count > 1 Or NotInAllFiles.Contains(Keyword) Then             'if there is more than 1 entry or entries are missing, add
@@ -198,8 +203,8 @@ Public Class cFITSGrepper
             Ptr += 1
             NewRow(0) = FileName
             For Each Keyword As eFITSKeywords In AllFileHeaders(FileName).Keys
-                Dim ColIdx As Integer = ColumnsToDisplay(Keyword)
                 If ColumnsToDisplay.ContainsKey(Keyword) = True Then
+                    Dim ColIdx As Integer = ColumnsToDisplay(Keyword)
                     If AllFileHeaders(FileName).ContainsKey(Keyword) Then
                         NewRow(ColIdx) = AllFileHeaders(FileName)(Keyword)
                     Else

@@ -1023,15 +1023,78 @@ Public Class MainForm
     End Sub
 
     Private Sub tsmiTest_Focus_Click(sender As Object, e As EventArgs) Handles tsmiTest_Focus.Click
-        Dim Plot_X As New List(Of Double)
-        Dim Plot_Y As New List(Of Double)
+
+        Dim Disp1 As New cZEDGraphForm
+        Dim LineGen As New cZEDGraphService.cLineStyleGenerator
+        Dim StatHist As New Dictionary(Of Integer, Dictionary(Of Long, ULong))
+
+        'Combine all histograms
         For Each FileName As String In AllFiles.Keys
-            Dim FocusPos As String = System.IO.Path.GetFileNameWithoutExtension(FileName).Split("_"c)(1)
-            Plot_X.Add(Val(FocusPos))
-            Plot_Y.Add(Val(AllFiles(FileName).Statistics.MonoStatistics_Int.Max.Key))
+            'Get the value indicating the focus
+            Dim FocusPos As Integer = CInt(System.IO.Path.GetFileNameWithoutExtension(FileName).Split("_"c)(2))
+            If StatHist.ContainsKey(FocusPos) = False Then
+                StatHist.Add(FocusPos, AllFiles(FileName).Statistics.MonochromHistogram_Int)
+            Else
+                CombineHisto(StatHist(FocusPos), AllFiles(FileName).Statistics.MonochromHistogram_Int)
+            End If
         Next FileName
-        Dim Disp1 As New cZEDGraphForm : Disp1.PlotData("Focus - MAX VALUE", Plot_X.ToArray, Plot_Y.ToArray, Color.Red)
+
+        'Calculate focus
+        For Each FocusPos As Integer In StatHist.Keys
+            Dim Plot_X As New List(Of Double)
+            Dim Plot_Y As New List(Of Double)
+            FocusAnalysis(FocusPos.ValRegIndep, StatHist(FocusPos), Plot_X, Plot_Y)
+            Disp1.PlotData("Focus - <" & FocusPos & ">", Plot_X.ToArray, Plot_Y.ToArray, LineGen.GetNextColor)
+        Next FocusPos
+        Disp1.MakeYAxisLog()
+
     End Sub
+
+    '''<summary>Combine 2 histograms.</summary>
+    Private Sub CombineHisto(ByRef SumHisto As Dictionary(Of Long, ULong), ByVal HistToAdd As Dictionary(Of Long, ULong))
+        If IsNothing(SumHisto) = True Then
+            'Init sum with HistToAdd
+            SumHisto = New Dictionary(Of Long, ULong)
+            For Each Entry As Long In HistToAdd.Keys
+                SumHisto.Add(Entry, HistToAdd(Entry))
+            Next Entry
+        Else
+            For Each Entry As Long In HistToAdd.Keys
+                If SumHisto.ContainsKey(Entry) = False Then
+                    SumHisto.Add(Entry, HistToAdd(Entry))
+                Else
+                    SumHisto(Entry) += HistToAdd(Entry)
+                End If
+            Next Entry
+        End If
+        SumHisto = SumHisto.SortDictionary
+    End Sub
+
+    '''<summary>Focus analysis based on maximum enery in N percent of the pixel.</summary>
+    Private Function FocusAnalysis(ByVal FileName As String, ByVal Hist As Dictionary(Of Long, ULong), ByRef Plot_X As List(Of Double), ByRef Plot_Y As List(Of Double)) As Boolean
+
+        'We assume only positive pixel ADU values (else, the minimum must be added)
+
+        Dim AllPixelValue As List(Of Long) = Hist.Keys.ToList
+        Plot_X = New List(Of Double)
+        Plot_Y = New List(Of Double)
+
+        '1.) Get the total energy in the image
+        Dim TotalEnery As Long = 0
+        For Each Entry As Long In AllPixelValue
+            TotalEnery += CLng((Entry * Hist(Entry)))
+        Next Entry
+
+        '2.) We count from top and get the energy plot
+        AllPixelValue.Reverse()
+        Dim SumEnergy As Long = 0
+        For Each Entry As Long In AllPixelValue
+            Plot_X.Add(Entry)
+            SumEnergy += CLng((Entry * Hist(Entry)))
+            Plot_Y.Add(100 * (SumEnergy / TotalEnery))
+        Next Entry
+
+    End Function
 
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles Me.KeyUp
         If e.KeyCode = Keys.F1 Then
@@ -1157,8 +1220,8 @@ Public Class MainForm
                 XY.Add(Values.ToArray)
             Next ADUValue
             Dim worksheet As ClosedXML.Excel.IXLWorksheet = workbook.Worksheets.Add("Histogram")
-            worksheet.Cell(1, 1).InsertData(AllFiles, True)
-            worksheet.Cell(2, 1).InsertData(XY)
+            worksheet.Cell(1, 1).InsertData(FileList, True)                                         'file names
+            worksheet.Cell(2, 1).InsertData(XY)                                                     'combined histogram
             For Each col In worksheet.ColumnsUsed
                 col.AdjustToContents()
             Next col
@@ -1853,4 +1916,5 @@ Public Class MainForm
     Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs)
 
     End Sub
+
 End Class

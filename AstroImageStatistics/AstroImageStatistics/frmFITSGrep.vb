@@ -14,11 +14,15 @@ Public Class frmFITSGrep
         If MyButton.Text = "Search" Then
             MyButton.Text = "Stop"
             FITSGrepper.StopFlag = False
-            FITSGrepper.Grep(tbRootFolder.Text, tbFilter.Text)
+            FITSGrepper.Grep(tbRootFolder.Text, tbDirFilter.Text, tbFileFilter.Text)
             MyData.DataSource = FITSGrepper.GetDataTable
-            adgvMain.DataSource = MyData
-            adgvMain.SortASC(adgvMain.Columns(0))
-            'adgvMain.AutoResizeColumns()
+            If IsNothing(MyData.DataSource) = False Then
+                adgvMain.DataSource = MyData
+                adgvMain.SortASC(adgvMain.Columns(0))
+                'adgvMain.AutoResizeColumns()
+            Else
+                adgvMain.DataSource = Nothing
+            End If
             tbOutput.Text &= Join(FITSGrepper.Report.ToArray, System.Environment.NewLine)
             tspbMain.Value = 0
             MyButton.Text = "Search"

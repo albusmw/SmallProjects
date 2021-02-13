@@ -562,7 +562,7 @@ Partial Public Class MainForm
         Me.Text &= BuildDate
 
         'Load INI
-        If System.IO.File.Exists(M.DB.MyINI) Then M.DB.INI.Load(M.DB.MyINI)
+        M.DB.INI.Load(M.DB.MyINI)
 
         'Load IPP
         Dim IPPLoadError As String = String.Empty

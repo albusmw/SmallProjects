@@ -19,7 +19,7 @@ Public Class frmNavigator
     Private MosaikForm As New cImgForm
 
     Private WithEvents clbDropHandler As Ato.DragDrop
-
+    '''<summary>Flag to block updating when a selection change is running.</summary>
     Private UpdateRunning As Boolean = False
 
     '''<summary>Main function to plot the mosaik.</summary>
@@ -160,11 +160,11 @@ Public Class frmNavigator
         End Select
     End Sub
 
-    Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged, clbFiles.ItemCheck
+    Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged
         ShowMosaik()
     End Sub
 
-    Private Sub lbPixel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lbPixel.SelectedIndexChanged
+    Private Sub lbPixel_SelectedIndexChanged(sender As Object, e As EventArgs)
         Dim SelectedText As String = CStr(lbPixel.SelectedItem)
         If IsNothing(SelectedText) Then Exit Sub
         Dim Splitted As String() = Split(SelectedText, ":")
@@ -179,31 +179,6 @@ Public Class frmNavigator
         clbDropHandler.FillList = False
     End Sub
 
-    Private Sub btnCheckAll_Click(sender As Object, e As EventArgs) Handles btnCheckAll.Click
-        For Idx As Integer = 0 To clbFiles.Items.Count - 1
-            clbFiles.SetItemCheckState(Idx, CheckState.Checked)
-        Next Idx
-    End Sub
-
-    Private Sub btnUncheckAll_Click(sender As Object, e As EventArgs) Handles btnUncheckAll.Click
-        For Idx As Integer = 0 To clbFiles.Items.Count - 1
-            clbFiles.SetItemCheckState(Idx, CheckState.Unchecked)
-        Next Idx
-    End Sub
-
-    Private Sub btnDeleteAll_Click(sender As Object, e As EventArgs) Handles btnDeleteAll.Click
-        clbFiles.Items.Clear()
-    End Sub
-
-    Private Sub btnSaveMosaik_Click(sender As Object, e As EventArgs) Handles btnSaveMosaik.Click
-        With sfdMain
-            .Filter = "FITS (*.fits)|*.fits"
-            If .ShowDialog <> DialogResult.OK Then Exit Sub
-        End With
-        cFITSWriter.Write(sfdMain.FileName, MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
-        Process.Start(sfdMain.FileName)
-    End Sub
-
     Private Sub clbDropHandler_DropOccured(Files() As String) Handles clbDropHandler.DropOccured
         'Add all files from a drop event
         UpdateRunning = True
@@ -216,7 +191,7 @@ Public Class frmNavigator
         ShowMosaik()
     End Sub
 
-    Private Sub clbFiles_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbFiles.SelectedIndexChanged
+    Private Sub clbFiles_SelectedIndexChanged(sender As Object, e As EventArgs)
         tbSelected.Text = clbFiles.SelectedItem.ToString
     End Sub
 
@@ -244,4 +219,36 @@ Public Class frmNavigator
         ShowMosaik()
     End Sub
 
+    Private Sub tsmiFile_SaveMosaik_Click(sender As Object, e As EventArgs) Handles tsmiFile_SaveMosaik.Click
+        With sfdMain
+            .Filter = "FITS (*.fits)|*.fits"
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+        cFITSWriter.Write(sfdMain.FileName, MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16)
+        Process.Start(sfdMain.FileName)
+    End Sub
+
+    Private Sub tsmiSel_DeleteAll_Click(sender As Object, e As EventArgs) Handles tsmiSel_DeleteAll.Click
+        clbFiles.Items.Clear()
+    End Sub
+
+    Private Sub tsmi_CheckAll_Click(sender As Object, e As EventArgs) Handles tsmi_CheckAll.Click
+        UpdateRunning = True
+        For Idx As Integer = 0 To clbFiles.Items.Count - 1
+            clbFiles.SetItemCheckState(Idx, CheckState.Checked)
+        Next Idx
+        UpdateRunning = False
+    End Sub
+
+    Private Sub tsmiSel_UncheckAll_Click(sender As Object, e As EventArgs) Handles tsmiSel_UncheckAll.Click
+        UpdateRunning = True
+        For Idx As Integer = 0 To clbFiles.Items.Count - 1
+            clbFiles.SetItemCheckState(Idx, CheckState.Unchecked)
+        Next Idx
+        UpdateRunning = False
+    End Sub
+
+    Private Sub AnythingChanged(sender As Object, e As ItemCheckEventArgs)
+
+    End Sub
 End Class

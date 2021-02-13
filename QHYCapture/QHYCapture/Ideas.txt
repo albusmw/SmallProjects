@@ -6,3 +6,7 @@
 - Time-Out für Read-Funktion (wenn diese abstürzt ...); Mail an QHY zu dem Problem
 - Auto-Focus-Aid: ROI erst voll, dann Peak suchen für z.B. 10x10 Pixel, dann hier ROI setzen und evtl. noch Auto-Brightness
 - Statistic über den Overscan-Bereich
+
+Errors:
+- When init / new exp, the ROI is set to the full sensor size; this makes ROISet returning TRUE (as width and height are not zero), leading the the overscan NOT be removed
+  (check AdjustAndCorrectROI)

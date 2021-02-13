@@ -2,6 +2,7 @@
 Option Strict On
 
 'Classes to enable WCF interoperation
+'Reference: Assembly System.ServiceModel.Web
 
 Public Class IDB_Properties
     Public Const ResponseFormat As ServiceModel.Web.WebMessageFormat = ServiceModel.Web.WebMessageFormat.Xml
@@ -32,7 +33,7 @@ Public Interface IDB
     <ServiceModel.OperationContract()>
     Function RunExposure() As Object
 
-    '''<summary>Run an exposure.</summary>
+    '''<summary>Get the software log.</summary>
     <ServiceModel.Web.WebGet(UriTemplate:="GetLog", ResponseFormat:=IDB_Properties.ResponseFormat, BodyStyle:=IDB_Properties.BodyStyle)>
     <ServiceModel.OperationContract()>
     Function GetLog() As String()
@@ -67,7 +68,7 @@ Public Class cDB_ServiceContract : Implements IDB
     '''<summary>Get a list of all available parameters.</summary>
     Public Function GetParameterList() As List(Of String) Implements IDB.GetParameterList
         Dim RetVal As New List(Of String)
-        For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
+        For Each SingleProperty As Reflection.PropertyInfo In DB.GetType.GetProperties()
             RetVal.Add(SingleProperty.Name)
         Next SingleProperty
         For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
