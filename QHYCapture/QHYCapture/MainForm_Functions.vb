@@ -242,6 +242,9 @@ Partial Public Class MainForm
                     M.DB.CamHandle = QHY.QHYCamera.OpenQHYCCD(M.DB.UsedCameraId)                                                        'Open the camera
                     If M.DB.CamHandle <> IntPtr.Zero Then
 
+                        'Stop any running exposures
+                        QHY.QHYCamera.CancelQHYCCDExposingAndReadout(M.DB.CamHandle)
+
                         'Get all supported read-out modes
                         Dim ReadoutModesCount As UInteger = 0
                         CallOK(QHY.QHYCamera.GetQHYCCDNumberOfReadModes(M.DB.CamHandle, ReadoutModesCount))
@@ -458,16 +461,24 @@ Partial Public Class MainForm
 
     '''<summary>Load the data from the 10Micron mount.</summary>
     Private Sub Load10MicronData()
-        Dim Client10Micron As New Net.Sockets.TcpClient(M.Meta.IP_10Micron, 3490)
-        Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
-        c10Micron.SendCommand(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
-        M.Meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
-        M.Meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
-        M.Meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
-        M.Meta.TelescopeDeclination = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeDeclination)
-        M.Meta.TelescopeAltitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAltitude)
-        M.Meta.TelescopeAzimuth = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAzimuth)
-        RefreshProperties()
+        Try
+            Dim Client10Micron As New Net.Sockets.TcpClient
+            If Client10Micron.ConnectAsync(M.Meta.IP_10Micron, M.Meta.IP_10Micron_Port).Wait(2000) = True Then
+                Dim Stream10Micron As Net.Sockets.NetworkStream = Client10Micron.GetStream
+                c10Micron.SendCommand(Stream10Micron, c10Micron.SetCommand.SetUltraHighPrecision)
+                M.Meta.SiteLatitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLatitude)
+                M.Meta.SiteLongitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.SiteLongitude)
+                M.Meta.TelescopeRightAscension = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeRightAscension)
+                M.Meta.TelescopeDeclination = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeDeclination)
+                M.Meta.TelescopeAltitude = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAltitude)
+                M.Meta.TelescopeAzimuth = c10Micron.GetAnswer(Stream10Micron, c10Micron.GetCommand.TelescopeAzimuth)
+                RefreshProperties()
+            Else
+                LogError("Could not connect to 10Micro @ <" & M.Meta.IP_10Micron & ":" & M.Meta.IP_10Micron_Port.ValRegIndep & " within " & M.Meta.IP_10Micron_TimeOut.ValRegIndep & " seconds")
+            End If
+        Catch ex As Exception
+            LogError("Could not load 10Micro data: <" & ex.Message & ">")
+        End Try
     End Sub
 
     '''<summary>Calculate all entries from the FITS header.</summary>
@@ -486,12 +497,21 @@ Partial Public Class MainForm
 
         CustomElement.Add(eFITSKeywords.OBS_ID, (M.Meta.GUID))
 
+        'Object and telescope pointing data
         CustomElement.Add(eFITSKeywords.OBJECT, M.Meta.ObjectName)
         CustomElement.Add(eFITSKeywords.RA, M.Meta.TelescopeRightAscension)
         CustomElement.Add(eFITSKeywords.DEC, M.Meta.TelescopeDeclination)
+        CustomElement.Add(eFITSKeywords.ALTITUDE, M.Meta.TelescopeAltitude)
+        CustomElement.Add(eFITSKeywords.AZIMUTH, M.Meta.TelescopeAzimuth)
 
+        'Origin (person and site) information
         CustomElement.Add(eFITSKeywords.AUTHOR, M.Meta.Author)
         CustomElement.Add(eFITSKeywords.ORIGIN, M.Meta.Origin)
+        CustomElement.Add(eFITSKeywords.SITELAT, M.Meta.SiteLatitude)
+        CustomElement.Add(eFITSKeywords.SITELONG, M.Meta.SiteLongitude)
+        CustomElement.Add(eFITSKeywords.PROGRAM, Me.Text)
+
+        'Telescope and camera properties
         CustomElement.Add(eFITSKeywords.TELESCOP, M.Meta.Telescope)
         CustomElement.Add(eFITSKeywords.TELAPER, M.Meta.TelescopeAperture / 1000.0)
         CustomElement.Add(eFITSKeywords.TELFOC, M.Meta.TelescopeFocalLength / 1000.0)
@@ -523,7 +543,7 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.FOCUS, SingleCaptureData.TelescopeFocus)
 
         CustomElement.Add(eFITSKeywords.QHY_MODE, SingleCaptureData.CamReadOutMode.ToString)
-        CustomElement.Add(eFITSKeywords.PROGRAM, Me.Text)
+
 
         'Create FITS file name
         FileNameToWrite = FileNameToWrite.Replace("$IDX$", Format(SingleCaptureData.CaptureIdx, "000"))

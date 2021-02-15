@@ -120,6 +120,9 @@
     <Compile Include="..\..\..\src\atomics\Extensions.vb">
       <Link>Extensions.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\FileHash.vb">
+      <Link>FileHash.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\Generics.vb">
       <Link>Generics.vb</Link>
     </Compile>
@@ -128,6 +131,9 @@
     </Compile>
     <Compile Include="..\..\..\src\atomics\INI_IO.vb">
       <Link>INI_IO.vb</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\atomics\RTFTextBox.vb">
+      <Link>RTFTextBox.vb</Link>
     </Compile>
     <Compile Include="..\..\..\src\atomics\ZedGraphService.vb">
       <Link>ZedGraphService.vb</Link>
@@ -248,6 +254,7 @@
       <Link>Everything64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="FITSKeywords_FromGrep.txt" />
     <Content Include="QHY600.ico" />
     <EmbeddedResource Include="BuildDate.txt" />
     <Content Include="..\BiasCapture.qhycapture.xml">

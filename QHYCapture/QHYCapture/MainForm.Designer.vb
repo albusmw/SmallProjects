@@ -59,16 +59,19 @@ Partial Class MainForm
         Me.AllReadoutModesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ExposureTimeSeriesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GainVariationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.PresetsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPreset = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPreset_FastLive = New System.Windows.Forms.ToolStripMenuItem()
         Me.CenterROIToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPreset_SkipCooling = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPreset_DevTestMWeiss = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiActions = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiResetLoopStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiNewGUID = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiLoad10MicronData = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiClearLog = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_AllQHYDLLs = New System.Windows.Forms.ToolStripMenuItem()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
@@ -115,9 +118,10 @@ Partial Class MainForm
         'pgMain
         '
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgMain.Font = New System.Drawing.Font("Lucida Console", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.pgMain.Location = New System.Drawing.Point(3, 3)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(353, 303)
+        Me.pgMain.Size = New System.Drawing.Size(353, 302)
         Me.pgMain.TabIndex = 0
         Me.pgMain.ToolbarVisible = False
         '
@@ -231,7 +235,7 @@ Partial Class MainForm
         '
         'msMain
         '
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFile, Me.CaptureToolStripMenuItem, Me.PresetsToolStripMenuItem, Me.tsmiActions})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFile, Me.CaptureToolStripMenuItem, Me.tsmiPreset, Me.tsmiActions, Me.tsmiTools})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Size = New System.Drawing.Size(943, 24)
@@ -333,7 +337,7 @@ Partial Class MainForm
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(104, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -354,36 +358,42 @@ Partial Class MainForm
         Me.GainVariationToolStripMenuItem.Size = New System.Drawing.Size(181, 22)
         Me.GainVariationToolStripMenuItem.Text = "Gain variation"
         '
-        'PresetsToolStripMenuItem
+        'tsmiPreset
         '
-        Me.PresetsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiPreset_FastLive, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem, Me.tsmiPreset_SkipCooling})
-        Me.PresetsToolStripMenuItem.Name = "PresetsToolStripMenuItem"
-        Me.PresetsToolStripMenuItem.Size = New System.Drawing.Size(56, 20)
-        Me.PresetsToolStripMenuItem.Text = "Presets"
+        Me.tsmiPreset.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiPreset_FastLive, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem, Me.tsmiPreset_SkipCooling, Me.tsmiPreset_DevTestMWeiss})
+        Me.tsmiPreset.Name = "tsmiPreset"
+        Me.tsmiPreset.Size = New System.Drawing.Size(56, 20)
+        Me.tsmiPreset.Text = "Presets"
         '
         'tsmiPreset_FastLive
         '
         Me.tsmiPreset_FastLive.Name = "tsmiPreset_FastLive"
-        Me.tsmiPreset_FastLive.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiPreset_FastLive.Size = New System.Drawing.Size(171, 22)
         Me.tsmiPreset_FastLive.Text = "Fast live mode"
         '
         'CenterROIToolStripMenuItem
         '
         Me.CenterROIToolStripMenuItem.Name = "CenterROIToolStripMenuItem"
-        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.CenterROIToolStripMenuItem.Size = New System.Drawing.Size(171, 22)
         Me.CenterROIToolStripMenuItem.Text = "Center ROI"
         '
         'SaveTransmissionToolStripMenuItem
         '
         Me.SaveTransmissionToolStripMenuItem.Name = "SaveTransmissionToolStripMenuItem"
-        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.SaveTransmissionToolStripMenuItem.Size = New System.Drawing.Size(171, 22)
         Me.SaveTransmissionToolStripMenuItem.Text = "Save transmission"
         '
         'tsmiPreset_SkipCooling
         '
         Me.tsmiPreset_SkipCooling.Name = "tsmiPreset_SkipCooling"
-        Me.tsmiPreset_SkipCooling.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiPreset_SkipCooling.Size = New System.Drawing.Size(171, 22)
         Me.tsmiPreset_SkipCooling.Text = "Skip cooling"
+        '
+        'tsmiPreset_DevTestMWeiss
+        '
+        Me.tsmiPreset_DevTestMWeiss.Name = "tsmiPreset_DevTestMWeiss"
+        Me.tsmiPreset_DevTestMWeiss.Size = New System.Drawing.Size(171, 22)
+        Me.tsmiPreset_DevTestMWeiss.Text = "Dev test (M Weiss)"
         '
         'tsmiActions
         '
@@ -395,26 +405,39 @@ Partial Class MainForm
         'tsmiResetLoopStat
         '
         Me.tsmiResetLoopStat.Name = "tsmiResetLoopStat"
-        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(179, 22)
         Me.tsmiResetLoopStat.Text = "Reset loop statistics"
         '
         'tsmiNewGUID
         '
         Me.tsmiNewGUID.Name = "tsmiNewGUID"
-        Me.tsmiNewGUID.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiNewGUID.Size = New System.Drawing.Size(179, 22)
         Me.tsmiNewGUID.Text = "New GUID"
         '
         'tsmiLoad10MicronData
         '
         Me.tsmiLoad10MicronData.Name = "tsmiLoad10MicronData"
-        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(179, 22)
         Me.tsmiLoad10MicronData.Text = "Load 10Micron data"
         '
         'tsmiClearLog
         '
         Me.tsmiClearLog.Name = "tsmiClearLog"
-        Me.tsmiClearLog.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiClearLog.Size = New System.Drawing.Size(179, 22)
         Me.tsmiClearLog.Text = "Clear log"
+        '
+        'tsmiTools
+        '
+        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_AllQHYDLLs})
+        Me.tsmiTools.Name = "tsmiTools"
+        Me.tsmiTools.Size = New System.Drawing.Size(46, 20)
+        Me.tsmiTools.Text = "Tools"
+        '
+        'tsmiTools_AllQHYDLLs
+        '
+        Me.tsmiTools_AllQHYDLLs.Name = "tsmiTools_AllQHYDLLs"
+        Me.tsmiTools_AllQHYDLLs.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiTools_AllQHYDLLs.Text = "Get all QHY DLLs"
         '
         'zgcMain
         '
@@ -505,6 +528,7 @@ Partial Class MainForm
         Me.tcMain.Controls.Add(Me.TabPage2)
         Me.tcMain.Controls.Add(Me.TabPage3)
         Me.tcMain.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tcMain.Font = New System.Drawing.Font("Courier New", 8.25!)
         Me.tcMain.Location = New System.Drawing.Point(0, 0)
         Me.tcMain.Name = "tcMain"
         Me.tcMain.SelectedIndex = 0
@@ -514,10 +538,10 @@ Partial Class MainForm
         'TabPage1
         '
         Me.TabPage1.Controls.Add(Me.pgMain)
-        Me.TabPage1.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage1.Location = New System.Drawing.Point(4, 23)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(359, 309)
+        Me.TabPage1.Size = New System.Drawing.Size(359, 308)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Exposure"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -525,10 +549,10 @@ Partial Class MainForm
         'TabPage2
         '
         Me.TabPage2.Controls.Add(Me.pgMeta)
-        Me.TabPage2.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage2.Location = New System.Drawing.Point(4, 23)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(231, 309)
+        Me.TabPage2.Size = New System.Drawing.Size(359, 308)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Meta data"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -536,19 +560,20 @@ Partial Class MainForm
         'pgMeta
         '
         Me.pgMeta.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgMeta.Font = New System.Drawing.Font("Lucida Console", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.pgMeta.Location = New System.Drawing.Point(3, 3)
         Me.pgMeta.Name = "pgMeta"
-        Me.pgMeta.Size = New System.Drawing.Size(225, 303)
+        Me.pgMeta.Size = New System.Drawing.Size(353, 302)
         Me.pgMeta.TabIndex = 1
         Me.pgMeta.ToolbarVisible = False
         '
         'TabPage3
         '
         Me.TabPage3.Controls.Add(Me.pgPlotAndText)
-        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 23)
         Me.TabPage3.Name = "TabPage3"
         Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage3.Size = New System.Drawing.Size(231, 309)
+        Me.TabPage3.Size = New System.Drawing.Size(359, 308)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "Plot and text"
         Me.TabPage3.UseVisualStyleBackColor = True
@@ -556,9 +581,10 @@ Partial Class MainForm
         'pgPlotAndText
         '
         Me.pgPlotAndText.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pgPlotAndText.Font = New System.Drawing.Font("Lucida Console", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.pgPlotAndText.Location = New System.Drawing.Point(3, 3)
         Me.pgPlotAndText.Name = "pgPlotAndText"
-        Me.pgPlotAndText.Size = New System.Drawing.Size(225, 303)
+        Me.pgPlotAndText.Size = New System.Drawing.Size(353, 302)
         Me.pgPlotAndText.TabIndex = 2
         Me.pgPlotAndText.ToolbarVisible = False
         '
@@ -695,7 +721,7 @@ Partial Class MainForm
     Friend WithEvents tsMain As Windows.Forms.ToolStrip
     Friend WithEvents tsbCapture As Windows.Forms.ToolStripButton
     Friend WithEvents tsbStopCapture As Windows.Forms.ToolStripButton
-    Friend WithEvents PresetsToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tsmiPreset As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ilMain As Windows.Forms.ImageList
     Friend WithEvents SeriesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents AllReadoutModesToolStripMenuItem As Windows.Forms.ToolStripMenuItem
@@ -746,4 +772,7 @@ Partial Class MainForm
     Friend WithEvents tsslTemperature As ToolStripStatusLabel
     Friend WithEvents tsmiFile_LoadSettings As ToolStripMenuItem
     Friend WithEvents tsmiPreset_SkipCooling As ToolStripMenuItem
+    Friend WithEvents tsmiTools As ToolStripMenuItem
+    Friend WithEvents tsmiTools_AllQHYDLLs As ToolStripMenuItem
+    Friend WithEvents tsmiPreset_DevTestMWeiss As ToolStripMenuItem
 End Class

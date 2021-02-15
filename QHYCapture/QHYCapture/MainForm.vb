@@ -43,17 +43,16 @@ Partial Public Class MainForm
 
         LED_update(tsslLED_config, True)
 
-        'Get chip properties
+        'Get chip properties & SDK version
         QHY.QHYCamera.GetQHYCCDChipInfo(M.DB.CamHandle, M.Meta.MyChip_Physical.Width, M.Meta.MyChip_Physical.Height, M.Meta.MyChip_Pixel.Width, M.Meta.MyChip_Pixel.Height, M.Meta.MyPixel_Size.Width, M.Meta.MyPixel_Size.Height, bpp)
         QHY.QHYCamera.GetQHYCCDEffectiveArea(M.DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
         QHY.QHYCamera.GetQHYCCDOverScanArea(M.DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
+        QHY.QHYCamera.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))
         M.DB.Stopper.Stamp("Get chip properties")
 
         'Log chip properties
         If M.Meta.Log_CamProp = True Then
-            QHY.QHYCamera.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))       'Get the SDK version
-            Log("SDK version: " & M.Meta.SDKVersionString)                                                                                  'Display the SDK version
-
+            Log("SDK version: " & M.Meta.SDKVersionString)
             Log("Chip info (bpp: " & bpp.ValRegIndep & ")")
             Log("  Chip  W x H  :" & M.Meta.MyChip_Physical.Width.ValRegIndep & " x " & M.Meta.MyChip_Physical.Height.ValRegIndep & " mm")
             Log("  Image W x H  :" & M.Meta.MyChip_Pixel.Width.ValRegIndep & " x " & M.Meta.MyChip_Pixel.Height.ValRegIndep & " pixel")
@@ -125,16 +124,16 @@ Partial Public Class MainForm
             M.DB.Stopper.Stamp("GetQHYCCDMemLength & pinning")
 
             'Read image data from camera - ALWAYS WITH OVERSCAN
-            Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim CaptureBits As UInteger = 0
+            Dim Captured_W As UInteger = 0 : Dim Captured_H As UInteger = 0 : Dim BitPerPixel As UInteger = 0
             Dim LiveModePollCount As Integer = 0
             LED_update(tsslLED_reading, True)
             If M.DB.StreamMode = eStreamMode.SingleFrame Then
-                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr))
+                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr))
                 LED_update(tsslLED_capture, False)
             Else
                 Dim LiveModeReady As UInteger = UInteger.MaxValue
                 Do
-                    LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, CaptureBits, ChannelToRead, CamRawBufferPtr)
+                    LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr)
                     LiveModePollCount += 1
                     DE()
                 Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
@@ -143,9 +142,9 @@ Partial Public Class MainForm
             RunningCaptureInfo.ObsEnd = Now
             EndTimeStamps.Add(RunningCaptureInfo.ObsEnd)
 
-            Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(CaptureBits / BitsPerByte)
+            Dim BytesToTransfer_calculated As Long = Captured_W * Captured_H * CInt(BitPerPixel / BitsPerByte)
             LogVerbose("Calculation says       : " & BytesToTransfer_calculated.ValRegIndep.PadLeft(12) & " byte to transfer.")
-            LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & CaptureBits & " bit resolution")
+            LogVerbose("Loaded image with " & Captured_W.ValRegIndep & "x" & Captured_H.ValRegIndep & " pixel @ " & BitPerPixel & " bit resolution, " & ChannelToRead.ValRegIndep & " channels")
             M.DB.Stopper.Stamp("GetQHYCCDSingleFrame (" & LiveModePollCount.ValRegIndep & " x)")
 
             'Remove overscan - do NOT run if an ROI is set
@@ -491,7 +490,7 @@ Partial Public Class MainForm
 
     Private Sub Log(ByVal Text As List(Of String))
         For Each Line As String In Text
-            Line = Format(Now, "HH.mm.ss:fff") & "|" & Line
+            Line = Now.ForLogging & "|" & Line
             If M.DB.Log_Generic.Length = 0 Then
                 M.DB.Log_Generic.Append(Text)
             Else
@@ -519,7 +518,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub Log(ByVal Text As String)
-        Text = Format(Now, "HH.mm.ss:fff") & "|" & Text
+        Text = Now.ForLogging & "|" & Text
         If M.DB.Log_Generic.Length = 0 Then
             M.DB.Log_Generic.Append(Text)
         Else
@@ -594,7 +593,11 @@ Partial Public Class MainForm
             M.DB.serviceBehavior = M.DB.SetupWCF.Description.Behaviors.Find(Of ServiceModel.Description.ServiceDebugBehavior)
             M.DB.serviceBehavior.HttpHelpPageEnabled = True
             M.DB.serviceBehavior.IncludeExceptionDetailInFaults = True
-            M.DB.SetupWCF.Open()
+            Try
+                M.DB.SetupWCF.Open()
+            Catch ex As Exception
+                Log("Error creating WCF interface: <" & ex.Message & ">")
+            End Try
         End If
 
         'Other objects
@@ -839,7 +842,7 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsmiNewGUID_Click(sender As Object, e As EventArgs) Handles tsmiNewGUID.Click
-        M.Meta.GUID = Format(Now, "yyyy_MM_dd_HH_mm_ss")
+        M.Meta.GUID = Now.ForFileSystem
         RefreshProperties()
     End Sub
 
@@ -928,7 +931,6 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsmiPreset_SkipCooling_Click(sender As Object, e As EventArgs) Handles tsmiPreset_SkipCooling.Click
-        Dim ROISize As Integer = 100
         With M.DB
             .Temp_Target = -100
             .Temp_Tolerance = 1000
@@ -954,6 +956,49 @@ Partial Public Class MainForm
                 Clipboard.SetText(PropName)
             End If
         End If
+    End Sub
+
+    Private Sub tsmiTools_AllQHYDLLs_Click(sender As Object, e As EventArgs) Handles tsmiTools_AllQHYDLLs.Click
+        'Get all qhyccd.dll version and display them
+        Dim AllDLLs As List(Of String) = Everything.GetSearchResult("qhyccd.dll")
+        Dim DifferentDLLs As New Dictionary(Of String, String)
+        Dim RTFScanReport As New Ato.cRTFGenerator : RTFScanReport.RTFInit("Courier New", 8)
+        For Each DLLFile As String In AllDLLs
+            Dim Hash As String = FileHash.MD5(DLLFile)
+            If String.IsNullOrEmpty(Hash) = False Then
+                Dim VersionInfo As FileVersionInfo = FileVersionInfo.GetVersionInfo(DLLFile)
+                Dim VersionString As String = VersionInfo.FileVersion : If IsNothing(VersionString) = True Then VersionString = "???"
+                VersionString = VersionString.Replace(",", ".").Replace(" ", String.Empty).PadRight(12)
+                Dim InfoLine As String = VersionString & " of " & System.IO.File.GetCreationTime(DLLFile) & " -> " & DLLFile
+                If DifferentDLLs.ContainsKey(Hash) = False Then
+                    DifferentDLLs.Add(Hash, DLLFile)
+                    RTFScanReport.AddEntry("*** " & InfoLine, Color.Black)
+                Else
+                    RTFScanReport.AddEntry("    " & InfoLine, Color.Black)
+                End If
+            End If
+        Next DLLFile
+        RTFScanReport.AddEntry(DifferentDLLs.Count.ValRegIndep & " different verions found.", Color.Black)
+        'Display info
+        Dim Info As New cRTFTextBox
+        Info.Init("Different qhyccd.dll versions", 1200, 400)
+        Info.ShowText(RTFScanReport.GetRTFText)
+    End Sub
+
+    Private Sub tsmiPreset_DevTestMWeiss_Click(sender As Object, e As EventArgs) Handles tsmiPreset_DevTestMWeiss.Click
+        With M.DB
+            .Temp_Target = -100
+            .Temp_Tolerance = 1000
+            .Temp_StableTime = 0
+            .StoreImage = False
+        End With
+        With M.Meta
+            .Log_CamProp = True
+            .Log_Timing = True
+            .Log_Verbose = True
+            .Load10MicronDataAlways = False
+        End With
+        RefreshProperties()
     End Sub
 
 End Class

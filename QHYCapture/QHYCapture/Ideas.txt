@@ -10,3 +10,6 @@
 Errors:
 - When init / new exp, the ROI is set to the full sensor size; this makes ROISet returning TRUE (as width and height are not zero), leading the the overscan NOT be removed
   (check AdjustAndCorrectROI)
+
+Last used SDK:
+  20.8.26.3

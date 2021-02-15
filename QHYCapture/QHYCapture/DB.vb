@@ -303,7 +303,7 @@ Public Class cDB
     Public Property ExposureTime As Double = 1.0
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "4.) Gain")>
+    <ComponentModel.DisplayName(Indent & "4. Gain")>
     <ComponentModel.Description("Gain to set")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
@@ -532,81 +532,66 @@ End Class
 '''<summary>Database holding meta data information.</summary>
 Public Class cDB_meta
 
-    Const Cat1 As String = "1. Generic"
-    Const Cat2 As String = "2. Object"
-    Const Cat_log As String = "3. Software logging"
-    Const Cat_read As String = "4. Camera properties"
+    Const Cat_10Micron As String = "1. Generic (load via 10Micron)"
+    Const Cat2 As String = "3. Object"
+    Const Cat_log As String = "4. Software logging"
+    Const Cat_read As String = "5. Camera properties"
     Const Indent As String = "  "
     Const NotSet As String = "-----"
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "1. 10Micron IP")>
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "1. Load 10Micron data?")>
+    <ComponentModel.DefaultValue(True)>
+    Public Property Load10MicronDataAlways As Boolean = True
+
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "1.1. 10Micron IP")>
     <ComponentModel.Description("IP of the 10Micron mount")>
     Public Property IP_10Micron As String = "192.168.10.119"
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "2. GUID of the sequence")>
-    <ComponentModel.Description("Sequence GUID")>
-    Public Property GUID As String = String.Empty
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "1.2. 10Micron Port")>
+    <ComponentModel.Description("Port of the 10Micron mount")>
+    Public Property IP_10Micron_Port As Integer = 3490
 
-    '''<summary>Exposure type.</summary>
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "3. Exposure type")>
-    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
-    <ComponentModel.DefaultValue("TestOnly")>
-    Public Property ExposureType As String = "TestOnly"
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "1.3. 10Micron Time-out")>
+    <ComponentModel.Description("Time-out time for connecting the mount")>
+    Public Property IP_10Micron_TimeOut As Integer = 2
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "4. Author")>
-    <ComponentModel.Description("Author to add to the meta data.")>
-    <ComponentModel.DefaultValue("Martin Weiss")>
-    Public Property Author As String = "Martin Weiss"
-
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "5.1. Site longitude")>
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "2.1. Site longitude")>
     <ComponentModel.Description("Longitude of the site.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property SiteLongitude As String = NotSet
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "5.2. Site latitude")>
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "2.2. Site latitude")>
     <ComponentModel.Description("Latitude of the site.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property SiteLatitude As String = NotSet
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "6. Origin")>
-    <ComponentModel.Description("Origin to add to the meta data.")>
-    <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
-    Public Property Origin As String = "Sternwarte Holzkirchen"
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "3.1. RA")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeRightAscension As String = NotSet
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "7. Telescope used")>
-    <ComponentModel.Description("Telescope name to add to the meta data.")>
-    <ComponentModel.DefaultValue("CDK 12.5 with reducer")>
-    Public Property Telescope As String = "CDK 12.5 with reducer"
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "3.2. DEC")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeDeclination As String = NotSet
 
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "8. Telescope aperture [mm]")>
-    <ComponentModel.Description("Telescope aperture to add to the meta data.")>
-    <ComponentModel.DefaultValue(317.0)>
-    Public Property TelescopeAperture As Double = 317.0
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "4.1. Altitude")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeAltitude As String = NotSet
 
-    '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "9. Telescope focal length [mm]")>
-    <ComponentModel.Description("Telescope focal length to add to the meta data.")>
-    <ComponentModel.DefaultValue(1676.4)>
-    Public Property TelescopeFocalLength As Double = 1676.4
+    <ComponentModel.Category(Cat_10Micron)>
+    <ComponentModel.DisplayName(Indent & "4.2. Azimut")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property TelescopeAzimuth As String = NotSet
 
-    '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "10. Telescope focus position")>
-    <ComponentModel.Description("Focuser position reported by the telescope.")>
-    <ComponentModel.DefaultValue(Double.NaN)>
-    Public Property TelescopeFocus As Double = Double.NaN
-
-    '===================================================================================================
+    '================================================================================
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "1. Name")>
@@ -615,35 +600,60 @@ Public Class cDB_meta
     Public Property ObjectName As String = NotSet
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "2. RA")>
-    <ComponentModel.DefaultValue(NotSet)>
-    Public Property TelescopeRightAscension As String = NotSet
+    <ComponentModel.DisplayName(Indent & "2. GUID of the sequence")>
+    <ComponentModel.Description("Sequence GUID")>
+    Public Property GUID As String = String.Empty
+
+    '''<summary>Exposure type.</summary>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName(Indent & "3. Exposure type")>
+    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
+    <ComponentModel.DefaultValue("TestOnly")>
+    Public Property ExposureType As String = "TestOnly"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "3. DEC")>
-    <ComponentModel.DefaultValue(NotSet)>
-    Public Property TelescopeDeclination As String = NotSet
+    <ComponentModel.DisplayName(Indent & "4. Author")>
+    <ComponentModel.Description("Author to add to the meta data.")>
+    <ComponentModel.DefaultValue("Martin Weiss")>
+    Public Property Author As String = "Martin Weiss"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "4. Altitude")>
-    <ComponentModel.DefaultValue(NotSet)>
-    Public Property TelescopeAltitude As String = NotSet
+    <ComponentModel.DisplayName(Indent & "6. Origin")>
+    <ComponentModel.Description("Origin to add to the meta data.")>
+    <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
+    Public Property Origin As String = "Sternwarte Holzkirchen"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "5. Azimut")>
-    <ComponentModel.DefaultValue(NotSet)>
-    Public Property TelescopeAzimuth As String = NotSet
+    <ComponentModel.DisplayName(Indent & "7. Telescope used")>
+    <ComponentModel.Description("Telescope name to add to the meta data.")>
+    <ComponentModel.DefaultValue("CDK 12.5 with reducer")>
+    Public Property Telescope As String = "CDK 12.5 with reducer"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "6. Load 10Micron data")>
-    <ComponentModel.DefaultValue(True)>
-    Public Property Load10MicronDataAlways As Boolean = True
+    <ComponentModel.DisplayName(Indent & "8. Telescope aperture [mm]")>
+    <ComponentModel.Description("Telescope aperture to add to the meta data.")>
+    <ComponentModel.DefaultValue(317.0)>
+    Public Property TelescopeAperture As Double = 317.0
+
+    '''<summary>Telescope focal length [mm].</summary>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName(Indent & "9. Telescope focal length [mm]")>
+    <ComponentModel.Description("Telescope focal length to add to the meta data.")>
+    <ComponentModel.DefaultValue(1676.4)>
+    Public Property TelescopeFocalLength As Double = 1676.4
+
+    '''<summary>Telescope focal length [mm].</summary>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName(Indent & "10. Telescope focus position")>
+    <ComponentModel.Description("Focuser position reported by the telescope.")>
+    <ComponentModel.DefaultValue(Double.NaN)>
+    Public Property TelescopeFocus As Double = Double.NaN
 
     '===================================================================================================
 
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName(Indent & "1. Log camera properties")>
-    <ComponentModel.Description("Log all supported camera properties with name and range in the begin - usedful e.g. to see the value range for certain settings")>
+    <ComponentModel.Description("Log all supported camera properties with name and range in the begin - useful e.g. to see the value range for certain settings")>
     <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_CamProp As Boolean = False
