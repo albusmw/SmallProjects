@@ -915,13 +915,14 @@ Public Class MainForm
         J2000ToJNow(Solver.SolvedRA * RadToH, Solver.SolvedDec * RadToGrad, JNow_RA_solved, JNow_Dec_solved)
 
         Dim Output As New List(Of String)
-        Output.Add("Start with   RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow file string)")
-        Output.Add("             RA <" & Ato.AstroCalc.FormatHMS(File_RA_J2000) & ">, DEC <" & Ato.AstroCalc.Format360Degree(File_Dec_J2000) & "> (J2000)")
-        Output.Add("Solved as    RA <" & Ato.AstroCalc.FormatHMS(Solver.SolvedRA * RadToH) & ">, DEC <" & Ato.AstroCalc.Format360Degree(Solver.SolvedDec * RadToGrad) & "> (J2000)")
-        Output.Add("Converted to RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
-        Output.Add("Angle           <" & Solver.RotationAngle.ValRegIndep & ">")
-        Output.Add("Error        RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
-        Output.Add("             RA <" & Solver.PixelErrorRA.ValRegIndep & " pixel>, DEC < " & Solver.PixelErrorDec.ValRegIndep & " pixel>")
+        Output.Add("Start with        RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow file string)")
+        Output.Add("                  RA <" & Ato.AstroCalc.FormatHMS(File_RA_J2000) & ">, DEC <" & Ato.AstroCalc.Format360Degree(File_Dec_J2000) & "> (J2000)")
+        Output.Add("Solved as       : RA <" & Ato.AstroCalc.FormatHMS(Solver.SolvedRA * RadToH) & ">, DEC <" & Ato.AstroCalc.Format360Degree(Solver.SolvedDec * RadToGrad) & "> (J2000)")
+        Output.Add("                  RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
+        Output.Add("Error           :  RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
+        Output.Add("Error results   :  RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
+        Output.Add(" <Pixel>        :  RA <" & Solver.PixelErrorRA.ValRegIndep & " pixel>, DEC < " & Solver.PixelErrorDec.ValRegIndep & " pixel>")
+        Output.Add("Angle           : <" & Solver.RotationAngle.ValRegIndep & ">")
 
         Log("PLATE SOLVE: > ", Output.ToArray)
 
@@ -1915,6 +1916,16 @@ Public Class MainForm
 
     Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs)
 
+    End Sub
+
+    Private Sub tsmiTools_ChangeHeader_Click(sender As Object, e As EventArgs) Handles tsmiTools_ChangeHeader.Click
+
+        Dim SrcDst As String = "C:\TEMP\Astro - Change header\ToChange.fits"
+        Dim ValuesToChange As New Dictionary(Of String, Object)
+        ValuesToChange.Add(FITSKeyword.KeywordString(eFITSKeywords.TELFOC), New Object() {433.2, "Ganz doll ..."})
+        ValuesToChange.Add("Ollla", New Object() {Now, "Heute isses schoen"})
+        Dim Result As String = cFITSHeaderChanger.ChangeHeader(SrcDst, ValuesToChange)
+        MsgBox(Result)
     End Sub
 
 End Class

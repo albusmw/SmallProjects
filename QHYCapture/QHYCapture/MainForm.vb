@@ -644,7 +644,7 @@ Partial Public Class MainForm
     Private Sub AllReadoutModesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AllReadoutModesToolStripMenuItem.Click
         M.DB.StopFlag = False
         For Each Mode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
-            M.DB.ReadOutMode = Mode
+            M.DB.ReadOutModeEnum = Mode
             RefreshProperties()
             QHYCapture(False)
             If M.DB.StopFlag = True Then Exit For
@@ -756,7 +756,7 @@ Partial Public Class MainForm
         M.DB.ExposureTime = 60
         For Each ReadOutMode As eReadOutMode In [Enum].GetValues(GetType(eReadOutMode))
             If ReadOutMode <> eReadOutMode.Invalid Then
-                M.DB.ReadOutMode = ReadOutMode
+                M.DB.ReadOutModeEnum = ReadOutMode
                 For Each Filter As eFilter In New eFilter() {eFilter.H_alpha}
                     M.DB.FilterSlot = Filter
                     For Gain As Double = 0 To 200 Step 1

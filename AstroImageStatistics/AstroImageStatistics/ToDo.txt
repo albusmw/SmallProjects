@@ -31,6 +31,8 @@ Histo code:				https://pastebin.com/Wb0J48E1
 - frmImageDisplay:		* Nicht nur percentage, sondern direkt Wert eingebbar machen für cut-off percentage
                         * Anzeigen wieviele Pixel im Range sind 
 
+FITSGrep: File \\192.168.100.10\astro\2019_10_26 (Focus)\FOCUS_ROI_9890.FITS wird als corrupt angezeigt
+
 
 Missing FITS keywords:
 from C:\Users\albusmw\Dropbox\Astro\!WORK\Andreas Gutekunst - 1540_Hα

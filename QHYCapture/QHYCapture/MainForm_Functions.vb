@@ -138,7 +138,7 @@ Partial Public Class MainForm
         With SingleCaptureData
             .CaptureIdx = CaptureIdx
             .FilterActive = FilterActive
-            .CamReadOutMode = New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(M.DB.CamHandle, M.DB.ReadOutMode, .CamReadOutMode)
+            .CamReadOutMode = New Text.StringBuilder : QHY.QHYCamera.GetQHYCCDReadModeName(M.DB.CamHandle, M.DB.ReadOutModeEnum, .CamReadOutMode)
             .ExpTime = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_EXPOSURE) / 1000000
             .Gain = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_GAIN)
             .Offset = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_OFFSET)
@@ -264,11 +264,11 @@ Partial Public Class MainForm
 
                         'Run the start-up init sequence
                         Log("Init QHY camera  <" & M.DB.UsedCameraId.ToString & "> ...")
-                        If CallOK(QHY.QHYCamera.SetQHYCCDReadMode(M.DB.CamHandle, M.DB.ReadOutMode)) = True Then
+                        If CallOK(QHY.QHYCamera.SetQHYCCDReadMode(M.DB.CamHandle, M.DB.ReadOutModeEnum)) = True Then
                             If CallOK(QHY.QHYCamera.SetQHYCCDStreamMode(M.DB.CamHandle, M.DB.StreamMode)) = True Then                   'Set single capture mode
                                 If CallOK(QHY.QHYCamera.InitQHYCCD(M.DB.CamHandle)) = True Then                                       'Init the camera with the selected mode, ...
                                     'Camera was opened correct
-                                    M.DB.UsedReadMode = M.DB.ReadOutMode
+                                    M.DB.UsedReadMode = M.DB.ReadOutModeEnum
                                     M.DB.UsedStreamMode = M.DB.StreamMode
                                     M.DB.LiveModeInitiated = False
                                 Else
@@ -280,7 +280,7 @@ Partial Public Class MainForm
                                 M.DB.CamHandle = IntPtr.Zero
                             End If
                         Else
-                            LogError("SetQHYCCDReadMode to <" & M.DB.ReadOutMode & "> FAILED!")
+                            LogError("SetQHYCCDReadMode to <" & M.DB.ReadOutModeEnum & "> FAILED!")
                         End If
                     Else
                         LogError("OpenQHYCCD FAILED!")
@@ -499,8 +499,8 @@ Partial Public Class MainForm
 
         'Object and telescope pointing data
         CustomElement.Add(eFITSKeywords.OBJECT, M.Meta.ObjectName)
-        CustomElement.Add(eFITSKeywords.RA, M.Meta.TelescopeRightAscension)
-        CustomElement.Add(eFITSKeywords.DEC, M.Meta.TelescopeDeclination)
+        CustomElement.Add(eFITSKeywords.RA_NOM, M.Meta.TelescopeRightAscension)
+        CustomElement.Add(eFITSKeywords.DEC_NOM, M.Meta.TelescopeDeclination)
         CustomElement.Add(eFITSKeywords.ALTITUDE, M.Meta.TelescopeAltitude)
         CustomElement.Add(eFITSKeywords.AZIMUTH, M.Meta.TelescopeAzimuth)
 
@@ -525,15 +525,15 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.COLORTYP, "0")                                                           '<- check
         CustomElement.Add(eFITSKeywords.FILTER, FilterName)
 
-        CustomElement.Add(eFITSKeywords.DATE_OBS, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsStart))
-        CustomElement.Add(eFITSKeywords.DATE_END, cFITSKeywords.GetDateWithTime(SingleCaptureData.ObsEnd))
-        CustomElement.Add(eFITSKeywords.TIME_OBS, cFITSKeywords.GetTime(SingleCaptureData.ObsStart))
-        CustomElement.Add(eFITSKeywords.TIME_END, cFITSKeywords.GetTime(SingleCaptureData.ObsEnd))
+        CustomElement.Add(eFITSKeywords.DATE_OBS, cFITSType.FITSString_Date(SingleCaptureData.ObsStart))
+        CustomElement.Add(eFITSKeywords.DATE_END, cFITSType.FITSString_Date(SingleCaptureData.ObsEnd))
+        CustomElement.Add(eFITSKeywords.TIME_OBS, cFITSType.FITSString_Time(SingleCaptureData.ObsStart))
+        CustomElement.Add(eFITSKeywords.TIME_END, cFITSType.FITSString_Time(SingleCaptureData.ObsEnd))
 
         CustomElement.Add(eFITSKeywords.CRPIX1, 0.5 * (SingleCaptureData.NAXIS1 + 1))
         CustomElement.Add(eFITSKeywords.CRPIX2, 0.5 * (SingleCaptureData.NAXIS2 + 1))
 
-        CustomElement.Add(eFITSKeywords.IMAGETYP, M.Meta.ExposureType)
+        CustomElement.Add(eFITSKeywords.IMAGETYP, M.Meta.ExposureTypeString)
         CustomElement.Add(eFITSKeywords.EXPTIME, SingleCaptureData.ExpTime)
         CustomElement.Add(eFITSKeywords.GAIN, SingleCaptureData.Gain)
         CustomElement.Add(eFITSKeywords.OFFSET, SingleCaptureData.Offset)
@@ -544,7 +544,6 @@ Partial Public Class MainForm
 
         CustomElement.Add(eFITSKeywords.QHY_MODE, SingleCaptureData.CamReadOutMode.ToString)
 
-
         'Create FITS file name
         FileNameToWrite = FileNameToWrite.Replace("$IDX$", Format(SingleCaptureData.CaptureIdx, "000"))
         FileNameToWrite = FileNameToWrite.Replace("$CNT$", Format(M.DB.CaptureCount, "000"))
@@ -552,7 +551,7 @@ Partial Public Class MainForm
         FileNameToWrite = FileNameToWrite.Replace("$GAIN$", SingleCaptureData.Gain.ValRegIndep)
         FileNameToWrite = FileNameToWrite.Replace("$OFFS$", SingleCaptureData.Offset.ValRegIndep)
         FileNameToWrite = FileNameToWrite.Replace("$FILT$", FilterName)
-        FileNameToWrite = FileNameToWrite.Replace("$RMODE$", [Enum].GetName(GetType(eReadOutMode), M.DB.ReadOutMode))
+        FileNameToWrite = FileNameToWrite.Replace("$RMODE$", [Enum].GetName(GetType(eReadOutMode), M.DB.ReadOutModeEnum))
 
         Return CustomElement
 

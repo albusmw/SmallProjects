@@ -111,6 +111,7 @@ Partial Class MainForm
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
+        Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -561,7 +562,7 @@ Partial Class MainForm
         '
         'tsmiTools
         '
-        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_ALADINCoords})
+        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_ALADINCoords, Me.tsmiTools_ChangeHeader})
         Me.tsmiTools.Name = "tsmiTools"
         Me.tsmiTools.Size = New System.Drawing.Size(46, 22)
         Me.tsmiTools.Text = "Tools"
@@ -724,6 +725,12 @@ Partial Class MainForm
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
+        'tsmiTools_ChangeHeader
+        '
+        Me.tsmiTools_ChangeHeader.Name = "tsmiTools_ChangeHeader"
+        Me.tsmiTools_ChangeHeader.Size = New System.Drawing.Size(196, 22)
+        Me.tsmiTools_ChangeHeader.Text = "Change header"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -849,4 +856,5 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem12 As ToolStripSeparator
     Friend WithEvents CodeBelowIsNotForHereToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CloudWatcherCombinerToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiTools_ChangeHeader As ToolStripMenuItem
 End Class

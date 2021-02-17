@@ -123,6 +123,28 @@ Public Enum eReadOutMode As UInteger
     Invalid = UInteger.MaxValue
 End Enum
 
+'''<summary>Available exposure types modes.</summary>
+Public Enum eExposureType As UInteger
+    <ComponentModel.Description("Undefined")>
+    Undefined = 0
+    <ComponentModel.Description("Light")>
+    Light = 1
+    <ComponentModel.Description("Dark")>
+    Dark = 2
+    <ComponentModel.Description("Flat")>
+    Flat = 3
+    <ComponentModel.Description("Bias")>
+    Bias = 4
+    <ComponentModel.Description("DarkFlat")>
+    DarkFlat = 5
+    <ComponentModel.Description("Test")>
+    Test = 99
+    <ComponentModel.Description("Custom)")>
+    Custom = 100
+    <ComponentModel.Description("Invalid")>
+    Invalid = UInteger.MaxValue
+End Enum
+
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
@@ -199,7 +221,10 @@ Public Class cDB
     <ComponentModel.Description("Photographic or high-gain.")>
     <ComponentModel.DefaultValue(GetType(eReadOutMode), "Photographic")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
-    Public Property ReadOutMode As eReadOutMode = eReadOutMode.Photographic
+    Public Property ReadOutModeEnum As eReadOutMode = eReadOutMode.Photographic
+
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property ReadOutModeString As String = [Enum].GetName(GetType(eReadOutMode), ReadOutModeEnum)
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "3. Stream mode")>
@@ -606,10 +631,26 @@ Public Class cDB_meta
 
     '''<summary>Exposure type.</summary>
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "3. Exposure type")>
+    <ComponentModel.DisplayName(Indent & "3.1 Exposure type")>
+    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
+    <ComponentModel.DefaultValue(GetType(eExposureType), "Undefined")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
+    Public Property ExposureTypeEnum As eExposureType = eExposureType.Undefined
+
+    '''<summary>Custom exposure type if ExposureTypeEnum is set to Custom.</summary>
+    <ComponentModel.Category(Cat2)>
+    <ComponentModel.DisplayName(Indent & "3.2 Custom exposure type")>
     <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
     <ComponentModel.DefaultValue("TestOnly")>
-    Public Property ExposureType As String = "TestOnly"
+    Public Property ExposureTypeCustom As String = "TestOnly"
+
+    '''<summary>String representation of the exposure type enum.</summary>
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property ExposureTypeString As String
+        Get
+            If ExposureTypeEnum = eExposureType.Custom Then Return ExposureTypeCustom Else Return [Enum].GetName(GetType(eReadOutMode), ExposureTypeEnum)
+        End Get
+    End Property
 
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "4. Author")>

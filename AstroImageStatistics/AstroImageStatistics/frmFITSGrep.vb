@@ -72,4 +72,9 @@ Public Class frmFITSGrep
     Private Sub MyData_ListChanged(sender As Object, e As ListChangedEventArgs) Handles MyData.ListChanged
         tsslSelectedFiles.Text = MyData.List.Count & " files filtered"
     End Sub
+
+    Private Sub btnBrowseFolder_Click(sender As Object, e As EventArgs) Handles btnBrowseFolder.Click
+        If System.IO.Directory.Exists(tbRootFolder.Text) Then Process.Start(tbRootFolder.Text)
+    End Sub
+
 End Class

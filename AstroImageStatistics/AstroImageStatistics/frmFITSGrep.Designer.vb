@@ -42,6 +42,7 @@ Partial Class frmFITSGrep
         Me.tsmiFile_ResetFilter = New System.Windows.Forms.ToolStripMenuItem()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.tbDirFilter = New System.Windows.Forms.TextBox()
+        Me.btnBrowseFolder = New System.Windows.Forms.Button()
         Me.ssMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -74,9 +75,9 @@ Partial Class frmFITSGrep
         '
         Me.tbRootFolder.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbRootFolder.Location = New System.Drawing.Point(79, 36)
+        Me.tbRootFolder.Location = New System.Drawing.Point(126, 36)
         Me.tbRootFolder.Name = "tbRootFolder"
-        Me.tbRootFolder.Size = New System.Drawing.Size(782, 20)
+        Me.tbRootFolder.Size = New System.Drawing.Size(735, 20)
         Me.tbRootFolder.TabIndex = 2
         Me.tbRootFolder.Text = "\\192.168.100.10\astro"
         '
@@ -227,11 +228,21 @@ Partial Class frmFITSGrep
         Me.tbDirFilter.TabIndex = 11
         Me.tbDirFilter.Text = "*"
         '
+        'btnBrowseFolder
+        '
+        Me.btnBrowseFolder.Location = New System.Drawing.Point(80, 34)
+        Me.btnBrowseFolder.Name = "btnBrowseFolder"
+        Me.btnBrowseFolder.Size = New System.Drawing.Size(40, 24)
+        Me.btnBrowseFolder.TabIndex = 12
+        Me.btnBrowseFolder.Text = "..."
+        Me.btnBrowseFolder.UseVisualStyleBackColor = True
+        '
         'frmFITSGrep
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1326, 674)
+        Me.Controls.Add(Me.btnBrowseFolder)
         Me.Controls.Add(Me.tbDirFilter)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.tbFileFilter)
@@ -279,4 +290,5 @@ Partial Class frmFITSGrep
     Friend WithEvents tsslSelectedFiles As ToolStripStatusLabel
     Friend WithEvents Label3 As Label
     Friend WithEvents tbDirFilter As TextBox
+    Friend WithEvents btnBrowseFolder As Button
 End Class

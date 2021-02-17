@@ -254,7 +254,7 @@ Public Class cFITSGrepper
 
     Private Function GetCard(ByVal FITSHeader As Dictionary(Of eFITSKeywords, Object), ByVal Keyword As eFITSKeywords, ByVal EmptyString As String) As String
         If FITSHeader.ContainsKey(Keyword) Then
-            Return FITSKeyword.KeywordString(Keyword) & "=" & cFITSKeywords.AsString(FITSHeader(Keyword)).Trim
+            Return FITSKeyword.KeywordString(Keyword) & "=" & cFITSType.AsString(FITSHeader(Keyword)).Trim
         Else
             Return FITSKeyword.KeywordString(Keyword) & "=" & EmptyString
         End If
