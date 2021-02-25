@@ -96,6 +96,8 @@ Partial Class MainForm
         Me.tsmiDisplayImage = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ALADINCoords = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_RemoveOverscan = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -111,7 +113,8 @@ Partial Class MainForm
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
-        Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SpecialTestFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.CheckROICutoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -384,36 +387,36 @@ Partial Class MainForm
         'tsmiAnalysisVignette_CalcRaw
         '
         Me.tsmiAnalysisVignette_CalcRaw.Name = "tsmiAnalysisVignette_CalcRaw"
-        Me.tsmiAnalysisVignette_CalcRaw.Size = New System.Drawing.Size(220, 22)
-        Me.tsmiAnalysisVignette_CalcRaw.Text = "Calculate raw data"
+        Me.tsmiAnalysisVignette_CalcRaw.Size = New System.Drawing.Size(240, 22)
+        Me.tsmiAnalysisVignette_CalcRaw.Text = "Calculate raw data (no binning)"
         '
         'tsmiAnalysisVignette_CalcParam
         '
         Me.tsmiAnalysisVignette_CalcParam.Name = "tsmiAnalysisVignette_CalcParam"
-        Me.tsmiAnalysisVignette_CalcParam.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_CalcParam.Size = New System.Drawing.Size(240, 22)
         Me.tsmiAnalysisVignette_CalcParam.Text = "Calculate fitting parameters"
         '
         'tsmiAnalysisVignette_Correct
         '
         Me.tsmiAnalysisVignette_Correct.Name = "tsmiAnalysisVignette_Correct"
-        Me.tsmiAnalysisVignette_Correct.Size = New System.Drawing.Size(220, 22)
-        Me.tsmiAnalysisVignette_Correct.Text = "Correct"
+        Me.tsmiAnalysisVignette_Correct.Size = New System.Drawing.Size(240, 22)
+        Me.tsmiAnalysisVignette_Correct.Text = "Correct (only for BIN=0)"
         '
         'tsmiAnalysisVignette_Display
         '
         Me.tsmiAnalysisVignette_Display.Name = "tsmiAnalysisVignette_Display"
-        Me.tsmiAnalysisVignette_Display.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_Display.Size = New System.Drawing.Size(240, 22)
         Me.tsmiAnalysisVignette_Display.Text = "Display"
         '
         'ToolStripMenuItem10
         '
         Me.ToolStripMenuItem10.Name = "ToolStripMenuItem10"
-        Me.ToolStripMenuItem10.Size = New System.Drawing.Size(217, 6)
+        Me.ToolStripMenuItem10.Size = New System.Drawing.Size(237, 6)
         '
         'tsmiAnalysisVignette_Clear
         '
         Me.tsmiAnalysisVignette_Clear.Name = "tsmiAnalysisVignette_Clear"
-        Me.tsmiAnalysisVignette_Clear.Size = New System.Drawing.Size(220, 22)
+        Me.tsmiAnalysisVignette_Clear.Size = New System.Drawing.Size(240, 22)
         Me.tsmiAnalysisVignette_Clear.Text = "Clear"
         '
         'tsmiAnalysisPixelMap
@@ -562,7 +565,7 @@ Partial Class MainForm
         '
         'tsmiTools
         '
-        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_ALADINCoords, Me.tsmiTools_ChangeHeader})
+        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_ALADINCoords, Me.tsmiTools_ChangeHeader, Me.tsmiTools_RemoveOverscan, Me.SpecialTestFileToolStripMenuItem, Me.CheckROICutoutToolStripMenuItem})
         Me.tsmiTools.Name = "tsmiTools"
         Me.tsmiTools.Size = New System.Drawing.Size(46, 22)
         Me.tsmiTools.Text = "Tools"
@@ -570,8 +573,20 @@ Partial Class MainForm
         'tsmiTools_ALADINCoords
         '
         Me.tsmiTools_ALADINCoords.Name = "tsmiTools_ALADINCoords"
-        Me.tsmiTools_ALADINCoords.Size = New System.Drawing.Size(196, 22)
+        Me.tsmiTools_ALADINCoords.Size = New System.Drawing.Size(215, 22)
         Me.tsmiTools_ALADINCoords.Text = "Coords for ALADIN call"
+        '
+        'tsmiTools_ChangeHeader
+        '
+        Me.tsmiTools_ChangeHeader.Name = "tsmiTools_ChangeHeader"
+        Me.tsmiTools_ChangeHeader.Size = New System.Drawing.Size(215, 22)
+        Me.tsmiTools_ChangeHeader.Text = "Change header"
+        '
+        'tsmiTools_RemoveOverscan
+        '
+        Me.tsmiTools_RemoveOverscan.Name = "tsmiTools_RemoveOverscan"
+        Me.tsmiTools_RemoveOverscan.Size = New System.Drawing.Size(215, 22)
+        Me.tsmiTools_RemoveOverscan.Text = "Remove QHY600 Overscan"
         '
         'ofdMain
         '
@@ -725,11 +740,17 @@ Partial Class MainForm
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
-        'tsmiTools_ChangeHeader
+        'SpecialTestFileToolStripMenuItem
         '
-        Me.tsmiTools_ChangeHeader.Name = "tsmiTools_ChangeHeader"
-        Me.tsmiTools_ChangeHeader.Size = New System.Drawing.Size(196, 22)
-        Me.tsmiTools_ChangeHeader.Text = "Change header"
+        Me.SpecialTestFileToolStripMenuItem.Name = "SpecialTestFileToolStripMenuItem"
+        Me.SpecialTestFileToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
+        Me.SpecialTestFileToolStripMenuItem.Text = "Special test file"
+        '
+        'CheckROICutoutToolStripMenuItem
+        '
+        Me.CheckROICutoutToolStripMenuItem.Name = "CheckROICutoutToolStripMenuItem"
+        Me.CheckROICutoutToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
+        Me.CheckROICutoutToolStripMenuItem.Text = "Check ROI cut-out"
         '
         'MainForm
         '
@@ -857,4 +878,7 @@ Partial Class MainForm
     Friend WithEvents CodeBelowIsNotForHereToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CloudWatcherCombinerToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiTools_ChangeHeader As ToolStripMenuItem
+    Friend WithEvents tsmiTools_RemoveOverscan As ToolStripMenuItem
+    Friend WithEvents SpecialTestFileToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents CheckROICutoutToolStripMenuItem As ToolStripMenuItem
 End Class

@@ -24,15 +24,15 @@ Public Class frmManualAdjust
     End Sub
 
     Private Sub tbCurve_Scale_MouseWheel(sender As Object, e As MouseEventArgs) Handles tbCurve_1_Scale.MouseWheel, tbCurve_2_Scale.MouseWheel, tbCurve_3_Scale.MouseWheel, tbCurve_4_Scale.MouseWheel
-        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + (e.Delta / (120 * 20))).ValRegIndep
+        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + ((tbCurve_Scale_Step.Text.ValRegIndep * e.Delta) / (120 * 20))).ValRegIndep
     End Sub
 
     Private Sub tbCurve_Offset_MouseWheel(sender As Object, e As MouseEventArgs) Handles tbCurve_1_Offset.MouseWheel, tbCurve_2_Offset.MouseWheel, tbCurve_3_Offset.MouseWheel, tbCurve_4_Offset.MouseWheel
-        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + (e.Delta / (120))).ValRegIndep
+        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + ((tbCurve_Offset_Step.Text.ValRegIndep * e.Delta) / (120))).ValRegIndep
     End Sub
 
     Private Sub tbCurve_YMul(sender As Object, e As MouseEventArgs) Handles tbCurve_1_YMul.MouseWheel, tbCurve_2_YMul.MouseWheel, tbCurve_3_YMul.MouseWheel, tbCurve_4_YMul.MouseWheel
-        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + (e.Delta / (120 * 20))).ValRegIndep
+        CType(sender, TextBox).Text = (Val(CType(sender, TextBox).Text) + ((tbCurve_YMul_Step.Text.ValRegIndep * e.Delta) / (120 * 20))).ValRegIndep
     End Sub
 
     Private Sub tbCurve_1_Scale_TextChanged(sender As Object, e As EventArgs) Handles tbCurve_1_Scale.TextChanged, tbCurve_1_Offset.TextChanged, tbCurve_1_YMul.TextChanged

@@ -30,13 +30,13 @@ Partial Class frmImageDisplay
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.cmsImage = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cms_SetCutOff = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SendToNavigatorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.SaveAsSeenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.scImageAndScale = New System.Windows.Forms.SplitContainer()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslInfo1 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
-        Me.SendToNavigatorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
@@ -59,7 +59,7 @@ Partial Class frmImageDisplay
         Me.scMain.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.scMain.Location = New System.Drawing.Point(0, 0)
+        Me.scMain.Location = New System.Drawing.Point(4, 0)
         Me.scMain.Name = "scMain"
         '
         'scMain.Panel1
@@ -70,8 +70,8 @@ Partial Class frmImageDisplay
         '
         Me.scMain.Panel2.ContextMenuStrip = Me.cmsImage
         Me.scMain.Panel2.Controls.Add(Me.scImageAndScale)
-        Me.scMain.Size = New System.Drawing.Size(1134, 974)
-        Me.scMain.SplitterDistance = 288
+        Me.scMain.Size = New System.Drawing.Size(1122, 974)
+        Me.scMain.SplitterDistance = 284
         Me.scMain.TabIndex = 0
         '
         'scLeft
@@ -90,7 +90,7 @@ Partial Class frmImageDisplay
         'scLeft.Panel2
         '
         Me.scLeft.Panel2.Controls.Add(Me.scDetails)
-        Me.scLeft.Size = New System.Drawing.Size(288, 974)
+        Me.scLeft.Size = New System.Drawing.Size(284, 974)
         Me.scLeft.SplitterDistance = 412
         Me.scLeft.TabIndex = 1
         '
@@ -99,7 +99,7 @@ Partial Class frmImageDisplay
         Me.pgMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pgMain.Location = New System.Drawing.Point(0, 0)
         Me.pgMain.Name = "pgMain"
-        Me.pgMain.Size = New System.Drawing.Size(288, 412)
+        Me.pgMain.Size = New System.Drawing.Size(284, 412)
         Me.pgMain.TabIndex = 0
         '
         'scDetails
@@ -112,7 +112,7 @@ Partial Class frmImageDisplay
         'scDetails.Panel1
         '
         Me.scDetails.Panel1.Controls.Add(Me.tbDetails)
-        Me.scDetails.Size = New System.Drawing.Size(288, 558)
+        Me.scDetails.Size = New System.Drawing.Size(284, 558)
         Me.scDetails.SplitterDistance = 213
         Me.scDetails.TabIndex = 0
         '
@@ -125,20 +125,26 @@ Partial Class frmImageDisplay
         Me.tbDetails.Name = "tbDetails"
         Me.tbDetails.ReadOnly = True
         Me.tbDetails.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.tbDetails.Size = New System.Drawing.Size(288, 213)
+        Me.tbDetails.Size = New System.Drawing.Size(284, 213)
         Me.tbDetails.TabIndex = 0
         '
         'cmsImage
         '
         Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff, Me.SendToNavigatorToolStripMenuItem, Me.ToolStripMenuItem1, Me.SaveAsSeenToolStripMenuItem})
         Me.cmsImage.Name = "cmsImage"
-        Me.cmsImage.Size = New System.Drawing.Size(230, 98)
+        Me.cmsImage.Size = New System.Drawing.Size(230, 76)
         '
         'cms_SetCutOff
         '
         Me.cms_SetCutOff.Name = "cms_SetCutOff"
         Me.cms_SetCutOff.Size = New System.Drawing.Size(229, 22)
         Me.cms_SetCutOff.Text = "Set zoom min-max as cut-off"
+        '
+        'SendToNavigatorToolStripMenuItem
+        '
+        Me.SendToNavigatorToolStripMenuItem.Name = "SendToNavigatorToolStripMenuItem"
+        Me.SendToNavigatorToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
+        Me.SendToNavigatorToolStripMenuItem.Text = "Send to navigator"
         '
         'ToolStripMenuItem1
         '
@@ -157,7 +163,7 @@ Partial Class frmImageDisplay
         Me.scImageAndScale.Location = New System.Drawing.Point(0, 0)
         Me.scImageAndScale.Name = "scImageAndScale"
         Me.scImageAndScale.Orientation = System.Windows.Forms.Orientation.Horizontal
-        Me.scImageAndScale.Size = New System.Drawing.Size(842, 974)
+        Me.scImageAndScale.Size = New System.Drawing.Size(834, 974)
         Me.scImageAndScale.SplitterDistance = 945
         Me.scImageAndScale.TabIndex = 0
         '
@@ -175,12 +181,6 @@ Partial Class frmImageDisplay
         Me.tsslInfo1.Name = "tsslInfo1"
         Me.tsslInfo1.Size = New System.Drawing.Size(22, 17)
         Me.tsslInfo1.Text = "---"
-        '
-        'SendToNavigatorToolStripMenuItem
-        '
-        Me.SendToNavigatorToolStripMenuItem.Name = "SendToNavigatorToolStripMenuItem"
-        Me.SendToNavigatorToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
-        Me.SendToNavigatorToolStripMenuItem.Text = "Send to navigator"
         '
         'frmImageDisplay
         '

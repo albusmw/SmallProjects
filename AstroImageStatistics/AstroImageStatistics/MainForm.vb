@@ -486,16 +486,15 @@ Public Class MainForm
     End Sub
 
     Private Sub tsmiTest_WriteTestData_Click(sender As Object, e As EventArgs) Handles tsmiTest_WriteTestData.Click
-        cFITSWriter.WriteTestFile_Int8("FITS_BitPix8.FITS")
-        cFITSWriter.WriteTestFile_Int16("FITS_BitPix16.FITS") ': Process.Start("FITS_BitPix16.FITS")
-        cFITSWriter.WriteTestFile_Int32("FITS_BitPix32.FITS") ': Process.Start("FITS_BitPix32.FITS")
-        cFITSWriter.WriteTestFile_Float32("FITS_BitPix32f.FITS") ': Process.Start("FITS_BitPix32f.FITS")
-        cFITSWriter.WriteTestFile_Float64("FITS_BitPix64f.FITS") : Process.Start("FITS_BitPix64f.FITS")
+        cFITSWriter.WriteTestFile_Int8(System.IO.Path.Combine(DB.MyPath, "FITS_BitPix8.FITS"))
+        cFITSWriter.WriteTestFile_Int16(System.IO.Path.Combine(DB.MyPath, "FITS_BitPix16.FITS"))
+        cFITSWriter.WriteTestFile_Int32(System.IO.Path.Combine(DB.MyPath, "FITS_BitPix32.FITS"))
+        cFITSWriter.WriteTestFile_Float32(System.IO.Path.Combine(DB.MyPath, "FITS_BitPix32f.FITS"))
+        cFITSWriter.WriteTestFile_Float64(System.IO.Path.Combine(DB.MyPath, "FITS_BitPix64f.FITS"))
         cFITSWriter.WriteTestFile_UInt16_Cross(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_mono.fits"))
         cFITSWriter.WriteTestFile_UInt16_Cross_RGB(System.IO.Path.Combine(DB.MyPath, "UInt16_Cross_rgb.fits"))
         cFITSWriter.WriteTestFile_UInt16_XYIdent(System.IO.Path.Combine(DB.MyPath, "UInt16_XYIdent.fits"))
-        Process.Start(DB.MyPath)
-        'MsgBox("OK")
+        MsgBox("OK")
     End Sub
 
     Private Sub tsmiFile_OpenLastFile_Click(sender As Object, e As EventArgs) Handles tsmiFile_OpenLastFile.Click
@@ -1485,7 +1484,7 @@ Public Class MainForm
                 CurrentFileEvalResults.Vig_RawData = ImageProcessing.Vignette(CurrentData.DataProcessor_UInt32.ImageData(0).Data)
         End Select
         CurrentFileEvalResults.Vig_RawData = CurrentFileEvalResults.Vig_RawData.SortDictionary
-        Log(Stopper.Stamp("Vignette - getting data"))
+        Log(Stopper.Stamp("Vignette - getting data (" & CurrentFileEvalResults.Vig_RawData.Count & " values"))
         Idle()
     End Sub
 
@@ -1511,13 +1510,14 @@ Public Class MainForm
         Log(Stopper.Stamp("Vignette - normalizing"))
 
         'Correct the vignette
+        Dim CorrectedValues As Integer = -1
         Select Case CurrentData.DataMode
             Case AstroNET.Statistics.eDataMode.UInt16
-                ImageProcessing.CorrectVignette(CurrentData.DataProcessor_UInt16.ImageData(0).Data, UsedVignette_Correction)
+                CorrectedValues = ImageProcessing.CorrectVignette(CurrentData.DataProcessor_UInt16.ImageData(0).Data, UsedVignette_Correction)
             Case AstroNET.Statistics.eDataMode.UInt32
-                ImageProcessing.CorrectVignette(CurrentData.DataProcessor_UInt32.ImageData(0).Data, UsedVignette_Correction)
+                CorrectedValues = ImageProcessing.CorrectVignette(CurrentData.DataProcessor_UInt32.ImageData(0).Data, UsedVignette_Correction)
         End Select
-        Log(Stopper.Stamp("Vignette - correction"))
+        Log(Stopper.Stamp("Vignette - correction (" & CorrectedValues.ValRegIndep & " values corrected"))
 
         CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
         Idle()
@@ -1914,18 +1914,67 @@ Public Class MainForm
         Return True
     End Function
 
-    Private Sub FITSTestFilesToolStripMenuItem_Click(sender As Object, e As EventArgs)
-
-    End Sub
-
     Private Sub tsmiTools_ChangeHeader_Click(sender As Object, e As EventArgs) Handles tsmiTools_ChangeHeader.Click
-
         Dim SrcDst As String = "C:\TEMP\Astro - Change header\ToChange.fits"
         Dim ValuesToChange As New Dictionary(Of String, Object)
         ValuesToChange.Add(FITSKeyword.KeywordString(eFITSKeywords.TELFOC), New Object() {433.2, "Ganz doll ..."})
         ValuesToChange.Add("Ollla", New Object() {Now, "Heute isses schoen"})
         Dim Result As String = cFITSHeaderChanger.ChangeHeader(SrcDst, ValuesToChange)
         MsgBox(Result)
+    End Sub
+
+    Private Sub RemoveQHY600OverscanToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiTools_RemoveOverscan.Click
+        'Remove the overscan area of the given data
+        'Normal size is 9600 x 6422
+        'Overscan is 24 x 34 pixel
+        'Resulting "image only" area is 9576 x 6388
+        Dim W As Integer = 9600
+        Dim H As Integer = 6422
+        Dim OV_X As Integer = 24
+        Dim OV_Y As Integer = 34
+        Dim EffArea_Width As Integer = W - OV_X
+        Dim EffArea_Height As Integer = H - OV_Y
+        'Run IPP function (correct)
+        Dim ZoomStatCalc As New AstroNET.Statistics(DB.IPP)
+        ZoomStatCalc.ResetAllProcessors()
+        Dim Status_GetROI As cIntelIPP.IppStatus = DB.IPP.Copy(CurrentData.DataProcessor_UInt16.ImageData(0).Data, ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, CInt(OV_X), CInt(0), CInt(EffArea_Width), CInt(EffArea_Height))
+        'Run VB function (may be wrong)
+        Dim Data_New(,) As UInt16 = ImgArrayFunction.GetROI(CurrentData.DataProcessor_UInt16.ImageData(0).Data, OV_X, W - 1, 0, H - OV_Y - 2)
+        'Compare both ROI's
+        Dim DiffCount As Integer = ImgArrayFunction.FindDifferences(ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, Data_New)
+
+        LastFITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.NAXIS1, EffArea_Width))
+        LastFITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.NAXIS2, EffArea_Height))
+        sfdMain.Filter = "FITS 16-bit fixed|*.fits"
+        If sfdMain.ShowDialog = DialogResult.OK Then
+            Running()
+            cFITSWriter.Write(sfdMain.FileName, ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, cFITSWriter.eBitPix.Int16, LastFITSHeader.GetCardsAsList)
+            Idle()
+        End If
+    End Sub
+
+    Private Sub SpecialTestFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SpecialTestFileToolStripMenuItem.Click
+        cFITSWriter.WriteTestFile_UInt16_XYCoded(System.IO.Path.Combine(DB.MyPath, "UInt16_XYCoded.fits"))
+        Process.Start(DB.MyPath)
+    End Sub
+
+    Private Sub CheckROICutoutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CheckROICutoutToolStripMenuItem.Click
+
+        Dim W As Integer = 100
+        Dim H As Integer = 50
+        Dim OV_X As Integer = 24
+        Dim OV_Y As Integer = 34
+        Dim EffArea_Width As Integer = W - OV_X
+        Dim EffArea_Height As Integer = H - OV_Y
+        'Run IPP function (correct)
+        Dim ZoomStatCalc As New AstroNET.Statistics(DB.IPP)
+        ZoomStatCalc.ResetAllProcessors()
+        Dim Status_GetROI As cIntelIPP.IppStatus = DB.IPP.Copy(CurrentData.DataProcessor_UInt16.ImageData(0).Data, ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, CInt(OV_X), CInt(0), CInt(EffArea_Width), CInt(EffArea_Height))
+        'Run VB function (may be wrong)
+        Dim Data_New(,) As UInt16 = ImgArrayFunction.GetROI(CurrentData.DataProcessor_UInt16.ImageData(0).Data, OV_X, W - 1, 0, H - OV_Y - 1)
+        'Compare both ROI's
+        Dim DiffCount As Integer = ImgArrayFunction.FindDifferences(ZoomStatCalc.DataProcessor_UInt16.ImageData(0).Data, Data_New)
+
     End Sub
 
 End Class

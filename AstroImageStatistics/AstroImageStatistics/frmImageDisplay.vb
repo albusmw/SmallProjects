@@ -312,8 +312,8 @@ Public Class frmImageDisplay
         Report.Add("Max    : " & ZoomStatistics.MonoStatistics_Int.Max.Key.ValRegIndep)
         Report.Add("Mean   : " & ZoomStatistics.MonoStatistics_Int.Mean.ValRegIndep("0.0"))
         Report.Add("Median : " & ZoomStatistics.MonoStatistics_Int.Median.ValRegIndep)
-        Report.Add("1%-PCT : " & ZoomStatistics.MonoStatistics_Int.Percentile(1).ValRegIndep)
-        Report.Add("99%-PCT: " & ZoomStatistics.MonoStatistics_Int.Percentile(99).ValRegIndep)
+        Report.Add("1%-PCT : " & ZoomStatistics.MonoStatistics_Int.GetPercentile(1).ValRegIndep)
+        Report.Add("99%-PCT: " & ZoomStatistics.MonoStatistics_Int.GetPercentile(99).ValRegIndep)
         tbDetails.Text = String.Join(System.Environment.NewLine, Report)
 
         'Get the magnified version
