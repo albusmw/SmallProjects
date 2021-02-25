@@ -15,9 +15,9 @@ Public Class frmCooling
         If Double.IsNaN(TimedCool) = False Then M.DB.Temp_Target = TimedCool
 
         'Get current camera parameters
-        Dim CurrentTemp As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURTEMP)
-        Dim TargetTemp As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_COOLER)
-        Dim CurrentPWM As Double = QHY.QHYCamera.GetQHYCCDParam(M.DB.CamHandle, QHY.QHYCamera.CONTROL_ID.CONTROL_CURPWM)
+        Dim CurrentTemp As Double = QHY.QHY.GetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_CURTEMP)
+        Dim TargetTemp As Double = QHY.QHY.GetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_COOLER)
+        Dim CurrentPWM As Double = QHY.QHY.GetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_CURPWM)
 
         tbT_measured.Text = CurrentTemp.ValRegIndep("#0.0")
         tbT_set.Text = TargetTemp.ValRegIndep("#0.0")

@@ -44,10 +44,10 @@ Partial Public Class MainForm
         LED_update(tsslLED_config, True)
 
         'Get chip properties & SDK version
-        QHY.QHYCamera.GetQHYCCDChipInfo(M.DB.CamHandle, M.Meta.MyChip_Physical.Width, M.Meta.MyChip_Physical.Height, M.Meta.MyChip_Pixel.Width, M.Meta.MyChip_Pixel.Height, M.Meta.MyPixel_Size.Width, M.Meta.MyPixel_Size.Height, bpp)
-        QHY.QHYCamera.GetQHYCCDEffectiveArea(M.DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
-        QHY.QHYCamera.GetQHYCCDOverScanArea(M.DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
-        QHY.QHYCamera.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))
+        QHY.QHY.GetQHYCCDChipInfo(M.DB.CamHandle, M.Meta.MyChip_Physical.Width, M.Meta.MyChip_Physical.Height, M.Meta.MyChip_Pixel.Width, M.Meta.MyChip_Pixel.Height, M.Meta.MyPixel_Size.Width, M.Meta.MyPixel_Size.Height, bpp)
+        QHY.QHY.GetQHYCCDEffectiveArea(M.DB.CamHandle, EffArea.X, EffArea.Y, EffArea.Width, EffArea.Height)
+        QHY.QHY.GetQHYCCDOverScanArea(M.DB.CamHandle, OverArea.X, OverArea.Y, OverArea.Width, OverArea.Height)
+        QHY.QHY.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))
         M.DB.Stopper.Stamp("Get chip properties")
 
         'Log chip properties
@@ -114,7 +114,7 @@ Partial Public Class MainForm
             If StopNow(False) Then Exit For
 
             'Get the buffer size from the DLL - typically too big but does not care ...
-            Dim BytesToTransfer_reported As UInteger = QHY.QHYCamera.GetQHYCCDMemLength(M.DB.CamHandle)
+            Dim BytesToTransfer_reported As UInteger = QHY.QHY.GetQHYCCDMemLength(M.DB.CamHandle)
             LogVerbose("GetQHYCCDMemLength says: " & BytesToTransfer_reported.ValRegIndep.PadLeft(12) & " byte to transfer.")
             If (CamRawBuffer.Length <> BytesToTransfer_reported) Or (IsNothing(PinHandler) = True) Then
                 PinHandler = New cIntelIPP.cPinHandler
@@ -128,15 +128,15 @@ Partial Public Class MainForm
             Dim LiveModePollCount As Integer = 0
             LED_update(tsslLED_reading, True)
             If M.DB.StreamMode = eStreamMode.SingleFrame Then
-                CallOK("GetQHYCCDSingleFrame", QHY.QHYCamera.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr))
+                CallOK("GetQHYCCDSingleFrame", QHY.QHY.GetQHYCCDSingleFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr))
                 LED_update(tsslLED_capture, False)
             Else
                 Dim LiveModeReady As UInteger = UInteger.MaxValue
                 Do
-                    LiveModeReady = QHY.QHYCamera.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr)
+                    LiveModeReady = QHY.QHY.GetQHYCCDLiveFrame(M.DB.CamHandle, Captured_W, Captured_H, BitPerPixel, ChannelToRead, CamRawBufferPtr)
                     LiveModePollCount += 1
                     DE()
-                Loop Until (LiveModeReady = QHY.QHYCamera.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
+                Loop Until (LiveModeReady = QHYCamera.QHY.QHYCCD_ERROR.QHYCCD_SUCCESS) Or M.DB.StopFlag = True
             End If
             LED_update(tsslLED_reading, False)
             RunningCaptureInfo.ObsEnd = Now
@@ -180,7 +180,7 @@ Partial Public Class MainForm
             If M.DB.StarSearch = True Then
                 Dim ROICenter As Point = ImageProcessing.BrightStarDetect(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.StarSearch_Blur, M.DB.StarSearch_Blur)
                 M.DB.ROI = AdjustAndCorrectROI(ROICenter, M.DB.StarSearch_ROI, M.DB.StarSearch_ROI)
-                CallOK("SetQHYCCDResolution", QHY.QHYCamera.SetQHYCCDResolution(M.DB.CamHandle, CUInt(M.DB.ROI.X), CUInt(M.DB.ROI.Y), CUInt(M.DB.ROI.Width \ M.DB.HardwareBinning), CUInt(M.DB.ROI.Height \ M.DB.HardwareBinning)))
+                CallOK("SetQHYCCDResolution", QHY.QHY.SetQHYCCDResolution(M.DB.CamHandle, CUInt(M.DB.ROI.X), CUInt(M.DB.ROI.Y), CUInt(M.DB.ROI.Width \ M.DB.HardwareBinning), CUInt(M.DB.ROI.Height \ M.DB.HardwareBinning)))
                 M.DB.StarSearch = False
             End If
 
@@ -256,7 +256,7 @@ Partial Public Class MainForm
                 End If
                 If NewWindowRequired = True Then
                     FocusWindow = New cImgForm
-                    FocusWindow.Show("Focus Window <" & SingleStatCalc.Dimensions & ">")
+                    FocusWindow.Show '("Focus Window <" & SingleStatCalc.Dimensions & ">")
                 End If
                 Select Case SingleStatCalc.DataMode
                     Case AstroNET.Statistics.eDataMode.UInt16
@@ -331,9 +331,9 @@ Partial Public Class MainForm
     '''<returns>TRUE if camera hardware is stopped and exit can be performed.</returns>
     Private Function StopNow(ByVal Force As Boolean) As Boolean
         If M.DB.StopFlag Or Force = True Then
-            CallOK("CancelQHYCCDExposing", QHY.QHYCamera.CancelQHYCCDExposing(M.DB.CamHandle))
-            CallOK("CancelQHYCCDExposingAndReadout", QHY.QHYCamera.CancelQHYCCDExposingAndReadout(M.DB.CamHandle))
-            If M.DB.StreamMode = eStreamMode.LiveFrame Then CallOK("StopQHYCCDLive", QHY.QHYCamera.StopQHYCCDLive(M.DB.CamHandle))
+            CallOK("CancelQHYCCDExposing", QHY.QHY.CancelQHYCCDExposing(M.DB.CamHandle))
+            CallOK("CancelQHYCCDExposingAndReadout", QHY.QHY.CancelQHYCCDExposingAndReadout(M.DB.CamHandle))
+            If M.DB.StreamMode = eStreamMode.LiveFrame Then CallOK("StopQHYCCDLive", QHY.QHY.StopQHYCCDLive(M.DB.CamHandle))
             Return True
         End If
         Return False
@@ -628,8 +628,8 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tSetTemp_Tick(sender As Object, e As EventArgs) Handles tSetTemp.Tick
-        If M.DB.CamHandle <> IntPtr.Zero Then
-            QHY.QHYCamera.ControlQHYCCDTemp(M.DB.CamHandle, M.DB.Temp_Target)
+        If (M.DB.CamHandle <> IntPtr.Zero) And TargetTempResonable() Then
+            QHY.QHY.ControlQHYCCDTemp(M.DB.CamHandle, M.DB.Temp_Target)
         End If
     End Sub
 
@@ -711,12 +711,20 @@ Partial Public Class MainForm
             .ConfigAlways = False
             .FilterSlot = eFilter.Invalid
             .ShowLiveImage = True
+            .USBTraffic = 0
+            .Temp_Target = -100
+            .Temp_Tolerance = 1000
+            .Temp_StableTime = 0
         End With
         With M.Meta
             .Load10MicronDataAlways = False
         End With
         With M.Report.Prop
             .Log_ClearStat = True
+            .PlotStatisticsColor = False
+            .PlotStatisticsMono = False
+            .PlotMeanStatistics = False
+            .PlotSingleStatistics = False
         End With
         RefreshProperties()
     End Sub
@@ -1001,4 +1009,51 @@ Partial Public Class MainForm
         RefreshProperties()
     End Sub
 
+    Private Sub tsmiPreset_NoOverhead_Click(sender As Object, e As EventArgs) Handles tsmiPreset_NoOverhead.Click
+        With M.DB
+            .Temp_Target = -100
+            .Temp_Tolerance = 1000
+            .Temp_StableTime = 0
+            .ExposureTime = 0.001
+            .StoreImage = False
+        End With
+        With M.Meta
+            .Load10MicronDataAlways = False
+        End With
+        RefreshProperties()
+    End Sub
+
+    Private Sub tsmiTools_Log_Store_Click(sender As Object, e As EventArgs) Handles tsmiTools_Log_Store.Click
+        Dim LogFile As String = System.IO.Path.Combine(M.DB.EXEPath, "QHYDLLCalls.log")
+        System.IO.File.WriteAllLines(LogFile, QHY.QHY.GetCallLog.ToArray)
+        Process.Start(LogFile)
+    End Sub
+
+    Private Sub tsmiTools_Log_Clear_Click(sender As Object, e As EventArgs) Handles tsmiTools_Log_Clear.Click
+        If MsgBox("Are you sure to clean the log?", MsgBoxStyle.OkCancel Or MsgBoxStyle.Question) = MsgBoxResult.Ok Then QHY.QHY.CallLog.Clear()
+    End Sub
+
+    Private Sub AllCoolersOffToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles tsmiActions_AllCoolersOff.Click
+        If CallOK(QHY.QHY.InitQHYCCDResource) = True Then
+            Dim CameraCount As UInteger = QHY.QHY.ScanQHYCCD
+            If CameraCount > 0 Then
+                Log(CameraCount.ValRegIndep & " cameras found")
+                For Idx As Integer = 0 To CInt(CameraCount - 1)
+                    Dim CurrentCamID As New System.Text.StringBuilder(0)
+                    If CallOK(QHY.QHY.GetQHYCCDId(Idx, CurrentCamID)) = True Then
+                        Log("  Open <" & CurrentCamID.ToString & ">")
+                        M.DB.CamHandle = QHY.QHY.OpenQHYCCD(CurrentCamID)
+                        If M.DB.CamHandle <> IntPtr.Zero Then
+                            QHY.QHY.CancelQHYCCDExposingAndReadout(M.DB.CamHandle)
+                            QHY.QHY.ControlQHYCCDTemp(M.DB.CamHandle, 40.0)
+                            Log("    Target temperature set to 40°C")
+                        End If
+                    End If
+                Next Idx
+            End If
+            QHY.QHY.ReleaseQHYCCDResource()
+            M.DB.CamHandle = IntPtr.Zero
+            Log("All coolers deactivated")
+        End If
+    End Sub
 End Class

@@ -63,6 +63,9 @@
     <Folder Include="My Project\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\AstroCam.Nativ.NET\QHYDLLWrapper.vb">
+      <Link>QHYDLLWrapper.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\MyRemoteObservatory\c10Micron.vb">
       <Link>c10Micron.vb</Link>
     </Compile>

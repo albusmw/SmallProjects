@@ -248,14 +248,15 @@ Public Class cDB
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.3 Target Temp - stable time")>
     <ComponentModel.Description("Time [s] to be within tolerance to mark cooling as done")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
     <ComponentModel.DefaultValue(60.0)>
     Public Property Temp_StableTime As Double = 60.0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.4. Cooling time-out")>
     <ComponentModel.Description("Time [s] after which the cooling is finished even if the target temperature is NOT reached")>
-    <ComponentModel.DefaultValue(60.0)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
+    <ComponentModel.DefaultValue(60.0)>
     Public Property Temp_TimeOutAndOK As Double = 60.0
 
     <ComponentModel.Category(Cat1)>
@@ -401,13 +402,6 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ShowLiveImage As Boolean = False
 
-    <ComponentModel.Category(Cat3)>
-    <ComponentModel.DisplayName(Indent & "7. Infinit stack mode")>
-    <ComponentModel.Description("Stack all images (use for focus or drift analysis)")>
-    <ComponentModel.DefaultValue(False)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property StackAll As Boolean = False
-
     '===================================================================================================
 
     <ComponentModel.Category(Cat4)>
@@ -424,21 +418,12 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property StatColor As Boolean = True
 
-    '===================================================================================================
-
-    <ComponentModel.Category(Cat5)>
-    <ComponentModel.DisplayName("   d) Intel IPP path")>
-    <ComponentModel.Description("This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes")>
+    <ComponentModel.Category(Cat4)>
+    <ComponentModel.DisplayName(Indent & "3. Infinit stack mode")>
+    <ComponentModel.Description("Stack all images (use for focus or drift analysis)")>
     <ComponentModel.DefaultValue(False)>
-    Public ReadOnly Property Log_IntelIPPPath As String
-        Get
-            If IsNothing(IPP) = True Then
-                Return "--- (nothing)"
-            Else
-                Return IPP.IPPPath
-            End If
-        End Get
-    End Property
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property StackAll As Boolean = False
 
     '===================================================================================================
 
@@ -508,10 +493,15 @@ Public Class cDB
 
     '===================================================================================================
 
+    '''<summary>Property indicating if the ROI is set.</summary>
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property ROISet() As Boolean
         Get
-            If ROI.X = 0 And ROI.Y = 0 And ROI.Width = 0 And ROI.Height = 0 Then Return False Else Return True
+            If ROI.X = 0 And ROI.Y = 0 Then
+                If ROI.Width = 0 And ROI.Height = 0 Then Return False                                                       'auto-ROI
+                If ROI.Width = M.Meta.Chip_Pixel.Width And ROI.Height = M.Meta.Chip_Pixel.Height Then Return False          'ROI set from the chip dimensions
+            End If
+            Return True
         End Get
     End Property
 
@@ -648,7 +638,7 @@ Public Class cDB_meta
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property ExposureTypeString As String
         Get
-            If ExposureTypeEnum = eExposureType.Custom Then Return ExposureTypeCustom Else Return [Enum].GetName(GetType(eReadOutMode), ExposureTypeEnum)
+            If ExposureTypeEnum = eExposureType.Custom Then Return ExposureTypeCustom Else Return [Enum].GetName(GetType(eExposureType), ExposureTypeEnum)
         End Get
     End Property
 
@@ -659,33 +649,33 @@ Public Class cDB_meta
     Public Property Author As String = "Martin Weiss"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "6. Origin")>
+    <ComponentModel.DisplayName(Indent & "5. Origin")>
     <ComponentModel.Description("Origin to add to the meta data.")>
     <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
     Public Property Origin As String = "Sternwarte Holzkirchen"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "7. Telescope used")>
+    <ComponentModel.DisplayName(Indent & "6. Telescope used")>
     <ComponentModel.Description("Telescope name to add to the meta data.")>
     <ComponentModel.DefaultValue("CDK 12.5 with reducer")>
     Public Property Telescope As String = "CDK 12.5 with reducer"
 
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "8. Telescope aperture [mm]")>
+    <ComponentModel.DisplayName(Indent & "7.1. Telescope aperture [mm]")>
     <ComponentModel.Description("Telescope aperture to add to the meta data.")>
     <ComponentModel.DefaultValue(317.0)>
     Public Property TelescopeAperture As Double = 317.0
 
     '''<summary>Telescope focal length [mm].</summary>
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "9. Telescope focal length [mm]")>
+    <ComponentModel.DisplayName(Indent & "7.2. Telescope focal length [mm]")>
     <ComponentModel.Description("Telescope focal length to add to the meta data.")>
     <ComponentModel.DefaultValue(1676.4)>
     Public Property TelescopeFocalLength As Double = 1676.4
 
     '''<summary>Telescope focal length [mm].</summary>
     <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "10. Telescope focus position")>
+    <ComponentModel.DisplayName(Indent & "8. Telescope focus position")>
     <ComponentModel.Description("Focuser position reported by the telescope.")>
     <ComponentModel.DefaultValue(Double.NaN)>
     Public Property TelescopeFocus As Double = Double.NaN
@@ -712,6 +702,20 @@ Public Class cDB_meta
     <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property Log_Verbose As Boolean = False
+
+    <ComponentModel.Category(Cat_log)>
+    <ComponentModel.DisplayName(Indent & "4. Intel IPP path")>
+    <ComponentModel.Description("This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes")>
+    <ComponentModel.DefaultValue(False)>
+    Public ReadOnly Property Log_IntelIPPPath As String
+        Get
+            If IsNothing(M.DB.IPP) = True Then
+                Return "--- (nothing)"
+            Else
+                Return M.DB.IPP.IPPPath
+            End If
+        End Get
+    End Property
 
     '===================================================================================================
 
