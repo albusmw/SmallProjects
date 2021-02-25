@@ -65,6 +65,7 @@ Partial Class MainForm
         Me.SaveTransmissionToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPreset_SkipCooling = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiPreset_DevTestMWeiss = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiPreset_NoOverhead = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiActions = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiResetLoopStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiNewGUID = New System.Windows.Forms.ToolStripMenuItem()
@@ -72,6 +73,9 @@ Partial Class MainForm
         Me.tsmiClearLog = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_AllQHYDLLs = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_Log = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_Log_Store = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTools_Log_Clear = New System.Windows.Forms.ToolStripMenuItem()
         Me.zgcMain = New ZedGraph.ZedGraphControl()
         Me.tSetTemp = New System.Windows.Forms.Timer(Me.components)
         Me.tsMain = New System.Windows.Forms.ToolStrip()
@@ -94,6 +98,8 @@ Partial Class MainForm
         Me.sfdMain = New System.Windows.Forms.SaveFileDialog()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tStatusUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiActions_AllCoolersOff = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         Me.msMain.SuspendLayout()
         Me.tsMain.SuspendLayout()
@@ -337,7 +343,7 @@ Partial Class MainForm
         '
         Me.SeriesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllReadoutModesToolStripMenuItem, Me.ExposureTimeSeriesToolStripMenuItem, Me.GainVariationToolStripMenuItem})
         Me.SeriesToolStripMenuItem.Name = "SeriesToolStripMenuItem"
-        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(104, 22)
+        Me.SeriesToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.SeriesToolStripMenuItem.Text = "Series"
         '
         'AllReadoutModesToolStripMenuItem
@@ -360,7 +366,7 @@ Partial Class MainForm
         '
         'tsmiPreset
         '
-        Me.tsmiPreset.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiPreset_FastLive, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem, Me.tsmiPreset_SkipCooling, Me.tsmiPreset_DevTestMWeiss})
+        Me.tsmiPreset.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiPreset_FastLive, Me.CenterROIToolStripMenuItem, Me.SaveTransmissionToolStripMenuItem, Me.tsmiPreset_SkipCooling, Me.tsmiPreset_DevTestMWeiss, Me.tsmiPreset_NoOverhead})
         Me.tsmiPreset.Name = "tsmiPreset"
         Me.tsmiPreset.Size = New System.Drawing.Size(56, 20)
         Me.tsmiPreset.Text = "Presets"
@@ -395,9 +401,15 @@ Partial Class MainForm
         Me.tsmiPreset_DevTestMWeiss.Size = New System.Drawing.Size(171, 22)
         Me.tsmiPreset_DevTestMWeiss.Text = "Dev test (M Weiss)"
         '
+        'tsmiPreset_NoOverhead
+        '
+        Me.tsmiPreset_NoOverhead.Name = "tsmiPreset_NoOverhead"
+        Me.tsmiPreset_NoOverhead.Size = New System.Drawing.Size(171, 22)
+        Me.tsmiPreset_NoOverhead.Text = "No overhead"
+        '
         'tsmiActions
         '
-        Me.tsmiActions.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiResetLoopStat, Me.tsmiNewGUID, Me.tsmiLoad10MicronData, Me.tsmiClearLog})
+        Me.tsmiActions.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiResetLoopStat, Me.tsmiNewGUID, Me.tsmiLoad10MicronData, Me.tsmiClearLog, Me.ToolStripMenuItem2, Me.tsmiActions_AllCoolersOff})
         Me.tsmiActions.Name = "tsmiActions"
         Me.tsmiActions.Size = New System.Drawing.Size(59, 20)
         Me.tsmiActions.Text = "Actions"
@@ -405,30 +417,30 @@ Partial Class MainForm
         'tsmiResetLoopStat
         '
         Me.tsmiResetLoopStat.Name = "tsmiResetLoopStat"
-        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiResetLoopStat.Size = New System.Drawing.Size(180, 22)
         Me.tsmiResetLoopStat.Text = "Reset loop statistics"
         '
         'tsmiNewGUID
         '
         Me.tsmiNewGUID.Name = "tsmiNewGUID"
-        Me.tsmiNewGUID.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiNewGUID.Size = New System.Drawing.Size(180, 22)
         Me.tsmiNewGUID.Text = "New GUID"
         '
         'tsmiLoad10MicronData
         '
         Me.tsmiLoad10MicronData.Name = "tsmiLoad10MicronData"
-        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiLoad10MicronData.Size = New System.Drawing.Size(180, 22)
         Me.tsmiLoad10MicronData.Text = "Load 10Micron data"
         '
         'tsmiClearLog
         '
         Me.tsmiClearLog.Name = "tsmiClearLog"
-        Me.tsmiClearLog.Size = New System.Drawing.Size(179, 22)
+        Me.tsmiClearLog.Size = New System.Drawing.Size(180, 22)
         Me.tsmiClearLog.Text = "Clear log"
         '
         'tsmiTools
         '
-        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_AllQHYDLLs})
+        Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_AllQHYDLLs, Me.tsmiTools_Log})
         Me.tsmiTools.Name = "tsmiTools"
         Me.tsmiTools.Size = New System.Drawing.Size(46, 20)
         Me.tsmiTools.Text = "Tools"
@@ -438,6 +450,25 @@ Partial Class MainForm
         Me.tsmiTools_AllQHYDLLs.Name = "tsmiTools_AllQHYDLLs"
         Me.tsmiTools_AllQHYDLLs.Size = New System.Drawing.Size(180, 22)
         Me.tsmiTools_AllQHYDLLs.Text = "Get all QHY DLLs"
+        '
+        'tsmiTools_Log
+        '
+        Me.tsmiTools_Log.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_Log_Store, Me.tsmiTools_Log_Clear})
+        Me.tsmiTools_Log.Name = "tsmiTools_Log"
+        Me.tsmiTools_Log.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiTools_Log.Text = "DLL Log"
+        '
+        'tsmiTools_Log_Store
+        '
+        Me.tsmiTools_Log_Store.Name = "tsmiTools_Log_Store"
+        Me.tsmiTools_Log_Store.Size = New System.Drawing.Size(121, 22)
+        Me.tsmiTools_Log_Store.Text = "Store log"
+        '
+        'tsmiTools_Log_Clear
+        '
+        Me.tsmiTools_Log_Clear.Name = "tsmiTools_Log_Clear"
+        Me.tsmiTools_Log_Clear.Size = New System.Drawing.Size(121, 22)
+        Me.tsmiTools_Log_Clear.Text = "Clear"
         '
         'zgcMain
         '
@@ -664,6 +695,17 @@ Partial Class MainForm
         Me.tStatusUpdate.Enabled = True
         Me.tStatusUpdate.Interval = 250
         '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(177, 6)
+        '
+        'tsmiActions_AllCoolersOff
+        '
+        Me.tsmiActions_AllCoolersOff.Name = "tsmiActions_AllCoolersOff"
+        Me.tsmiActions_AllCoolersOff.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiActions_AllCoolersOff.Text = "All coolers off"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -775,4 +817,10 @@ Partial Class MainForm
     Friend WithEvents tsmiTools As ToolStripMenuItem
     Friend WithEvents tsmiTools_AllQHYDLLs As ToolStripMenuItem
     Friend WithEvents tsmiPreset_DevTestMWeiss As ToolStripMenuItem
+    Friend WithEvents tsmiPreset_NoOverhead As ToolStripMenuItem
+    Friend WithEvents tsmiTools_Log As ToolStripMenuItem
+    Friend WithEvents tsmiTools_Log_Store As ToolStripMenuItem
+    Friend WithEvents tsmiTools_Log_Clear As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem2 As ToolStripSeparator
+    Friend WithEvents tsmiActions_AllCoolersOff As ToolStripMenuItem
 End Class
