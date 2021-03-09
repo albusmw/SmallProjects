@@ -98,6 +98,8 @@ Partial Class MainForm
         Me.tsmiTools_ALADINCoords = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_RemoveOverscan = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SpecialTestFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.CheckROICutoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -113,8 +115,7 @@ Partial Class MainForm
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
-        Me.SpecialTestFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.CheckROICutoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTest_AllFilePixelStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -483,7 +484,7 @@ Partial Class MainForm
         '
         'tsmiTest
         '
-        Me.tsmiTest.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTest_WriteTestData, Me.AfiineTranslateToolStripMenuItem, Me.tsmiTest_ASCOMDyn, Me.ToolStripMenuItem6, Me.tsmiTest_Focus, Me.tsmiTest_ReadNEFFile, Me.ToolStripMenuItem9, Me.tsmiTestCode_UseOpenCV, Me.MedianWithinNETToolStripMenuItem, Me.ToolStripMenuItem12, Me.CodeBelowIsNotForHereToolStripMenuItem, Me.CloudWatcherCombinerToolStripMenuItem})
+        Me.tsmiTest.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTest_WriteTestData, Me.AfiineTranslateToolStripMenuItem, Me.tsmiTest_ASCOMDyn, Me.ToolStripMenuItem6, Me.tsmiTest_Focus, Me.tsmiTest_ReadNEFFile, Me.ToolStripMenuItem9, Me.tsmiTestCode_UseOpenCV, Me.MedianWithinNETToolStripMenuItem, Me.ToolStripMenuItem12, Me.CodeBelowIsNotForHereToolStripMenuItem, Me.CloudWatcherCombinerToolStripMenuItem, Me.tsmiTest_AllFilePixelStat})
         Me.tsmiTest.Name = "tsmiTest"
         Me.tsmiTest.Size = New System.Drawing.Size(68, 22)
         Me.tsmiTest.Text = "Test code"
@@ -587,6 +588,18 @@ Partial Class MainForm
         Me.tsmiTools_RemoveOverscan.Name = "tsmiTools_RemoveOverscan"
         Me.tsmiTools_RemoveOverscan.Size = New System.Drawing.Size(215, 22)
         Me.tsmiTools_RemoveOverscan.Text = "Remove QHY600 Overscan"
+        '
+        'SpecialTestFileToolStripMenuItem
+        '
+        Me.SpecialTestFileToolStripMenuItem.Name = "SpecialTestFileToolStripMenuItem"
+        Me.SpecialTestFileToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
+        Me.SpecialTestFileToolStripMenuItem.Text = "Special test file"
+        '
+        'CheckROICutoutToolStripMenuItem
+        '
+        Me.CheckROICutoutToolStripMenuItem.Name = "CheckROICutoutToolStripMenuItem"
+        Me.CheckROICutoutToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
+        Me.CheckROICutoutToolStripMenuItem.Text = "Check ROI cut-out"
         '
         'ofdMain
         '
@@ -740,17 +753,11 @@ Partial Class MainForm
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
-        'SpecialTestFileToolStripMenuItem
+        'tsmiTest_AllFilePixelStat
         '
-        Me.SpecialTestFileToolStripMenuItem.Name = "SpecialTestFileToolStripMenuItem"
-        Me.SpecialTestFileToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
-        Me.SpecialTestFileToolStripMenuItem.Text = "Special test file"
-        '
-        'CheckROICutoutToolStripMenuItem
-        '
-        Me.CheckROICutoutToolStripMenuItem.Name = "CheckROICutoutToolStripMenuItem"
-        Me.CheckROICutoutToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
-        Me.CheckROICutoutToolStripMenuItem.Text = "Check ROI cut-out"
+        Me.tsmiTest_AllFilePixelStat.Name = "tsmiTest_AllFilePixelStat"
+        Me.tsmiTest_AllFilePixelStat.Size = New System.Drawing.Size(274, 22)
+        Me.tsmiTest_AllFilePixelStat.Text = "All files pixel stat"
         '
         'MainForm
         '
@@ -881,4 +888,5 @@ Partial Class MainForm
     Friend WithEvents tsmiTools_RemoveOverscan As ToolStripMenuItem
     Friend WithEvents SpecialTestFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CheckROICutoutToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiTest_AllFilePixelStat As ToolStripMenuItem
 End Class

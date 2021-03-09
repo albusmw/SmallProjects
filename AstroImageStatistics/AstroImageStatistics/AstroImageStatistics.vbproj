@@ -255,6 +255,12 @@
     <Compile Include="frmHeaderAsIs.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmSinglePixelStat.Designer.vb">
+      <DependentUpon>frmSinglePixelStat.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSinglePixelStat.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -316,6 +322,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmHeaderAsIs.resx">
       <DependentUpon>frmHeaderAsIs.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSinglePixelStat.resx">
+      <DependentUpon>frmSinglePixelStat.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>

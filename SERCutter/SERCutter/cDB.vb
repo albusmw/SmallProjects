@@ -24,12 +24,12 @@ Public Class cDB
     <ComponentModel.Category(Cat_files)>
     <ComponentModel.DisplayName("a.) Input file")>
     <ComponentModel.DefaultValue("")>
-    Public Property InputFile As String = "C:\TEMP\H_alpha\Sun.ser"
+    Public Property InputFile As String = "\\192.168.100.10\astro\2021_02_25 (TrackTest)\20_56_28.ser"
 
     <ComponentModel.Category(Cat_files)>
     <ComponentModel.DisplayName("b.) Output file")>
     <ComponentModel.DefaultValue("")>
-    Public Property OutputFile As String = "C:\!Work\Astro\SERCutter_solar\<FileName>__cutout.ser"
+    Public Property OutputFile As String = "C:\!Work\Astro\TrackTest<FileName>__cutout.ser"
 
     <ComponentModel.Category(Cat_files)>
     <ComponentModel.DisplayName("c.) Single-image FITS path")>
