@@ -32,12 +32,15 @@ Partial Class MainForm
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReadHeader = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenEXELocationToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenInputPathToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DebugToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ShowLogToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiFile_SaveXLS = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiDebug_PlotTracking = New System.Windows.Forms.ToolStripMenuItem()
         Me.ssMain.SuspendLayout()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
@@ -132,7 +135,7 @@ Partial Class MainForm
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiReadHeader, Me.OpenEXELocationToolStripMenuItem, Me.OpenInputPathToolStripMenuItem, Me.ToolStripMenuItem1, Me.ExitToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiReadHeader, Me.OpenEXELocationToolStripMenuItem, Me.OpenInputPathToolStripMenuItem, Me.ToolStripMenuItem1, Me.tsmiFile_SaveXLS, Me.ToolStripMenuItem2, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -142,17 +145,6 @@ Partial Class MainForm
         Me.tsmiReadHeader.Name = "tsmiReadHeader"
         Me.tsmiReadHeader.Size = New System.Drawing.Size(180, 22)
         Me.tsmiReadHeader.Text = "Read header only"
-        '
-        'ToolStripMenuItem1
-        '
-        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(177, 6)
-        '
-        'ExitToolStripMenuItem
-        '
-        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.ExitToolStripMenuItem.Text = "Exit"
         '
         'OpenEXELocationToolStripMenuItem
         '
@@ -166,9 +158,20 @@ Partial Class MainForm
         Me.OpenInputPathToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.OpenInputPathToolStripMenuItem.Text = "Open input path"
         '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(177, 6)
+        '
+        'ExitToolStripMenuItem
+        '
+        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ExitToolStripMenuItem.Text = "Exit"
+        '
         'DebugToolStripMenuItem
         '
-        Me.DebugToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ShowLogToolStripMenuItem})
+        Me.DebugToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ShowLogToolStripMenuItem, Me.tsmiDebug_PlotTracking})
         Me.DebugToolStripMenuItem.Name = "DebugToolStripMenuItem"
         Me.DebugToolStripMenuItem.Size = New System.Drawing.Size(54, 20)
         Me.DebugToolStripMenuItem.Text = "Debug"
@@ -178,6 +181,23 @@ Partial Class MainForm
         Me.ShowLogToolStripMenuItem.Name = "ShowLogToolStripMenuItem"
         Me.ShowLogToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.ShowLogToolStripMenuItem.Text = "Show Log"
+        '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(177, 6)
+        '
+        'tsmiFile_SaveXLS
+        '
+        Me.tsmiFile_SaveXLS.Name = "tsmiFile_SaveXLS"
+        Me.tsmiFile_SaveXLS.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiFile_SaveXLS.Text = "Save Excel report"
+        '
+        'tsmiDebug_PlotTracking
+        '
+        Me.tsmiDebug_PlotTracking.Name = "tsmiDebug_PlotTracking"
+        Me.tsmiDebug_PlotTracking.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiDebug_PlotTracking.Text = "Plot tracking graph"
         '
         'MainForm
         '
@@ -222,4 +242,7 @@ Partial Class MainForm
     Friend WithEvents OpenInputPathToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents DebugToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ShowLogToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents tsmiFile_SaveXLS As Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem2 As Windows.Forms.ToolStripSeparator
+    Friend WithEvents tsmiDebug_PlotTracking As Windows.Forms.ToolStripMenuItem
 End Class

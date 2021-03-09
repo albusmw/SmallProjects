@@ -110,7 +110,8 @@ Public Class frmNavigator
         If NewWindowRequired = True Then
             FormToShow = New cImgForm
         End If
-        FormToShow.Show("MosaikForm <" & tbRootFile.Text & ">")
+        FormToShow.Show()
+        FormToShow.Hoster.Text = "MosaikForm <" & tbRootFile.Text & ">"
         FormToShow.ColorMap = CType(cbColorModes.SelectedIndex, cColorMaps.eMaps)
         FormToShow.ShowData(Data, Min, Max)
 

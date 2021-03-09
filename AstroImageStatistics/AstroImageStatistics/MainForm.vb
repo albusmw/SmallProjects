@@ -1977,4 +1977,11 @@ Public Class MainForm
 
     End Sub
 
+    Private Sub tsmiTest_AllFilePixelStat_Click(sender As Object, e As EventArgs) Handles tsmiTest_AllFilePixelStat.Click
+
+        Dim NewForm As New frmSinglePixelStat
+        NewForm.Show()
+
+    End Sub
+
 End Class

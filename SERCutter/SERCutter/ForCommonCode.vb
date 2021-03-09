@@ -3,6 +3,7 @@ Option Strict On
 
 Public Class ForCommonCode
 
+
     Public Shared Function SlidingAVG(ByRef Data() As Long, ByVal WindowLength As Integer, ByRef PeakPos As Integer) As Long()
 
         Dim RetVal(Data.GetUpperBound(0)) As Long
