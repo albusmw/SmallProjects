@@ -95,7 +95,7 @@ Public Enum eFilter As Byte
     H_alpha = 5
     <ComponentModel.Description("S-II")>
     S_II = 6
-    <ComponentModel.Description("O_III")>
+    <ComponentModel.Description("O-III")>
     O_III = 7
     <ComponentModel.Description("Empty")>
     Empty = 9
@@ -313,9 +313,10 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property UseFilterWheel As Boolean = True
 
+    '''<summaryFilter slot to select</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "2.2. Filter slot")>
-    <ComponentModel.Description("Filter slot to select.")>
+    <ComponentModel.Description("Filter slot to select")>
     <ComponentModel.DefaultValue(eFilter.Invalid)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property FilterSlot As eFilter = eFilter.Invalid
@@ -328,18 +329,21 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
     Public Property ExposureTime As Double = 1.0
 
+    '''<summaryGain to set</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "4. Gain")>
     <ComponentModel.Description("Gain to set")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
+    '''<summary>Offset to set</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "5. Offset")>
     <ComponentModel.Description("Offset to set")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
 
+    '''<summary>Remove the overscan area in the stored data and file</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "6. Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored data and file")>
@@ -347,6 +351,7 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property RemoveOverscan As Boolean = True
 
+    '''<summary>Write all exposure data to the camera on each exposure start (takes some ms ...)</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "7. Config for each capture")>
     <ComponentModel.Description("Write all exposure data to the camera on each exposure start (takes some ms ...)")>

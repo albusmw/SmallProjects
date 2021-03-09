@@ -1016,6 +1016,7 @@ Partial Public Class MainForm
             .Temp_StableTime = 0
             .ExposureTime = 0.001
             .StoreImage = False
+            .ConfigAlways = False
         End With
         With M.Meta
             .Load10MicronDataAlways = False
