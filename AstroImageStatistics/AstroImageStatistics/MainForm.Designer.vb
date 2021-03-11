@@ -93,13 +93,15 @@ Partial Class MainForm
         Me.ToolStripMenuItem12 = New System.Windows.Forms.ToolStripSeparator()
         Me.CodeBelowIsNotForHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CloudWatcherCombinerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiDisplayImage = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiTest_AllFilePixelStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ALADINCoords = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_RemoveOverscan = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpecialTestFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CheckROICutoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.WorkflowToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiWorkflow_Runner = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -115,7 +117,6 @@ Partial Class MainForm
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
-        Me.tsmiTest_AllFilePixelStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -133,7 +134,7 @@ Partial Class MainForm
         'msMain
         '
         Me.msMain.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFile, Me.tsmiAnalysis, Me.tsmiProcessing, Me.tsmiTest, Me.tsmiDisplayImage, Me.tsmiTools})
+        Me.msMain.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFile, Me.tsmiAnalysis, Me.tsmiProcessing, Me.tsmiTest, Me.tsmiTools, Me.WorkflowToolStripMenuItem})
         Me.msMain.Location = New System.Drawing.Point(0, 0)
         Me.msMain.Name = "msMain"
         Me.msMain.Padding = New System.Windows.Forms.Padding(4, 1, 0, 1)
@@ -558,11 +559,11 @@ Partial Class MainForm
         Me.CloudWatcherCombinerToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.CloudWatcherCombinerToolStripMenuItem.Text = "CloudWatcher combiner"
         '
-        'tsmiDisplayImage
+        'tsmiTest_AllFilePixelStat
         '
-        Me.tsmiDisplayImage.Name = "tsmiDisplayImage"
-        Me.tsmiDisplayImage.Size = New System.Drawing.Size(93, 22)
-        Me.tsmiDisplayImage.Text = "Display image"
+        Me.tsmiTest_AllFilePixelStat.Name = "tsmiTest_AllFilePixelStat"
+        Me.tsmiTest_AllFilePixelStat.Size = New System.Drawing.Size(274, 22)
+        Me.tsmiTest_AllFilePixelStat.Text = "All files pixel stat"
         '
         'tsmiTools
         '
@@ -600,6 +601,19 @@ Partial Class MainForm
         Me.CheckROICutoutToolStripMenuItem.Name = "CheckROICutoutToolStripMenuItem"
         Me.CheckROICutoutToolStripMenuItem.Size = New System.Drawing.Size(215, 22)
         Me.CheckROICutoutToolStripMenuItem.Text = "Check ROI cut-out"
+        '
+        'WorkflowToolStripMenuItem
+        '
+        Me.WorkflowToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiWorkflow_Runner})
+        Me.WorkflowToolStripMenuItem.Name = "WorkflowToolStripMenuItem"
+        Me.WorkflowToolStripMenuItem.Size = New System.Drawing.Size(70, 22)
+        Me.WorkflowToolStripMenuItem.Text = "Workflow"
+        '
+        'tsmiWorkflow_Runner
+        '
+        Me.tsmiWorkflow_Runner.Name = "tsmiWorkflow_Runner"
+        Me.tsmiWorkflow_Runner.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiWorkflow_Runner.Text = "Open runner"
         '
         'ofdMain
         '
@@ -753,12 +767,6 @@ Partial Class MainForm
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
-        'tsmiTest_AllFilePixelStat
-        '
-        Me.tsmiTest_AllFilePixelStat.Name = "tsmiTest_AllFilePixelStat"
-        Me.tsmiTest_AllFilePixelStat.Size = New System.Drawing.Size(274, 22)
-        Me.tsmiTest_AllFilePixelStat.Text = "All files pixel stat"
-        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -853,7 +861,6 @@ Partial Class MainForm
     Friend WithEvents tsmiSetPixelToValue As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem9 As ToolStripSeparator
     Friend WithEvents tsmiTestCode_UseOpenCV As ToolStripMenuItem
-    Friend WithEvents tsmiDisplayImage As ToolStripMenuItem
     Friend WithEvents tsmiTools As ToolStripMenuItem
     Friend WithEvents tsmiTools_ALADINCoords As ToolStripMenuItem
     Friend WithEvents tsmiAnalysis_ManualColorBalancer As ToolStripMenuItem
@@ -889,4 +896,6 @@ Partial Class MainForm
     Friend WithEvents SpecialTestFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CheckROICutoutToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiTest_AllFilePixelStat As ToolStripMenuItem
+    Friend WithEvents WorkflowToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents tsmiWorkflow_Runner As ToolStripMenuItem
 End Class

@@ -261,6 +261,12 @@
     <Compile Include="frmSinglePixelStat.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmWorkflow.Designer.vb">
+      <DependentUpon>frmWorkflow.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmWorkflow.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -325,6 +331,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmSinglePixelStat.resx">
       <DependentUpon>frmSinglePixelStat.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmWorkflow.resx">
+      <DependentUpon>frmWorkflow.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>

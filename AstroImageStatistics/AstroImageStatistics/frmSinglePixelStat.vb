@@ -44,7 +44,7 @@ Public Class frmSinglePixelStat
         Dim FITSReader As New cFITSReader
 
         'Get all pixel
-        Dim Stat As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : Stat.StoreRawValues = True
+        Dim Stat As New Ato.cSingleValueStatistics(True)
         Dim AllPixel As New List(Of UInt16)
         Dim StringValues As New List(Of String)
         For Each File As String In AllDataOffsets.Keys

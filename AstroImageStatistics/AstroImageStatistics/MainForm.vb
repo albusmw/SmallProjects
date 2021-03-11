@@ -156,8 +156,7 @@ Public Class MainForm
                 ReDim StackingStatistics(Container.NAXIS1 - 1, Container.NAXIS2 - 1)
                 For Idx1 As Integer = 0 To StackingStatistics.GetUpperBound(0)
                     For Idx2 As Integer = 0 To StackingStatistics.GetUpperBound(1)
-                        StackingStatistics(Idx1, Idx2) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
-                        StackingStatistics(Idx1, Idx2).StoreRawValues = False
+                        StackingStatistics(Idx1, Idx2) = New Ato.cSingleValueStatistics(False)
                     Next Idx2
                 Next Idx1
             End If
@@ -201,27 +200,6 @@ Public Class MainForm
         Dim Indent As String = "  "
         'Calculate statistics
         Stat = Container.ImageStatistics(Container.DataFixFloat)
-        'Set width and height values
-        If Container.DataFixFloat = AstroNET.Statistics.sStatistics.eDataMode.Fixed Then
-            Stat.MonoStatistics_Int.Width = Container.NAXIS1
-            Stat.MonoStatistics_Int.Height = Container.NAXIS2
-            For BayerIdx1 As Integer = 0 To 1
-                For BayerIdx2 As Integer = 0 To 1
-                    Stat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Width = Container.NAXIS1 \ 2
-                    Stat.BayerStatistics_Int(BayerIdx1, BayerIdx2).Height = Container.NAXIS2 \ 2
-                Next BayerIdx2
-            Next BayerIdx1
-        Else
-            Stat.MonoStatistics_Float32.Width = Container.NAXIS1
-            Stat.MonoStatistics_Float32.Height = Container.NAXIS2
-            Stat.MonoStatistics_Int.Height = Container.NAXIS2
-            For BayerIdx1 As Integer = 0 To 1
-                For BayerIdx2 As Integer = 0 To 1
-                    Stat.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Width = Container.NAXIS1 \ 2
-                    Stat.BayerStatistics_Float32(BayerIdx1, BayerIdx2).Height = Container.NAXIS2 \ 2
-                Next BayerIdx2
-            Next BayerIdx1
-        End If
         'Log statistics
         Log("Statistics:")
         Log(Indent, Stat.StatisticsReport(DB.MonoStatistics, DB.BayerStatistics, ChannelNames).ToArray())
@@ -435,6 +413,10 @@ Public Class MainForm
         Log(Text.ToArray)
     End Sub
 
+    Private Sub Log(ByVal Indent As String, ByVal Text As String)
+        Log(Indent & Text, False, False)
+    End Sub
+
     Private Sub Log(ByVal Indent As String, ByVal Text() As String)
         For Each Line As String In Text
             Log(Indent & Line, False, False)
@@ -627,7 +609,7 @@ Public Class MainForm
 
     Private Sub InitStat(ByRef Vector() As Ato.cSingleValueStatistics)
         For Idx As Integer = 0 To Vector.GetUpperBound(0)
-            Vector(Idx) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear)
+            Vector(Idx) = New Ato.cSingleValueStatistics(True)
         Next Idx
     End Sub
 
@@ -1330,18 +1312,6 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub tsmiDisplayImage_Click(sender As Object, e As EventArgs) Handles tsmiDisplayImage.Click
-        Dim ImageDisplay As New frmImageDisplay
-        ImageDisplay.FileToDisplay = LastFile
-        ImageDisplay.Show()
-        ImageDisplay.SingleStatCalc = CurrentData
-        ImageDisplay.StatToUsed = CurrentStatistics
-        ImageDisplay.MyIPP = DB.IPP
-        ImageDisplay.Props.MinCutOff_ADU = CurrentStatistics.MonoStatistics_Int.Min.Key
-        ImageDisplay.Props.MaxCutOff_ADU = CurrentStatistics.MonoStatistics_Int.Max.Key
-        ImageDisplay.GenerateDisplayImage()
-    End Sub
-
     Private Sub tsmiTools_ALADINCoords_Click(sender As Object, e As EventArgs) Handles tsmiTools_ALADINCoords.Click
 
         Dim FileToRun As String = LastFile
@@ -1557,8 +1527,8 @@ Public Class MainForm
             Dim VigBin_X(DB.VigCalcBins - 1) As Ato.cSingleValueStatistics
             Dim VigBin_Y(DB.VigCalcBins - 1) As Ato.cSingleValueStatistics
             For InitIdx As Integer = 0 To VigBin_X.GetUpperBound(0)
-                VigBin_X(InitIdx) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear, False)
-                VigBin_Y(InitIdx) = New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear, False)
+                VigBin_X(InitIdx) = New Ato.cSingleValueStatistics(False)
+                VigBin_Y(InitIdx) = New Ato.cSingleValueStatistics(False)
             Next InitIdx
             'Sweep over all used dictionary entries, calculate bin and add value for X and Y value
             Dim Range As Double = Max - Min
@@ -1639,7 +1609,7 @@ Public Class MainForm
         With CurrentData.DataProcessor_UInt16.ImageData(0)
             For Idx1 As Integer = 1 To .NAXIS1 - 2
                 For Idx2 As Integer = 1 To .NAXIS2 - 2
-                    Dim SurSum As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : SurSum.StoreRawValues = True
+                    Dim SurSum As New Ato.cSingleValueStatistics(True)
                     SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
                     SurSum.AddValue(.Data(Idx1 - 1, Idx2))
                     SurSum.AddValue(.Data(Idx1 - 1, Idx2 + 1))
@@ -1744,7 +1714,15 @@ Public Class MainForm
     End Sub
 
     Private Sub tsb_Display_Click(sender As Object, e As EventArgs) Handles tsb_Display.Click
-        tsmiDisplayImage_Click(Nothing, Nothing)
+        Dim ImageDisplay As New frmImageDisplay
+        ImageDisplay.FileToDisplay = LastFile
+        ImageDisplay.Show()
+        ImageDisplay.SingleStatCalc = CurrentData
+        ImageDisplay.StatToUsed = CurrentStatistics
+        ImageDisplay.MyIPP = DB.IPP
+        ImageDisplay.Props.MinCutOff_ADU = CurrentStatistics.MonoStatistics_Int.Min.Key
+        ImageDisplay.Props.MaxCutOff_ADU = CurrentStatistics.MonoStatistics_Int.Max.Key
+        ImageDisplay.GenerateDisplayImage()
     End Sub
 
     Private Sub tsmiFile_AstroBinSearch_Click(sender As Object, e As EventArgs) Handles tsmiFile_AstroBinSearch.Click
@@ -1982,6 +1960,12 @@ Public Class MainForm
         Dim NewForm As New frmSinglePixelStat
         NewForm.Show()
 
+    End Sub
+
+    Private Sub tsmiWorkflow_Runner_Click(sender As Object, e As EventArgs) Handles tsmiWorkflow_Runner.Click
+        Dim Workflow As New frmWorkflow
+        Workflow.SetDB(DB)
+        Workflow.Show()
     End Sub
 
 End Class
