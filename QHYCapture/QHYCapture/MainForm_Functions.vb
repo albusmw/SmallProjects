@@ -529,17 +529,17 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.INSTRUME, M.DB.UsedCameraId.ToString)
         CustomElement.Add(eFITSKeywords.PIXSIZE1, M.Meta.Pixel_Size.Width)
         CustomElement.Add(eFITSKeywords.PIXSIZE2, M.Meta.Pixel_Size.Height)
-        CustomElement.Add(eFITSKeywords.PLATESZ1, PLATESZ1 / 10)                        'calculated from the image data as ROI may be set ...
-        CustomElement.Add(eFITSKeywords.PLATESZ2, PLATESZ2 / 10)                        'calculated from the image data as ROI may be set ...
+        CustomElement.Add(eFITSKeywords.PLATESZ1, PLATESZ1 / 10)                                                    'calculated from the image data as ROI may be set ...
+        CustomElement.Add(eFITSKeywords.PLATESZ2, PLATESZ2 / 10)                                                    'calculated from the image data as ROI may be set ...
         CustomElement.Add(eFITSKeywords.FOV1, FOV1)
         CustomElement.Add(eFITSKeywords.FOV2, FOV2)
         CustomElement.Add(eFITSKeywords.COLORTYP, "0")                                                           '<- check
         CustomElement.Add(eFITSKeywords.FILTER, FilterName)
 
-        CustomElement.Add(eFITSKeywords.DATE_OBS, cFITSType.FITSString_Date(SingleCaptureData.ObsStart))
-        CustomElement.Add(eFITSKeywords.DATE_END, cFITSType.FITSString_Date(SingleCaptureData.ObsEnd))
-        CustomElement.Add(eFITSKeywords.TIME_OBS, cFITSType.FITSString_Time(SingleCaptureData.ObsStart))
-        CustomElement.Add(eFITSKeywords.TIME_END, cFITSType.FITSString_Time(SingleCaptureData.ObsEnd))
+        CustomElement.Add(eFITSKeywords.DATE_OBS, SingleCaptureData.ObsStart.Date)
+        CustomElement.Add(eFITSKeywords.DATE_END, SingleCaptureData.ObsEnd.Date)
+        CustomElement.Add(eFITSKeywords.TIME_OBS, SingleCaptureData.ObsStart.TimeOfDay)
+        CustomElement.Add(eFITSKeywords.TIME_END, SingleCaptureData.ObsEnd.TimeOfDay)
 
         CustomElement.Add(eFITSKeywords.CRPIX1, 0.5 * (SingleCaptureData.NAXIS1 + 1))
         CustomElement.Add(eFITSKeywords.CRPIX2, 0.5 * (SingleCaptureData.NAXIS2 + 1))
