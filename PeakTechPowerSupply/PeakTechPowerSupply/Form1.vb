@@ -14,8 +14,10 @@ Public Class Form1
     End Sub
 
     Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+        tbRxTx.BackColor = Color.Red : DE()
         COM_IO.Update()
         pgMain.SelectedObject = COM_IO
+        tbRxTx.BackColor = Color.Silver : DE()
     End Sub
 
     Private Sub btnOff_Click(sender As Object, e As EventArgs) Handles btnOff.Click
@@ -32,6 +34,10 @@ Public Class Form1
 
     Private Sub tbnStart_Click(sender As Object, e As EventArgs) Handles tbnStart.Click
         Start()
+    End Sub
+
+    Private Sub DE()
+        System.Windows.Forms.Application.DoEvents()
     End Sub
 
 End Class

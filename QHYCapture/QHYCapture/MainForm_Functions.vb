@@ -169,7 +169,7 @@ Partial Public Class MainForm
 
         'Display all properties available
         For Each CONTROL_ID As QHYCamera.QHY.CONTROL_ID In [Enum].GetValues(GetType(QHYCamera.QHY.CONTROL_ID))                          'Move over all Control ID's
-            If QHY.QHY.IsQHYCCDControlAvailable(M.DB.CamHandle, CONTROL_ID) <> QHYCamera.QHY.QHYCCD_ERROR.QHYCCD_SUCCESS Then     'If control is available
+            If QHY.QHY.IsQHYCCDControlAvailable(M.DB.CamHandle, CONTROL_ID) <> QHYCamera.QHY.QHYCCD_ERROR.QHYCCD_SUCCESS Then           'If control is available
                 Log("  " & CONTROL_ID.ToString.Trim.PadRight(40) & ": NOT AVAILABLE")
             Else
                 Dim Min As Double = Double.NaN
@@ -192,6 +192,16 @@ Partial Public Class MainForm
         Next CONTROL_ID
 
     End Sub
+
+    Private Function IsColorCamera() As Boolean
+        Dim RGBPattern As UInt32 = CUInt(QHY.QHY.IsQHYCCDControlAvailable(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CAM_COLOR))
+        Select Case CType(RGBPattern, QHYCamera.QHY.BAYER_ID)
+            Case QHYCamera.QHY.BAYER_ID.BAYER_BG, QHYCamera.QHY.BAYER_ID.BAYER_GB, QHYCamera.QHY.BAYER_ID.BAYER_GR, QHYCamera.QHY.BAYER_ID.BAYER_RG
+                Return True
+            Case Else
+                Return False
+        End Select
+    End Function
 
     '''<summary>Init the camera with the passed handle.</summary>
     Private Function InitQHY(ByVal CamIDToSearch As String) As Boolean
@@ -408,6 +418,7 @@ Partial Public Class MainForm
     End Function
 
     '''<summary>Select a certain filter.</summary>
+    '''<param name="CamHandle">Camera handle to use.</param>
     Private Function SelectFilter(ByRef CamHandle As IntPtr) As eFilter
         Dim RetVal As eFilter = eFilter.Invalid
         Dim FilterState(63) As Byte

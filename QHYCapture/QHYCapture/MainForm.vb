@@ -30,6 +30,9 @@ Partial Public Class MainForm
         Dim OverArea As sRect_UInt
         Dim bpp As UInteger = 0
 
+        'Set DLL log path
+        QHY.QHY.LogFile = M.Meta.QHYLogFile
+
         'Start
         M.DB.StopFlag = False
         M.DB.RunningFlag = True
@@ -50,6 +53,13 @@ Partial Public Class MainForm
         QHY.QHY.GetQHYCCDSDKVersion(M.Meta.SDKVersion(0), M.Meta.SDKVersion(1), M.Meta.SDKVersion(2), M.Meta.SDKVersion(3))
         M.DB.Stopper.Stamp("Get chip properties")
 
+        'Get camera firmware version info
+        ReDim M.Meta.FWVersion(32)
+        Using Pinner As New cIntelIPP.cPinHandler
+            Dim BufPtr As IntPtr = Pinner.Pin(M.Meta.FWVersion)
+            QHY.QHY.GetQHYCCDFWVersion(M.DB.CamHandle, BufPtr)
+        End Using
+
         'Log chip properties
         If M.Meta.Log_CamProp = True Then
             Log("SDK version: " & M.Meta.SDKVersionString)
@@ -64,16 +74,21 @@ Partial Public Class MainForm
             Log("  Start X : Y  :" & OverArea.X.ValRegIndep & ":" & OverArea.Y.ValRegIndep)
             Log("  Size  W x H  :" & OverArea.Width.ValRegIndep & " x " & OverArea.Height.ValRegIndep)
             Log("==============================================================================")
-
-            Log("ControlValues:")                                                                                                           'Start reading all control values
+            'Log all control values
+            Log("ControlValues:")
             LogControlValues()
             M.DB.Stopper.Stamp("GetQHYCCDParams")
-
             Log("==============================================================================")
         End If
 
+        RefreshProperties()
         LED_update(tsslLED_config, False)
 
+        'Set properties for color cameras
+        If IsColorCamera() = False And M.Meta.ColorStatOffForMono Then
+            M.Report.Prop.PlotStatisticsColor = False
+            M.DB.StatColor = False
+        End If
         Dim ChannelToRead As UInteger = 0
 
         'Prepare buffers
@@ -309,6 +324,7 @@ Partial Public Class MainForm
         'Close camera if selected 
         If CloseAtEnd = True Then CloseCamera()
         M.DB.Stopper.Stamp("CloseCamera")
+        QHY.QHY.StoreCurrentLog()
 
         '================================================================================
         'Display timing log
@@ -613,9 +629,7 @@ Partial Public Class MainForm
         RTFGen.RTFInit("Courier New", 8)
 
         'Show DB
-        pgMain.SelectedObject = M.DB
-        pgMeta.SelectedObject = M.Meta
-        pgPlotAndText.SelectedObject = M.Report.Prop
+        RefreshProperties()
 
         'Set position
         Me.Width = 1600
@@ -1001,6 +1015,7 @@ Partial Public Class MainForm
             .StoreImage = False
         End With
         With M.Meta
+            .ExposureTypeEnum = eExposureType.Test
             .Log_CamProp = True
             .Log_Timing = True
             .Log_Verbose = True
@@ -1057,4 +1072,16 @@ Partial Public Class MainForm
             Log("All coolers deactivated")
         End If
     End Sub
+
+    Private Sub tsmiPreset_StandardCapture_Click(sender As Object, e As EventArgs) Handles tsmiPreset_StandardCapture.Click
+        M.DB.StatColor = False
+        M.DB.Temp_Target = -20.0
+        M.DB.Temp_Tolerance = 0.2
+        M.DB.Temp_TimeOutAndOK = 600.0
+        M.Meta.ExposureTypeEnum = eExposureType.Light
+        M.Meta.Load10MicronDataAlways = True
+        M.Meta.ObjectName = InputBox("Object:", "Object", M.Meta.ObjectName)
+        RefreshProperties()
+    End Sub
+
 End Class
