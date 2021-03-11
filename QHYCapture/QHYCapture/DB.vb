@@ -95,7 +95,7 @@ Public Enum eFilter As Byte
     H_alpha = 5
     <ComponentModel.Description("S-II")>
     S_II = 6
-    <ComponentModel.Description("O_III")>
+    <ComponentModel.Description("O-III")>
     O_III = 7
     <ComponentModel.Description("Empty")>
     Empty = 9
@@ -226,25 +226,29 @@ Public Class cDB
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property ReadOutModeString As String = [Enum].GetName(GetType(eReadOutMode), ReadOutModeEnum)
 
+    '''<summary>Single frame or live mode.</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "3. Stream mode")>
-    <ComponentModel.Description("Photo or Video.")>
+    <ComponentModel.Description("Single frame or live mode.")>
     <ComponentModel.DefaultValue(GetType(eStreamMode), "SingleFrame")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property StreamMode As eStreamMode = eStreamMode.SingleFrame
 
+    '''<summary>Target temperature to cool to; enter <-100 for do-not-use</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.1 Target Temp")>
-    <ComponentModel.Description("Target temperature to cool to; enter <-100 for do-not-use")>
+    <ComponentModel.Description("Target temperature to cool to; enter <= -100 for do-not-use")>
     <ComponentModel.DefaultValue(-10.0)>
     Public Property Temp_Target As Double = -10.0
 
+    '''<summary>Tolerable temperature error [°C]</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.2 Target Temp - tolerance")>
-    <ComponentModel.Description("Tolerable temperature error")>
-    <ComponentModel.DefaultValue(0.1)>
-    Public Property Temp_Tolerance As Double = 0.1
+    <ComponentModel.Description("Tolerable temperature error [°C]")>
+    <ComponentModel.DefaultValue(0.2)>
+    Public Property Temp_Tolerance As Double = 0.2
 
+    '''<summary>Time [s] to be within tolerance to mark cooling as done.</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.3 Target Temp - stable time")>
     <ComponentModel.Description("Time [s] to be within tolerance to mark cooling as done")>
@@ -252,12 +256,13 @@ Public Class cDB
     <ComponentModel.DefaultValue(60.0)>
     Public Property Temp_StableTime As Double = 60.0
 
+    '''<summary>Time [s] after which the cooling is finished even if the target temperature is NOT reached.</summary>
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "4.4. Cooling time-out")>
     <ComponentModel.Description("Time [s] after which the cooling is finished even if the target temperature is NOT reached")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
-    <ComponentModel.DefaultValue(60.0)>
-    Public Property Temp_TimeOutAndOK As Double = 60.0
+    <ComponentModel.DefaultValue(600.0)>
+    Public Property Temp_TimeOutAndOK As Double = 600.0
 
     <ComponentModel.Category(Cat1)>
     <ComponentModel.DisplayName(Indent & "5.1 Binning - Hardware")>
@@ -313,9 +318,10 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property UseFilterWheel As Boolean = True
 
+    '''<summaryFilter slot to select</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "2.2. Filter slot")>
-    <ComponentModel.Description("Filter slot to select.")>
+    <ComponentModel.Description("Filter slot to select")>
     <ComponentModel.DefaultValue(eFilter.Invalid)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
     Public Property FilterSlot As eFilter = eFilter.Invalid
@@ -328,18 +334,21 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
     Public Property ExposureTime As Double = 1.0
 
+    '''<summaryGain to set</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "4. Gain")>
     <ComponentModel.Description("Gain to set")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
+    '''<summary>Offset to set</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "5. Offset")>
     <ComponentModel.Description("Offset to set")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
 
+    '''<summary>Remove the overscan area in the stored data and file</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "6. Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored data and file")>
@@ -347,6 +356,7 @@ Public Class cDB
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property RemoveOverscan As Boolean = True
 
+    '''<summary>Write all exposure data to the camera on each exposure start (takes some ms ...)</summary>
     <ComponentModel.Category(Cat2)>
     <ComponentModel.DisplayName(Indent & "7. Config for each capture")>
     <ComponentModel.Description("Write all exposure data to the camera on each exposure start (takes some ms ...)")>
@@ -548,14 +558,16 @@ End Class
 Public Class cDB_meta
 
     Const Cat_10Micron As String = "1. Generic (load via 10Micron)"
-    Const Cat2 As String = "3. Object"
-    Const Cat_log As String = "4. Software logging"
-    Const Cat_read As String = "5. Camera properties"
+    Const Cat2 As String = "2. Object"
+    Const Cat_log As String = "3. Software logging"
+    Const Cat_special As String = "4. Camera properties"
+    Const Cat_CamProperties As String = "5. Camera properties"
     Const Indent As String = "  "
     Const NotSet As String = "-----"
 
     <ComponentModel.Category(Cat_10Micron)>
     <ComponentModel.DisplayName(Indent & "1. Load 10Micron data?")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(True)>
     Public Property Load10MicronDataAlways As Boolean = True
 
@@ -685,22 +697,22 @@ Public Class cDB_meta
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName(Indent & "1. Log camera properties")>
     <ComponentModel.Description("Log all supported camera properties with name and range in the begin - useful e.g. to see the value range for certain settings")>
-    <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    <ComponentModel.DefaultValue(False)>
     Public Property Log_CamProp As Boolean = False
 
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName(Indent & "2. Log timing")>
     <ComponentModel.Description("Display a detailed timing log in the end")>
-    <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    <ComponentModel.DefaultValue(False)>
     Public Property Log_Timing As Boolean = False
 
     <ComponentModel.Category(Cat_log)>
     <ComponentModel.DisplayName(Indent & "3. Log verbose")>
     <ComponentModel.Description("Log special settings")>
-    <ComponentModel.DefaultValue(False)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    <ComponentModel.DefaultValue(False)>
     Public Property Log_Verbose As Boolean = False
 
     <ComponentModel.Category(Cat_log)>
@@ -717,9 +729,18 @@ Public Class cDB_meta
         End Get
     End Property
 
+    <ComponentModel.Category(Cat_log)>
+    <ComponentModel.DisplayName(Indent & "5. QHY DLL log path")>
+    <ComponentModel.Description("This file contains all DLL calls")>
+    Public ReadOnly Property QHYLogFile As String
+        Get
+            Return System.IO.Path.Combine(M.DB.EXEPath, "QHYLog_" & GUID & ".log")
+        End Get
+    End Property
+
     '===================================================================================================
 
-    <ComponentModel.Category(Cat_read)>
+    <ComponentModel.Category(Cat_CamProperties)>
     <ComponentModel.DisplayName(Indent & "1. Chip physical size [mm]")>
     <ComponentModel.Description("Value that was read from the driver")>
     Public ReadOnly Property Chip_Physical As sSize_Dbl
@@ -729,7 +750,7 @@ Public Class cDB_meta
     End Property
     Public MyChip_Physical As New sSize_Dbl
 
-    <ComponentModel.Category(Cat_read)>
+    <ComponentModel.Category(Cat_CamProperties)>
     <ComponentModel.DisplayName(Indent & "2. Chip size [pixel]")>
     <ComponentModel.Description("Value that was read from the driver")>
     Public ReadOnly Property Chip_Pixel As sSize_UInt
@@ -739,7 +760,7 @@ Public Class cDB_meta
     End Property
     Public MyChip_Pixel As New sSize_UInt
 
-    <ComponentModel.Category(Cat_read)>
+    <ComponentModel.Category(Cat_CamProperties)>
     <ComponentModel.DisplayName(Indent & "3. Chip pixel size [um]")>
     <ComponentModel.Description("Value that was read from the driver")>
     Public ReadOnly Property Pixel_Size As sSize_Dbl
@@ -749,7 +770,7 @@ Public Class cDB_meta
     End Property
     Public MyPixel_Size As New sSize_Dbl
 
-    <ComponentModel.Category(Cat_read)>
+    <ComponentModel.Category(Cat_CamProperties)>
     <ComponentModel.DisplayName(Indent & "4. SDK version")>
     <ComponentModel.Description("Value that was read from the driver")>
     Public ReadOnly Property SDKVersionString As String
@@ -762,5 +783,32 @@ Public Class cDB_meta
         End Get
     End Property
     Public SDKVersion(3) As UInteger
+
+    <ComponentModel.Category(Cat_CamProperties)>
+    <ComponentModel.DisplayName(Indent & "5. Firmware version")>
+    <ComponentModel.Description("Value that was read from the driver")>
+    Public ReadOnly Property FWVersionString As String
+        Get
+            Dim Year As Integer = (FWVersion(0) \ 16) + &H10
+            Dim Month As Integer = FWVersion(0) - ((FWVersion(0) \ 16) * 16)
+            Dim Day As Integer = FWVersion(1)
+            Return Format(Year, "00") & "-" & Format(Month, "00") & "-" & Format(Day, "00")
+        End Get
+    End Property
+    Public FWVersion As Byte() = {0, 0, 0, 0}
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat_special)>
+    <ComponentModel.DisplayName(Indent & "1. Color stat OFF for mono")>
+    <ComponentModel.Description("Auto-switch color statistics OFF for mono cameras?")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    <ComponentModel.DefaultValue(True)>
+    Public ReadOnly Property ColorStatOffForMono As Boolean
+        Get
+            Return MyColorStatOffForMono
+        End Get
+    End Property
+    Public MyColorStatOffForMono As Boolean = True
 
 End Class

@@ -31,6 +31,7 @@ Partial Class Form1
         Me.tbCOMPort = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.tbnStart = New System.Windows.Forms.Button()
+        Me.tbRxTx = New System.Windows.Forms.Label()
         CType(Me.scOnOff, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scOnOff.Panel1.SuspendLayout()
         Me.scOnOff.Panel2.SuspendLayout()
@@ -101,7 +102,7 @@ Partial Class Form1
         Me.tbCOMPort.Name = "tbCOMPort"
         Me.tbCOMPort.Size = New System.Drawing.Size(65, 20)
         Me.tbCOMPort.TabIndex = 2
-        Me.tbCOMPort.Text = "COM5"
+        Me.tbCOMPort.Text = "COM20"
         '
         'Label1
         '
@@ -115,18 +116,30 @@ Partial Class Form1
         'tbnStart
         '
         Me.tbnStart.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.tbnStart.Location = New System.Drawing.Point(233, 12)
+        Me.tbnStart.Location = New System.Drawing.Point(142, 12)
         Me.tbnStart.Name = "tbnStart"
         Me.tbnStart.Size = New System.Drawing.Size(62, 20)
         Me.tbnStart.TabIndex = 4
         Me.tbnStart.Text = "Start"
         Me.tbnStart.UseVisualStyleBackColor = True
         '
+        'tbRxTx
+        '
+        Me.tbRxTx.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.tbRxTx.AutoSize = True
+        Me.tbRxTx.BackColor = System.Drawing.Color.Silver
+        Me.tbRxTx.Location = New System.Drawing.Point(273, 16)
+        Me.tbRxTx.Name = "tbRxTx"
+        Me.tbRxTx.Size = New System.Drawing.Size(22, 13)
+        Me.tbRxTx.TabIndex = 5
+        Me.tbRxTx.Text = "<->"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(307, 513)
+        Me.Controls.Add(Me.tbRxTx)
         Me.Controls.Add(Me.tbnStart)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.tbCOMPort)
@@ -151,4 +164,5 @@ Partial Class Form1
     Friend WithEvents tbCOMPort As TextBox
     Friend WithEvents Label1 As Label
     Friend WithEvents tbnStart As Button
+    Friend WithEvents tbRxTx As Label
 End Class
