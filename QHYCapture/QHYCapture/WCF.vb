@@ -95,6 +95,7 @@ Public Class cDB_ServiceContract : Implements IDB
 
     '''<summary>Set value of a certain parameter.</summary>
     Public Function SetParameter(Key As String, Value As String) As Object Implements IDB.SetParameter
+        'Search in DB
         For Each SingleProperty As Reflection.PropertyInfo In M.DB.GetType.GetProperties()
             If Key.ToUpper = SingleProperty.Name.ToUpper Then
                 Select Case SingleProperty.PropertyType.Name.ToUpper
@@ -106,6 +107,7 @@ Public Class cDB_ServiceContract : Implements IDB
                 Return SingleProperty.GetValue(DB, Nothing)
             End If
         Next SingleProperty
+        'Search in Meta DB
         For Each SingleProperty As Reflection.PropertyInfo In DB_meta.GetType.GetProperties()
             If Key.ToUpper = SingleProperty.Name.ToUpper Then
                 Select Case SingleProperty.PropertyType.Name.ToUpper

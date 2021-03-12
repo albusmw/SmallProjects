@@ -14,6 +14,8 @@ Partial Public Class MainForm
     Private FocusWindow As cImgForm = Nothing
     '''<summary>Accumulated statistics.</summary>
     Private LoopStat As AstroNET.Statistics.sStatistics
+    '''<summary>Monitor for the MIDI events.</summary>
+    Private WithEvents MIDI As cMIDIMonitor
 
     Private WithEvents ZWOASI As New cZWOASI
 
@@ -102,7 +104,7 @@ Partial Public Class MainForm
         'Select filter
         Dim FilterActive As eFilter = eFilter.Invalid
         If M.DB.FilterSlot <> eFilter.Invalid And M.DB.UseFilterWheel = True Then
-            FilterActive = ActiveFilter(M.DB.CamHandle, M.DB.FilterSlot, M.DB.FilterWheelTimeOut)
+            FilterActive = ActiveFilter(M.DB.CamHandle, M.DB.FilterSlot, M.Meta.FilterWheelTimeOut)
         End If
         M.DB.Stopper.Stamp("Select filter")
 
@@ -192,11 +194,11 @@ Partial Public Class MainForm
                 SingleStatCalc.Reset_UInt16()
             End If
 
-            If M.DB.StarSearch = True Then
-                Dim ROICenter As Point = ImageProcessing.BrightStarDetect(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.DB.StarSearch_Blur, M.DB.StarSearch_Blur)
-                M.DB.ROI = AdjustAndCorrectROI(ROICenter, M.DB.StarSearch_ROI, M.DB.StarSearch_ROI)
+            If M.Meta.StarSearch = True Then
+                Dim ROICenter As Point = ImageProcessing.BrightStarDetect(SingleStatCalc.DataProcessor_UInt16.ImageData(0).Data, M.Meta.StarSearch_Blur, M.Meta.StarSearch_Blur)
+                M.DB.ROI = AdjustAndCorrectROI(ROICenter, M.Meta.StarSearch_ROI, M.Meta.StarSearch_ROI)
                 CallOK("SetQHYCCDResolution", QHY.QHY.SetQHYCCDResolution(M.DB.CamHandle, CUInt(M.DB.ROI.X), CUInt(M.DB.ROI.Y), CUInt(M.DB.ROI.Width \ M.DB.HardwareBinning), CUInt(M.DB.ROI.Height \ M.DB.HardwareBinning)))
-                M.DB.StarSearch = False
+                M.Meta.StarSearch = False
             End If
 
             '================================================================================
@@ -628,6 +630,10 @@ Partial Public Class MainForm
         RTFGen.AttachToControl(rtbStatistics)
         RTFGen.RTFInit("Courier New", 8)
 
+        'MIDI monitor
+        MIDI = New cMIDIMonitor
+        If MIDI.MIDIDeviceCount > 0 Then MIDI.SelectMidiDevice(0)
+
         'Show DB
         RefreshProperties()
 
@@ -876,6 +882,7 @@ Partial Public Class MainForm
         'Load / run the passed XML config file
         With ofdMain
             .Filter = "XML definitions (*.qhycapture.xml)|*.qhycapture.xml"
+            .FileName = String.Empty
             .Multiselect = False
             If .ShowDialog <> DialogResult.OK Then Exit Sub
         End With
@@ -936,7 +943,7 @@ Partial Public Class MainForm
         End If
     End Sub
 
-    Private Sub tsmiGetAllXMLParameters_Click(sender As Object, e As EventArgs) Handles tsmiFile_GetAllXMLParameters.Click
+    Private Sub tsmiFile_SaveAllXMLParameters_Click(sender As Object, e As EventArgs) Handles tsmiFile_SaveAllXMLParameters.Click
         Dim FileOut As New List(Of String)
         FileOut.AddRange(GetAllPropertyNames(M.DB.GetType))
         FileOut.AddRange(GetAllPropertyNames(M.Meta.GetType))
@@ -946,10 +953,8 @@ Partial Public Class MainForm
     End Sub
 
     Private Sub tsmiFile_CreateXML_Click(sender As Object, e As EventArgs) Handles tsmiFile_CreateXML.Click
-
         Dim XMLGeneration As New frmXMLGeneration
         XMLGeneration.Show()
-
     End Sub
 
     Private Sub tsmiPreset_SkipCooling_Click(sender As Object, e As EventArgs) Handles tsmiPreset_SkipCooling.Click
@@ -1013,9 +1018,9 @@ Partial Public Class MainForm
             .Temp_Tolerance = 1000
             .Temp_StableTime = 0
             .StoreImage = False
+            .ExposureTypeEnum = eExposureType.Test
         End With
         With M.Meta
-            .ExposureTypeEnum = eExposureType.Test
             .Log_CamProp = True
             .Log_Timing = True
             .Log_Verbose = True
@@ -1078,10 +1083,66 @@ Partial Public Class MainForm
         M.DB.Temp_Target = -20.0
         M.DB.Temp_Tolerance = 0.2
         M.DB.Temp_TimeOutAndOK = 600.0
-        M.Meta.ExposureTypeEnum = eExposureType.Light
+        M.DB.ExposureTypeEnum = eExposureType.Light
         M.Meta.Load10MicronDataAlways = True
         M.Meta.ObjectName = InputBox("Object:", "Object", M.Meta.ObjectName)
         RefreshProperties()
+    End Sub
+
+    '===================================================================================================
+
+    '''<summary>Handle data entered via a MIDI input device.</summary>
+    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
+        Select Case Channel
+            Case 1
+                M.DB.Gain += Value
+            Case 2
+                M.Meta.WhiteBalance_Red += Value
+            Case 3
+                M.Meta.WhiteBalance_Green += Value
+            Case 4
+                M.Meta.WhiteBalance_Blue += Value
+            Case 5
+                M.Meta.Contrast += Value / 100
+            Case 6
+                M.Meta.Brightness += Value / 100
+        End Select
+        RefreshProperties()
+    End Sub
+
+    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
+        Select Case Channel
+            Case 1
+                M.DB.Gain = 0
+            Case 2
+                M.Meta.WhiteBalance_Red = 128
+            Case 3
+                M.Meta.WhiteBalance_Green = 128
+            Case 4
+                M.Meta.WhiteBalance_Blue = 128
+            Case 5
+                M.Meta.Contrast = 0.0
+            Case 6
+                M.Meta.Brightness = 0.0
+        End Select
+        RefreshProperties()
+    End Sub
+
+    Private Sub tsmiFile_SaveSettings_Click(sender As Object, e As EventArgs) Handles tsmiFile_SaveSettings.Click
+        'Get the file name to save
+        With sfdMain
+            .Filter = "XML definitions (*.qhycapture.xml)|*.qhycapture.xml"
+            .FileName = M.Meta.GUID & ".qhycapture.xml"
+            If .ShowDialog <> DialogResult.OK Then Exit Sub
+        End With
+        'Create the XML file to save
+        Dim FileOut As New Xml.XmlDocument
+        Dim Sequence As Xml.XmlNode = FileOut.AppendChild(FileOut.CreateNode(Xml.XmlNodeType.Element, "sequence", String.Empty))
+        Dim Exp As Xml.XmlNode = Sequence.AppendChild(FileOut.CreateNode(Xml.XmlNodeType.Element, "exp", String.Empty))
+        PropGridToXML(Exp, M.DB)
+        PropGridToXML(Exp, M.Meta)
+        FileOut.Save(sfdMain.FileName)
+        Process.Start(sfdMain.FileName)
     End Sub
 
 End Class

@@ -20,7 +20,7 @@ Partial Public Class MainForm
         'Reflect meta database
         Dim DB_meta_Type As Type = M.Meta.GetType
         Dim DB_meta_props As List(Of String) = GetAllPropertyNames(DB_meta_Type)
-        'Reflect meta database
+        'Reflect report database
         Dim DB_report_Type As Type = M.Report.Prop.GetType
         Dim DB_report_props As List(Of String) = GetAllPropertyNames(DB_report_Type)
         'Move over all exposure specifications in the file
@@ -96,11 +96,40 @@ Partial Public Class MainForm
     '''<summary>Get a list of all available property names.</summary>
     Private Function GetAllPropertyNames(ByRef TypeToReflect As Type) As List(Of String)
         Dim RetVal As New List(Of String)
-        Dim DescriptionAttribute As Type = GetType(System.ComponentModel.DescriptionAttribute)
         For Each SingleProperty As Reflection.PropertyInfo In TypeToReflect.GetProperties()
             Dim PropertyName As String = SingleProperty.Name
             RetVal.Add(PropertyName)
         Next SingleProperty
+        Return RetVal
+    End Function
+
+    '''<summary>Get the configuration of each property.</summary>
+    Private Function PropGridToXML(ByVal Node As Xml.XmlNode, ByVal DBObject As Object) As List(Of Xml.XmlNode)
+        Dim RetVal As New List(Of Xml.XmlNode)
+        For Each Prop As Reflection.PropertyInfo In DBObject.GetType.GetProperties()
+            Dim PropName As String = Prop.Name
+            Dim PropDispName As String = Prop.Name
+            Dim PropVal As Object = Prop.GetValue(DBObject)
+            Dim PropDesc As String = String.Empty
+            Dim PropBrowsable As Boolean = True
+            Dim DispNameAttr As Object() = Prop.GetCustomAttributes(GetType(System.ComponentModel.DisplayNameAttribute), True) : If DispNameAttr.Length > 0 Then PropDispName = CType(DispNameAttr(0), System.ComponentModel.DisplayNameAttribute).DisplayName.Trim
+            Dim DescAttr As Object() = Prop.GetCustomAttributes(GetType(System.ComponentModel.DescriptionAttribute), True) : If DescAttr.Length > 0 Then PropDesc = CType(DescAttr(0), System.ComponentModel.DescriptionAttribute).Description
+            Dim BrowsAttr As Object() = Prop.GetCustomAttributes(GetType(System.ComponentModel.BrowsableAttribute), True) : If BrowsAttr.Length > 0 Then PropBrowsable = CType(BrowsAttr(0), System.ComponentModel.BrowsableAttribute).Browsable
+            'Only add attributes that are browsable
+            If PropBrowsable = True And Prop.CanWrite = True Then
+                Dim PropNode As Xml.XmlElement = Node.OwnerDocument.CreateElement(PropName)
+                Try
+                    PropNode.InnerText = CStr(PropVal)
+                Catch ex As Exception
+                    PropNode.InnerText = "!!!CONVERSION_ERROR!!!"
+                End Try
+                PropNode.Attributes.Append(Node.OwnerDocument.CreateAttribute("DisplayedName")) : PropNode.Attributes.GetNamedItem("DisplayedName").Value = PropDispName
+                If PropDesc.Length > 0 Then
+                    PropNode.Attributes.Append(Node.OwnerDocument.CreateAttribute("Description")) : PropNode.Attributes.GetNamedItem("Description").Value = PropDesc
+                End If
+                Node.AppendChild(PropNode)
+            End If
+        Next Prop
         Return RetVal
     End Function
 
@@ -447,12 +476,12 @@ Partial Public Class MainForm
         CallOK("CONTROL_USBTRAFFIC", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_USBTRAFFIC, M.DB.USBTraffic))
         CallOK("CONTROL_DDR", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_DDR, CInt(IIf(M.DB.DDR_RAM = True, 1.0, 0.0))))
         CallOK("CONTROL_EXPOSURE", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_EXPOSURE, M.DB.ExposureTime * 1000000))
-        CallOK("CONTROL_BRIGHTNESS", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_BRIGHTNESS, M.DB.Brightness))
-        CallOK("CONTROL_CONTRAST", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_CONTRAST, M.DB.Contrast))
-        CallOK("CONTROL_WBR", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBR, M.DB.WhiteBalance_Red))
-        CallOK("CONTROL_WBG", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBG, M.DB.WhiteBalance_Green))
-        CallOK("CONTROL_WBB", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBB, M.DB.WhiteBalance_Blue))
-        CallOK("CONTROL_GAMMA", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_GAMMA, M.DB.Gamma))
+        CallOK("CONTROL_BRIGHTNESS", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_BRIGHTNESS, M.Meta.Brightness))
+        CallOK("CONTROL_CONTRAST", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_CONTRAST, M.Meta.Contrast))
+        CallOK("CONTROL_WBR", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBR, M.Meta.WhiteBalance_Red))
+        CallOK("CONTROL_WBG", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBG, M.Meta.WhiteBalance_Green))
+        CallOK("CONTROL_WBB", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_WBB, M.Meta.WhiteBalance_Blue))
+        CallOK("CONTROL_GAMMA", QHY.QHY.SetQHYCCDParam(M.DB.CamHandle, QHYCamera.QHY.CONTROL_ID.CONTROL_GAMMA, M.Meta.Gamma))
         PropertyChanged = False
     End Sub
 
@@ -544,7 +573,7 @@ Partial Public Class MainForm
         CustomElement.Add(eFITSKeywords.CRPIX1, 0.5 * (SingleCaptureData.NAXIS1 + 1))
         CustomElement.Add(eFITSKeywords.CRPIX2, 0.5 * (SingleCaptureData.NAXIS2 + 1))
 
-        CustomElement.Add(eFITSKeywords.IMAGETYP, M.Meta.ExposureTypeString)
+        CustomElement.Add(eFITSKeywords.IMAGETYP, M.DB.ExposureTypeString)
         CustomElement.Add(eFITSKeywords.EXPTIME, SingleCaptureData.ExpTime)
         CustomElement.Add(eFITSKeywords.GAIN, SingleCaptureData.Gain)
         CustomElement.Add(eFITSKeywords.OFFSET, SingleCaptureData.Offset)

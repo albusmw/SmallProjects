@@ -148,8 +148,6 @@ End Enum
 '''<summary>Database holding relevant information.</summary>
 Public Class cDB
 
-    Public Event PropertyChanged()
-
     '''<summary>Handle to the camera.</summary>
     Public CamHandle As IntPtr = IntPtr.Zero
     '''<summary>Currently used camera ID.</summary>
@@ -162,8 +160,6 @@ Public Class cDB
     Public LiveModeInitiated As Boolean = False
     '''<summary>Used to call BeginQHYLiveMode only once.</summary>
     Public LastStoredFile As String = String.Empty
-    '''<summary>Monitor for the MIDI events.</summary>
-    Private WithEvents MIDI As cMIDIMonitor
 
     Public Stopper As New cStopper
 
@@ -195,19 +191,14 @@ Public Class cDB
     Public IPP As cIntelIPP
 
     Const Cat1 As String = "1. Imaging hardware"
-    Const Cat2 As String = "2. Exposure"
+    Const Cat2_Exposure As String = "2. Exposure"
     Const Cat3 As String = "3. Image storage"
     Const Cat4 As String = "4. Statistics calculation"
     Const Cat5 As String = "5. Debug and logging"
     Const Cat6 As String = "6. Exposure - Advanced"
     Const Cat7 As String = "7. Focus star search"
     Const Indent As String = "  "
-
-    Public Sub New()
-        'MIDI monitor
-        MIDI = New cMIDIMonitor
-        If MIDI.MIDIDeviceCount > 0 Then MIDI.SelectMidiDevice(0)
-    End Sub
+    Const NotSet As String = "-----"
 
     '''<summary>Camera to search for.</summary>
     <ComponentModel.Category(Cat1)>
@@ -236,21 +227,21 @@ Public Class cDB
 
     '''<summary>Target temperature to cool to; enter <-100 for do-not-use</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "4.1 Target Temp")>
+    <ComponentModel.DisplayName(Indent & "4.1. Target Temp")>
     <ComponentModel.Description("Target temperature to cool to; enter <= -100 for do-not-use")>
     <ComponentModel.DefaultValue(-10.0)>
     Public Property Temp_Target As Double = -10.0
 
     '''<summary>Tolerable temperature error [°C]</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "4.2 Target Temp - tolerance")>
+    <ComponentModel.DisplayName(Indent & "4.2. Target Temp - tolerance")>
     <ComponentModel.Description("Tolerable temperature error [°C]")>
     <ComponentModel.DefaultValue(0.2)>
     Public Property Temp_Tolerance As Double = 0.2
 
     '''<summary>Time [s] to be within tolerance to mark cooling as done.</summary>
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "4.3 Target Temp - stable time")>
+    <ComponentModel.DisplayName(Indent & "4.3. Target Temp - stable time")>
     <ComponentModel.Description("Time [s] to be within tolerance to mark cooling as done")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
     <ComponentModel.DefaultValue(60.0)>
@@ -265,13 +256,13 @@ Public Class cDB
     Public Property Temp_TimeOutAndOK As Double = 600.0
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "5.1 Binning - Hardware")>
+    <ComponentModel.DisplayName(Indent & "5.1. Binning - Hardware")>
     <ComponentModel.Description("Hardware Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
     Public Property HardwareBinning As Integer = 1
 
     <ComponentModel.Category(Cat1)>
-    <ComponentModel.DisplayName(Indent & "5.2 Binning - Software")>
+    <ComponentModel.DisplayName(Indent & "5.2. Binning - Software")>
     <ComponentModel.Description("Software Binning (NxN)")>
     <ComponentModel.DefaultValue(1)>
     Public Property SoftwareBinning As Integer = 1
@@ -305,13 +296,36 @@ Public Class cDB
     '===================================================================================================
 
     '''<summary>Number of exposured to take with identical settings.</summary>
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "1. # of captures")>
+    <ComponentModel.Category(Cat2_Exposure)>
+    <ComponentModel.DisplayName(Indent & "1.1. # of captures")>
     <ComponentModel.Description("Number of exposured to take with identical settings.")>
     <ComponentModel.DefaultValue(1)>
     Public Property CaptureCount As Integer = 1
 
-    <ComponentModel.Category(Cat2)>
+    '''<summary>Light, Bias, Dark, Flat, Tricolor or TestOnly.</summary>
+    <ComponentModel.Category(Cat2_Exposure)>
+    <ComponentModel.DisplayName(Indent & "1.2. Exposure type")>
+    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
+    <ComponentModel.DefaultValue(GetType(eExposureType), "Undefined")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
+    Public Property ExposureTypeEnum As eExposureType = eExposureType.Undefined
+
+    '''<summary>Custom exposure type if ExposureTypeEnum is set to Custom.</summary>
+    <ComponentModel.Category(Cat2_Exposure)>
+    <ComponentModel.DisplayName(Indent & "1.3. Custom exposure type")>
+    <ComponentModel.Description("Custom exposure type if ExposureTypeEnum is set to Custom.")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property ExposureTypeCustom As String = NotSet
+
+    '''<summary>String representation of the exposure type enum.</summary>
+    <ComponentModel.Browsable(False)>
+    Public ReadOnly Property ExposureTypeString As String
+        Get
+            If ExposureTypeEnum = eExposureType.Custom Then Return ExposureTypeCustom Else Return [Enum].GetName(GetType(eExposureType), ExposureTypeEnum)
+        End Get
+    End Property
+
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "2.1. Filter wheel")>
     <ComponentModel.Description("Configure if a real filter wheel should be controlled or if filter is just used in meta data, ....")>
     <ComponentModel.DefaultValue(True)>
@@ -319,7 +333,7 @@ Public Class cDB
     Public Property UseFilterWheel As Boolean = True
 
     '''<summaryFilter slot to select</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "2.2. Filter slot")>
     <ComponentModel.Description("Filter slot to select")>
     <ComponentModel.DefaultValue(eFilter.Invalid)>
@@ -327,7 +341,7 @@ Public Class cDB
     Public Property FilterSlot As eFilter = eFilter.Invalid
 
     '''<summary>Exposure time [s].</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "3. Exposure time [s]")>
     <ComponentModel.Description("Exposure time [s] for each exposure")>
     <ComponentModel.DefaultValue(1.0)>
@@ -335,21 +349,21 @@ Public Class cDB
     Public Property ExposureTime As Double = 1.0
 
     '''<summaryGain to set</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "4. Gain")>
     <ComponentModel.Description("Gain to set")>
     <ComponentModel.DefaultValue(26.0)>
     Public Property Gain As Double = 26.0
 
     '''<summary>Offset to set</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "5. Offset")>
     <ComponentModel.Description("Offset to set")>
     <ComponentModel.DefaultValue(50.0)>
     Public Property Offset As Double = 50.0
 
     '''<summary>Remove the overscan area in the stored data and file</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "6. Remove overscan")>
     <ComponentModel.Description("Remove the overscan area in the stored data and file")>
     <ComponentModel.DefaultValue(True)>
@@ -357,14 +371,14 @@ Public Class cDB
     Public Property RemoveOverscan As Boolean = True
 
     '''<summary>Write all exposure data to the camera on each exposure start (takes some ms ...)</summary>
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "7. Config for each capture")>
     <ComponentModel.Description("Write all exposure data to the camera on each exposure start (takes some ms ...)")>
     <ComponentModel.DefaultValue(True)>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     Public Property ConfigAlways As Boolean = True
 
-    <ComponentModel.Category(Cat2)>
+    <ComponentModel.Category(Cat2_Exposure)>
     <ComponentModel.DisplayName(Indent & "8. Close cam on each xml exp")>
     <ComponentModel.Description("Close and re-open the camera after each exposure XML entry")>
     <ComponentModel.DefaultValue(False)>
@@ -437,72 +451,6 @@ Public Class cDB
 
     '===================================================================================================
 
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "1. Brightness")>
-    <ComponentModel.Description("Brightness control value of the camera - leave at 0.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(0.0)>
-    Public Property Brightness As Double = 0.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "2. Contrast")>
-    <ComponentModel.Description("Contrast control value of the camera - leave at 0.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(0.0)>
-    Public Property Contrast As Double = 0.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "3. Gamma")>
-    <ComponentModel.Description("Gamma control value of the camera - leave at 1.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(1.0)>
-    Public Property Gamma As Double = 1.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "4.1. White balance - Red")>
-    <ComponentModel.Description("White balance RED control value of the camera - leave at 128.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(128.0)>
-    Public Property WhiteBalance_Red As Double = 128.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "4.2. White balance - Green")>
-    <ComponentModel.Description("White balance GREEN control value of the camera - leave at 128.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(128.0)>
-    Public Property WhiteBalance_Green As Double = 128.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "4.3. White balance - Blue")>
-    <ComponentModel.Description("White balance BLUE control value of the camera - leave at 128.0 for optimum file output results")>
-    <ComponentModel.DefaultValue(128.0)>
-    Public Property WhiteBalance_Blue As Double = 128.0
-
-    <ComponentModel.Category(Cat6)>
-    <ComponentModel.DisplayName(Indent & "5. Filter wheel time-out")>
-    <ComponentModel.Description("Time [s] after which the filter wheel movement is stoped and the software goes on even if the filter is NOT in place")>
-    <ComponentModel.DefaultValue(15.0)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
-    Public Property FilterWheelTimeOut As Double = 15.0
-
-    '===================================================================================================
-
-    <ComponentModel.Category(Cat7)>
-    <ComponentModel.DisplayName(Indent & "1. Auto-star search for auto-focus")>
-    <ComponentModel.Description("Auto-select ROI and center on found maximum")>
-    <ComponentModel.DefaultValue(False)>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
-    Public Property StarSearch As Boolean = False
-
-    <ComponentModel.Category(Cat7)>
-    <ComponentModel.DisplayName(Indent & "2. Auto-star search ROI size")>
-    <ComponentModel.Description("Size [pixel] of the ROI during start search")>
-    <ComponentModel.DefaultValue(5)>
-    Public Property StarSearch_Blur As Integer = 5
-
-    <ComponentModel.Category(Cat7)>
-    <ComponentModel.DisplayName(Indent & "3. Auto-star search ROI size")>
-    <ComponentModel.Description("Size [pixel] of the ROI during start search")>
-    <ComponentModel.DefaultValue(41)>
-    Public Property StarSearch_ROI As Integer = 41
-
-    '===================================================================================================
-
     '''<summary>Property indicating if the ROI is set.</summary>
     <ComponentModel.Browsable(False)>
     Public ReadOnly Property ROISet() As Boolean
@@ -515,210 +463,184 @@ Public Class cDB
         End Get
     End Property
 
-    '''<summary>Handle data entered via a MIDI input device.</summary>
-    Private Sub MIDI_Increment(Channel As Integer, Value As Integer) Handles MIDI.Increment
-        Select Case Channel
-            Case 1
-                Gain += Value
-            Case 2
-                WhiteBalance_Red += Value
-            Case 3
-                WhiteBalance_Green += Value
-            Case 4
-                WhiteBalance_Blue += Value
-            Case 5
-                Contrast += Value / 100
-            Case 6
-                Brightness += Value / 100
-        End Select
-        RaiseEvent PropertyChanged()
-    End Sub
-
-    Private Sub MIDI_Reset(Channel As Integer) Handles MIDI.Reset
-        Select Case Channel
-            Case 1
-                Gain = 0
-            Case 2
-                WhiteBalance_Red = 128
-            Case 3
-                WhiteBalance_Green = 128
-            Case 4
-                WhiteBalance_Blue = 128
-            Case 5
-                Contrast = 0.0
-            Case 6
-                Brightness = 0.0
-        End Select
-        RaiseEvent PropertyChanged()
-    End Sub
-
 End Class
 
 '''<summary>Database holding meta data information.</summary>
 Public Class cDB_meta
 
-    Const Cat_10Micron As String = "1. Generic (load via 10Micron)"
-    Const Cat2 As String = "2. Object"
-    Const Cat_log As String = "3. Software logging"
-    Const Cat_special As String = "4. Camera properties"
-    Const Cat_CamProperties As String = "5. Camera properties"
+    Const Cat1_SiteAndMount As String = "1. Site and mount"
+    Const Cat2_ObjectAndInstrument As String = "2. Object and instrument"
+    Const Cat3_Logging As String = "3. Software logging"
+    Const Cat4_CamProperties As String = "4. Camera properties"
+    Const Cat5_CamAdvanced As String = "5. Advanced camera settings"
+    Const Cat6_Focus As String = "6. Focus support"
+    Const Cat7_MiscSettings As String = "7. Misc settings"
     Const Indent As String = "  "
     Const NotSet As String = "-----"
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "1. Load 10Micron data?")>
+    '''<summary>Automatically oad mount data via LAN?.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "1.1. Use 10Micron LAN?")>
+    <ComponentModel.Description("Automatically oad mount data via LAN?")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(True)>
     Public Property Load10MicronDataAlways As Boolean = True
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "1.1. 10Micron IP")>
-    <ComponentModel.Description("IP of the 10Micron mount")>
+    '''<summary>IP of the 10Micron mount</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "1.2. 10Micron LAN IP")>
+    <ComponentModel.Description("IP of the 10Micron mount.")>
     Public Property IP_10Micron As String = "192.168.10.119"
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "1.2. 10Micron Port")>
-    <ComponentModel.Description("Port of the 10Micron mount")>
+    '''<summary>LAN port of the 10Micron mount</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "1.3. 10Micron LAN Port")>
+    <ComponentModel.Description("LAN port of the 10Micron mount.")>
+    <ComponentModel.DefaultValue(3490)>
     Public Property IP_10Micron_Port As Integer = 3490
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "1.3. 10Micron Time-out")>
-    <ComponentModel.Description("Time-out time for connecting the mount")>
+    '''<summary>Time-out time for connecting the mount.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "1.4. 10Micron LAN Time-out")>
+    <ComponentModel.Description("Time-out time for connecting the mount.")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
+    <ComponentModel.DefaultValue(2)>
     Public Property IP_10Micron_TimeOut As Integer = 2
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "2.1. Site longitude")>
+    '''<summary>Longitude of the site.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "2.1. Site - Longitude")>
     <ComponentModel.Description("Longitude of the site.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property SiteLongitude As String = NotSet
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "2.2. Site latitude")>
+    '''<summary>Latitude of the site.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "2.2. Site - Latitude")>
     <ComponentModel.Description("Latitude of the site.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property SiteLatitude As String = NotSet
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "3.1. RA")>
+    '''<summary>Height of the site.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "2.3. Site - Height")>
+    <ComponentModel.Description("Height of the site.")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property SiteHeight As String = NotSet
+
+    '''<summary>Configured mount right ascension.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "3.1. Mount - RA")>
+    <ComponentModel.Description("Configured mount right ascension.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property TelescopeRightAscension As String = NotSet
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "3.2. DEC")>
+    '''<summary>Configured mount declination.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "3.2. Mount - DEC")>
+    <ComponentModel.Description("Configured mount declination.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property TelescopeDeclination As String = NotSet
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "4.1. Altitude")>
+    '''<summary>Current mount altitude.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "4.1. Mount - Altitude")>
+    <ComponentModel.Description("Current mount altitude.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property TelescopeAltitude As String = NotSet
 
-    <ComponentModel.Category(Cat_10Micron)>
-    <ComponentModel.DisplayName(Indent & "4.2. Azimut")>
+    '''<summary>Current mount azimuth.</summary>
+    <ComponentModel.Category(Cat1_SiteAndMount)>
+    <ComponentModel.DisplayName(Indent & "4.2. Mount - Azimuth")>
+    <ComponentModel.Description("Current mount azimuth.")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property TelescopeAzimuth As String = NotSet
 
     '================================================================================
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "1. Name")>
+    '''<summary>Name of the object (NGC1234, ...).</summary>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "1. Objectame")>
     <ComponentModel.Description("Name of the object (NGC1234, ...).")>
     <ComponentModel.DefaultValue(NotSet)>
     Public Property ObjectName As String = NotSet
 
-    <ComponentModel.Category(Cat2)>
+    '''<summary>Sequence GUID.</summary>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
     <ComponentModel.DisplayName(Indent & "2. GUID of the sequence")>
-    <ComponentModel.Description("Sequence GUID")>
-    Public Property GUID As String = String.Empty
+    <ComponentModel.Description("Sequence GUID.")>
+    <ComponentModel.DefaultValue(NotSet)>
+    Public Property GUID As String = NotSet
 
-    '''<summary>Exposure type.</summary>
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "3.1 Exposure type")>
-    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
-    <ComponentModel.DefaultValue(GetType(eExposureType), "Undefined")>
-    <ComponentModel.TypeConverter(GetType(ComponentModelEx.EnumDesciptionConverter))>
-    Public Property ExposureTypeEnum As eExposureType = eExposureType.Undefined
-
-    '''<summary>Custom exposure type if ExposureTypeEnum is set to Custom.</summary>
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "3.2 Custom exposure type")>
-    <ComponentModel.Description("Light, Bias, Dark, Flat, Tricolor or TestOnly.")>
-    <ComponentModel.DefaultValue("TestOnly")>
-    Public Property ExposureTypeCustom As String = "TestOnly"
-
-    '''<summary>String representation of the exposure type enum.</summary>
-    <ComponentModel.Browsable(False)>
-    Public ReadOnly Property ExposureTypeString As String
-        Get
-            If ExposureTypeEnum = eExposureType.Custom Then Return ExposureTypeCustom Else Return [Enum].GetName(GetType(eExposureType), ExposureTypeEnum)
-        End Get
-    End Property
-
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "4. Author")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "3. Author")>
     <ComponentModel.Description("Author to add to the meta data.")>
     <ComponentModel.DefaultValue("Martin Weiss")>
     Public Property Author As String = "Martin Weiss"
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "5. Origin")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "4. Origin")>
     <ComponentModel.Description("Origin to add to the meta data.")>
     <ComponentModel.DefaultValue("Sternwarte Holzkirchen")>
     Public Property Origin As String = "Sternwarte Holzkirchen"
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "6. Telescope used")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "5. Telescope used")>
     <ComponentModel.Description("Telescope name to add to the meta data.")>
     <ComponentModel.DefaultValue("CDK 12.5 with reducer")>
     Public Property Telescope As String = "CDK 12.5 with reducer"
 
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "7.1. Telescope aperture [mm]")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "5.1. Telescope aperture [mm]")>
     <ComponentModel.Description("Telescope aperture to add to the meta data.")>
     <ComponentModel.DefaultValue(317.0)>
     Public Property TelescopeAperture As Double = 317.0
 
     '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "7.2. Telescope focal length [mm]")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "5.2. Telescope focal length [mm]")>
     <ComponentModel.Description("Telescope focal length to add to the meta data.")>
     <ComponentModel.DefaultValue(1676.4)>
     Public Property TelescopeFocalLength As Double = 1676.4
 
     '''<summary>Telescope focal length [mm].</summary>
-    <ComponentModel.Category(Cat2)>
-    <ComponentModel.DisplayName(Indent & "8. Telescope focus position")>
+    <ComponentModel.Category(Cat2_ObjectAndInstrument)>
+    <ComponentModel.DisplayName(Indent & "5.3. Telescope focus position")>
     <ComponentModel.Description("Focuser position reported by the telescope.")>
     <ComponentModel.DefaultValue(Double.NaN)>
     Public Property TelescopeFocus As Double = Double.NaN
 
     '===================================================================================================
 
-    <ComponentModel.Category(Cat_log)>
+    '''<summary>Log all supported camera properties with name and range in the begin - useful e.g. to see the value range for certain settings.</summary>
+    <ComponentModel.Category(Cat3_Logging)>
     <ComponentModel.DisplayName(Indent & "1. Log camera properties")>
-    <ComponentModel.Description("Log all supported camera properties with name and range in the begin - useful e.g. to see the value range for certain settings")>
+    <ComponentModel.Description("Log all supported camera properties with name and range in the begin - useful e.g. to see the value range for certain settings.")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_CamProp As Boolean = False
 
-    <ComponentModel.Category(Cat_log)>
+    '''<summary>Display a detailed timing log in the end.</summary>
+    <ComponentModel.Category(Cat3_Logging)>
     <ComponentModel.DisplayName(Indent & "2. Log timing")>
-    <ComponentModel.Description("Display a detailed timing log in the end")>
+    <ComponentModel.Description("Display a detailed timing log in the end.")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_Timing As Boolean = False
 
-    <ComponentModel.Category(Cat_log)>
+    '''<summary>Log special settings.</summary>
+    <ComponentModel.Category(Cat3_Logging)>
     <ComponentModel.DisplayName(Indent & "3. Log verbose")>
-    <ComponentModel.Description("Log special settings")>
+    <ComponentModel.Description("Log special settings.")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(False)>
     Public Property Log_Verbose As Boolean = False
 
-    <ComponentModel.Category(Cat_log)>
+    '''<summary>This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes.</summary>
+    <ComponentModel.Category(Cat3_Logging)>
     <ComponentModel.DisplayName(Indent & "4. Intel IPP path")>
-    <ComponentModel.Description("This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes")>
-    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.Description("This folder contains the IPP (Intel Performance Primitives) that are used to speed-up all calculation processes.")>
+    <ComponentModel.DefaultValue(NotSet)>
     Public ReadOnly Property Log_IntelIPPPath As String
         Get
             If IsNothing(M.DB.IPP) = True Then
@@ -729,9 +651,11 @@ Public Class cDB_meta
         End Get
     End Property
 
-    <ComponentModel.Category(Cat_log)>
+    '''<summary>This file contains all DLL calls.</summary>
+    <ComponentModel.Category(Cat3_Logging)>
     <ComponentModel.DisplayName(Indent & "5. QHY DLL log path")>
-    <ComponentModel.Description("This file contains all DLL calls")>
+    <ComponentModel.Description("This file contains all DLL calls.")>
+    <ComponentModel.DefaultValue(NotSet)>
     Public ReadOnly Property QHYLogFile As String
         Get
             Return System.IO.Path.Combine(M.DB.EXEPath, "QHYLog_" & GUID & ".log")
@@ -740,9 +664,10 @@ Public Class cDB_meta
 
     '===================================================================================================
 
-    <ComponentModel.Category(Cat_CamProperties)>
+    '''<summary>Chip physical size [mm].</summary>
+    <ComponentModel.Category(Cat4_CamProperties)>
     <ComponentModel.DisplayName(Indent & "1. Chip physical size [mm]")>
-    <ComponentModel.Description("Value that was read from the driver")>
+    <ComponentModel.Description("Chip physical size [mm].")>
     Public ReadOnly Property Chip_Physical As sSize_Dbl
         Get
             Return MyChip_Physical
@@ -750,9 +675,10 @@ Public Class cDB_meta
     End Property
     Public MyChip_Physical As New sSize_Dbl
 
-    <ComponentModel.Category(Cat_CamProperties)>
+    '''<summary>Chip size [pixel].</summary>
+    <ComponentModel.Category(Cat4_CamProperties)>
     <ComponentModel.DisplayName(Indent & "2. Chip size [pixel]")>
-    <ComponentModel.Description("Value that was read from the driver")>
+    <ComponentModel.Description("Chip size [pixel].")>
     Public ReadOnly Property Chip_Pixel As sSize_UInt
         Get
             Return MyChip_Pixel
@@ -760,9 +686,10 @@ Public Class cDB_meta
     End Property
     Public MyChip_Pixel As New sSize_UInt
 
-    <ComponentModel.Category(Cat_CamProperties)>
+    '''<summary>Chip pixel size [um].</summary>
+    <ComponentModel.Category(Cat4_CamProperties)>
     <ComponentModel.DisplayName(Indent & "3. Chip pixel size [um]")>
-    <ComponentModel.Description("Value that was read from the driver")>
+    <ComponentModel.Description("Chip pixel size [um].")>
     Public ReadOnly Property Pixel_Size As sSize_Dbl
         Get
             Return MyPixel_Size
@@ -770,9 +697,10 @@ Public Class cDB_meta
     End Property
     Public MyPixel_Size As New sSize_Dbl
 
-    <ComponentModel.Category(Cat_CamProperties)>
+    '''<summary>SDK version.</summary>
+    <ComponentModel.Category(Cat4_CamProperties)>
     <ComponentModel.DisplayName(Indent & "4. SDK version")>
-    <ComponentModel.Description("Value that was read from the driver")>
+    <ComponentModel.Description("SDK version.")>
     Public ReadOnly Property SDKVersionString As String
         Get
             Dim RetVal As New List(Of String)
@@ -784,9 +712,10 @@ Public Class cDB_meta
     End Property
     Public SDKVersion(3) As UInteger
 
-    <ComponentModel.Category(Cat_CamProperties)>
+    '''<summary>Firmware version.</summary>
+    <ComponentModel.Category(Cat4_CamProperties)>
     <ComponentModel.DisplayName(Indent & "5. Firmware version")>
-    <ComponentModel.Description("Value that was read from the driver")>
+    <ComponentModel.Description("Firmware version.")>
     Public ReadOnly Property FWVersionString As String
         Get
             Dim Year As Integer = (FWVersion(0) \ 16) + &H10
@@ -799,8 +728,76 @@ Public Class cDB_meta
 
     '===================================================================================================
 
-    <ComponentModel.Category(Cat_special)>
-    <ComponentModel.DisplayName(Indent & "1. Color stat OFF for mono")>
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "1. Brightness")>
+    <ComponentModel.Description("Brightness control value of the camera - leave at 0.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Brightness As Double = 0.0
+
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "2. Contrast")>
+    <ComponentModel.Description("Contrast control value of the camera - leave at 0.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(0.0)>
+    Public Property Contrast As Double = 0.0
+
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "3. Gamma")>
+    <ComponentModel.Description("Gamma control value of the camera - leave at 1.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(1.0)>
+    Public Property Gamma As Double = 1.0
+
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "4.1. White balance - Red")>
+    <ComponentModel.Description("White balance RED control value of the camera - leave at 128.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Red As Double = 128.0
+
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "4.2. White balance - Green")>
+    <ComponentModel.Description("White balance GREEN control value of the camera - leave at 128.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Green As Double = 128.0
+
+    <ComponentModel.Category(Cat5_CamAdvanced)>
+    <ComponentModel.DisplayName(Indent & "4.3. White balance - Blue")>
+    <ComponentModel.Description("White balance BLUE control value of the camera - leave at 128.0 for optimum file output results")>
+    <ComponentModel.DefaultValue(128.0)>
+    Public Property WhiteBalance_Blue As Double = 128.0
+
+    '===================================================================================================
+
+    <ComponentModel.Category(Cat6_Focus)>
+    <ComponentModel.DisplayName(Indent & "1. Auto-star search for auto-focus")>
+    <ComponentModel.Description("Auto-select ROI and center on found maximum")>
+    <ComponentModel.DefaultValue(False)>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
+    Public Property StarSearch As Boolean = False
+
+    <ComponentModel.Category(Cat6_Focus)>
+    <ComponentModel.DisplayName(Indent & "2. Auto-star search ROI size")>
+    <ComponentModel.Description("Size [pixel] of the ROI during start search")>
+    <ComponentModel.DefaultValue(5)>
+    Public Property StarSearch_Blur As Integer = 5
+
+    <ComponentModel.Category(Cat6_Focus)>
+    <ComponentModel.DisplayName(Indent & "3. Auto-star search ROI size")>
+    <ComponentModel.Description("Size [pixel] of the ROI during start search")>
+    <ComponentModel.DefaultValue(41)>
+    Public Property StarSearch_ROI As Integer = 41
+
+    '===================================================================================================
+
+    '''<summary>Time [s] after which the filter wheel movement is stoped and the software goes on even if the filter is NOT in place.</summary>
+    <ComponentModel.Category(Cat7_MiscSettings)>
+    <ComponentModel.DisplayName(Indent & "1. Filter wheel time-out")>
+    <ComponentModel.Description("Time [s] after which the filter wheel movement is stoped and the software goes on even if the filter is NOT in place.")>
+    <ComponentModel.TypeConverter(GetType(ComponentModelEx.DoublePropertyConverter_s))>
+    <ComponentModel.DefaultValue(15.0)>
+    Public Property FilterWheelTimeOut As Double = 15.0
+
+    '''<summary>Auto-switch color statistics OFF for mono cameras?</summary>
+    <ComponentModel.Category(Cat7_MiscSettings)>
+    <ComponentModel.DisplayName(Indent & "2. Color stat OFF for mono")>
     <ComponentModel.Description("Auto-switch color statistics OFF for mono cameras?")>
     <ComponentModel.TypeConverter(GetType(ComponentModelEx.BooleanPropertyConverter_YesNo))>
     <ComponentModel.DefaultValue(True)>
