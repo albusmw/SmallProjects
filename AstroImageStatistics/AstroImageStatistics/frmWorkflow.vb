@@ -5,6 +5,8 @@ Public Class frmWorkflow
 
     Private DB As cDB
     Private LogContent As New System.Text.StringBuilder
+    Private WithEvents DD_Bias As Ato.DragDrop
+
     Dim ReportIndent As String = "  "
 
     '''<summary>Set a link to the database to use.</summary>
@@ -177,6 +179,16 @@ Public Class frmWorkflow
 
     Private Sub DE()
         System.Windows.Forms.Application.DoEvents()
+    End Sub
+
+    Private Sub lbBiasFiles_KeyUp(sender As Object, e As KeyEventArgs) Handles lbBiasFiles.KeyUp
+        If e.KeyCode = Keys.Delete Then
+            lbBiasFiles.RemoveSelectedItems
+        End If
+    End Sub
+
+    Private Sub frmWorkflow_Load(sender As Object, e As EventArgs) Handles Me.Load
+        DD_Bias = New Ato.DragDrop(lbBiasFiles, True)       'TODO: configure if double-drop same file is allowed!
     End Sub
 
 End Class

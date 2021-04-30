@@ -848,140 +848,10 @@ Public Class MainForm
     End Sub
 
     Private Sub tsmiPlateSolve_Click(sender As Object, e As EventArgs) Handles tsmiPlateSolve.Click
-
-        Dim Solver As New cPlateSolve
-        Dim FileToRun As String = LastFile
-        Dim Binning As Integer = 1
-
-        'Get the FITS header information
-        Dim DataStartPos As Integer = -1
-        Dim FITSHeader As List(Of cFITSHeaderParser.sHeaderElement) = cFITSHeaderChanger.ParseHeader(FileToRun, DataStartPos)
-        Dim File_RA_JNow As String = Nothing
-        Dim File_Dec_JNow As String = Nothing
-        Dim File_FOV1 As Object = Nothing
-        Dim File_FOV2 As Object = Nothing
-        For Each Entry As cFITSHeaderParser.sHeaderElement In FITSHeader
-            If Entry.Keyword = eFITSKeywords.RA Then File_RA_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
-            If Entry.Keyword = eFITSKeywords.DEC Then File_Dec_JNow = CStr(Entry.Value).Trim("'"c).Trim.Trim("'"c)
-            If Entry.Keyword = eFITSKeywords.FOV1 Then File_FOV1 = Entry.Value
-            If Entry.Keyword = eFITSKeywords.FOV2 Then File_FOV2 = Entry.Value
-        Next Entry
-
-        'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
-        Dim File_RA_J2000 As Double = Double.NaN
-        Dim File_Dec_J2000 As Double = Double.NaN
-        JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
-
-        'Run plate solve
-        Dim FITSFile1 As String = ofdMain.FileName
-        Dim ErrorCode1 As String = String.Empty
-        Dim SolverIn_RA As String() = File_RA_JNow.Trim.Trim("'"c).Split(":"c)
-        Dim SolverIn_Dec As String() = File_Dec_JNow.Trim.Trim("'"c).Split(":"c)
-        cPlateSolve.PlateSolvePath = DB.PlateSolve2Path
-        With Solver
-            .SetRA(File_RA_J2000)                                                                       'theoretical position (Wikipedia, J2000.0)
-            .SetDec(File_Dec_J2000)                                                                     'theoretical position (Wikipedia, J2000.0)
-            .SetDimX(Val(File_FOV1) * cPlateSolve.DegToMin)                                             'constant for system [telescope-camera]
-            .SetDimY(Val(File_FOV2) * cPlateSolve.DegToMin)                                             'constant for system [telescope-camera]
-            .HoldOpenTime = DB.PlateSolve2HoldOpen
-            Dim RawOut As String() = {}
-            ErrorCode1 = .Solve(LastFile, RawOut)
-        End With
-
-        'Convert
-        Dim RadToH As Double = 12 / Math.PI
-        Dim RadToGrad As Double = (180 / Math.PI)
-        Dim JNow_RA_solved As Double = Double.NaN
-        Dim JNow_Dec_solved As Double = Double.NaN
-        J2000ToJNow(Solver.SolvedRA * RadToH, Solver.SolvedDec * RadToGrad, JNow_RA_solved, JNow_Dec_solved)
-
-        Dim Output As New List(Of String)
-        Output.Add("Start with        RA <" & File_RA_JNow & ">, DEC <" & File_Dec_JNow & "> (JNow file string)")
-        Output.Add("                  RA <" & Ato.AstroCalc.FormatHMS(File_RA_J2000) & ">, DEC <" & Ato.AstroCalc.Format360Degree(File_Dec_J2000) & "> (J2000)")
-        Output.Add("Solved as       : RA <" & Ato.AstroCalc.FormatHMS(Solver.SolvedRA * RadToH) & ">, DEC <" & Ato.AstroCalc.Format360Degree(Solver.SolvedDec * RadToGrad) & "> (J2000)")
-        Output.Add("                  RA <" & Ato.AstroCalc.FormatHMS(JNow_RA_solved) & ">, DEC <" & Ato.AstroCalc.Format360Degree(JNow_Dec_solved) & "> (JNow)")
-        Output.Add("Error           :  RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
-        Output.Add("Error results   :  RA <" & Solver.ErrorRA.ValRegIndep & " "">, DEC < " & Solver.ErrorDec.ValRegIndep & " "">")
-        Output.Add(" <Pixel>        :  RA <" & Solver.PixelErrorRA.ValRegIndep & " pixel>, DEC < " & Solver.PixelErrorDec.ValRegIndep & " pixel>")
-        Output.Add("Angle           : <" & Solver.RotationAngle.ValRegIndep & ">")
-
-        Log("PLATE SOLVE: > ", Output.ToArray)
-
-        '----------------------------------------------------------------------------------------------------
-        'Code taken from ASCOM_CamTest
-
-        'Dim Solver As New cPlateSolve
-        'Dim BasePath As String = "\\DS1819\astro\2019-12-05\IC405\23_57_38"
-
-        'Dim SolverRawOut As String() = {}
-
-        'Dim InitRA As Double = Double.NaN
-        'Dim InitDec As Double = Double.NaN
-
-        'For Each File As String In System.IO.Directory.GetFiles(BasePath, "*.fits")
-
-        '    Log(">>> " & File)
-
-        '    Dim Changer As New cFITSHeaderChanger
-        '    Dim FITSHeader As New cFITSHeaderParser(cFITSHeaderChanger.ReadHeader(File))
-
-        '    'On first run set assumed position, else set parameters of 1st run
-        '    If Double.IsNaN(InitRA) = True Then Solver.SetRA(5, 16, 12) Else Solver.RA = InitRA
-        '    If Double.IsNaN(InitDec) = True Then Solver.SetDec(34, 16, 0) Else Solver.Dec = InitDec
-
-        '    'Set X and Y dimensions
-        '    Solver.SetDimX(2541, 4.88, FITSHeader.Width)
-        '    Solver.SetDimY(2541, 4.88, FITSHeader.Height)
-        '    Solver.HoldOpenTime = 0
-
-        '    'Solve
-        '    Dim SolverStatus As String = Solver.Solve(File, SolverRawOut)
-        '    If Double.IsNaN(InitRA) = True Then InitRA = Solver.SolvedRA
-        '    If Double.IsNaN(InitDec) = True Then InitDec = Solver.SolvedDec
-        '    Log(Solver.ErrorRA.ValRegIndep & " : " & Solver.ErrorDec.ValRegIndep)
-
-        '    'Set keywords after solving as e.g. http://bf-astro.com/eXcalibrator/excalibrator.htm may need it
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CTYPE1, "'RA---SIN'"))
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CTYPE2, "'DEC--SIN'"))
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRPIX1, 0.5 * (FITSHeader.Width + 1)))                            'pixels
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRPIX2, 0.5 * (FITSHeader.Height + 1)))                           'pixels
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CDELT1, (Solver.DimX * Solver.RadToGrad) / FITSHeader.Width))     'degrees/pixel
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CDELT2, (Solver.DimY * Solver.RadToGrad) / FITSHeader.Height))    'degrees/pixel
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CROTA1, 0.0))                                                     'degrees
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CROTA2, 0.0))                                                     'degrees
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRVAL1, Solver.SolvedRA * Solver.RadToGrad))                      'Right Ascension [degrees]
-        '    FITSHeader.Add(New cFITSHeaderParser.sHeaderElement(eFITSKeywords.CRVAL2, Solver.SolvedDec * Solver.RadToGrad))                     'Declination [degrees]
-
-        '    'Store new header elements
-        '    Changer.ChangeHeader(File, File & "_SOLVED.fits", FITSHeader.GetCardsAsDictionary)
-
-        'Next File
-
+        Log("PLATE SOLVE: > ", AstroImageStatistics_Fun.PlateSolve(LastFile, DB.PlateSolve2Path, DB.PlateSolve2HoldOpen))
     End Sub
 
-    '''<summary>Convert JNow to J2000 epoch.</summary>
-    '''<param name="JNowRA">RA in apparent co-ordinates [hours].</param>
-    '''<param name="JNowDec">DEC in apparent co-ordinates [deg].</param>
-    '''<param name="J2000RA">J2000 Right Ascension [hours].</param>
-    '''<param name="J2000Dec">J2000 Declination [deg].</param>
-    '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
-    Public Shared Sub JNowToJ2000(ByVal JNowRA As Double, ByVal JNowDec As Double, ByRef J2000RA As Double, ByRef J2000Dec As Double)
-        Dim X As New ASCOM.Astrometry.Transform.Transform
-        X.JulianDateUTC = (New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)
-        X.SetApparent(JNowRA, JNowDec)
-        J2000RA = X.RAJ2000
-        J2000Dec = X.DecJ2000
-    End Sub
 
-    '''<summary>Convert J2000 to JNow epoch.</summary>
-    '''<seealso cref="https://ascom-standards.org/Help/Developer/html/T_ASCOM_Astrometry_Transform_Transform.htm"/>
-    Public Shared Sub J2000ToJNow(ByVal J2000RA As Double, ByVal J2000Dec As Double, ByRef JNowRA As Double, ByRef JNowDec As Double)
-        Dim X As New ASCOM.Astrometry.Transform.Transform
-        X.JulianDateUTC = (New ASCOM.Astrometry.NOVAS.NOVAS31).JulianDate(CShort(Now.Year), CShort(Now.Month), CShort(Now.Day), Now.Hour)
-        X.SetJ2000(J2000RA, J2000Dec)
-        JNowRA = X.RAApparent
-        JNowDec = X.DECApparent
-    End Sub
 
     Private Sub tsmiFile_FITSGrep_Click(sender As Object, e As EventArgs) Handles tsmiFile_FITSGrep.Click
         Dim X As New frmFITSGrep : X.Show()
@@ -1329,7 +1199,7 @@ Public Class MainForm
         'Data from QHYCapture (10Micron) are in JNow, so convert to J2000 for PlateSolve
         Dim File_RA_J2000 As Double = Double.NaN
         Dim File_Dec_J2000 As Double = Double.NaN
-        JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
+        AstroImageStatistics_Fun.JNowToJ2000(AstroParser.ParseRA(File_RA_JNow), AstroParser.ParseDeclination(File_Dec_JNow), File_RA_J2000, File_Dec_J2000)
 
         Dim AladinCall As String = Ato.AstroCalc.FormatHMS(File_RA_J2000) & " " & Ato.AstroCalc.Format360Degree(File_Dec_J2000)
 
@@ -1819,6 +1689,7 @@ Public Class MainForm
                 Lines.Add(System.Text.Encoding.UTF8.GetString(ByteBuffer))
             Next LineIdx
             Dim HeaderAsIs As New frmHeaderAsIs
+            HeaderAsIs.Text = "Raw header of file <" & LastFile & ">"
             HeaderAsIs.tbHeader.Text = Join(Lines.ToArray, System.Environment.NewLine)
             HeaderAsIs.Show()
         End If
@@ -1955,17 +1826,90 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub tsmiTest_AllFilePixelStat_Click(sender As Object, e As EventArgs) Handles tsmiTest_AllFilePixelStat.Click
-
-        Dim NewForm As New frmSinglePixelStat
-        NewForm.Show()
-
-    End Sub
-
     Private Sub tsmiWorkflow_Runner_Click(sender As Object, e As EventArgs) Handles tsmiWorkflow_Runner.Click
         Dim Workflow As New frmWorkflow
         Workflow.SetDB(DB)
         Workflow.Show()
+    End Sub
+
+    Private Sub tsmiAnalysis_MultiFile_Open_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_MultiFile_Open.Click
+        Dim NewForm As New frmSinglePixelStat
+        NewForm.Show()
+    End Sub
+
+    Private Sub tsmiAnalysis_MultiFile_LoadAbove_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_MultiFile_LoadAbove.Click
+
+        Dim FixedPixelCount As UInt32 = 0
+        Dim LowerLimit As UShort = 0 : UShort.TryParse(InputBox("Lower limit (included)", "Lower limit (included)", "0"), LowerLimit)
+        Dim UpperLimit As UShort = 65535 : UShort.TryParse(InputBox("Upper limit (included)", "Upper limit (included)", "65535"), UpperLimit)
+        Running()
+        Dim CriteriaPixel As New List(Of String)
+        Select Case CurrentData.DataMode
+            Case AstroNET.Statistics.eDataMode.UInt16
+                'Search all criteria pixels
+                With CurrentData.DataProcessor_UInt16.ImageData(0)
+                    For Idx1 As Integer = 0 To .NAXIS1 - 1
+                        For Idx2 As Integer = 0 To .NAXIS2 - 1
+                            If (.Data(Idx1, Idx2) >= LowerLimit) And (.Data(Idx1, Idx2) <= UpperLimit) Then
+                                FixedPixelCount += UInt32One
+                                CriteriaPixel.Add(Format(.Data(Idx1, Idx2), "00000") & ":" & Format(Idx1, "0000").Trim & ":" & Format(Idx2, "0000"))
+                            End If
+                        Next Idx2
+                    Next Idx1
+                End With
+                'Load to form
+                For Each OpenForm As Form In Application.OpenForms
+                    If OpenForm.GetType.Name = "frmSinglePixelStat" Then
+                        CType(OpenForm, frmSinglePixelStat).lbHotCandidates.Items.AddRange(CriteriaPixel.ToArray)
+                        CType(OpenForm, frmSinglePixelStat).Focus()
+                    End If
+                Next OpenForm
+            Case Else
+        End Select
+        Log("Fixed " & FixedPixelCount.ValRegIndep & " pixel changed")
+        Idle()
+
+    End Sub
+
+    Private Sub FixRADECErrorToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FixRADECErrorToolStripMenuItem.Click
+        'Fix the error that RA_NOM which comes first is also DEC_NOM
+        Dim DirScanner As New Ato.RecursivDirScanner("\\192.168.100.10\astro\2021_02_13 (SH2-155)")
+        DirScanner.Scan("*.fit?")
+        Dim FileCount As Integer = 0
+        Dim CorrectCount As Integer = 0
+        For Each File As String In DirScanner.AllFiles
+            FileCount += 1
+            Dim Pos1 As Integer = 10            '0-based offset
+            Dim Pos2 As Integer = 11            '0-based offset
+            Dim Buffer1(6) As Byte : Dim Text1 As String = String.Empty
+            Dim Buffer2(6) As Byte : Dim Text2 As String = String.Empty
+            Using Stream As System.IO.Stream = System.IO.File.OpenRead(File)
+                Stream.Seek((Pos1 - 1) * 80, IO.SeekOrigin.Begin) : Stream.Read(Buffer1, 0, Buffer1.Length) : Text1 = System.Text.Encoding.ASCII.GetString(Buffer1)
+                Stream.Seek((Pos2 - 1) * 80, IO.SeekOrigin.Begin) : Stream.Read(Buffer2, 0, Buffer2.Length) : Text2 = System.Text.Encoding.ASCII.GetString(Buffer2)
+            End Using
+            'Error case ...
+            Dim RA_NOM As Byte() = System.Text.Encoding.ASCII.GetBytes("RA_NOM ")
+            If (Text1 = "DEC_NOM") And (Text2 = "DEC_NOM") Then
+                CorrectCount += 1
+                Using Stream As System.IO.Stream = System.IO.File.OpenWrite(File)
+                    Stream.Seek((Pos1 - 1) * 80, IO.SeekOrigin.Begin) : Stream.Write(RA_NOM, 0, RA_NOM.Length)
+                End Using
+            End If
+        Next File
+        MsgBox(FileCount.ValRegIndep & " files scanned, " & CorrectCount.ValRegIndep & " files corrected")
+    End Sub
+
+    Private Sub SubtractMedianToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SubtractMedianToolStripMenuItem.Click
+        Dim Entry As String = InputBox("KSize", "KSize", "3")
+        Dim KSize As Integer = -1
+        If Integer.TryParse(Entry, KSize) = False Then
+            Exit Sub
+        Else
+            Dim NewData(,) As UInt16 = {}
+            cOpenCvSharp.RelToMedian(CurrentData.DataProcessor_UInt16.ImageData(0).Data, KSize)
+            CalculateStatistics(CurrentData, DB.BayerPatternNames, CurrentStatistics)
+            If DB.AutoOpenStatGraph = True Then PlotStatistics(LastFile, CurrentStatistics)
+        End If
     End Sub
 
 End Class

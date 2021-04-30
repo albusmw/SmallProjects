@@ -74,6 +74,9 @@ Partial Class MainForm
         Me.tsmiAnalysisPixelMap_SaveFor = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAnalysis_RawFITSHeader = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAnalysis_FloatAsIntError = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysis_MultiFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysis_MultiFile_Open = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalysis_MultiFile_LoadAbove = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiProcessing = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAdjustRGB = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiStretch = New System.Windows.Forms.ToolStripMenuItem()
@@ -93,7 +96,6 @@ Partial Class MainForm
         Me.ToolStripMenuItem12 = New System.Windows.Forms.ToolStripSeparator()
         Me.CodeBelowIsNotForHereToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CloudWatcherCombinerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiTest_AllFilePixelStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ALADINCoords = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiTools_ChangeHeader = New System.Windows.Forms.ToolStripMenuItem()
@@ -102,6 +104,8 @@ Partial Class MainForm
         Me.CheckROICutoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WorkflowToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiWorkflow_Runner = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem13 = New System.Windows.Forms.ToolStripSeparator()
+        Me.FixRADECErrorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ofdMain = New System.Windows.Forms.OpenFileDialog()
         Me.tbLogOutput = New System.Windows.Forms.TextBox()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
@@ -117,6 +121,7 @@ Partial Class MainForm
         Me.tsMain = New System.Windows.Forms.ToolStrip()
         Me.tsb_Open = New System.Windows.Forms.ToolStripButton()
         Me.tsb_Display = New System.Windows.Forms.ToolStripButton()
+        Me.SubtractMedianToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.msMain.SuspendLayout()
         Me.ssMain.SuspendLayout()
         Me.gbDetails.SuspendLayout()
@@ -312,7 +317,7 @@ Partial Class MainForm
         '
         'tsmiAnalysis
         '
-        Me.tsmiAnalysis.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysis_RowColStat, Me.tsmiAnalysis_Plot, Me.tsmiAnalysisHotPixel, Me.ToolStripMenuItem7, Me.tsmiAnalysis_MultiAreaCompare, Me.tsmiAnalysis_ManualColorBalancer, Me.tsmiAnalysisVignette, Me.tsmiAnalysisPixelMap, Me.tsmiAnalysis_RawFITSHeader, Me.tsmiAnalysis_FloatAsIntError})
+        Me.tsmiAnalysis.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysis_RowColStat, Me.tsmiAnalysis_Plot, Me.tsmiAnalysisHotPixel, Me.ToolStripMenuItem7, Me.tsmiAnalysis_MultiAreaCompare, Me.tsmiAnalysis_ManualColorBalancer, Me.tsmiAnalysisVignette, Me.tsmiAnalysisPixelMap, Me.tsmiAnalysis_RawFITSHeader, Me.tsmiAnalysis_FloatAsIntError, Me.tsmiAnalysis_MultiFile})
         Me.tsmiAnalysis.Name = "tsmiAnalysis"
         Me.tsmiAnalysis.Size = New System.Drawing.Size(62, 22)
         Me.tsmiAnalysis.Text = "Analysis"
@@ -446,9 +451,28 @@ Partial Class MainForm
         Me.tsmiAnalysis_FloatAsIntError.Size = New System.Drawing.Size(212, 22)
         Me.tsmiAnalysis_FloatAsIntError.Text = "Float error to int"
         '
+        'tsmiAnalysis_MultiFile
+        '
+        Me.tsmiAnalysis_MultiFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAnalysis_MultiFile_Open, Me.tsmiAnalysis_MultiFile_LoadAbove})
+        Me.tsmiAnalysis_MultiFile.Name = "tsmiAnalysis_MultiFile"
+        Me.tsmiAnalysis_MultiFile.Size = New System.Drawing.Size(212, 22)
+        Me.tsmiAnalysis_MultiFile.Text = "Multi-file statistics"
+        '
+        'tsmiAnalysis_MultiFile_Open
+        '
+        Me.tsmiAnalysis_MultiFile_Open.Name = "tsmiAnalysis_MultiFile_Open"
+        Me.tsmiAnalysis_MultiFile_Open.Size = New System.Drawing.Size(195, 22)
+        Me.tsmiAnalysis_MultiFile_Open.Text = "Open analysis  window"
+        '
+        'tsmiAnalysis_MultiFile_LoadAbove
+        '
+        Me.tsmiAnalysis_MultiFile_LoadAbove.Name = "tsmiAnalysis_MultiFile_LoadAbove"
+        Me.tsmiAnalysis_MultiFile_LoadAbove.Size = New System.Drawing.Size(195, 22)
+        Me.tsmiAnalysis_MultiFile_LoadAbove.Text = "Load certain pixel ..."
+        '
         'tsmiProcessing
         '
-        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiSetPixelToValue, Me.tsmiProcessing_MedianFilter})
+        Me.tsmiProcessing.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiAdjustRGB, Me.tsmiStretch, Me.tsmiPlateSolve, Me.tsmiSetPixelToValue, Me.tsmiProcessing_MedianFilter, Me.SubtractMedianToolStripMenuItem})
         Me.tsmiProcessing.Name = "tsmiProcessing"
         Me.tsmiProcessing.Size = New System.Drawing.Size(76, 22)
         Me.tsmiProcessing.Text = "Processing"
@@ -485,7 +509,7 @@ Partial Class MainForm
         '
         'tsmiTest
         '
-        Me.tsmiTest.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTest_WriteTestData, Me.AfiineTranslateToolStripMenuItem, Me.tsmiTest_ASCOMDyn, Me.ToolStripMenuItem6, Me.tsmiTest_Focus, Me.tsmiTest_ReadNEFFile, Me.ToolStripMenuItem9, Me.tsmiTestCode_UseOpenCV, Me.MedianWithinNETToolStripMenuItem, Me.ToolStripMenuItem12, Me.CodeBelowIsNotForHereToolStripMenuItem, Me.CloudWatcherCombinerToolStripMenuItem, Me.tsmiTest_AllFilePixelStat})
+        Me.tsmiTest.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTest_WriteTestData, Me.AfiineTranslateToolStripMenuItem, Me.tsmiTest_ASCOMDyn, Me.ToolStripMenuItem6, Me.tsmiTest_Focus, Me.tsmiTest_ReadNEFFile, Me.ToolStripMenuItem9, Me.tsmiTestCode_UseOpenCV, Me.MedianWithinNETToolStripMenuItem, Me.ToolStripMenuItem12, Me.CodeBelowIsNotForHereToolStripMenuItem, Me.CloudWatcherCombinerToolStripMenuItem})
         Me.tsmiTest.Name = "tsmiTest"
         Me.tsmiTest.Size = New System.Drawing.Size(68, 22)
         Me.tsmiTest.Text = "Test code"
@@ -559,12 +583,6 @@ Partial Class MainForm
         Me.CloudWatcherCombinerToolStripMenuItem.Size = New System.Drawing.Size(274, 22)
         Me.CloudWatcherCombinerToolStripMenuItem.Text = "CloudWatcher combiner"
         '
-        'tsmiTest_AllFilePixelStat
-        '
-        Me.tsmiTest_AllFilePixelStat.Name = "tsmiTest_AllFilePixelStat"
-        Me.tsmiTest_AllFilePixelStat.Size = New System.Drawing.Size(274, 22)
-        Me.tsmiTest_AllFilePixelStat.Text = "All files pixel stat"
-        '
         'tsmiTools
         '
         Me.tsmiTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiTools_ALADINCoords, Me.tsmiTools_ChangeHeader, Me.tsmiTools_RemoveOverscan, Me.SpecialTestFileToolStripMenuItem, Me.CheckROICutoutToolStripMenuItem})
@@ -604,7 +622,7 @@ Partial Class MainForm
         '
         'WorkflowToolStripMenuItem
         '
-        Me.WorkflowToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiWorkflow_Runner})
+        Me.WorkflowToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiWorkflow_Runner, Me.ToolStripMenuItem13, Me.FixRADECErrorToolStripMenuItem})
         Me.WorkflowToolStripMenuItem.Name = "WorkflowToolStripMenuItem"
         Me.WorkflowToolStripMenuItem.Size = New System.Drawing.Size(70, 22)
         Me.WorkflowToolStripMenuItem.Text = "Workflow"
@@ -612,8 +630,19 @@ Partial Class MainForm
         'tsmiWorkflow_Runner
         '
         Me.tsmiWorkflow_Runner.Name = "tsmiWorkflow_Runner"
-        Me.tsmiWorkflow_Runner.Size = New System.Drawing.Size(180, 22)
+        Me.tsmiWorkflow_Runner.Size = New System.Drawing.Size(162, 22)
         Me.tsmiWorkflow_Runner.Text = "Open runner"
+        '
+        'ToolStripMenuItem13
+        '
+        Me.ToolStripMenuItem13.Name = "ToolStripMenuItem13"
+        Me.ToolStripMenuItem13.Size = New System.Drawing.Size(159, 6)
+        '
+        'FixRADECErrorToolStripMenuItem
+        '
+        Me.FixRADECErrorToolStripMenuItem.Name = "FixRADECErrorToolStripMenuItem"
+        Me.FixRADECErrorToolStripMenuItem.Size = New System.Drawing.Size(162, 22)
+        Me.FixRADECErrorToolStripMenuItem.Text = "Fix RA_DEC error"
         '
         'ofdMain
         '
@@ -767,6 +796,12 @@ Partial Class MainForm
         Me.tsb_Display.Size = New System.Drawing.Size(49, 22)
         Me.tsb_Display.Text = "Display"
         '
+        'SubtractMedianToolStripMenuItem
+        '
+        Me.SubtractMedianToolStripMenuItem.Name = "SubtractMedianToolStripMenuItem"
+        Me.SubtractMedianToolStripMenuItem.Size = New System.Drawing.Size(301, 22)
+        Me.SubtractMedianToolStripMenuItem.Text = "Subtract median"
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -895,7 +930,12 @@ Partial Class MainForm
     Friend WithEvents tsmiTools_RemoveOverscan As ToolStripMenuItem
     Friend WithEvents SpecialTestFileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CheckROICutoutToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents tsmiTest_AllFilePixelStat As ToolStripMenuItem
     Friend WithEvents WorkflowToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents tsmiWorkflow_Runner As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysis_MultiFile As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysis_MultiFile_Open As ToolStripMenuItem
+    Friend WithEvents tsmiAnalysis_MultiFile_LoadAbove As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem13 As ToolStripSeparator
+    Friend WithEvents FixRADECErrorToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents SubtractMedianToolStripMenuItem As ToolStripMenuItem
 End Class

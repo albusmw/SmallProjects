@@ -31,9 +31,9 @@ Partial Class frmWorkflow
         Me.scMain = New System.Windows.Forms.SplitContainer()
         Me.tcMain = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
-        Me.TabPage2 = New System.Windows.Forms.TabPage()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.TabPage2 = New System.Windows.Forms.TabPage()
         CType(Me.scMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.scMain.Panel1.SuspendLayout()
         Me.scMain.Panel2.SuspendLayout()
@@ -88,11 +88,14 @@ Partial Class frmWorkflow
         Me.lbBiasFiles.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lbBiasFiles.Font = New System.Drawing.Font("Courier New", 8.25!)
         Me.lbBiasFiles.FormattingEnabled = True
         Me.lbBiasFiles.IntegralHeight = False
+        Me.lbBiasFiles.ItemHeight = 14
         Me.lbBiasFiles.Location = New System.Drawing.Point(6, 58)
         Me.lbBiasFiles.Name = "lbBiasFiles"
         Me.lbBiasFiles.ScrollAlwaysVisible = True
+        Me.lbBiasFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple
         Me.lbBiasFiles.Size = New System.Drawing.Size(653, 1139)
         Me.lbBiasFiles.TabIndex = 4
         '
@@ -160,15 +163,14 @@ Partial Class frmWorkflow
         Me.TabPage1.Text = "Bias"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
-        'TabPage2
+        'Label2
         '
-        Me.TabPage2.Location = New System.Drawing.Point(4, 22)
-        Me.TabPage2.Name = "TabPage2"
-        Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(498, 793)
-        Me.TabPage2.TabIndex = 1
-        Me.TabPage2.Text = "TabPage2"
-        Me.TabPage2.UseVisualStyleBackColor = True
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(6, 35)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(45, 13)
+        Me.Label2.TabIndex = 6
+        Me.Label2.Text = "File filter"
         '
         'Label1
         '
@@ -179,14 +181,15 @@ Partial Class frmWorkflow
         Me.Label1.TabIndex = 5
         Me.Label1.Text = "Root folder"
         '
-        'Label2
+        'TabPage2
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(6, 35)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(45, 13)
-        Me.Label2.TabIndex = 6
-        Me.Label2.Text = "File filter"
+        Me.TabPage2.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage2.Name = "TabPage2"
+        Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage2.Size = New System.Drawing.Size(665, 1247)
+        Me.TabPage2.TabIndex = 1
+        Me.TabPage2.Text = "TabPage2"
+        Me.TabPage2.UseVisualStyleBackColor = True
         '
         'frmWorkflow
         '

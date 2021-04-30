@@ -347,21 +347,31 @@ Public Class frmImageDisplay
         pgMain.SelectedObject = Props
     End Sub
 
-    Private Sub SaveAsSeenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsSeenToolStripMenuItem.Click
+    Private Sub cms_SaveAsSeen_Click(sender As Object, e As EventArgs) Handles cms_SaveAsSeen.Click
         sfdMain.Filter = ImageFileFormatSpecific.SaveImageFileFilters
         If sfdMain.ShowDialog() <> DialogResult.OK Then Exit Sub
         ImageFileFormatSpecific.SaveImageFile(sfdMain.FileName, OutputImage.BitmapToProcess)
     End Sub
 
-    Private Sub SendToNavigatorToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SendToNavigatorToolStripMenuItem.Click
-        For Each OpenForm As Form In Application.OpenForms
-            If OpenForm.GetType.Name = "frmNavigator" Then
-                CType(OpenForm, frmNavigator).tbOffsetX.Text = ROICenter.X.ToString.Trim
-                CType(OpenForm, frmNavigator).tbOffsetY.Text = ROICenter.Y.ToString.Trim
-                CType(OpenForm, frmNavigator).Focus()
-            End If
-        Next OpenForm
-    End Sub
+    'Private Sub cms_SendToNavigator_Click(sender As Object, e As EventArgs) Handles cms_SendToNavigator.Click
+    '    For Each OpenForm As Form In Application.OpenForms
+    '        If OpenForm.GetType.Name = "frmNavigator" Then
+    '            CType(OpenForm, frmNavigator).tbOffsetX.Text = ROICenter.X.ToString.Trim
+    '            CType(OpenForm, frmNavigator).tbOffsetY.Text = ROICenter.Y.ToString.Trim
+    '            CType(OpenForm, frmNavigator).Focus()
+    '        End If
+    '    Next OpenForm
+    'End Sub
+
+    'Private Sub cms_SendToSinglePixelStat_Click(sender As Object, e As EventArgs) Handles cms_SendToSinglePixelStat.Click
+    '    For Each OpenForm As Form In Application.OpenForms
+    '        If OpenForm.GetType.Name = "frmSinglePixelStat" Then
+    '            CType(OpenForm, frmSinglePixelStat).tbOffsetX.Text = ROICenter.X.ToString.Trim
+    '            CType(OpenForm, frmSinglePixelStat).tbOffsetY.Text = ROICenter.Y.ToString.Trim
+    '            CType(OpenForm, frmSinglePixelStat).Focus()
+    '        End If
+    '    Next OpenForm
+    'End Sub
 
 End Class
 

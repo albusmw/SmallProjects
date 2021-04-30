@@ -240,6 +240,7 @@
       <Link>PictureBoxEx.vb</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AstroImageStatistics.vb" />
     <Compile Include="cDB.vb" />
     <Compile Include="cFITSGrepper.vb" />
     <Compile Include="cIntelIPP_NewCode.vb" />

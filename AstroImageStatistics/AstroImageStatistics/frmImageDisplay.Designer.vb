@@ -30,9 +30,10 @@ Partial Class frmImageDisplay
         Me.tbDetails = New System.Windows.Forms.TextBox()
         Me.cmsImage = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cms_SetCutOff = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SendToNavigatorToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cms_SendToNavigator = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cms_SendToSinglePixelStat = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.SaveAsSeenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cms_SaveAsSeen = New System.Windows.Forms.ToolStripMenuItem()
         Me.scImageAndScale = New System.Windows.Forms.SplitContainer()
         Me.ssMain = New System.Windows.Forms.StatusStrip()
         Me.tsslInfo1 = New System.Windows.Forms.ToolStripStatusLabel()
@@ -130,9 +131,9 @@ Partial Class frmImageDisplay
         '
         'cmsImage
         '
-        Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff, Me.SendToNavigatorToolStripMenuItem, Me.ToolStripMenuItem1, Me.SaveAsSeenToolStripMenuItem})
+        Me.cmsImage.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cms_SetCutOff, Me.cms_SendToNavigator, Me.cms_SendToSinglePixelStat, Me.ToolStripMenuItem1, Me.cms_SaveAsSeen})
         Me.cmsImage.Name = "cmsImage"
-        Me.cmsImage.Size = New System.Drawing.Size(230, 76)
+        Me.cmsImage.Size = New System.Drawing.Size(230, 98)
         '
         'cms_SetCutOff
         '
@@ -140,22 +141,28 @@ Partial Class frmImageDisplay
         Me.cms_SetCutOff.Size = New System.Drawing.Size(229, 22)
         Me.cms_SetCutOff.Text = "Set zoom min-max as cut-off"
         '
-        'SendToNavigatorToolStripMenuItem
+        'cms_SendToNavigator
         '
-        Me.SendToNavigatorToolStripMenuItem.Name = "SendToNavigatorToolStripMenuItem"
-        Me.SendToNavigatorToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
-        Me.SendToNavigatorToolStripMenuItem.Text = "Send to navigator"
+        Me.cms_SendToNavigator.Name = "cms_SendToNavigator"
+        Me.cms_SendToNavigator.Size = New System.Drawing.Size(229, 22)
+        Me.cms_SendToNavigator.Text = "Send to navigator"
+        '
+        'cms_SendToSinglePixelStat
+        '
+        Me.cms_SendToSinglePixelStat.Name = "cms_SendToSinglePixelStat"
+        Me.cms_SendToSinglePixelStat.Size = New System.Drawing.Size(229, 22)
+        Me.cms_SendToSinglePixelStat.Text = "Send to single pixel stat"
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
         Me.ToolStripMenuItem1.Size = New System.Drawing.Size(226, 6)
         '
-        'SaveAsSeenToolStripMenuItem
+        'cms_SaveAsSeen
         '
-        Me.SaveAsSeenToolStripMenuItem.Name = "SaveAsSeenToolStripMenuItem"
-        Me.SaveAsSeenToolStripMenuItem.Size = New System.Drawing.Size(229, 22)
-        Me.SaveAsSeenToolStripMenuItem.Text = "Save as seen"
+        Me.cms_SaveAsSeen.Name = "cms_SaveAsSeen"
+        Me.cms_SaveAsSeen.Size = New System.Drawing.Size(229, 22)
+        Me.cms_SaveAsSeen.Text = "Save as seen"
         '
         'scImageAndScale
         '
@@ -224,8 +231,9 @@ Partial Class frmImageDisplay
     Friend WithEvents cmsImage As ContextMenuStrip
     Friend WithEvents cms_SetCutOff As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem1 As ToolStripSeparator
-    Friend WithEvents SaveAsSeenToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents cms_SaveAsSeen As ToolStripMenuItem
     Friend WithEvents sfdMain As SaveFileDialog
     Friend WithEvents scImageAndScale As SplitContainer
-    Friend WithEvents SendToNavigatorToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents cms_SendToNavigator As ToolStripMenuItem
+    Friend WithEvents cms_SendToSinglePixelStat As ToolStripMenuItem
 End Class
