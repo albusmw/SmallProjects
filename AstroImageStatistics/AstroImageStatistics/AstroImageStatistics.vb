@@ -118,6 +118,49 @@ Public Class AstroImageStatistics_Fun
 
     End Function
 
+    '''<summary>Filter values that have a high surrounding.</summary>
+    '''<param name="Container">Container holding the image data.</param>
+    '''<param name="StatCalc">Calculated statistical values.</param>
+    '''<param name="SpecialPixels">Pixel with high value.</param>
+    '''<returns>List of pixel values and corresponding coordinates for this pixel.</returns>
+    Public Shared Function HighSurrounding(ByRef Container As AstroNET.Statistics, ByRef StatCalc As AstroNET.Statistics.sStatistics, ByRef SpecialPixels As Dictionary(Of UInt16, List(Of Point))) As Dictionary(Of UInt16, List(Of Point))
+
+        Dim RetVal As New Dictionary(Of UInt16, List(Of Point))
+        With Container.DataProcessor_UInt16.ImageData(0)
+            For Each Value As UInt16 In SpecialPixels.Keys
+                For Each Pixel As Point In SpecialPixels(Value)
+                    Dim Idx1 As Integer = Pixel.X
+                    Dim Idx2 As Integer = Pixel.Y
+                    Dim Mean As UInt16 = 0
+                    'Sum up all values arround
+                    Using SurSum As New Ato.cSingleValueStatistics(True)
+                        SurSum.AddValue(.Data(Idx1, Idx2))
+                        If Idx1 > 0 Then
+                            If Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
+                            SurSum.AddValue(.Data(Idx1 - 1, Idx2))
+                            If Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 + 1))
+                        End If
+                        If Idx2 > 0 Then SurSum.AddValue(.Data(Idx1, Idx2 - 1))
+                        If Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1, Idx2 + 1))
+                        If Idx1 < .Data.GetUpperBound(0) Then
+                            If Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 - 1))
+                            SurSum.AddValue(.Data(Idx1 + 1, Idx2))
+                            If Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 + 1))
+                        End If
+                        Mean = CType(SurSum.Mean, UInt16)
+                    End Using
+                    If RetVal.ContainsKey(Mean) = False Then
+                        RetVal.Add(Mean, New List(Of Point)({Pixel}))
+                    Else
+                        RetVal(Mean).Add(Pixel)
+                    End If
+                Next Pixel
+            Next Value
+        End With
+        Return RetVal.SortDictionaryInverse
+
+    End Function
+
     '''<summary>Convert JNow to J2000 epoch.</summary>
     '''<param name="JNowRA">RA in apparent co-ordinates [hours].</param>
     '''<param name="JNowDec">DEC in apparent co-ordinates [deg].</param>

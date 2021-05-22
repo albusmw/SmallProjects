@@ -966,47 +966,41 @@ Public Class MainForm
 
     Private Sub tsmiAnalysis_MultiAreaCompare_Click(sender As Object, e As EventArgs) Handles tsmiAnalysis_MultiAreaCompare.Click
 
-        Dim TopVal As Dictionary(Of UInt16, List(Of Point)) = Nothing 'SingleStatCalc.DataProcessor_UInt16.GetAbove(CUShort(LastStat.MonoStatistics_Int.Percentile(99)))
+        Dim TopValues As Double = 99.99
 
-        'Filter values that have a high surrounding
-        'Dim TopValFiltered As New Dictionary(Of UInt16, List(Of Point))
-        'With SingleStatCalc.DataProcessor_UInt16.ImageData(0)
-        '    For Each Value As UInt16 In TopVal.Keys
-        '        For Each Pixel As Point In TopVal(Value)
-        '            Dim Idx1 As Integer = Pixel.X
-        '            Dim Idx2 As Integer = Pixel.Y
-        '            Dim SurSum As New Ato.cSingleValueStatistics(Ato.cSingleValueStatistics.eValueType.Linear) : SurSum.StoreRawValues = True
-        '            SurSum.AddValue(.Data(Idx1, Idx2))
-        '            If Idx1 > 0 And Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 - 1))
-        '            If Idx1 > 0 Then SurSum.AddValue(.Data(Idx1 - 1, Idx2))
-        '            If Idx1 > 0 And Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 - 1, Idx2 + 1))
-        '            If Idx2 > 0 Then SurSum.AddValue(.Data(Idx1, Idx2 - 1))
-        '            If Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1, Idx2 + 1))
-        '            If Idx1 < .Data.GetUpperBound(0) And Idx2 > 0 Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 - 1))
-        '            If Idx1 < .Data.GetUpperBound(0) Then SurSum.AddValue(.Data(Idx1 + 1, Idx2))
-        '            If Idx1 < .Data.GetUpperBound(0) And Idx2 < .Data.GetUpperBound(1) Then SurSum.AddValue(.Data(Idx1 + 1, Idx2 + 1))
-        '            Dim Mean As UInt16 = CType(SurSum.Mean, UInt16)
-        '            If TopValFiltered.ContainsKey(Mean) = False Then
-        '                TopValFiltered.Add(Mean, New List(Of Point)({Pixel}))
-        '            Else
-        '                TopValFiltered(Mean).Add(Pixel)
-        '            End If
-        '        Next Pixel
-        '    Next Value
-        'End With
-        'TopValFiltered = TopValFiltered.SortDictionaryInverse
+        'Get top 1 percent of the pixel
+        Dim SpecialPixels As Dictionary(Of UInt16, List(Of Point)) = Nothing
+        Try
+            SpecialPixels = CurrentData.DataProcessor_UInt16.GetAbove(CUShort(CurrentStatistics.MonochromHistogram_PctFract(TopValues)))
+        Catch ex As Exception
+            'Do nothing
+        End Try
 
+        'Optional: Get only pixel which also have high values arround (some sort of blur ...)
+        'SpecialPixels = AstroImageStatistics_Fun.HighSurrounding(CurrentData, CurrentStatistics, SpecialPixels)
+
+        'Init a new navigator window
         Dim Navigator As New frmNavigator
         Navigator.IPP = DB.IPP
-        Navigator.tbRootFile.Text = LastFile
-        Navigator.lbPixel.Items.Clear()
-        If IsNothing(TopVal) = False Then
-            If TopVal.Count > 0 Then
-                For Each Pixel As Point In TopVal(TopVal.Keys(0))
-                    Navigator.lbPixel.Items.Add(Pixel.X.ToString.Trim & ":" & Pixel.Y.ToString.Trim)
-                Next Pixel
+        Try
+            Navigator.tbRootFile.Text = System.IO.Path.GetDirectoryName(LastFile)
+        Catch ex As Exception
+            'Do nut update root file
+        End Try
+
+        'Load the list of special pixel values to the navigator
+        Navigator.lbSpecialPixel.Items.Clear()
+        If IsNothing(SpecialPixels) = False Then
+            If SpecialPixels.Count > 0 Then
+                For Each PixelValue As UShort In SpecialPixels.Keys
+                    For Each Pixel As Point In SpecialPixels(PixelValue)
+                        Navigator.lbSpecialPixel.Items.Add(Pixel.X.ToString.Trim & ":" & Pixel.Y.ToString.Trim & ":value=" & PixelValue.ValRegIndep)
+                    Next Pixel
+                Next PixelValue
             End If
         End If
+
+        'Show the navigator
         Navigator.Show()
         Navigator.ShowMosaik()
 
@@ -1911,5 +1905,60 @@ Public Class MainForm
             If DB.AutoOpenStatGraph = True Then PlotStatistics(LastFile, CurrentStatistics)
         End If
     End Sub
+
+    Private Sub GrayPNGToFITSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GrayPNGToFITSToolStripMenuItem.Click
+
+        Dim InputFile As String = "\\192.168.100.10\astro_misc\!Support und Probleme\Christian Zier (Sonnenraster)\Sonne_25.04.21-1-1_Frame34.png"
+        Dim PNG As Bitmap = Nothing
+        Using FileIn As New System.IO.FileStream(InputFile, IO.FileMode.Open)
+            PNG = New Bitmap(Image.FromStream(FileIn))
+        End Using
+
+        Dim OutputFile As String = "\\192.168.100.10\astro_misc\!Support und Probleme\Christian Zier (Sonnenraster)\Sonne_25.04.21-1-1_Frame34.fits"
+        Dim BitPix As Integer = cFITSWriter.eBitPix.Int16
+        Dim BaseOut As New System.IO.StreamWriter(OutputFile)
+        Dim BytesOut As New System.IO.BinaryWriter(BaseOut.BaseStream)
+
+        'Create converted data
+        Dim ImageData(PNG.Width - 1, PNG.Height - 1) As UInt16
+        For Idx1 As Integer = 0 To ImageData.GetUpperBound(1)
+            For Idx2 As Integer = 0 To ImageData.GetUpperBound(0)
+                ImageData(Idx2, Idx1) = PNG.GetPixel(Idx2, Idx1).R
+            Next Idx2
+        Next Idx1
+
+        'Load all header elements
+        Dim Header As New Dictionary(Of eFITSKeywords, Object)
+        Header.Add(eFITSKeywords.SIMPLE, "T")
+        Header.Add(eFITSKeywords.BITPIX, BitPix)
+        Header.Add(eFITSKeywords.NAXIS, 2)
+        Header.Add(eFITSKeywords.NAXIS1, ImageData.GetUpperBound(0) + 1)
+        Header.Add(eFITSKeywords.NAXIS2, ImageData.GetUpperBound(1) + 1)
+        Header.Add(eFITSKeywords.BZERO, 32768)
+        Header.Add(eFITSKeywords.BSCALE, 1)
+
+        'Write header
+        BaseOut.Write(cFITSWriter.CreateFITSHeader(Header))
+        BaseOut.Flush()
+
+        'Write content
+        For Idx1 As Integer = 0 To ImageData.GetUpperBound(1)
+            For Idx2 As Integer = 0 To ImageData.GetUpperBound(0)
+                BytesOut.Write(GetBytes_BitPix16(CType(ImageData(Idx2, Idx1) - 32768, Int16)))
+            Next Idx2
+        Next Idx1
+
+        'Finish
+        BytesOut.Flush()
+        BaseOut.Close()
+
+        MsgBox("OK")
+
+    End Sub
+
+    Private Function GetBytes_BitPix16(ByVal Value As Int16) As Byte()
+        Dim RetVal As Byte() = BitConverter.GetBytes(Value)
+        Return New Byte() {RetVal(1), RetVal(0)}
+    End Function
 
 End Class

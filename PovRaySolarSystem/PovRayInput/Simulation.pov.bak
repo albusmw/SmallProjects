@@ -1,0 +1,297 @@
+// Grundgerüst
+#include "colors.inc"  
+#include "shapes.inc"
+#include "woods.inc" 
+#include "textures.inc"
+
+#include "MyTextures.inc"    
+#include "MyCameras.inc"
+#include "MyMacros.inc"
+
+#include "Solar_winter_5min.inc"
+           
+// 0-Punkt: Küchen-Glas-Ecke           
+// Garten-Tiefe     ist X-Achse
+// Haus-Achse       ist Y-Achse
+// Gelände-Erhebung ist Z-Achse
+
+global_settings 
+{
+    assumed_gamma 1.0
+    
+    #declare DD         = 0.001;                // Delta für Überschneidungen
+    #declare DG         = 0.075;                // Glas-Dicke EG
+    #declare Wall       = 0.365;                // Wand-Dicke
+    
+    #declare RH_EG      = 2.66;                 // Raumhöhe EG von 0.00 ab
+    #declare FB_OG      = 3.06;                 // FFB OG von 0.00 ab
+    
+    #declare Glass_G    = 8.595;                // Glas-Aussenseite Garten
+    
+    #declare L_Haus     = 13.28;                // Haupthaus Länge
+    #declare B_Haus     = 8.74;                 // Haupthaus Breite
+    #declare H_Haus     = 6.00;                 // Haupthaus Höhe (0.00 bis Durchdringung Dachunterkante)
+    
+    #declare L_Garage   = 21.95 - L_Haus;       // Garage Länge
+    #declare B_Garage   = 7.24;                 // Garage Breite
+    #declare H_Garage   = 3.22;                 // Garage Höhe (0.00 bis Durchdringung Dachunterkante)
+    
+    #declare Neigung    = radians(25);          // Dachneigung [°]
+    #declare Vor_Haus   = 0.785;                // Haupthaus Vordach horizontaler Abstand
+    #declare Ort_Haus   = 0.45;                 // Abstand Hauswand - Ortgangende
+    #declare Dach_Mat   = 0.16;                 // Vertikale Dachdicke
+    
+    #declare Vor_Garage = 0.785;                // Garage Vordach horizontaler Abstand
+    #declare Ort_Garage = 0.45;                 // Abstand Garagenwand - Ortgangende
+    
+    #declare Solar_Breite = 3;
+    #declare Solar_Hoehe  = 3;
+    #declare Solar_OrtD   = Ort_Garage+0.5;     // Entfernung zum Garagen-Ortgang
+    #declare Solar_TopD   = 1;                  // Abwicklungs-Entfernung zum First
+
+}
+
+ 
+// Kamera     
+#declare GR_Debug=0;
+camera {Camera_0}
+  
+// ================================================================================
+// Sonne
+// ================================================================================
+#declare time         = clock;                         // Hier clock einsetzen für Animation
+#declare SolarDist    = 10000;
+#declare Sol_elev     = radians(Sol_Height[time]);
+#declare Sol_azim     = radians(Sol_Azimut[time]-50+90+180);
+light_source 
+{   
+    
+    <SolarDist*-sin(Sol_azim),SolarDist*cos(Sol_azim),SolarDist*tan(Sol_elev)>
+    color rgb <1,1,1>*1.2
+}
+
+
+// ========================================
+// Haupthaus
+
+// ================================================================================
+
+#declare Haus_Top   = H_Haus+(B_Haus/2)*tan(Neigung);
+
+difference{ 
+
+        union{
+        
+                // --------------------------------------------------------------------------------
+                // Grundkörper EG
+                box {
+                    <0,0,0>,<B_Haus,L_Haus,H_Haus>
+                    texture {Texture_Innen}
+                }
+                 
+                 
+                // Dachprisma
+                prism {
+                    0.00, L_Haus, 4
+                   <0.00, H_Haus>,
+                   <B_Haus,H_Haus>,
+                   <B_Haus/2, Haus_Top>,
+                   <0.00, H_Haus>
+                    texture {Texture_Innen}
+                } 
+                
+        }
+        
+        // --------------------------------------------------------------------------------
+        // EG
+        // --------------------------------------------------------------------------------
+        
+        // Esszimmer mit Fensterloch Garten
+        box {<4.615,Wall,0>,<8.74+DD,5.335,RH_EG> texture {Texture_Innen}}
+        
+        // Esszimmer Fensterloch Hang
+        box {<5.99,0-DD,0>,<8.74+DD,Wall+DD,RH_EG> texture {Texture_Innen}}
+        
+        // Durchgang Flur-Wohnzimmer                                                        
+        box {<4.615+DD,3.615,0>,<3.00-DD,4.875,RH_EG> texture {Texture_Innen}}
+        
+        // Wohnzimmer ohne "Belichtung Arbeitszimmer"                                                        
+        box {<4.365-DD,4.875,0>,<8.325,9.28,RH_EG> texture {Texture_Innen}} 
+        
+        // Sofa-Eck & Wohnwand                                                        
+        box {<7.265,9.875,0>,<3.865,5.865,RH_EG> texture {Texture_Innen}}
+        
+        // Innenfenster Arbeit - Wohnen                                                        
+        box {<7.4,10.005+DD,0>,<8.325,9.28-DD,RH_EG> texture {Texture_Innen}}
+        
+        // Arbeitszimmer
+        box {<3.865,9.99,0>,<8.74+DD,12.875,RH_EG> texture {Texture_Innen}}
+        
+        // Arbeitszimmer -> Fensterfront
+        box {<8.375,L_Haus+DD,0>,<8.74+DD,9.60,RH_EG> texture {Texture_Innen}}
+        
+        // Arbeitszimmer -> Fensterfront zur Innenverglasung hin
+        box {<8.74+DD,9.60,0>,<7.4,11.00,RH_EG> texture {Texture_Innen}}
+                                                                
+        // Küche
+        box {<0.365,0.365,0>,<4.375,3.375,RH_EG> texture {Texture_Innen}}
+        
+        // Windfang
+        box {<0-DD,3.615,0>,<3,5.375,RH_EG> texture {Texture_Innen}}
+        
+        // Diele
+        box {<1.865,5.375-DD,0>,<3,9.875,RH_EG> texture {Texture_Innen}}
+        
+        // Dielen-Schrank
+        box {<3-DD,6.74,0>,<3.625,9.875,RH_EG> texture {Texture_Innen}}
+        
+        // Durchgang Diele-Arbeit
+        box {<3-DD,11,0>,<7.4,9.99,RH_EG> texture {Texture_Innen}}
+        
+        // Treppenloch
+        box {<0.365,7.365>,<3,11,H_Haus> texture {Texture_Innen}}
+        
+        // Küche Fensterloch
+        box {<0-DD,0-DD,1>,<3.725,0.965,2.315> texture {Texture_Innen}}
+        
+        // Durchgang Esszimmer-Küche
+        box {<4.375-DD,1.865,0>,<4.615+DD,2.625,RH_EG> texture {Texture_Innen}}
+         
+        // Innenfenster Esszimmer-Küche
+        box {<4.375-DD,0.47,1.2>,<4.615+DD,1.74,1.8> texture {Texture_Innen}}
+        
+        // --------------------------------------------------------------------------------
+        // OG
+        // --------------------------------------------------------------------------------
+        
+        // Schlafzimmer
+        box {<3.85,Wall,FB_OG>,<8.01,5.00,Haus_Top> texture {Texture_Innen}}
+        
+        // Schlafzimmer -> Fensterloch
+        box {<5.99,0-DD,3.56>,<8.74+DD,2.75,5.16> texture {Texture_Innen}}
+        
+        // Kinderzimmer rechts
+        box {<3.215,6.740,FB_OG>,<8.375,9.75,Haus_Top> texture {Texture_Innen}}
+        
+        // Kinderzimmer rechts -> Fensterloch
+        box {<8.375-DD,9.75,3.56>,<8.74+DD,7.24,5.16> texture {Texture_Innen}}
+        
+        // Kinderzimmer links
+        box {<3.215,9.865,FB_OG>,<8.375,12.875,Haus_Top> texture {Texture_Innen}}
+        
+        // Kinderzimmer links -> Fensterloch
+        box {<8.375-DD,12.375,3.56>,<8.74+DD,9.865,5.16> texture {Texture_Innen}}
+                       
+                       
+        // --------------------------------------------------------------------------------
+        // OG und Dach wieder wegnehmen
+        // --------------------------------------------------------------------------------
+        #if (GR_Debug=1) 
+        
+        box {
+                    <0-DD,0-DD,2>,<B_Haus+DD,L_Haus+DD,12>
+                    texture {Texture_Innen}
+                } 
+        
+        #end
+        
+}
+
+// Boden EG
+box {
+    <0+DD,0+DD,0>,<B_Haus-DD,L_Haus-DD,0.01>
+    texture {T_Wood8}
+}
+
+// Debug
+// object {Round_Box(<7.4+DD,9.28,0>,<3.865,5.865,RH_EG>,0.025,0) texture{pigment{ color rgb<0.5,0.5,1.0>}}}
+ 
+ 
+
+
+
+
+// ================================================================================
+// Fenster 
+// Wohnzimmer Garten
+box {<Glass_G,5.335,0>,<Glass_G-DG,0.145,RH_EG> material {Texture_Glas}}                                                         
+        Rahmen_Garten(Glass_G,5.335,DG,RH_EG)                                                                                                           
+        Rahmen_Garten(Glass_G,3.630,0,RH_EG)      
+        Rahmen_Garten(Glass_G,1.925,0,RH_EG)           
+
+// Wohnzimmer Hang
+box {<Glass_G,0.145,0>,<5.99,0.145+DG,RH_EG> material {Texture_Glas}}
+        Rahmen_Hang(6.890,0.220,0,RH_EG)
+        
+// Arbeitszimmer
+box {<Glass_G,0.145,0>,<5.99,0.145+DG,RH_EG> material {Texture_Glas}}
+        Rahmen_Hang(6.890,0.220,0,RH_EG)
+
+
+           
+
+// Haupthaus - Dachfläche                                                     
+#if (GR_Debug=0)                                                     
+                                                     
+  
+        #declare Haus_DachU   = H_Haus-Vor_Haus*tan(Neigung);
+        prism {
+            -Ort_Haus, L_Haus+Ort_Haus, 7
+           <-Vor_Haus, Haus_DachU>,
+           <-Vor_Haus, Haus_DachU+Dach_Mat>,
+           <B_Haus/2, Haus_Top+Dach_Mat>,
+           <B_Haus+Vor_Haus,Haus_DachU+Dach_Mat>,
+           <B_Haus+Vor_Haus,Haus_DachU>,
+           <B_Haus/2, Haus_Top>,
+           <-Vor_Haus, Haus_DachU>
+           texture {Texture_Dach}
+        } 
+
+#end
+
+
+
+
+//================================================================================
+// Garage
+box {
+    <0,L_Haus,0>,<B_Garage,L_Haus+L_Garage,H_Garage>
+    texture {Texture_Innen}
+}
+
+// Garage - Dachprisma
+#declare Garage_Top   = H_Garage+((B_Garage/2)*tan(Neigung));
+prism {
+    L_Haus, L_Haus+L_Garage, 4
+   <0.00, H_Garage>,
+   <B_Garage,H_Garage>,
+   <B_Garage/2, Garage_Top>,
+   <0.00, H_Garage>
+   texture {Texture_Innen}
+}   
+
+// Garage - Dachfläche  
+#declare Garage_DachU   = H_Garage-Vor_Garage*tan(Neigung);
+prism {
+    L_Haus, L_Haus+L_Garage+Ort_Garage, 7
+   <-Vor_Haus, Garage_DachU>,
+   <-Vor_Haus, Garage_DachU+Dach_Mat>,
+   <B_Garage/2, Garage_Top+Dach_Mat>,
+   <B_Garage+Vor_Garage,Garage_DachU+Dach_Mat>,
+   <B_Garage+Vor_Garage,Garage_DachU>,
+   <B_Garage/2, Garage_Top>,
+   <-Vor_Haus, Garage_DachU>
+    texture {Texture_Dach}
+}      
+
+// Solarmodul
+#declare Solar_Up=Dach_Mat+0.01;  
+prism {
+    L_Haus+L_Garage+Ort_Garage-Solar_OrtD,L_Haus+L_Garage+Ort_Garage-Solar_OrtD-Solar_Breite, 5
+    <B_Garage/2+(Solar_TopD*cos(Neigung)), Garage_Top-(Solar_TopD*sin(Neigung))>,
+    <B_Garage/2+(Solar_TopD*cos(Neigung)), Garage_Top-(Solar_TopD*sin(Neigung))+Solar_Up>,
+    <B_Garage/2+((Solar_TopD+Solar_Hoehe)*cos(Neigung)), Garage_Top-((Solar_TopD+Solar_Hoehe)*sin(Neigung))+Solar_Up>,
+    <B_Garage/2+((Solar_TopD+Solar_Hoehe)*cos(Neigung)), Garage_Top-((Solar_TopD+Solar_Hoehe)*sin(Neigung))>,
+    <B_Garage/2+(Solar_TopD*cos(Neigung)), Garage_Top-(Solar_TopD*sin(Neigung))>
+    texture {pigment {color rgb <0,0,1>}}
+}

@@ -148,6 +148,9 @@
     <Compile Include="..\..\..\src\atomics\AstroStatistics.vb">
       <Link>AstroStatistics.vb</Link>
     </Compile>
+    <Compile Include="..\..\..\src\atomics\BayerFunctions.vb">
+      <Link>BayerFunctions.vb</Link>
+    </Compile>
     <Compile Include="..\..\..\src\atomics\cAstroParser.vb">
       <Link>cAstroParser.vb</Link>
     </Compile>

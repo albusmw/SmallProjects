@@ -25,13 +25,22 @@ Public Class frmNavigator
     '''<summary>Main function to plot the mosaik.</summary>
     Public Sub ShowMosaik()
 
+        'Get all files to show
+        Dim AllFiles As New List(Of String)
+        For Each SingleFile As String In clbFiles.CheckedItems
+            If System.IO.File.Exists(SingleFile) Then AllFiles.Add(SingleFile)
+        Next SingleFile
+        If AllFiles.Count = 0 Then Exit Sub
+
         'Do not do anything as long as items are added from a queue
         If UpdateRunning Then Exit Sub
 
+
         'Read the same segment from all files and compose a new combined image
-        Dim TileSize As Integer = 0             'size for 1 tile
-        Dim OffsetX As Integer = 0              'X offset start position
-        Dim OffsetY As Integer = 0              'Y offset start position
+        Dim TileSize As Integer = 0                                 'size for 1 tile
+        Dim OffsetX As Integer = 0                                  'X offset start position
+        Dim OffsetY As Integer = 0                                  'Y offset start position
+        Dim TileBorderSize As Integer = CInt(tbTileBoarder.Text)    'border between the displayed mosaik tiles
 
         'Plaubility check
         Try
@@ -45,16 +54,14 @@ Public Class frmNavigator
 
         Dim FITSReader As New cFITSReader
 
-        'Get all files to show
-        Dim AllFiles As New List(Of String)
-        For Each SingleFile As String In clbFiles.CheckedItems
-            If System.IO.File.Exists(SingleFile) Then AllFiles.Add(SingleFile)
-        Next SingleFile
-        If AllFiles.Count = 0 Then Exit Sub
+
 
         Dim MosaikWidth As Integer = CInt(Math.Ceiling(Math.Sqrt(AllFiles.Count)))              'Number of tiles in X direction
         Dim MosaikHeight As Integer = CInt(Math.Ceiling(AllFiles.Count / MosaikWidth))          'Number of tiles in Y direction
-        ReDim MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data(MosaikWidth * TileSize + (MosaikWidth - 1) - 1, MosaikHeight * TileSize + (MosaikHeight - 1) - 1)
+        Dim TileBorderWidth As Integer = TileBorderSize * (MosaikWidth - 1)
+        Dim TileBorderHeight As Integer = TileBorderSize * (MosaikHeight - 1)
+
+        ReDim MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data((MosaikWidth * TileSize) + TileBorderWidth - 1, (MosaikHeight * TileSize) + TileBorderHeight - 1)
 
         'Compose the mosaik
         Dim WidthPtr As Integer = 0 : Dim WidthIdx As Integer = 0
@@ -63,20 +70,21 @@ Public Class frmNavigator
         For FileIdx As Integer = 0 To AllFiles.Count - 1
             Dim File As String = AllFiles(FileIdx)
             pbMain.Value = FileIdx : DE()
-            Dim Data(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize, False)
-            cOpenCvSharp.MedianBlur(Data, 3)
+            Dim SingleFileTile(,) As UInt16 = FITSReader.ReadInUInt16(File, UseIPP, OffsetX, TileSize, OffsetY, TileSize, False)
+            Dim SelectedBlur As Integer = CInt(tbBlur.Text)
+            If SelectedBlur > 1 Then cOpenCvSharp.MedianBlur(SingleFileTile, SelectedBlur)
             Try
                 For X As Integer = 0 To TileSize - 1
                     For Y As Integer = 0 To TileSize - 1
-                        MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = Data(X, Y)
+                        MosaikStatCalc.DataProcessor_UInt16.ImageData(0).Data(WidthPtr + X, HeightPtr + Y) = SingleFileTile(X, Y)
                     Next Y
                 Next X
             Catch ex As Exception
                 'Log this error ...
             End Try
-            WidthPtr += TileSize + 1 : WidthIdx += 1
+            WidthPtr += TileSize + TileBorderSize : WidthIdx += 1
             If WidthIdx >= MosaikWidth Then
-                HeightPtr += TileSize + 1
+                HeightPtr += TileSize + TileBorderSize
                 WidthPtr = 0
                 WidthIdx = 0
             End If
@@ -161,17 +169,19 @@ Public Class frmNavigator
         End Select
     End Sub
 
+    '''<summary>Update the mosaik if anything changed.</summary>
     Private Sub AnythingChanged(sender As Object, e As EventArgs) Handles tbOffsetX.TextChanged, tbOffsetY.TextChanged, tbTileSize.TextChanged, tbFilterString.TextChanged, cbColorModes.SelectedIndexChanged
         ShowMosaik()
     End Sub
 
-    Private Sub lbPixel_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Dim SelectedText As String = CStr(lbPixel.SelectedItem)
+    Private Sub lbSpecialPixel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lbSpecialPixel.SelectedIndexChanged
+        Dim SelectedText As String = CStr(lbSpecialPixel.SelectedItem)
         If IsNothing(SelectedText) Then Exit Sub
-        Dim Splitted As String() = Split(SelectedText, ":")
-        If Splitted.Length < 2 Then Exit Sub
-        tbOffsetX.Text = Splitted(0)
-        tbOffsetY.Text = Splitted(1)
+        Dim Split As String() = SelectedText.Split(":"c)
+        If Split.Length >= 2 Then
+            tbOffsetX.Text = Split(0)
+            tbOffsetY.Text = Split(1)
+        End If
     End Sub
 
     Private Sub frmNavigator_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -249,7 +259,8 @@ Public Class frmNavigator
         UpdateRunning = False
     End Sub
 
-    Private Sub AnythingChanged(sender As Object, e As ItemCheckEventArgs)
-
+    Private Sub tsmiFile_Exit_Click(sender As Object, e As EventArgs) Handles tsmiFile_Exit.Click
+        Me.Close()
     End Sub
+
 End Class
